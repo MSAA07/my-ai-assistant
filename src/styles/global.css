@@ -1,0 +1,122 @@
+/* ========================================
+   Dark Navy Theme Variables
+   ======================================== */
+
+:root {
+  --color-bg: #0a0e27;
+  --color-bg-secondary: #0f1435;
+  --color-surface: #111840;
+  --color-surface-hover: #161d4e;
+  --color-border: #1e2758;
+  --color-border-light: #283170;
+  --color-shadow: rgba(0, 0, 0, 0.4);
+  --color-glow: rgba(96, 165, 250, 0.15);
+
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+
+  --color-accent: #60a5fa;
+  --color-accent-light: #93c5fd;
+  --color-accent-bg: rgba(96, 165, 250, 0.08);
+  --color-accent-bg-hover: rgba(96, 165, 250, 0.14);
+
+  --gradient-accent: linear-gradient(135deg, #60a5fa, #93c5fd);
+  --gradient-hero: linear-gradient(135deg, #60a5fa 0%, #93c5fd 50%, #60a5fa 100%);
+  --gradient-card-border: linear-gradient(135deg, #1e2758, #2a3570);
+  --gradient-bg-radial: radial-gradient(ellipse at 50% 0%, rgba(96, 165, 250, 0.08) 0%, transparent 60%);
+
+  --color-code-bg: #0d1230;
+}
+
+/* ========================================
+   Base Reset & Defaults
+   ======================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-accent-light);
+}
+
+/* ========================================
+   Scrollbar
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* ========================================
+   Selection
+   ======================================== */
+
+::selection {
+  background: rgba(96, 165, 250, 0.3);
+  color: white;
+}
+
+/* ========================================
+   Global Visibility & Dark Theme Defaults
+   ======================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  color: #f1f5f9;
+}
+
+p {
+  color: #cbd5e1;
+}
+
+button {
+  font-family: inherit;
+}
+
+input, textarea, select {
+  color: #f1f5f9;
+  background: #0f172a;
+  border: 1px solid #334155;
+}

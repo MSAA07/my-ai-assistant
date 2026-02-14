@@ -1,0 +1,9 @@
+node_modules
+dist
+.vite
+*.local
+.aider*
+.env
+uploads/
+prisma/dev.db
+prisma/*.db
