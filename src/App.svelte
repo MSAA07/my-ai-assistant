@@ -1,6 +1,7 @@
 <script>
   import AppHeader from './components/AppHeader.svelte';
   import Footer from './components/Footer.svelte';
+  import Landing from './pages/Landing.svelte';
   import Home from './pages/Home.svelte';
   import DocumentView from './pages/DocumentView.svelte';
   import { currentPath } from './stores/router.js';
@@ -9,10 +10,13 @@
   $: route = $currentPath;
 </script>
 
+{#if route === '/' || route === ''}
+  <Landing />
+{:else}
 <div class="app-layout">
   <AppHeader />
   <main class="content">
-    {#if route === '/' || route === ''}
+    {#if route === '/app'}
       <Home />
     {:else if route.startsWith('/document/')}
       <DocumentView documentId={route.replace('/document/', '')} />
@@ -27,6 +31,7 @@
 
   <Footer />
 </div>
+{/if}
 
 <style>
   .app-layout {

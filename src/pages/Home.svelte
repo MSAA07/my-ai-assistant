@@ -295,9 +295,19 @@
         />
         <label for="file-input" class="file-label">
           {#if selectedFile}
-            {selectedFile.name}
+            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+            <span class="file-label-text">{selectedFile.name}</span>
           {:else}
-            Click to select a file (PDF, DOCX, PPTX)
+            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+            <span class="file-label-text">Click to select a file (PDF, DOCX, PPTX)</span>
           {/if}
         </label>
       </div>
@@ -637,6 +647,7 @@
 
   .file-input-wrapper {
     margin-bottom: 1rem;
+    cursor: pointer;
   }
 
   #file-input {
@@ -644,21 +655,43 @@
   }
 
   .file-label {
-    display: block;
-    padding: 3rem;
-    border: 2px dashed #1e2758;
-    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 48px 24px;
+    border: 2px dashed rgba(147, 197, 253, 0.4);
+    border-radius: 12px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s ease;
-    background: var(--color-bg);
+    transition: all 0.3s ease;
+    background: rgba(30, 41, 59, 0.4);
     color: #94a3b8;
   }
 
   .file-label:hover {
-    border-color: #60a5fa;
-    background: rgba(96, 165, 250, 0.05);
+    border-color: rgba(147, 197, 253, 0.7);
+    background: rgba(30, 41, 59, 0.6);
     color: #cbd5e1;
+  }
+
+  .upload-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    color: rgba(147, 197, 253, 0.8);
+    transition: all 0.3s ease;
+  }
+
+  .file-label:hover .upload-icon {
+    color: rgba(147, 197, 253, 1);
+    transform: translateY(-2px);
+  }
+
+  .file-label-text {
+    font-size: 1rem;
+    font-weight: 500;
   }
 
   .file-info {
