@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { session } from "../stores/auth.js"; // Import session
 
   let user = null;
   let documents = [];
@@ -14,13 +15,6 @@
   let uploadStage = "";
   let progressInterval = null;
 
-  // Mock Clerk user for now
-  let mockClerkId = localStorage.getItem("mockUserId");
-  if (!mockClerkId) {
-    mockClerkId = "user_demo_" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("mockUserId", mockClerkId);
-  }
-
   // API Base URL (Dynamic for production, localhost fallback)
   const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
@@ -30,16 +24,21 @@
 
   async function fetchUserData() {
     try {
+      // Use the new /api/user/me endpoint with credentials
       const response = await fetch(
-        `${API_BASE}/api/user/${mockClerkId}`,
+        `${API_BASE}/api/user/me`,
+        {
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include' // Important for sending cookies
+        }
       );
+      if (!response.ok) throw new Error('Failed to fetch data');
       const data = await response.json();
       user = data.user;
       documents = data.documents;
     } catch (err) {
       console.error("Failed to fetch user data:", err);
-      error =
-        "Failed to load user data. Please make sure the server is running.";
+      error = "Failed to load user data. Please refresh.";
     }
   }
 
@@ -67,7 +66,8 @@
       return;
     }
 
-    if (!user || user.remainingDocuments <= 0) {
+    if (!user || (user.role !== 'admin' && user.plan !== 'premium' && user.remainingDocuments <= 0)) {
+       // Check against plan/role if needed, but backend enforces it too
       error = "You have reached your monthly upload limit";
       return;
     }
@@ -80,12 +80,13 @@
 
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("clerkId", mockClerkId);
+    // clerkId removed
     formData.append("language", language);
 
     try {
       const data = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        xhr.withCredentials = true; // Crucial for Better Auth cookies
 
         // Track real upload progress (0-30%)
         xhr.upload.addEventListener("progress", (e) => {
@@ -126,7 +127,9 @@
               uploadStage = "Complete!";
               resolve(response);
             } else {
-              reject(new Error(response.error || "Failed to upload document"));
+              const message = response.error || "Failed to upload document";
+              const details = response.details ? ` (${response.details})` : "";
+              reject(new Error(`${message}${details}`));
             }
           } catch {
             reject(new Error("Invalid server response"));
@@ -175,6 +178,7 @@
         `${API_BASE}/api/document/${docId}`,
         {
           method: "DELETE",
+          credentials: 'include'
         },
       );
 
@@ -242,7 +246,7 @@
   {#if user}
     <div class="usage-stats">
       <div class="stat-card">
-        <div class="stat-value">{user.remainingDocuments}</div>
+        <div class="stat-value" style={user.role === 'admin' ? "font-size:1.8rem" : ""}>{user.role === 'admin' ? "Unlimited" : user.remainingDocuments}</div>
         <div class="stat-label">Documents Remaining</div>
       </div>
       <div class="stat-card">
@@ -322,7 +326,7 @@
         on:click={handleUpload}
         disabled={!selectedFile ||
           uploading ||
-          (user && user.remainingDocuments <= 0)}
+          (user && user.role !== 'admin' && user.remainingDocuments <= 0)}
       >
         {#if uploading}
           Processing... (this may take 20-30 seconds)

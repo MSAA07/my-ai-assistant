@@ -10,7 +10,7 @@
 
 | Component | Tech Stack |
 |-----------|------------|
-| **Frontend** | Svelte 4, Vite 5, JavaScript (ESM), CSS Variables (Dark Theme) |
+| **Frontend** | Svelte 4, Vite 5, JavaScript (ESM), CSS Variables (Dark Theme), better-auth |
 | **Backend** | Node.js, Express.js, PostgreSQL (Prisma ORM), OpenAI API |
 | **Database** | PostgreSQL with Prisma Schema (User, Document, ExamAttempt) |
 
@@ -48,7 +48,7 @@
 *   **Imports**: strict ordering:
     1.  External dependencies (e.g., `svelte`, `marked`)
     2.  Internal Components (`./components/Header.svelte`)
-    3.  Stores/Utils (`./stores/router.js`)
+    3.  Stores/Utils (`./stores/router.js`, `./stores/auth.js`)
     4.  Styles (`./styles/global.css`)
 *   **File Extensions**: **ALWAYS** include `.js` extension for local imports (e.g., `import { router } from './router.js'`).
 
@@ -121,6 +121,9 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 3.  **Verification**: After making changes, verify by checking for syntax errors or running the relevant build command (`npm run build`).
 4.  **No Hallucinations**: Do not reference scripts (`npm run test`) or files (`tsconfig.json`) that do not exist.
 5.  **Documentation**: When adding new features, update this `AGENTS.md` file.
+6.  **Admin Dashboard**:
+    *   Admin UI lives in `src/components/admin/` and is rendered by `src/components/AdminDashboard.svelte`.
+    *   Admin data is fetched from `/api/admin/*` endpoints with `credentials: "include"`.
 
 ---
 

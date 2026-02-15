@@ -32,6 +32,7 @@
     try {
       const response = await fetch(
         `${API_BASE}/api/document/${documentId}`,
+        { credentials: 'include' }
       );
       const data = await response.json();
 
