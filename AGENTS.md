@@ -1,200 +1,135 @@
 # AI Study Assistant - Agent Guidelines
 
-## Project Overview
+## 1. Project Overview & Tech Stack
 
-AI Study Assistant - A Svelte + Express.js application for uploading study materials and getting AI-powered summaries, flashcards, and practice exams.
+**Application**: Full-stack study assistant for uploading documents (PDF, DOCX) to generate AI summaries, flashcards, and exams.
+**Architecture**: Monorepo-style with separate frontend and backend directories.
 
-**Stack**: Svelte 4 + Vite + Express.js + PostgreSQL (Prisma) + OpenAI GPT-4o-mini
-
----
-
-## Build Commands
-
-```bash
-# Development
-npm run dev              # Start Vite dev server (port 5173)
-npm run dev:server       # Start Express backend (port 3001)
-npm run dev:all          # Run both frontend and backend
-
-# Production
-npm run build            # Build production bundle
-npm run preview          # Preview production build
-
-# Database
-npm run db:push          # Push Prisma schema to database
-npm run db:studio        # Open Prisma Studio GUI
-```
-
-**Note**: No linting or testing tools are currently configured.
+| Component | Tech Stack |
+|-----------|------------|
+| **Frontend** | Svelte 4, Vite 5, JavaScript (ESM), CSS Variables (Dark Theme) |
+| **Backend** | Node.js, Express.js, PostgreSQL (Prisma ORM), OpenAI API |
+| **Database** | PostgreSQL with Prisma Schema (User, Document, ExamAttempt) |
 
 ---
 
-## Code Style Guidelines
+## 2. Build & Development Commands
 
-### JavaScript/ES Modules
+### Frontend (`/my-ai-assistant`)
+*   **Install**: `npm install`
+*   **Dev Server**: `npm run dev` (Runs on `http://localhost:5173`)
+*   **Build**: `npm run build` (Outputs to `dist/`)
+*   **Preview**: `npm run preview`
 
-- Use ES modules (`import`/`export`) - project has `"type": "module"`
-- Prefer `const` and `let` over `var`
-- Use async/await for asynchronous code
-- Always include `.js` extension in relative imports
+### Backend (`/ai-assistant-backend`)
+*   **Install**: `npm install`
+*   **Start**: `node server.js` (Runs on `http://localhost:3001`)
+*   **Database Sync**: `npx prisma db push` (Sync schema without migrations)
+*   **Database GUI**: `npx prisma studio`
 
-### Import Order
+### Testing & Linting
+*   **Current Status**: ❌ No testing or linting framework is currently configured.
+*   **Recommended**:
+    *   **Unit Tests**: Use `vitest` for Svelte components.
+    *   **Backend Tests**: Use `jest` or `supertest` for API endpoints.
+    *   **Linting**: Use `eslint` + `prettier`.
 
-1. External dependencies (npm packages)
-2. Internal Svelte components
-3. Stores and utilities
-4. Styles (CSS imports last)
+---
 
-```javascript
-import { onMount } from "svelte";
-import AppHeader from './components/AppHeader.svelte';
-import { currentPath } from './stores/router.js';
-import './styles/global.css';
-```
+## 3. Code Style Guidelines
 
-### Naming Conventions
-
-- **Components**: PascalCase (`AppHeader.svelte`, `DocumentView.svelte`)
-- **Stores**: camelCase (`router.js`, `currentPath`)
-- **Variables/Functions**: camelCase
-- **CSS Classes**: kebab-case (`--color-bg`, `file-label`)
-- **Files**: Match component name exactly
-
-### File Organization
-
-```
-src/
-├── components/     # Reusable UI components (PascalCase)
-├── pages/          # Route-level components (PascalCase)
-├── stores/         # Svelte stores (camelCase)
-└── styles/         # Global styles
-```
+### General JavaScript
+*   **Type**: Use **ES Modules** (`import`/`export`) exclusively.
+*   **Variables**: Prefer `const` over `let`. Avoid `var`.
+*   **Async**: Use `async`/`await` for all asynchronous operations.
+*   **Imports**: strict ordering:
+    1.  External dependencies (e.g., `svelte`, `marked`)
+    2.  Internal Components (`./components/Header.svelte`)
+    3.  Stores/Utils (`./stores/router.js`)
+    4.  Styles (`./styles/global.css`)
+*   **File Extensions**: **ALWAYS** include `.js` extension for local imports (e.g., `import { router } from './router.js'`).
 
 ### Svelte Components
-
-- Use `<script>` at top, then template, then `<style>`
-- Use reactive statements (`$:`) sparingly
-- Prefer props over global state when possible
-- Style blocks should be scoped (no `global` attribute needed)
+*   **Structure**: `<script>` -> Template (HTML) -> `<style>`
+*   **Naming**: PascalCase for files and components (e.g., `DocumentView.svelte`).
+*   **Reactivity**: Use `$: ` for derived state, but prefer event-driven updates where possible.
+*   **Scoped Styles**: Default behavior. Do not use `<style global>` unless absolutely necessary.
 
 ```svelte
 <script>
-  import Component from './Component.svelte';
-  export let propName;
-  $: computedValue = propName + 1;
+  import { onMount } from 'svelte';
+  import Button from './Button.svelte'; // Local import
+  
+  export let title = 'Default Title';
 </script>
 
-<div class="component-wrapper">
-  <Component value={computedValue} />
+<div class="card">
+  <h2>{title}</h2>
+  <slot />
 </div>
 
 <style>
-  .component-wrapper {
-    /* scoped styles */
+  .card {
+    background: var(--color-surface); /* Use CSS variables */
+    padding: 1rem;
   }
 </style>
 ```
 
-### CSS Conventions
+### CSS & Theming
+*   **Theme**: Dark Navy Theme. Use CSS variables from `src/styles/global.css`.
+*   **Variables**:
+    *   `--color-bg`: `#0a0e27` (Main background)
+    *   `--color-surface`: `#111840` (Cards/Modals)
+    *   `--color-accent`: `#60a5fa` (Primary actions)
+    *   `--color-text`: `#f1f5f9` (Primary text)
+*   **Responsive**: Mobile-first approach. Breakpoints at `640px` and `768px`.
 
-Use the established CSS variables from `src/styles/global.css`:
-
-```css
-/* Colors */
-var(--color-bg)              /* #0a0e27 - Main background */
-var(--color-surface)         /* #111840 - Card backgrounds */
-var(--color-border)          /* #1e2758 - Borders */
-var(--color-accent)          /* #60a5fa - Primary accent */
-var(--color-text)            /* #f1f5f9 - Primary text */
-var(--color-text-secondary)  /* #cbd5e1 - Secondary text */
-
-/* Gradients */
-var(--gradient-accent)       /* linear-gradient(135deg, #60a5fa, #93c5fd) */
-```
-
-### Error Handling
-
-- Always wrap API calls in try/catch
-- Use descriptive error messages
-- Clear errors before new operations
+### Backend & API
+*   **Structure**: `server.js` handles all routes. Keep logic modular if refactoring.
+*   **Database**: Use `prisma` client for all DB operations.
+*   **Error Handling**: Wrap **ALL** async route handlers in `try/catch`.
+    *   Log errors with `console.error`.
+    *   Return JSON error responses: `res.status(500).json({ error: 'Message' })`.
 
 ```javascript
-try {
-  const response = await fetch(url);
-  const data = await response.json();
-} catch (err) {
-  console.error('Operation failed:', err);
-  error = 'User-friendly error message';
-}
-```
-
-### API Patterns
-
-Base URL: `http://localhost:3001`
-
-```javascript
-// GET request
-const response = await fetch(`http://localhost:3001/api/user/${userId}`);
-const data = await response.json();
-
-// POST with FormData
-const formData = new FormData();
-formData.append('file', file);
-formData.append('key', value);
-
-const response = await fetch('http://localhost:3001/api/upload', {
-  method: 'POST',
-  body: formData
+// Example Route Handler
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) throw new Error('No file uploaded');
+    // ... process file ...
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 ```
 
-### Routing
+---
 
-Uses custom hash-based router (`src/stores/router.js`):
+## 4. Agent Operational Rules
 
-```javascript
-import { router } from './stores/router.js';
+1.  **Safety First**: Never commit secrets (API keys, .env). Always use environment variables.
+2.  **Path Resolution**: Always use **absolute paths** when reading/writing files.
+    *   Root: `C:/Users/Saudp/projects/`
+    *   Frontend: `.../my-ai-assistant/`
+    *   Backend: `.../ai-assistant-backend/`
+3.  **Verification**: After making changes, verify by checking for syntax errors or running the relevant build command (`npm run build`).
+4.  **No Hallucinations**: Do not reference scripts (`npm run test`) or files (`tsconfig.json`) that do not exist.
+5.  **Documentation**: When adding new features, update this `AGENTS.md` file.
 
-// Navigate
-router.navigate('/path');
+---
 
-// Current route (reactive)
-import { currentPath } from './stores/router.js';
-$: route = $currentPath;
+## 5. Environment Configuration
+
+Ensure `.env` exists in both root directories with:
+
+**Backend (`ai-assistant-backend/.env`)**
+```ini
+DATABASE_URL="postgresql://user:pass@localhost:5432/mydb"
+OPENAI_API_KEY="sk-..."
+PORT=3001
 ```
 
-Routes:
-- `/` - Landing page
-- `/app` - Main app (Home)
-- `/document/:id` - Document view
-
----
-
-## Best Practices
-
-1. **Keep components focused** - One responsibility per component
-2. **Use semantic HTML** - Proper headings, labels, ARIA attributes
-3. **Responsive design** - Mobile-first with breakpoints at 768px and 640px
-4. **Dark theme** - All UI should use the dark navy color scheme
-5. **File uploads** - Max 25MB, supported types: PDF, DOCX, PPTX
-6. **Always handle loading states** - Show feedback during async operations
-7. **Clean up** - Clear intervals/timeouts in `onDestroy`
-
----
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and configure:
-- `DATABASE_URL` - PostgreSQL connection string
-- `OPENAI_API_KEY` - OpenAI API key
-- `PORT` - Server port (default: 3001)
-
----
-
-## Quick Reference
-
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:3001
-- **No TypeScript** - Pure JavaScript only
-- **No testing framework** - Add tests if needed
-- **Prisma ORM** - Database operations via `@prisma/client`
+**Frontend** works with the backend at `http://localhost:3001`.
