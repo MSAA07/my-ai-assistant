@@ -4,6 +4,9 @@
 
 **Application**: Full-stack study assistant for uploading documents (PDF, DOCX) to generate AI summaries, flashcards, and exams.
 **Architecture**: Monorepo-style with separate frontend and backend directories.
+**Deployment Status**:
+*   ✅ **Frontend**: Deployed on Vercel (`https://my-ai-assistant-ypzx.vercel.app`)
+*   ✅ **Backend**: Deployed on Railway (`https://ai-assistant-backend-production-ddf0.up.railway.app`)
 
 | Component | Tech Stack |
 |-----------|------------|
@@ -132,4 +135,6 @@ OPENAI_API_KEY="sk-..."
 PORT=3001
 ```
 
-**Frontend** works with the backend at `http://localhost:3001`.
+**Frontend** works with the backend at:
+*   **Local**: `http://localhost:3001`
+*   **Production**: `VITE_API_BASE_URL` (Set in Vercel to Railway URL)

@@ -21,6 +21,9 @@
     localStorage.setItem("mockUserId", mockClerkId);
   }
 
+  // API Base URL (Dynamic for production, localhost fallback)
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
   onMount(async () => {
     await fetchUserData();
   });
@@ -28,7 +31,7 @@
   async function fetchUserData() {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/user/${mockClerkId}`,
+        `${API_BASE}/api/user/${mockClerkId}`,
       );
       const data = await response.json();
       user = data.user;
@@ -135,7 +138,7 @@
           reject(new Error("Network error. Please try again."));
         });
 
-        xhr.open("POST", "http://localhost:3001/api/upload");
+        xhr.open("POST", `${API_BASE}/api/upload`);
         xhr.send(formData);
       });
 
@@ -169,7 +172,7 @@
 
     try {
       const response = await fetch(
-        `http://localhost:3001/api/document/${docId}`,
+        `${API_BASE}/api/document/${docId}`,
         {
           method: "DELETE",
         },

@@ -21,6 +21,9 @@
   let score = 0;
   let showAnswersMode = "end"; // 'instant' or 'end'
 
+  // API Base URL (Dynamic for production, localhost fallback)
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
   onMount(async () => {
     await fetchDocument();
   });
@@ -28,7 +31,7 @@
   async function fetchDocument() {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/document/${documentId}`,
+        `${API_BASE}/api/document/${documentId}`,
       );
       const data = await response.json();
 
