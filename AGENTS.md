@@ -146,25 +146,79 @@ PORT=3001
 
 **Frontend**: Uses `VITE_API_BASE_URL` (set to Railway URL in production)
 
+### Vercel Deployment Configuration
+
+**Production Environment**:
+- Branch: `production`
+- URL: `https://my-ai-assistant.vercel.app` (or your custom domain)
+- Environment Variable: `VITE_API_BASE_URL` -> Production Railway backend URL
+- Auto-deploys: When `production` branch is updated
+
+**Staging/Preview Environment**:
+- Branch: `stage`
+- URL: `https://my-ai-assistant-git-stage-<username>.vercel.app`
+- Environment Variable: `VITE_API_BASE_URL` -> Staging Railway backend URL
+- Auto-deploys: When `stage` branch is updated
+
+**Testing Workflow**:
+1. Push changes to `stage` branch
+2. Vercel automatically creates preview deployment
+3. Test on preview URL (connects to staging backend)
+4. If successful, merge `stage` -> `production`
+
 ---
 
-## 6. Git Workflow & Deployment
+## 6. Git Workflow & Branch Strategy
 
-### Branches
-- **`production`**: LIVE/STABLE. Real users see this.
-  - NEVER commit directly here.
-  - ONLY update via merge from `stage` after testing.
-- **`stage`**: TESTING.
-  - Push new features/fixes here first.
-  - Test on staging URLs.
-  - If successful -> merge to `production`.
+### Branch Structure
+```
+production  <- Live environment (real users)
+stage       <- Testing environment (pre-production)
+feature/*   <- Development branches (temporary)
+```
 
-### Workflow Rules
-1. Develop locally on a feature branch or your working branch.
-2. Push to `stage` for testing: `git push origin stage`.
-3. Release to production:
-   ```bash
-   git checkout production
-   git merge stage
-   git push origin production
-   ```
+### Branch Purposes
+- **`production`**: Production-ready code. Auto-deploys to live environment. Protected - requires PR.
+- **`stage`**: Pre-production testing. Auto-deploys to staging environment. Protected - requires PR.
+- **`feature/*`**: Individual features or fixes. Merged into `stage` for testing.
+
+### Standard Workflow
+```bash
+# 1. Start new feature from stage
+git checkout stage
+git pull origin stage
+git checkout -b feature/my-feature
+
+# 2. Develop and commit
+git add .
+git commit -m "Add my feature"
+git push origin feature/my-feature
+
+# 3. Create PR: feature/my-feature -> stage
+# 4. Merge and test on staging environment
+# 5. If tests pass: Create PR: stage -> production
+# 6. Merge to deploy to production
+```
+
+### Critical Rules
+- DO NOT push directly to `production` (branch protection prevents this)
+- DO NOT push directly to `stage` (branch protection prevents this)
+- ALWAYS create feature branches
+- ALWAYS test on staging before merging to production
+- ALWAYS use Pull Requests for merging
+
+### Emergency Hotfix Workflow
+```bash
+# For urgent production fixes only
+git checkout production
+git pull origin production
+git checkout -b hotfix/urgent-fix
+
+# Make minimal fix
+git add .
+git commit -m "Hotfix: description"
+git push origin hotfix/urgent-fix
+
+# Create PR: hotfix -> production (review and merge immediately)
+# Then backport: Create PR: hotfix -> stage (to keep stage synced)
+```
