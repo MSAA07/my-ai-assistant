@@ -1,3 +1,9 @@
+# FRONTEND SPECIALIST - AI Study Assistant
+**Parent Agent**: `C:/Users/Saudp/projects/AGENTS.md` (Project Overseer)
+**Role**: Frontend Development, Svelte Components, User Interface, Vercel Deployment
+
+---
+
 # AI Study Assistant - Agent Guidelines
 
 ## 1. Project Overview
