@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import UserDetail from './UserDetail.svelte';
+  import { API_BASE } from "../../config.js";
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
   let users = [];
   let loading = true;

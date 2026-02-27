@@ -1,11 +1,11 @@
 import { createAuthClient } from "better-auth/client";
 import { writable } from "svelte/store";
 import { adminClient } from "better-auth/client/plugins";
+import { API_BASE } from "../config.js";
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
 const client = createAuthClient({
-  baseURL: apiBaseUrl,
+  baseURL: API_BASE,
   plugins: [
     adminClient()
   ]

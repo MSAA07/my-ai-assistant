@@ -1,9 +1,9 @@
 <script>
   import { onMount, createEventDispatcher } from 'svelte';
+  import { API_BASE } from "../../config.js";
 
   export let userId;
 
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
   const dispatch = createEventDispatcher();
 
   let user = null;

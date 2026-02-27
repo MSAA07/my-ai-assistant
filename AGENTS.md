@@ -152,6 +152,10 @@ PORT=3001
 
 **Frontend**: Uses `VITE_API_BASE_URL` (set to Railway URL in production)
 
+### Staging Access Notes
+- QA admin login (Better Auth) for staging: `admin@ai.com` / `admin123` (testing only, rotate if exposed).
+- Staging backend URL: `https://ai-assistant-backend-staging.up.railway.app` with whitelisted origin `https://my-ai-assistant-git-stage-msaa07.vercel.app`. Ensure `VITE_API_BASE_URL` matches this when validating preview builds.
+
 ### Vercel Deployment Configuration
 
 **Production Environment**:

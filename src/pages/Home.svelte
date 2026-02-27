@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { API_BASE } from "../config.js";
   import { session } from "../stores/auth.js"; // Import session
 
   let user = null;
@@ -14,9 +15,6 @@
   let uploadProgress = 0;
   let uploadStage = "";
   let progressInterval = null;
-
-  // API Base URL (Dynamic for production, localhost fallback)
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
   onMount(async () => {
     await fetchUserData();

@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { API_BASE } from "../config.js";
 
   export let documentId;
 
@@ -20,9 +21,6 @@
   let examComplete = false;
   let score = 0;
   let showAnswersMode = "end"; // 'instant' or 'end'
-
-  // API Base URL (Dynamic for production, localhost fallback)
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
   onMount(async () => {
     await fetchDocument();
