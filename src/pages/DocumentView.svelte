@@ -7,6 +7,7 @@
   let docData = null;
   let loading = true;
   let error = "";
+  let processingStatus = "complete";
   let activeTab = "summary";
 
   // Flashcard state
@@ -36,7 +37,15 @@
 
       if (response.ok) {
         docData = data.document;
-        shuffledCards = [...docData.flashcards];
+        processingStatus = docData.processingStatus || 'complete';
+        
+        if (processingStatus === 'queued' || processingStatus === 'running') {
+          setTimeout(fetchDocument, 2000);
+        } else if (processingStatus === 'failed') {
+          error = "Document processing failed. Please try again.";
+        } else {
+          shuffledCards = [...docData.flashcards];
+        }
       } else {
         error = data.error || "Document not found";
       }
@@ -149,6 +158,12 @@
     <h2>Error</h2>
     <p>{error}</p>
     <button on:click={goBack}>Back to Dashboard</button>
+  </div>
+{:else if processingStatus === 'queued' || processingStatus === 'running'}
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>AI is generating study materials...</p>
+    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem">This usually takes about 20 seconds.</p>
   </div>
 {:else if docData}
   <div class="document-view">

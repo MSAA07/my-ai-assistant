@@ -6,9 +6,15 @@ import { API_BASE } from "../config.js";
 
 const client = createAuthClient({
   baseURL: API_BASE,
+  fetch: (input, init = {}) => {
+    return fetch(input, {
+      ...init,
+      credentials: "include",
+    });
+  },
   plugins: [
     adminClient()
-  ]
+  ],
 });
 
 export const session = writable(null);
