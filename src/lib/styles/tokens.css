@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  /* Base colors */
+  --color-bg: #0f1117;
+  --color-sidebar: #161b27;
+  --color-surface-1: #1e2433;
+  --color-surface-2: #232a3c;
+  --color-border: #2a3147;
+  --color-text-primary: #e8eaf0;
+  --color-text-muted: #8b92a5;
+  --color-accent-primary: #6c63ff;
+  --color-accent-secondary: #00d4aa;
+
+  /* Semantic colors */
+  --color-success: #00d4aa;
+  --color-warning: #f6c177;
+  --color-danger: #ff4d6d;
+  --color-info: #6c63ff;
+
+  /* Typography */
+  --font-family-en: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-family-ar: Cairo, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-family-base: var(--font-family-en);
+
+  /* Sizing & spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius-1: 8px;
+  --radius-2: 12px;
+  --radius-3: 16px;
+  --size-topbar: 60px;
+  --size-sidebar: 240px;
+  --size-drawer: 400px;
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-normal: 200ms;
+  --ease-standard: cubic-bezier(.2, .0, .2, 1);
+}

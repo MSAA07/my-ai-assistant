@@ -1,194 +1,291 @@
 <script>
-  import AppHeader from './components/AppHeader.svelte';
-  import Footer from './components/Footer.svelte';
+  import AppShell from './lib/components/layout/AppShell.svelte';
+  import EmptyState from './lib/components/ui/EmptyState.svelte';
   import Landing from './pages/Landing.svelte';
   import Home from './pages/Home.svelte';
   import DocumentView from './pages/DocumentView.svelte';
   import SignIn from './components/auth/SignIn.svelte';
   import SignUp from './components/auth/SignUp.svelte';
   import AdminDashboard from './components/AdminDashboard.svelte';
-  import { currentPath } from './stores/router.js';
-  import { session, isLoading } from './stores/auth.js';
+  import Footer from './components/Footer.svelte';
+  import { currentPath, routeParams, router } from './stores/router.js';
+  import { session, isLoading, signOut } from './stores/auth.js';
+  import { t } from './lib/i18n/t.js';
+  import { currentDictionary } from './lib/stores/language.js';
   import './styles/global.css';
 
+  const NAV_IDS = ['dashboard', 'documents', 'exams', 'flashcards'];
+
+  let showSignUp = false;
+  let notifications = 0;
+
   $: route = $currentPath;
+  $: params = $routeParams;
+  $: dictionary = $currentDictionary;
   $: isAuthenticated = !!$session;
   $: isAdmin = $session?.user?.role === 'admin';
-  let showSignUp = false;
+  $: activeNav = deriveActiveNav(route, params.section);
+  $: navItems = buildPrimaryNav(isAdmin, dictionary);
+  $: mobileNav = navItems.filter((item) => item.id !== 'admin');
+  $: secondaryNav = [{ id: 'settings', label: navLabel('settings', dictionary), href: '/app?section=settings' }];
+  $: planVariant = ($session?.user?.plan ?? 'free').toLowerCase() === 'pro' ? 'pro' : 'free';
+  $: planConfig = {
+    label: dictionary?.nav?.plan ?? t('nav.plan'),
+    badge: planVariant === 'pro'
+      ? dictionary?.plan?.pro ?? t('plan.pro')
+      : dictionary?.plan?.free ?? t('plan.free'),
+    variant: planVariant,
+  };
+  $: pageTitle = getPageTitle(route, activeNav, dictionary);
+
+  function deriveActiveNav(path, section) {
+    if (path.startsWith('/document/')) return 'documents';
+    if (path === '/admin') return 'admin';
+    if (path === '/app') return section || 'dashboard';
+    return 'dashboard';
+  }
+
+  function navHref(id) {
+    if (id === 'dashboard') return '/app';
+    if (id === 'admin') return '/admin';
+    return `/app?section=${id}`;
+  }
+
+  function navLabel(id, dict = dictionary) {
+    const navSection = dict?.nav ?? {};
+    switch (id) {
+      case 'dashboard':
+        return navSection.dashboard ?? t('nav.dashboard');
+      case 'documents':
+        return navSection.documents ?? t('nav.documents');
+      case 'exams':
+        return navSection.exams ?? t('nav.exams');
+      case 'flashcards':
+        return navSection.flashcards ?? t('nav.flashcards');
+      case 'settings':
+        return navSection.settings ?? t('nav.settings');
+      case 'admin':
+        return navSection.admin ?? t('nav.admin');
+      default:
+        return '';
+    }
+  }
+
+  function buildPrimaryNav(includeAdmin, dict) {
+    const base = NAV_IDS.map((id) => ({
+      id,
+      label: navLabel(id, dict),
+      href: navHref(id),
+    }));
+
+    return includeAdmin
+      ? [...base, { id: 'admin', label: navLabel('admin', dict), href: navHref('admin') }]
+      : base;
+  }
+
+  function getPageTitle(path, id, dict) {
+    const navSection = dict?.nav ?? {};
+
+    if (path.startsWith('/document/')) {
+      return navSection.documents ?? t('nav.documents');
+    }
+
+    switch (id) {
+      case 'dashboard':
+        return navSection.dashboard ?? t('nav.dashboard');
+      case 'documents':
+        return navSection.documents ?? t('nav.documents');
+      case 'exams':
+        return navSection.exams ?? t('nav.exams');
+      case 'flashcards':
+        return navSection.flashcards ?? t('nav.flashcards');
+      case 'settings':
+        return navSection.settings ?? t('nav.settings');
+      case 'admin':
+        return navSection.admin ?? t('nav.admin');
+      default:
+        return navSection.dashboard ?? t('nav.dashboard');
+    }
+  }
+
+  function handleNavigate(event) {
+    const item = event.detail?.item;
+    if (!item) return;
+    if (item.href) {
+      router.navigate(item.href);
+    }
+  }
+
+  function handleTopbar(event) {
+    if (event.type === 'logout') {
+      signOut();
+    }
+  }
 
   function toggleAuthMode() {
     showSignUp = !showSignUp;
+  }
+
+  function placeholderSubtitle(id) {
+    const subtitle = dictionary?.emptyState?.subtitle ?? t('emptyState.subtitle');
+    switch (id) {
+      case 'documents':
+      case 'exams':
+      case 'flashcards':
+      case 'settings':
+        return subtitle;
+      default:
+        return subtitle;
+    }
   }
 </script>
 
 {#if $isLoading}
   <div class="loading-screen">
     <div class="spinner"></div>
-    <p>Loading session...</p>
+    <p>{t('loading.session')}</p>
+  </div>
+{:else if route === '/' || route === ''}
+  <div class="landing-shell">
+    <Landing />
+    <Footer />
+  </div>
+{:else if !isAuthenticated}
+  <div class="auth-layout">
+    {#if showSignUp}
+      <SignUp on:success={() => (showSignUp = false)} on:toggle={toggleAuthMode} />
+    {:else}
+      <SignIn on:success={() => {}} on:toggle={toggleAuthMode} />
+    {/if}
   </div>
 {:else}
-  {#if route === '/' || route === ''}
-    <Landing />
-  {:else}
-    <div class="app-layout">
-      <AppHeader />
-      <main class="content">
-        {#if !isAuthenticated}
-          {#if showSignUp}
-            <SignUp on:success={() => showSignUp = false} on:toggle={toggleAuthMode} />
-          {:else}
-            <SignIn on:success={() => {}} on:toggle={toggleAuthMode} />
-          {/if}
-        {:else if route === '/app'}
-          <Home />
-        {:else if route === '/admin'}
-          {#if isAdmin}
-            <AdminDashboard />
-          {:else}
-            <div class="access-denied">
-              <h1>Access Denied</h1>
-              <p>You do not have permission to view the admin dashboard.</p>
-              <a href="#/app">Back to dashboard</a>
-            </div>
-          {/if}
-        {:else if route.startsWith('/document/')}
-          <DocumentView documentId={route.replace('/document/', '')} />
-        {:else}
-          <div class="not-found">
-            <h1>404</h1>
-            <p>Page not found.</p>
-            <a href="#/">Back to home</a>
-          </div>
-        {/if}
-      </main>
-
-      <Footer />
-    </div>
-  {/if}
+  <AppShell
+    pageTitle={pageTitle}
+    primaryNav={navItems}
+    secondaryNav={secondaryNav}
+    mobileNav={mobileNav}
+    activeId={activeNav}
+    plan={planConfig}
+    notificationCount={notifications}
+    user={$session?.user ?? {}}
+    on:navigate={handleNavigate}
+    on:logout={handleTopbar}
+    on:notifications={handleTopbar}
+    on:profile={handleTopbar}
+  >
+    {#if route.startsWith('/document/')}
+      <DocumentView documentId={route.replace('/document/', '')} />
+    {:else if route === '/admin'}
+      {#if isAdmin}
+        <AdminDashboard />
+      {:else}
+        <section class="status-block">
+          <h1>{t('errors.accessDeniedTitle')}</h1>
+          <p>{t('errors.accessDeniedDescription')}</p>
+          <a class="status-block__link" href="#/app">{t('actions.backToDashboard')}</a>
+        </section>
+      {/if}
+    {:else if route === '/app'}
+      {#if activeNav === 'dashboard'}
+        <Home />
+      {:else}
+        <EmptyState title={navLabel(activeNav)} subtitle={placeholderSubtitle(activeNav)} />
+      {/if}
+    {:else}
+      <section class="status-block">
+        <h1>{t('errors.notFoundTitle')}</h1>
+        <p>{t('errors.notFoundDescription')}</p>
+        <a class="status-block__link" href="#/">{t('actions.backToHome')}</a>
+      </section>
+    {/if}
+  </AppShell>
 {/if}
 
 <style>
   .loading-screen {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: var(--space-3);
     background: var(--color-bg);
-    color: var(--color-text);
-  }
-  
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255,255,255,0.1);
-    border-radius: 50%;
-    border-top-color: var(--color-accent);
-    animation: spin 1s ease-in-out infinite;
-    margin-bottom: 1rem;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+    color: var(--color-text-primary);
   }
 
-  .app-layout {
+  .spinner {
+    inline-size: 42px;
+    block-size: 42px;
+    border-radius: 999px;
+    border: 3px solid color-mix(in srgb, var(--color-text-muted) 20%, transparent);
+    border-top-color: var(--color-accent-primary);
+    animation: spin var(--motion-normal) var(--ease-standard) infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .landing-shell {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     background: var(--color-bg);
-    background-image: var(--gradient-bg-radial);
-  }
-/* ... rest of existing styles ... */
-
-  .content {
-    flex: 1;
-    padding: 2rem;
-    max-width: 960px;
-    width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
   }
 
-  .not-found {
+  .auth-layout {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: var(--space-6) var(--space-3);
+    background: var(--color-bg);
+  }
+
+  .status-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    padding: 6rem 1rem;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border-radius: var(--radius-2);
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-1) 92%, transparent);
   }
 
-  .access-denied {
-    text-align: center;
-    padding: 6rem 1rem;
-  }
-
-  .access-denied h1 {
-    font-size: 3rem;
-    font-weight: 800;
+  .status-block h1 {
     margin: 0;
-    background: var(--gradient-accent);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--color-text-primary);
   }
 
-  .access-denied p {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    margin: 0.75rem 0 2rem;
+  .status-block p {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-inline-size: 440px;
   }
 
-  .access-denied a {
+  .status-block__link {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--color-accent);
-    font-weight: 500;
-    padding: 0.5rem 1.25rem;
+    justify-content: center;
+    min-inline-size: 160px;
+    min-block-size: 44px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-1);
     border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
+    color: var(--color-text-primary);
+    background: var(--color-surface-1);
+    transition: background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard);
   }
 
-  .access-denied a:hover {
-    background: var(--color-accent-bg);
-    border-color: var(--color-accent);
-  }
-
-  .not-found h1 {
-    font-size: 5rem;
-    font-weight: 800;
-    margin: 0;
-    background: var(--gradient-accent);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .not-found p {
-    font-size: 1.25rem;
-    color: var(--color-text-secondary);
-    margin: 0.75rem 0 2rem;
-  }
-
-  .not-found a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--color-accent);
-    font-weight: 500;
-    padding: 0.5rem 1.25rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-  }
-
-  .not-found a:hover {
-    background: var(--color-accent-bg);
-    border-color: var(--color-accent);
-  }
-
-  @media (max-width: 640px) {
-    .content {
-      padding: 1rem;
-    }
+  .status-block__link:hover,
+  .status-block__link:focus-visible {
+    background: var(--color-surface-2);
+    border-color: var(--color-accent-primary);
+    outline: none;
   }
 </style>

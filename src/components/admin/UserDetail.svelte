@@ -140,17 +140,45 @@
     dispatch('updated');
   }
 
+  const handleBackdropClick = (event) => {
+    if (event.target === event.currentTarget) {
+      dispatch('close');
+    }
+  };
+
+  const handleBackdropKeydown = (event) => {
+    if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+      dispatch('close');
+    }
+  };
+
   onMount(fetchUser);
 </script>
 
-<div class="modal-backdrop" on:click={() => dispatch('close')}>
-  <div class="modal" on:click|stopPropagation>
+<div
+  class="modal-backdrop"
+  role="button"
+  aria-label="Close user detail"
+  tabindex="0"
+  on:click={handleBackdropClick}
+  on:keydown={handleBackdropKeydown}
+>
+  <div
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="user-detail-heading"
+  >
     <header>
       <div>
-        <h2>User Detail</h2>
+        <h2 id="user-detail-heading">User Detail</h2>
         <p class="muted">Manage account, files, and sessions.</p>
       </div>
-      <button class="close" on:click={() => dispatch('close')}>Close</button>
+      <button class="close" type="button" on:click={() => dispatch('close')}>
+        Close
+      </button>
     </header>
 
     {#if loading}
@@ -158,10 +186,34 @@
     {:else if error}
       <p class="error">{error}</p>
     {:else}
-      <div class="tab-row">
-        <button class:active={activeTab === 'profile'} on:click={() => (activeTab = 'profile')}>Profile</button>
-        <button class:active={activeTab === 'files'} on:click={() => (activeTab = 'files')}>Files</button>
-        <button class:active={activeTab === 'sessions'} on:click={() => (activeTab = 'sessions')}>Sessions</button>
+      <div class="tab-row" role="tablist" aria-label="User detail sections">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'profile'}
+          class:active={activeTab === 'profile'}
+          on:click={() => (activeTab = 'profile')}
+        >
+          Profile
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'files'}
+          class:active={activeTab === 'files'}
+          on:click={() => (activeTab = 'files')}
+        >
+          Files
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'sessions'}
+          class:active={activeTab === 'sessions'}
+          on:click={() => (activeTab = 'sessions')}
+        >
+          Sessions
+        </button>
       </div>
 
       {#if activeTab === 'profile'}
@@ -169,30 +221,32 @@
           <div class="card">
             <h3>Account</h3>
             <div class="field">
-              <label>Name</label>
-              <input bind:value={form.name} />
+              <label for="account-name">Name</label>
+              <input id="account-name" name="name" bind:value={form.name} />
             </div>
             <div class="field">
-              <label>Plan</label>
-              <select bind:value={form.plan}>
+              <label for="account-plan">Plan</label>
+              <select id="account-plan" name="plan" bind:value={form.plan}>
                 <option value="free">Free</option>
                 <option value="premium">Premium</option>
               </select>
             </div>
             <div class="field">
-              <label>Monthly Limit</label>
-              <input type="number" bind:value={form.monthlyLimit} />
+              <label for="account-monthly-limit">Monthly Limit</label>
+              <input id="account-monthly-limit" name="monthlyLimit" type="number" bind:value={form.monthlyLimit} />
             </div>
             <div class="field">
-              <label>Role</label>
-              <select bind:value={form.role}>
+              <label for="account-role">Role</label>
+              <select id="account-role" name="role" bind:value={form.role}>
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
             <div class="actions">
-              <button class="primary" on:click={updateUser}>Save Changes</button>
-              <button class="secondary" on:click={toggleBan}>{user.banned ? 'Unban' : 'Ban'} User</button>
+              <button class="primary" type="button" on:click={updateUser}>Save Changes</button>
+              <button class="secondary" type="button" on:click={toggleBan}>
+                {user.banned ? 'Unban' : 'Ban'} User
+              </button>
             </div>
           </div>
 
@@ -220,7 +274,7 @@
                     <strong>{doc.originalName}</strong>
                     <span class="muted">{formatBytes(doc.fileSize)} - {new Date(doc.uploadDate).toLocaleDateString()}</span>
                   </div>
-                  <button class="danger" on:click={() => deleteDocument(doc.id)}>Delete</button>
+                  <button class="danger" type="button" on:click={() => deleteDocument(doc.id)}>Delete</button>
                 </li>
               {/each}
             </ul>
@@ -230,7 +284,7 @@
         <div class="card">
           <header class="card-header">
             <h3>Sessions</h3>
-            <button class="secondary" on:click={revokeAllSessions}>Revoke All</button>
+            <button class="secondary" type="button" on:click={revokeAllSessions}>Revoke All</button>
           </header>
           {#if sessions.length === 0}
             <p class="muted">No active sessions.</p>
@@ -245,7 +299,7 @@
                       {session.userAgent ? ` - ${session.userAgent}` : ''}
                     </span>
                   </div>
-                  <button class="danger" on:click={() => revokeSession(session.id)}>Revoke</button>
+                  <button class="danger" type="button" on:click={() => revokeSession(session.id)}>Revoke</button>
                 </li>
               {/each}
             </ul>
@@ -260,72 +314,90 @@
   .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(10, 14, 39, 0.8);
+    background: color-mix(in srgb, var(--color-bg) 65%, rgba(0, 0, 0, 0.55) 35%);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2000;
-    padding: 1rem;
+    padding: var(--space-4);
   }
 
   .modal {
-    background: #0f172a;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    border-radius: 1rem;
-    padding: 1.5rem;
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    padding: var(--space-5);
     width: min(900px, 100%);
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 32px 64px color-mix(in srgb, var(--color-bg) 70%, transparent);
   }
 
   header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
   }
 
   .close {
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    border: 1px solid var(--color-border);
     background: transparent;
-    color: var(--color-text);
+    color: var(--color-text-primary);
     padding: 0.4rem 0.9rem;
     border-radius: 999px;
     cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .close:hover,
+  .close:focus-visible {
+    background: var(--color-surface-2);
+    border-color: var(--color-accent-primary);
+    color: var(--color-text-primary);
+    outline: none;
   }
 
   .tab-row {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
   }
 
   .tab-row button {
     padding: 0.45rem 1rem;
     border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    border: 1px solid var(--color-border);
     background: transparent;
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
     cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard);
   }
 
   .tab-row button.active {
-    background: rgba(96, 165, 250, 0.2);
-    color: var(--color-text);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border-color: var(--color-accent-primary);
   }
 
   .profile-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
   .card {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    border-radius: 0.9rem;
-    padding: 1rem;
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
   }
 
   .card-header {
@@ -336,42 +408,66 @@
 
   .field {
     display: grid;
-    gap: 0.4rem;
-    margin-bottom: 0.8rem;
+    gap: var(--space-2);
   }
 
   input,
   select {
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    border-radius: 0.6rem;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
     padding: 0.5rem 0.8rem;
-    color: var(--color-text);
+    color: var(--color-text-primary);
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard);
+  }
+
+  input:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
   }
 
   .actions {
     display: flex;
-    gap: 0.6rem;
+    gap: var(--space-3);
     flex-wrap: wrap;
   }
 
   .primary {
-    background: linear-gradient(135deg, #60a5fa, #818cf8);
+    background: var(--color-accent-primary);
     border: none;
-    color: #0f172a;
+    color: var(--color-bg);
     font-weight: 600;
-    border-radius: 0.6rem;
+    border-radius: var(--radius-1);
     padding: 0.5rem 1rem;
     cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard);
+  }
+
+  .primary:hover,
+  .primary:focus-visible {
+    background: color-mix(in srgb, var(--color-accent-primary) 85%, white 15%);
+    outline: none;
   }
 
   .secondary {
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    border: 1px solid var(--color-border);
     background: transparent;
-    color: var(--color-text);
-    border-radius: 0.6rem;
+    color: var(--color-text-primary);
+    border-radius: var(--radius-1);
     padding: 0.5rem 1rem;
     cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard);
+  }
+
+  .secondary:hover,
+  .secondary:focus-visible {
+    background: var(--color-surface-2);
+    border-color: var(--color-accent-primary);
+    outline: none;
   }
 
   .list {
@@ -379,34 +475,43 @@
     padding: 0;
     margin: 0;
     display: grid;
-    gap: 0.6rem;
+    gap: var(--space-2);
   }
 
   .list li {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--space-3);
     padding: 0.6rem 0.8rem;
-    border-radius: 0.6rem;
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: var(--radius-1);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
   }
 
   .danger {
-    border: 1px solid rgba(239, 68, 68, 0.5);
-    color: #fca5a5;
+    border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
+    color: var(--color-danger);
     background: transparent;
-    border-radius: 0.6rem;
+    border-radius: var(--radius-1);
     padding: 0.35rem 0.8rem;
     cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .danger:hover,
+  .danger:focus-visible {
+    background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+    color: color-mix(in srgb, var(--color-danger) 80%, #fff 20%);
+    outline: none;
   }
 
   .muted {
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
   }
 
   .error {
-    color: #fca5a5;
+    color: var(--color-danger);
   }
 </style>

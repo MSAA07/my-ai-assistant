@@ -1,32 +1,25 @@
 /* ========================================
-   Dark Navy Theme Variables
+   Derived Theme Values
    ======================================== */
 
 :root {
-  --color-bg: #0a0e27;
-  --color-bg-secondary: #0f1435;
-  --color-surface: #111840;
-  --color-surface-hover: #161d4e;
-  --color-border: #1e2758;
-  --color-border-light: #283170;
-  --color-shadow: rgba(0, 0, 0, 0.4);
-  --color-glow: rgba(96, 165, 250, 0.15);
-
-  --color-text: #f1f5f9;
-  --color-text-secondary: #cbd5e1;
-  --color-text-tertiary: #94a3b8;
-
-  --color-accent: #60a5fa;
-  --color-accent-light: #93c5fd;
-  --color-accent-bg: rgba(96, 165, 250, 0.08);
-  --color-accent-bg-hover: rgba(96, 165, 250, 0.14);
-
-  --gradient-accent: linear-gradient(135deg, #60a5fa, #93c5fd);
-  --gradient-hero: linear-gradient(135deg, #60a5fa 0%, #93c5fd 50%, #60a5fa 100%);
-  --gradient-card-border: linear-gradient(135deg, #1e2758, #2a3570);
-  --gradient-bg-radial: radial-gradient(ellipse at 50% 0%, rgba(96, 165, 250, 0.08) 0%, transparent 60%);
-
-  --color-code-bg: #0d1230;
+  --color-surface: var(--color-surface-1);
+  --color-surface-hover: var(--color-surface-2);
+  --color-border-light: color-mix(in srgb, var(--color-border) 75%, transparent);
+  --color-shadow: color-mix(in srgb, var(--color-bg) 25%, black 75%);
+  --color-glow: color-mix(in srgb, var(--color-accent-primary) 25%, transparent);
+  --color-text: var(--color-text-primary);
+  --color-text-secondary: color-mix(in srgb, var(--color-text-primary) 65%, var(--color-text-muted) 35%);
+  --color-text-tertiary: var(--color-text-muted);
+  --color-accent: var(--color-accent-primary);
+  --color-accent-light: color-mix(in srgb, var(--color-accent-primary) 60%, white 40%);
+  --color-accent-bg: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+  --color-accent-bg-hover: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+  --gradient-accent: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
+  --gradient-hero: radial-gradient(circle at top, color-mix(in srgb, var(--color-accent-primary) 35%, transparent) 0%, transparent 70%);
+  --gradient-card-border: linear-gradient(135deg, color-mix(in srgb, var(--color-border) 70%, transparent), color-mix(in srgb, var(--color-accent-primary) 15%, transparent));
+  --gradient-bg-radial: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-accent-primary) 20%, transparent) 0%, transparent 60%);
+  --color-code-bg: color-mix(in srgb, var(--color-surface-1) 85%, black 15%);
 }
 
 /* ========================================
@@ -47,8 +40,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
-    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-family-base);
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
@@ -95,8 +87,8 @@ a:hover {
    ======================================== */
 
 ::selection {
-  background: rgba(96, 165, 250, 0.3);
-  color: white;
+  background: color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+  color: var(--color-text-primary);
 }
 
 /* ========================================
@@ -104,11 +96,11 @@ a:hover {
    ======================================== */
 
 h1, h2, h3, h4, h5, h6 {
-  color: #f1f5f9;
+  color: var(--color-text-primary);
 }
 
 p {
-  color: #cbd5e1;
+  color: var(--color-text-secondary);
 }
 
 button {
@@ -116,7 +108,7 @@ button {
 }
 
 input, textarea, select {
-  color: #f1f5f9;
-  background: #0f172a;
-  border: 1px solid #334155;
+  color: var(--color-text-primary);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
 }
