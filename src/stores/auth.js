@@ -1,69 +1,120 @@
-import { createAuthClient } from "better-auth/client";
 import { writable } from "svelte/store";
-import { adminClient } from "better-auth/client/plugins";
 import { API_BASE } from "../config.js";
 
+const AUTH_BASE = `${API_BASE}/api/auth`;
 
-const client = createAuthClient({
-  baseURL: API_BASE,
-  fetch: (input, init = {}) => {
-    return fetch(input, {
-      ...init,
-      credentials: "include",
-    });
-  },
-  plugins: [
-    adminClient()
-  ],
-});
+const jsonHeaders = {
+  "Content-Type": "application/json",
+  Accept: "application/json"
+};
+
+const toResult = async (response) => {
+  const text = await response.text();
+  const data = text ? (() => {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  })() : null;
+
+  if (!response.ok) {
+    const message = data?.message || data?.error || response.statusText || "Request failed";
+    return {
+      data: null,
+      error: {
+        status: response.status,
+        message
+      }
+    };
+  }
+
+  return {
+    data: data?.data ?? data,
+    error: null
+  };
+};
+
+const request = async (path, { method = "GET", body } = {}) => {
+  const init = {
+    method,
+    credentials: "include",
+    headers: jsonHeaders
+  };
+
+  if (body && method !== "GET") {
+    init.body = JSON.stringify(body);
+  }
+
+  const response = await fetch(`${AUTH_BASE}${path}`, init);
+  return toResult(response);
+};
 
 export const session = writable(null);
 export const isLoading = writable(true);
 
-// Initial fetch
-client
-  .getSession()
-  .then(({ data }) => {
-    session.set(data);
-    isLoading.set(false);
-  })
-  .catch((err) => {
-    console.error("Failed to load session:", err);
-    session.set(null);
-    isLoading.set(false);
-  });
+export const getSession = async () => {
+  return request("/get-session");
+};
 
 export const signIn = async (email, password) => {
-  const res = await client.signIn.email({ 
-    email, 
-    password,
+  const result = await request("/sign-in/email", {
+    method: "POST",
+    body: { email, password }
   });
-  
-  if (!res.error) {
-     // Fetch fresh session to ensure we have all data
-     const { data } = await client.getSession();
-     session.set(data);
+
+  if (!result.error) {
+    const sessionResult = await getSession();
+    if (!sessionResult.error) {
+      session.set(sessionResult.data);
+    }
   }
-  return res;
+
+  return result;
 };
 
 export const signUp = async (email, password, name) => {
-  const res = await client.signUp.email({ 
-    email, 
-    password, 
-    name,
+  const result = await request("/sign-up/email", {
+    method: "POST",
+    body: { email, password, name }
   });
-  
-  if (!res.error) {
-     const { data } = await client.getSession();
-     session.set(data);
+
+  if (!result.error) {
+    const sessionResult = await getSession();
+    if (!sessionResult.error) {
+      session.set(sessionResult.data);
+    }
   }
-  return res;
+
+  return result;
 };
 
 export const signOut = async () => {
-  await client.signOut();
+  await request("/sign-out", { method: "POST" });
   session.set(null);
 };
 
-export const authClient = client;
+const bootstrapSession = async () => {
+  try {
+    const result = await getSession();
+    if (!result.error) {
+      session.set(result.data);
+    } else {
+      session.set(null);
+    }
+  } catch (error) {
+    console.error("Failed to load session:", error);
+    session.set(null);
+  } finally {
+    isLoading.set(false);
+  }
+};
+
+bootstrapSession();
+
+export const authClient = {
+  getSession,
+  signIn,
+  signUp,
+  signOut
+};
