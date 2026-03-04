@@ -1,6 +1,7 @@
 <script>
   import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
+  import { ENABLE_ARABIC_UI } from '../lib/config/features.js';
   import { session, signOut } from '../stores/auth.js';
   import { t } from '../lib/i18n/t.js';
 
@@ -32,9 +33,17 @@
   <section class="settings-section" id="language">
     <div>
       <h2>{t('settings.language.title')}</h2>
-      <p>{t('settings.language.description')}</p>
+      <p>
+        {#if ENABLE_ARABIC_UI}
+          {t('settings.language.description')}
+        {:else}
+          {t('settings.language.disabled')}
+        {/if}
+      </p>
     </div>
-    <LanguageToggle />
+    {#if ENABLE_ARABIC_UI}
+      <LanguageToggle />
+    {/if}
   </section>
 
   <section class="settings-section">

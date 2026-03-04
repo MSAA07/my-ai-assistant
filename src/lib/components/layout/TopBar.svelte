@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
+  import { ENABLE_ARABIC_UI } from '../../config/features.js';
   import { t } from '../../i18n/t.js';
 
   export let pageTitle = '';
@@ -63,7 +64,9 @@
     {#if planLabel}
       <span class="plan-pill">{planLabel}</span>
     {/if}
-    <LanguageToggle />
+    {#if ENABLE_ARABIC_UI}
+      <LanguageToggle />
+    {/if}
     <button
       class="icon-button"
       type="button"

@@ -1,14 +1,19 @@
 import { derived, writable } from 'svelte/store';
+import { ENABLE_ARABIC_UI } from '../config/features.js';
 
 const STORAGE_KEY = 'lang';
 const DEFAULT_LANGUAGE = 'en';
-export const availableLanguages = [
-  { code: 'en', labelKey: 'language.english', shortLabel: 'EN' },
-  { code: 'ar', labelKey: 'language.arabic', shortLabel: 'AR' }
-];
+
+export const availableLanguages = ENABLE_ARABIC_UI
+  ? [
+      { code: 'en', labelKey: 'language.english', shortLabel: 'EN' },
+      { code: 'ar', labelKey: 'language.arabic', shortLabel: 'AR' }
+    ]
+  : [{ code: 'en', labelKey: 'language.english', shortLabel: 'EN' }];
 const isBrowser = typeof window !== 'undefined';
 
 function readInitialLanguage() {
+  if (!ENABLE_ARABIC_UI) return DEFAULT_LANGUAGE;
   if (!isBrowser) return DEFAULT_LANGUAGE;
 
   const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -36,17 +41,25 @@ function applyLanguageSettings(lang) {
   document.body.dataset.dir = dir;
   document.body.style.fontFamily = font;
   document.documentElement.style.setProperty('--font-family-base', font);
-  window.localStorage.setItem(STORAGE_KEY, lang);
+
+  if (ENABLE_ARABIC_UI) {
+    window.localStorage.setItem(STORAGE_KEY, lang);
+  }
 }
 
 const initialLanguage = readInitialLanguage();
+applyLanguageSettings(initialLanguage);
+
 const languageStore = writable(initialLanguage);
 
-if (isBrowser) {
-  applyLanguageSettings(initialLanguage);
-}
-
 languageStore.subscribe((lang) => {
+  if (!ENABLE_ARABIC_UI && lang !== DEFAULT_LANGUAGE) {
+    if (import.meta.env.DEV) {
+      console.warn('[i18n] Arabic UI disabled; forcing English language.');
+    }
+    languageStore.set(DEFAULT_LANGUAGE);
+    return;
+  }
   applyLanguageSettings(lang);
 });
 
@@ -61,5 +74,6 @@ export const currentFontFamily = derived(language, ($lang) =>
 );
 
 export function toggleLanguage() {
+  if (!ENABLE_ARABIC_UI) return;
   language.update((lang) => (lang === 'ar' ? 'en' : 'ar'));
 }
