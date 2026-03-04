@@ -2,6 +2,10 @@ import { derived, writable } from 'svelte/store';
 
 const STORAGE_KEY = 'lang';
 const DEFAULT_LANGUAGE = 'en';
+export const availableLanguages = [
+  { code: 'en', labelKey: 'language.english', shortLabel: 'EN' },
+  { code: 'ar', labelKey: 'language.arabic', shortLabel: 'AR' }
+];
 const isBrowser = typeof window !== 'undefined';
 
 function readInitialLanguage() {
