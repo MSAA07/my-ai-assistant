@@ -41,6 +41,7 @@
     bottom: 0;
     z-index: 95;
     display: none;
+    pointer-events: none;
     background: var(--color-surface-overlay);
     backdrop-filter: blur(16px);
     border-top: 1px solid var(--color-border);
@@ -120,6 +121,7 @@
   @media (max-width: 768px) {
     .bottom-nav {
       display: flex;
+      pointer-events: auto;
     }
   }
 </style>
