@@ -3,103 +3,102 @@
   import Sidebar from './Sidebar.svelte';
   import TopBar from './TopBar.svelte';
   import BottomNav from './BottomNav.svelte';
-
-  export let pageTitle = '';
-  export let primaryNav = [];
-  export let secondaryNav = [];
-  export let mobileNav = [];
-  export let activeId = '';
-  export let plan = { label: '', badge: '', variant: 'free' };
-  export let notificationCount = 0;
-  export let user = { name: '', email: '', avatarUrl: '' };
+  import { direction } from '../../stores/language.js';
 
   const dispatch = createEventDispatcher();
 
-  const handleNavigate = (event) => {
-    dispatch('navigate', event.detail);
-  };
+  export let navItems = [];
+  export let secondaryItems = [];
+  export let activeNav = '';
+  export let pageTitle = '';
+  export let userName = '';
+  export let userEmail = '';
+  export let planLabel = '';
+  export let bottomNavItems = [];
 
-  const handleTopbar = (event) => {
-    dispatch(event.type, event.detail);
-  };
+  function onSignOut() {
+    dispatch('signOut');
+  }
+
+  function onNotifications() {
+    dispatch('openNotifications');
+  }
+
+  function onProfile() {
+    dispatch('openProfile');
+  }
 </script>
 
-<div class="app-shell">
+<div class={`app-shell ${$direction === 'rtl' ? 'rtl' : 'ltr'}`}>
   <Sidebar
-    items={primaryNav}
-    secondaryItems={secondaryNav}
-    activeId={activeId}
-    plan={plan}
-    on:navigate={handleNavigate}
-  >
-    <div slot="logo">
-      <slot name="logo">AI Study Assistant</slot>
-    </div>
-  </Sidebar>
+    items={navItems}
+    secondaryItems={secondaryItems}
+    activeId={activeNav}
+  />
 
-  <div class="app-shell__main">
+  <div class="shell-main">
     <TopBar
       pageTitle={pageTitle}
-      user={user}
-      notificationCount={notificationCount}
-      on:notifications={handleTopbar}
-      on:profile={handleTopbar}
-      on:logout={handleTopbar}
-    >
-      <span slot="title">
-        <slot name="pageTitle">{pageTitle}</slot>
-      </span>
-    </TopBar>
+      userName={userName}
+      userEmail={userEmail}
+      planLabel={planLabel}
+      on:signOut={onSignOut}
+      on:openNotifications={onNotifications}
+      on:openProfile={onProfile}
+    />
 
-    <main class="app-shell__content">
+    <main class="shell-content">
       <slot />
     </main>
   </div>
 
-  <BottomNav items={mobileNav.length ? mobileNav : primaryNav} activeId={activeId} on:navigate={handleNavigate} />
+  <BottomNav items={bottomNavItems.length ? bottomNavItems : navItems} activeId={activeNav} />
 </div>
 
 <style>
   .app-shell {
-    background: var(--color-bg);
     min-height: 100vh;
+    display: grid;
+    grid-template-columns: var(--size-sidebar) 1fr;
+    background: var(--color-bg);
     color: var(--color-text-primary);
   }
 
-  .app-shell__main {
+  .app-shell.rtl {
+    direction: rtl;
+    grid-template-columns: 1fr var(--size-sidebar);
+  }
+
+  .shell-main {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background: var(--gradient-bg-radial), var(--color-bg);
   }
 
-  .app-shell__content {
+  .shell-content {
     flex: 1;
     padding: var(--space-5);
-    padding-block-end: calc(var(--space-6) + 64px);
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
 
-  @media (max-width: 767px) {
-    .app-shell__content {
-      padding-inline: var(--space-3);
-    }
-  }
-
-  @media (min-width: 768px) {
-    .app-shell__main {
-      margin-inline-start: var(--size-sidebar);
-    }
-
-    :global(html[dir='rtl']) .app-shell__main {
-      margin-inline-start: 0;
-      margin-inline-end: var(--size-sidebar);
-    }
-
-    .app-shell__content {
-      padding-block-end: var(--space-6);
+  @media (max-width: 1024px) {
+    .shell-content {
+      padding: var(--space-4);
     }
   }
 
-  :global(html[dir='rtl']) .app-shell {
-    direction: rtl;
+  @media (max-width: 768px) {
+    .app-shell,
+    .app-shell.rtl {
+      grid-template-columns: 1fr;
+    }
+
+    .shell-content {
+      padding-bottom: calc(var(--space-5) + 72px);
+    }
   }
 </style>

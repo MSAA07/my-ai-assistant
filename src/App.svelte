@@ -1,209 +1,173 @@
 <script>
-  import AppShell from './lib/components/layout/AppShell.svelte';
-  import EmptyState from './lib/components/ui/EmptyState.svelte';
+  import Footer from './components/Footer.svelte';
   import Landing from './pages/Landing.svelte';
-  import Home from './pages/Home.svelte';
-  import DocumentView from './pages/DocumentView.svelte';
   import SignIn from './components/auth/SignIn.svelte';
   import SignUp from './components/auth/SignUp.svelte';
-  import AdminDashboard from './components/AdminDashboard.svelte';
-  import Footer from './components/Footer.svelte';
-  import { currentPath, routeParams, router } from './stores/router.js';
+  import AppHeader from './components/AppHeader.svelte';
+  import AppShell from './lib/components/layout/AppShell.svelte';
+  import { currentPath } from './stores/router.js';
   import { session, isLoading, signOut } from './stores/auth.js';
   import { t } from './lib/i18n/t.js';
-  import { currentDictionary } from './lib/stores/language.js';
+  import {
+    DEFAULT_AUTH_PATH,
+    resolveRoute,
+    getNavRoutes,
+    getBottomNavRoutes,
+    normalizeAppPath,
+    needsAdminAccess,
+    getNavIdForRoute
+  } from './routes.js';
   import './styles/global.css';
 
-  const NAV_IDS = ['dashboard', 'documents', 'exams', 'flashcards'];
-
+  const useAppShell = import.meta.env.VITE_FEATURE_APPSHELL !== 'false';
   let showSignUp = false;
-  let notifications = 0;
 
-  $: route = $currentPath;
-  $: params = $routeParams;
-  $: dictionary = $currentDictionary;
+  $: rawPath = $currentPath;
+  $: normalizedPath = normalizeAppPath(rawPath);
+  $: shouldRedirect = rawPath !== normalizedPath && normalizedPath !== '/';
+  $: if (shouldRedirect && typeof window !== 'undefined') {
+    window.location.hash = normalizedPath;
+  }
+
   $: isAuthenticated = !!$session;
   $: isAdmin = $session?.user?.role === 'admin';
-  $: activeNav = deriveActiveNav(route, params.section);
-  $: navItems = buildPrimaryNav(isAdmin, dictionary);
-  $: mobileNav = navItems.filter((item) => item.id !== 'admin');
-  $: secondaryNav = [{ id: 'settings', label: navLabel('settings', dictionary), href: '/app?section=settings' }];
-  $: planVariant = ($session?.user?.plan ?? 'free').toLowerCase() === 'pro' ? 'pro' : 'free';
-  $: planConfig = {
-    label: dictionary?.nav?.plan ?? t('nav.plan'),
-    badge: planVariant === 'pro'
-      ? dictionary?.plan?.pro ?? t('plan.pro')
-      : dictionary?.plan?.free ?? t('plan.free'),
-    variant: planVariant,
-  };
-  $: pageTitle = getPageTitle(route, activeNav, dictionary);
+  $: plan = $session?.user?.plan ?? 'free';
+  $: isPaidPlan = plan === 'pro' || plan === 'premium';
+  $: planLabel = isPaidPlan ? t('nav.proBadge') : t('nav.freeBadge');
 
-  function deriveActiveNav(path, section) {
-    if (path.startsWith('/document/')) return 'documents';
-    if (path === '/admin') return 'admin';
-    if (path === '/app') return section || 'dashboard';
-    return 'dashboard';
+  $: routeMatch = resolveRoute(normalizedPath);
+  $: activeRoute = routeMatch?.route;
+  $: routeParams = routeMatch?.params ?? {};
+  $: routeRequiresAdmin = needsAdminAccess(activeRoute);
+  $: routeAccessDenied = !!activeRoute && routeRequiresAdmin && !isAdmin;
+  $: componentProps = routeAccessDenied ? {} : routeParams;
+  $: ActiveComponent = routeAccessDenied ? null : activeRoute?.component ?? null;
+  $: activeNav = activeRoute ? getNavIdForRoute(activeRoute) : '';
+  $: pageTitle = routeAccessDenied
+    ? t('access.deniedTitle')
+    : activeRoute?.pageTitleKey
+      ? t(activeRoute.pageTitleKey)
+      : t('topbar.defaultTitle');
+
+  $: if (isAuthenticated && normalizedPath === '/' && typeof window !== 'undefined') {
+    window.location.hash = DEFAULT_AUTH_PATH;
   }
 
-  function navHref(id) {
-    if (id === 'dashboard') return '/app';
-    if (id === 'admin') return '/admin';
-    return `/app?section=${id}`;
-  }
+  $: navRoutes = getNavRoutes({ includeAdmin: isAdmin });
+  $: navItems = navRoutes.map((route) => ({
+    id: route.id,
+    label: t(route.labelKey),
+    href: `#${route.path}`,
+    icon: route.icon,
+    badge: route.comingSoon
+      ? { label: t('common.comingSoonBadge'), variant: 'info' }
+      : undefined
+  }));
 
-  function navLabel(id, dict = dictionary) {
-    const navSection = dict?.nav ?? {};
-    switch (id) {
-      case 'dashboard':
-        return navSection.dashboard ?? t('nav.dashboard');
-      case 'documents':
-        return navSection.documents ?? t('nav.documents');
-      case 'exams':
-        return navSection.exams ?? t('nav.exams');
-      case 'flashcards':
-        return navSection.flashcards ?? t('nav.flashcards');
-      case 'settings':
-        return navSection.settings ?? t('nav.settings');
-      case 'admin':
-        return navSection.admin ?? t('nav.admin');
-      default:
-        return '';
+  $: bottomNavRoutes = getBottomNavRoutes({ includeAdmin: isAdmin });
+  $: bottomNavItems = bottomNavRoutes.map((route) => ({
+    id: route.id,
+    label: t(route.labelKey),
+    href: `#${route.path}`,
+    icon: route.icon,
+    badge: route.comingSoon
+      ? { label: t('common.comingSoonBadge'), variant: 'info' }
+      : undefined
+  }));
+
+  $: secondaryItems = [
+    {
+      id: 'plan',
+      label: t('nav.plan'),
+      href: '#/settings',
+      icon: 'plan',
+      badge: {
+        label: planLabel,
+        variant: isPaidPlan ? 'success' : ''
+      }
     }
-  }
-
-  function buildPrimaryNav(includeAdmin, dict) {
-    const base = NAV_IDS.map((id) => ({
-      id,
-      label: navLabel(id, dict),
-      href: navHref(id),
-    }));
-
-    return includeAdmin
-      ? [...base, { id: 'admin', label: navLabel('admin', dict), href: navHref('admin') }]
-      : base;
-  }
-
-  function getPageTitle(path, id, dict) {
-    const navSection = dict?.nav ?? {};
-
-    if (path.startsWith('/document/')) {
-      return navSection.documents ?? t('nav.documents');
-    }
-
-    switch (id) {
-      case 'dashboard':
-        return navSection.dashboard ?? t('nav.dashboard');
-      case 'documents':
-        return navSection.documents ?? t('nav.documents');
-      case 'exams':
-        return navSection.exams ?? t('nav.exams');
-      case 'flashcards':
-        return navSection.flashcards ?? t('nav.flashcards');
-      case 'settings':
-        return navSection.settings ?? t('nav.settings');
-      case 'admin':
-        return navSection.admin ?? t('nav.admin');
-      default:
-        return navSection.dashboard ?? t('nav.dashboard');
-    }
-  }
-
-  function handleNavigate(event) {
-    const item = event.detail?.item;
-    if (!item) return;
-    if (item.href) {
-      router.navigate(item.href);
-    }
-  }
-
-  function handleTopbar(event) {
-    if (event.type === 'logout') {
-      signOut();
-    }
-  }
+  ];
 
   function toggleAuthMode() {
     showSignUp = !showSignUp;
-  }
-
-  function placeholderSubtitle(id) {
-    const subtitle = dictionary?.emptyState?.subtitle ?? t('emptyState.subtitle');
-    switch (id) {
-      case 'documents':
-      case 'exams':
-      case 'flashcards':
-      case 'settings':
-        return subtitle;
-      default:
-        return subtitle;
-    }
   }
 </script>
 
 {#if $isLoading}
   <div class="loading-screen">
     <div class="spinner"></div>
-    <p>{t('loading.session')}</p>
-  </div>
-{:else if route === '/' || route === ''}
-  <div class="landing-shell">
-    <Landing />
-    <Footer />
-  </div>
-{:else if !isAuthenticated}
-  <div class="auth-layout">
-    {#if showSignUp}
-      <SignUp on:success={() => (showSignUp = false)} on:toggle={toggleAuthMode} />
-    {:else}
-      <SignIn on:success={() => {}} on:toggle={toggleAuthMode} />
-    {/if}
+    <p>{t('app.loadingSession')}</p>
   </div>
 {:else}
-  <AppShell
-    pageTitle={pageTitle}
-    primaryNav={navItems}
-    secondaryNav={secondaryNav}
-    mobileNav={mobileNav}
-    activeId={activeNav}
-    plan={planConfig}
-    notificationCount={notifications}
-    user={$session?.user ?? {}}
-    on:navigate={handleNavigate}
-    on:logout={handleTopbar}
-    on:notifications={handleTopbar}
-    on:profile={handleTopbar}
-  >
-    {#if route.startsWith('/document/')}
-      <DocumentView documentId={route.replace('/document/', '')} />
-    {:else if route === '/admin'}
-      {#if isAdmin}
-        <AdminDashboard />
+  {#if normalizedPath === '/'}
+    <div class="landing-wrapper">
+      <Landing />
+      <Footer />
+    </div>
+  {:else if !isAuthenticated}
+    <div class="auth-wrapper">
+      {#if showSignUp}
+        <SignUp on:success={() => (showSignUp = false)} on:toggle={toggleAuthMode} />
       {:else}
-        <section class="status-block">
-          <h1>{t('errors.accessDeniedTitle')}</h1>
-          <p>{t('errors.accessDeniedDescription')}</p>
-          <a class="status-block__link" href="#/app">{t('actions.backToDashboard')}</a>
-        </section>
+        <SignIn on:success={() => {}} on:toggle={toggleAuthMode} />
       {/if}
-    {:else if route === '/app'}
-      {#if activeNav === 'dashboard'}
-        <Home />
+    </div>
+  {:else if useAppShell}
+    <AppShell
+      navItems={navItems}
+      secondaryItems={secondaryItems}
+      activeNav={activeNav}
+      pageTitle={pageTitle}
+      userName={$session?.user?.name ?? ''}
+      userEmail={$session?.user?.email ?? ''}
+      planLabel={planLabel}
+      bottomNavItems={bottomNavItems}
+      on:signOut={signOut}
+    >
+      {#if routeAccessDenied}
+        <div class="access-denied">
+          <h1>{t('access.deniedTitle')}</h1>
+          <p>{t('access.deniedMessage')}</p>
+          <a href="#/dashboard">{t('access.backToDashboard')}</a>
+        </div>
+      {:else if ActiveComponent}
+        <svelte:component this={ActiveComponent} {...componentProps} />
       {:else}
-        <EmptyState title={navLabel(activeNav)} subtitle={placeholderSubtitle(activeNav)} />
+        <div class="not-found">
+          <h1>404</h1>
+          <p>{t('errors.notFoundTitle')}</p>
+          <a href="#/dashboard">{t('errors.notFoundCta')}</a>
+        </div>
       {/if}
-    {:else}
-      <section class="status-block">
-        <h1>{t('errors.notFoundTitle')}</h1>
-        <p>{t('errors.notFoundDescription')}</p>
-        <a class="status-block__link" href="#/">{t('actions.backToHome')}</a>
-      </section>
-    {/if}
-  </AppShell>
+    </AppShell>
+  {:else}
+    <div class="legacy-layout">
+      <AppHeader />
+      <main class="content">
+        {#if routeAccessDenied}
+          <div class="access-denied">
+            <h1>{t('access.deniedTitle')}</h1>
+            <p>{t('access.deniedMessage')}</p>
+            <a href="#/dashboard">{t('access.backToDashboard')}</a>
+          </div>
+        {:else if ActiveComponent}
+          <svelte:component this={ActiveComponent} {...componentProps} />
+        {:else}
+          <div class="not-found">
+            <h1>404</h1>
+            <p>{t('errors.notFoundTitle')}</p>
+            <a href="#/dashboard">{t('errors.notFoundCta')}</a>
+          </div>
+        {/if}
+      </main>
+      <Footer />
+    </div>
+  {/if}
 {/if}
 
 <style>
   .loading-screen {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -214,12 +178,12 @@
   }
 
   .spinner {
-    inline-size: 42px;
-    block-size: 42px;
-    border-radius: 999px;
-    border: 3px solid color-mix(in srgb, var(--color-text-muted) 20%, transparent);
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-border);
+    border-radius: 50%;
     border-top-color: var(--color-accent-primary);
-    animation: spin var(--motion-normal) var(--ease-standard) infinite;
+    animation: spin 1s ease-in-out infinite;
   }
 
   @keyframes spin {
@@ -228,64 +192,76 @@
     }
   }
 
-  .landing-shell {
+  .landing-wrapper,
+  .auth-wrapper,
+  .legacy-layout {
+    min-height: 100vh;
+    background: var(--gradient-bg-radial), var(--color-bg);
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    background: var(--color-bg);
   }
 
-  .auth-layout {
-    min-height: 100vh;
-    display: grid;
-    place-items: center;
-    padding: var(--space-6) var(--space-3);
-    background: var(--color-bg);
-  }
-
-  .status-block {
-    display: flex;
-    flex-direction: column;
+  .auth-wrapper {
     align-items: center;
+    justify-content: center;
+    padding: var(--space-6) var(--space-3);
+  }
+
+  .content {
+    flex: 1;
+    padding: var(--space-5);
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .access-denied,
+  .not-found {
     text-align: center;
-    gap: var(--space-3);
-    padding: var(--space-6);
-    border-radius: var(--radius-2);
-    border: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-surface-1) 92%, transparent);
+    padding: 6rem 1rem;
   }
 
-  .status-block h1 {
+  .access-denied h1,
+  .not-found h1 {
+    font-size: 3rem;
     margin: 0;
-    font-size: clamp(2rem, 4vw, 3rem);
-    color: var(--color-text-primary);
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .status-block p {
-    margin: 0;
-    color: var(--color-text-muted);
-    max-inline-size: 440px;
+  .access-denied p,
+  .not-found p {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    margin: 0.75rem 0 2rem;
   }
 
-  .status-block__link {
+  .access-denied a,
+  .not-found a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-inline-size: 160px;
-    min-block-size: 44px;
-    padding: 0 var(--space-3);
-    border-radius: var(--radius-1);
+    gap: 0.5rem;
+    color: var(--color-accent-primary);
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
     border: 1px solid var(--color-border);
-    color: var(--color-text-primary);
-    background: var(--color-surface-1);
-    transition: background var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard);
+    border-radius: var(--radius-1);
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
-  .status-block__link:hover,
-  .status-block__link:focus-visible {
-    background: var(--color-surface-2);
+  .access-denied a:hover,
+  .not-found a:hover {
     border-color: var(--color-accent-primary);
-    outline: none;
+    background: var(--color-accent-surface);
+  }
+
+  @media (max-width: 640px) {
+    .content {
+      padding: var(--space-3);
+    }
   }
 </style>

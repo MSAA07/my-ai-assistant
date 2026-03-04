@@ -1,80 +1,81 @@
 <script>
-  import { createEventDispatcher, onDestroy } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
+  import { fade, fly } from 'svelte/transition';
   import { t } from '../../i18n/t.js';
-
-  export let open = false;
-  export let title = t('modal.destructiveTitle');
-  export let description = t('modal.destructiveSubtitle');
-  export let confirmLabel = t('modal.confirm');
-  export let cancelLabel = t('modal.cancel');
-  export let loading = false;
 
   const dispatch = createEventDispatcher();
 
-  const handleKeydown = (event) => {
-    if (!open) return;
+  export let open = false;
+  export let title = t('confirmModal.title');
+  export let description = t('confirmModal.description');
+  export let confirmLabel = t('confirmModal.confirm');
+  export let cancelLabel = t('confirmModal.cancel');
+
+  let modalElement;
+
+  function close() {
+    dispatch('cancel');
+  }
+
+  function confirm() {
+    dispatch('confirm');
+  }
+
+  function handleKeydown(event) {
     if (event.key === 'Escape') {
-      event.preventDefault();
-      dispatch('cancel');
-    }
-  };
-
-  const handleBackdrop = (event) => {
-    if (event.target === event.currentTarget) {
-      dispatch('cancel');
-    }
-  };
-
-  const teardown = () => {
-    if (typeof document === 'undefined') {
-      return;
-    }
-    document.removeEventListener('keydown', handleKeydown);
-    document.body.style.removeProperty('overflow');
-  };
-
-  let bindingsApplied = false;
-
-  $: {
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    if (open && !bindingsApplied) {
-      document.addEventListener('keydown', handleKeydown);
-      document.body.style.setProperty('overflow', 'hidden');
-      bindingsApplied = true;
-    }
-
-    if (!open && bindingsApplied) {
-      teardown();
-      bindingsApplied = false;
+      close();
     }
   }
 
-  onDestroy(() => {
-    teardown();
-    bindingsApplied = false;
+  function handleOverlayClick(event) {
+    if (event.target === event.currentTarget) {
+      close();
+    }
+  }
+
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeydown);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('keydown', handleKeydown);
+      }
+    };
   });
 </script>
 
 {#if open}
-  <div class="modal" role="presentation" on:click={handleBackdrop}>
-    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
-      <div class="modal__content">
-        <h2 id="confirm-modal-title">{title}</h2>
-        {#if description}
-          <p>{description}</p>
-        {/if}
-      </div>
-      <div class="modal__actions">
-        <button type="button" class="modal__cancel" on:click={() => dispatch('cancel')}>
+  <div
+    class="modal-overlay"
+    role="presentation"
+    tabindex="-1"
+    transition:fade={{ duration: 120 }}
+    on:click={handleOverlayClick}
+    on:keydown={(event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        close();
+      }
+    }}
+  >
+    <div
+      class="modal"
+      bind:this={modalElement}
+      transition:fly={{ y: 12, duration: 180, easing: t => t }}
+      role="dialog"
+      tabindex="-1"
+      aria-modal="true"
+      aria-labelledby="confirm-modal-title"
+    >
+      <h2 id="confirm-modal-title">{title}</h2>
+      <p>{description}</p>
+      <div class="modal-actions">
+        <button type="button" class="cancel" on:click={close}>
           {cancelLabel}
         </button>
-        <button type="button" class="modal__confirm" on:click={() => dispatch('confirm')} disabled={loading}>
-          {#if loading}
-            <span class="modal__spinner" aria-hidden="true"></span>
-          {/if}
+        <button type="button" class="confirm" on:click={confirm}>
           {confirmLabel}
         </button>
       </div>
@@ -83,100 +84,75 @@
 {/if}
 
 <style>
-  .modal {
+  .modal-overlay {
     position: fixed;
     inset: 0;
-    display: grid;
-    place-items: center;
-    background: color-mix(in srgb, black 40%, transparent);
-    backdrop-filter: blur(4px);
-    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-backdrop-strong);
+    backdrop-filter: blur(6px);
+    z-index: 999;
     padding: var(--space-4);
   }
 
-  .modal__dialog {
-    inline-size: min(420px, 100%);
-    border-radius: var(--radius-2);
+  .modal {
+    width: min(420px, 100%);
     background: var(--color-surface-1);
+    border-radius: var(--radius-2);
     border: 1px solid var(--color-border);
-    box-shadow: 0 32px 64px color-mix(in srgb, var(--color-bg) 70%, transparent);
+    padding: var(--space-5);
+    box-shadow: 0 20px 50px var(--color-shadow);
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-5);
+    gap: var(--space-3);
   }
 
   h2 {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.35rem;
     color: var(--color-text-primary);
   }
 
   p {
     margin: 0;
-    color: var(--color-text-muted);
+    color: var(--color-text-secondary);
   }
 
-  .modal__actions {
+  .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-2);
+    gap: var(--space-3);
+    margin-top: var(--space-4);
   }
 
   button {
-    min-inline-size: 120px;
-    min-block-size: 44px;
+    min-width: 120px;
+    min-height: 44px;
     border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    font: inherit;
+    font-weight: 600;
     cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard);
+    transition: all var(--motion-fast) var(--ease-standard);
+    border: 1px solid transparent;
   }
 
-  .modal__cancel {
+  .cancel {
     background: transparent;
-    color: var(--color-text-muted);
-  }
-
-  .modal__cancel:hover,
-  .modal__cancel:focus-visible {
     color: var(--color-text-primary);
-    background: var(--color-surface-2);
-    outline: none;
+    border-color: var(--color-border);
   }
 
-  .modal__confirm {
-    background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+  .cancel:hover {
+    border-color: var(--color-accent-primary);
+  }
+
+  .confirm {
+    background: var(--color-danger);
+    color: var(--color-bg);
     border-color: var(--color-danger);
-    color: var(--color-text-primary);
   }
 
-  .modal__confirm:hover,
-  .modal__confirm:focus-visible {
-    background: color-mix(in srgb, var(--color-danger) 28%, transparent);
-    outline: none;
-  }
-
-  .modal__confirm:disabled {
-    opacity: 0.6;
-    cursor: progress;
-  }
-
-  .modal__spinner {
-    inline-size: 16px;
-    block-size: 16px;
-    border-radius: 999px;
-    border: 2px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
-    border-top-color: var(--color-danger);
-    margin-inline-end: var(--space-2);
-    animation: spin var(--motion-normal) linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+  .confirm:hover {
+    filter: brightness(1.08);
   }
 </style>
