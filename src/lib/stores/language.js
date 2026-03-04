@@ -1,89 +1,65 @@
-import { derived, get, writable } from 'svelte/store';
-import en from '../i18n/en.js';
-import ar from '../i18n/ar.js';
+import { derived, writable } from 'svelte/store';
 
 const STORAGE_KEY = 'lang';
-const FALLBACK_LANG = 'en';
-const DICTIONARIES = { en, ar };
+const DEFAULT_LANGUAGE = 'en';
+export const availableLanguages = [
+  { code: 'en', labelKey: 'language.english', shortLabel: 'EN' },
+  { code: 'ar', labelKey: 'language.arabic', shortLabel: 'AR' }
+];
+const isBrowser = typeof window !== 'undefined';
 
-const resolveDir = (lang) => (lang === 'ar' ? 'rtl' : 'ltr');
+function readInitialLanguage() {
+  if (!isBrowser) return DEFAULT_LANGUAGE;
 
-const resolveInitialLanguage = () => {
-  if (typeof window === 'undefined') {
-    return FALLBACK_LANG;
-  }
-
-  const stored = window.localStorage?.getItem(STORAGE_KEY);
-  if (stored && Object.hasOwn(DICTIONARIES, stored)) {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (stored === 'en' || stored === 'ar') {
     return stored;
   }
 
-  const browserLang = window.navigator?.language?.toLowerCase() ?? '';
-  if (browserLang.startsWith('ar')) {
+  const navigatorLang = window.navigator.language?.toLowerCase() ?? '';
+  if (navigatorLang.startsWith('ar')) {
     return 'ar';
   }
 
-  return FALLBACK_LANG;
-};
+  return DEFAULT_LANGUAGE;
+}
 
-const initialCode = resolveInitialLanguage();
+function applyLanguageSettings(lang) {
+  if (!isBrowser) return;
 
-const languageStore = writable({
-  code: initialCode,
-  dir: resolveDir(initialCode),
-});
-
-const applyEnvironment = (code, dir) => {
-  if (typeof document === 'undefined') {
-    return;
-  }
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const font = lang === 'ar' ? 'var(--font-family-ar)' : 'var(--font-family-en)';
 
   document.documentElement.dir = dir;
-  document.documentElement.lang = code;
+  document.documentElement.lang = lang;
   document.documentElement.dataset.dir = dir;
-  document.documentElement.dataset.lang = code;
-  document.documentElement.style.setProperty('--font-family-base', `var(--font-family-${code})`);
+  document.body.dataset.dir = dir;
+  document.body.style.fontFamily = font;
+  document.documentElement.style.setProperty('--font-family-base', font);
+  window.localStorage.setItem(STORAGE_KEY, lang);
+}
 
-  if (typeof localStorage !== 'undefined') {
-    try {
-      localStorage.setItem(STORAGE_KEY, code);
-    } catch (error) {
-      console.error('Unable to persist language preference', error);
-    }
-  }
-};
+const initialLanguage = readInitialLanguage();
+const languageStore = writable(initialLanguage);
 
-applyEnvironment(initialCode, resolveDir(initialCode));
+if (isBrowser) {
+  applyLanguageSettings(initialLanguage);
+}
 
-const setLanguage = (code) => {
-  const nextCode = Object.hasOwn(DICTIONARIES, code) ? code : FALLBACK_LANG;
-  const dir = resolveDir(nextCode);
-
-  languageStore.set({ code: nextCode, dir });
-  applyEnvironment(nextCode, dir);
-};
-
-const toggleLanguage = () => {
-  const current = get(languageStore).code;
-  const next = current === 'ar' ? 'en' : 'ar';
-  setLanguage(next);
-};
-
-export const language = {
-  subscribe: languageStore.subscribe,
-  setLanguage,
-  toggleLanguage,
-};
-
-export const direction = derived(languageStore, ($language) => $language.dir);
-
-export const currentDictionary = derived(languageStore, ($language) => {
-  return DICTIONARIES[$language.code] ?? en;
+languageStore.subscribe((lang) => {
+  applyLanguageSettings(lang);
 });
 
-export const availableLanguages = [
-  { code: 'en', label: en.language.english, nativeLabel: en.language.english },
-  { code: 'ar', label: en.language.arabic, nativeLabel: ar.language.arabic },
-];
+export const language = languageStore;
 
-export const dictionaries = DICTIONARIES;
+export const direction = derived(language, ($lang) => ($lang === 'ar' ? 'rtl' : 'ltr'));
+
+export const isRTL = derived(direction, ($dir) => $dir === 'rtl');
+
+export const currentFontFamily = derived(language, ($lang) =>
+  $lang === 'ar' ? 'var(--font-family-ar)' : 'var(--font-family-en)'
+);
+
+export function toggleLanguage() {
+  language.update((lang) => (lang === 'ar' ? 'en' : 'ar'));
+}

@@ -48,7 +48,9 @@
     />
 
     <main class="shell-content">
-      <slot />
+      <div class="content-wrapper">
+        <slot />
+      </div>
     </main>
   </div>
 
@@ -78,15 +80,21 @@
 
   .shell-content {
     flex: 1;
-    padding: var(--space-5);
-    max-width: 1200px;
+    display: flex;
+    justify-content: center;
     width: 100%;
+  }
+
+  .content-wrapper {
+    width: 100%;
+    max-width: 1100px;
     margin: 0 auto;
+    padding: var(--space-5);
     box-sizing: border-box;
   }
 
   @media (max-width: 1024px) {
-    .shell-content {
+    .content-wrapper {
       padding: var(--space-4);
     }
   }
@@ -97,7 +105,7 @@
       grid-template-columns: 1fr;
     }
 
-    .shell-content {
+    .content-wrapper {
       padding-bottom: calc(var(--space-5) + 72px);
     }
   }

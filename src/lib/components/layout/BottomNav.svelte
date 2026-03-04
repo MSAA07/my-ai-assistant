@@ -45,6 +45,7 @@
     backdrop-filter: blur(16px);
     border-top: 1px solid var(--color-border);
     padding: var(--space-2);
+    justify-content: space-around;
   }
 
   .bottom-nav.ltr {
@@ -53,11 +54,6 @@
 
   .bottom-nav.rtl {
     flex-direction: row-reverse;
-  }
-
-  .bottom-nav {
-    display: flex;
-    justify-content: space-around;
   }
 
   .bottom-nav-item {
