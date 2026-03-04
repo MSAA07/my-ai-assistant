@@ -1,11 +1,17 @@
 <script>
   import { onMount } from "svelte";
   import { API_BASE } from "../config.js";
+  import { t } from "../lib/i18n/t.js";
+  import { language as languageStore } from "../lib/stores/language.js";
+  import StatusBadge from "../lib/components/ui/StatusBadge.svelte";
 
   export let documentId;
 
   let docData = null;
   let loading = true;
+  let errorKey = "";
+  let errorArgs = {};
+  let customError = "";
   let error = "";
   let processingStatus = "complete";
   let activeTab = "summary";
@@ -23,6 +29,18 @@
   let score = 0;
   let showAnswersMode = "end"; // 'instant' or 'end'
 
+  const statusMap = {
+    queued: "processing",
+    running: "processing",
+    complete: "ready",
+    failed: "failed"
+  };
+
+  $: statusTone = statusMap[processingStatus] || "info";
+
+  $: _lang = $languageStore;
+  $: error = errorKey ? t(errorKey, errorArgs) : customError;
+
   onMount(async () => {
     await fetchDocument();
   });
@@ -38,19 +56,34 @@
       if (response.ok) {
         docData = data.document;
         processingStatus = docData.processingStatus || 'complete';
-        
+
         if (processingStatus === 'queued' || processingStatus === 'running') {
           setTimeout(fetchDocument, 2000);
         } else if (processingStatus === 'failed') {
-          error = "Document processing failed. Please try again.";
+          errorKey = "document.processingFailed";
+          errorArgs = {};
+          customError = "";
         } else {
           shuffledCards = [...docData.flashcards];
+          errorKey = "";
+          errorArgs = {};
+          customError = "";
         }
       } else {
-        error = data.error || "Document not found";
+        if (data.error) {
+          errorKey = "";
+          errorArgs = {};
+          customError = data.error;
+        } else {
+          errorKey = "document.notFound";
+          errorArgs = {};
+          customError = "";
+        }
       }
     } catch (err) {
-      error = "Failed to load document";
+      errorKey = "document.loadingError";
+      errorArgs = {};
+      customError = "";
     } finally {
       loading = false;
     }
@@ -144,35 +177,37 @@
   }
 
   function goBack() {
-    window.location.hash = "/";
+    window.location.hash = '/dashboard';
   }
 </script>
 
 {#if loading}
   <div class="loading-container">
     <div class="loading-spinner"></div>
-    <p>Loading document...</p>
+    <p>{t('document.loading')}</p>
   </div>
 {:else if error}
   <div class="error-container">
-    <h2>Error</h2>
+    <h2>{t('status.failed')}</h2>
     <p>{error}</p>
-    <button on:click={goBack}>Back to Dashboard</button>
+    <button on:click={goBack}>{t('document.backToDashboard')}</button>
   </div>
 {:else if processingStatus === 'queued' || processingStatus === 'running'}
   <div class="loading-container">
     <div class="loading-spinner"></div>
-    <p>AI is generating study materials...</p>
-    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem">This usually takes about 20 seconds.</p>
+    <p>{t('document.aiGenerating')}</p>
+    <p class="processing-note">{t('document.aiGeneratingNote')}</p>
   </div>
 {:else if docData}
   <div class="document-view">
     <div class="document-header">
-      <button class="back-btn" on:click={goBack}>Back</button>
+      <div class="header-line">
+        <button class="back-btn" on:click={goBack}>{t('document.back')}</button>
+        <StatusBadge status={statusTone} />
+      </div>
       <h1>{docData.originalName}</h1>
       <p class="doc-meta">
-        Uploaded: {new Date(docData.uploadDate).toLocaleDateString()} | Language:
-        {docData.language === "arabic" ? "العربية" : "English"}
+        {t('document.uploaded')}: {new Date(docData.uploadDate).toLocaleDateString()} · {t('document.language')}: {docData.language === "arabic" ? t('home.documents.languageArabic') : t('home.documents.languageEnglish')}
       </p>
     </div>
 
@@ -182,28 +217,28 @@
         class:active={activeTab === "summary"}
         on:click={() => setTab("summary")}
       >
-        Summary
+        {t('document.tabs.summary')}
       </button>
       <button
         class="tab"
         class:active={activeTab === "flashcards"}
         on:click={() => setTab("flashcards")}
       >
-        Flashcards ({docData.flashcards.length})
+        {t('document.tabs.flashcards', { count: docData.flashcards.length })}
       </button>
       <button
         class="tab"
         class:active={activeTab === "exam"}
         on:click={() => setTab("exam")}
       >
-        Mock Exam ({docData.examQuestions.length})
+        {t('document.tabs.exam', { count: docData.examQuestions.length })}
       </button>
     </div>
 
     <div class="tab-content">
       {#if activeTab === "summary"}
         <div class="summary-section">
-          <h2>Summary</h2>
+          <h2>{t('document.tabs.summary')}</h2>
           <div class="summary-text">
             {docData.summary}
           </div>
@@ -213,24 +248,24 @@
           <div class="flashcard-controls">
             <button class="shuffle-btn" on:click={shuffleCards}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-              Shuffle
+              {t('document.flashcards.shuffle')}
             </button>
             <span class="card-counter">
-              Card {currentCardIndex + 1} of {shuffledCards.length}
+              {t('document.flashcards.cardCounter', { current: currentCardIndex + 1, total: shuffledCards.length })}
             </span>
           </div>
 
           <div class="flashcard" class:flipped={showAnswer} on:click={flipCard} on:keydown={(e) => e.key === 'Enter' && flipCard()} role="button" tabindex="0">
             <div class="flashcard-inner">
               <div class="flashcard-front">
-                <div class="card-label">Question</div>
+                <div class="card-label">{t('document.flashcards.question')}</div>
                 <div class="card-text">
                   {shuffledCards[currentCardIndex].question}
                 </div>
-                <div class="flip-hint">Click to flip</div>
+                <div class="flip-hint">{t('document.flashcards.flipHint')}</div>
               </div>
               <div class="flashcard-back">
-                <div class="card-label">Answer</div>
+                <div class="card-label">{t('document.flashcards.answer')}</div>
                 <div class="card-text">
                   {shuffledCards[currentCardIndex].answer}
                 </div>
@@ -240,13 +275,13 @@
 
           <div class="flashcard-nav">
             <button on:click={previousCard} disabled={currentCardIndex === 0}>
-              Previous
+              {t('document.flashcards.previous')}
             </button>
             <button
               on:click={nextCard}
               disabled={currentCardIndex === shuffledCards.length - 1}
             >
-              Next
+              {t('document.flashcards.next')}
             </button>
           </div>
         </div>
@@ -254,13 +289,13 @@
         <div class="exam-section">
           {#if !examStarted}
             <div class="exam-intro">
-              <h2>Ready for the Mock Exam?</h2>
+              <h2>{t('document.exam.readyTitle')}</h2>
               <p>
-                This exam contains {docData.examQuestions.length} questions
+                {t('document.exam.questionCount', { count: docData.examQuestions.length })}
               </p>
 
               <div class="exam-options">
-                <p><strong>How would you like to review answers?</strong></p>
+                <p><strong>{t('document.exam.feedbackPrompt')}</strong></p>
                 <label class="radio-option" class:radio-selected={showAnswersMode === 'instant'}>
                   <input
                     type="radio"
@@ -269,8 +304,8 @@
                   />
                   <span class="radio-dot"></span>
                   <span class="radio-content">
-                    <span class="radio-title">Instant Feedback</span>
-                    <span class="radio-desc">Show correct answer after each question</span>
+                    <span class="radio-title">{t('document.exam.instantTitle')}</span>
+                    <span class="radio-desc">{t('document.exam.instantDescription')}</span>
                   </span>
                 </label>
                 <label class="radio-option" class:radio-selected={showAnswersMode === 'end'}>
@@ -281,14 +316,14 @@
                   />
                   <span class="radio-dot"></span>
                   <span class="radio-content">
-                    <span class="radio-title">Exam Simulation</span>
-                    <span class="radio-desc">Show all answers at the end</span>
+                    <span class="radio-title">{t('document.exam.endTitle')}</span>
+                    <span class="radio-desc">{t('document.exam.endDescription')}</span>
                   </span>
                 </label>
               </div>
 
               <button class="start-exam-btn" on:click={startExam}>
-                Start Exam
+                {t('document.exam.start')}
               </button>
             </div>
           {:else if !examComplete}
@@ -302,15 +337,14 @@
                 ></div>
               </div>
               <p>
-                Question {currentQuestionIndex + 1} of {docData.examQuestions
-                  .length}
+                {t('document.exam.progress', { current: currentQuestionIndex + 1, total: docData.examQuestions.length })}
               </p>
             </div>
 
             {#each docData.examQuestions as question, i}
               {#if i === currentQuestionIndex}
                 <div class="question-card">
-                  <h3>Question {i + 1}</h3>
+                  <h3>{t('document.exam.questionNumber', { index: i + 1 })}</h3>
                   <p class="question-text">{question.question}</p>
 
                   {#if question.options && question.options.length > 0}
@@ -318,11 +352,11 @@
                       {#each question.options as option, optIdx}
                         <button
                           class="option-btn"
-                          class:selected={userAnswers[i] === option}
-                          on:click={() => selectAnswer(option)}
-                        >
-                          <span class="option-letter">{String.fromCharCode(65 + optIdx)}</span>
-                          <span class="option-text">{option}</span>
+                            class:selected={userAnswers[i] === option}
+                            on:click={() => selectAnswer(option)}
+                          >
+                            <span class="option-letter">{String.fromCharCode(65 + optIdx)}</span>
+                            <span class="option-text">{option}</span>
                         </button>
                       {/each}
                     </div>
@@ -331,7 +365,7 @@
                       <input
                         type="text"
                         class="short-answer-input"
-                        placeholder="Type your answer..."
+                        placeholder={t('document.exam.inputPlaceholder')}
                         value={userAnswers[i] || ''}
                         on:input={(e) => selectAnswer(e.target.value)}
                       />
@@ -346,14 +380,14 @@
                       <p>
                         <strong>
                           {userAnswers[i] === question.correctAnswer
-                            ? "Correct!"
-                            : "Incorrect"}
+                            ? t('document.exam.instantCorrect')
+                            : t('document.exam.instantIncorrect')}
                         </strong>
                       </p>
                       {#if userAnswers[i] !== question.correctAnswer}
-                        <p>Correct answer: {question.correctAnswer}</p>
+                        <p>{t('document.exam.instantAnswer', { answer: question.correctAnswer })}</p>
                       {/if}
-                      <p class="explanation">{question.explanation}</p>
+                      <p class="explanation">{t('document.exam.instantExplanation', { explanation: question.explanation })}</p>
                     </div>
                   {/if}
                 </div>
@@ -365,24 +399,24 @@
                 on:click={previousQuestion}
                 disabled={currentQuestionIndex === 0}
               >
-                Previous
+                {t('document.exam.previous')}
               </button>
 
               {#if currentQuestionIndex < docData.examQuestions.length - 1}
-                <button on:click={nextQuestion}>Next</button>
+                <button on:click={nextQuestion}>{t('document.exam.next')}</button>
               {:else}
                 <button
                   class="submit-btn"
                   on:click={submitExam}
                   disabled={userAnswers.some((a) => a === null || a === '')}
                 >
-                  Submit Exam
+                  {t('document.exam.submit')}
                 </button>
               {/if}
             </div>
           {:else}
             <div class="exam-results">
-              <h2>Exam Complete!</h2>
+              <h2>{t('document.exam.completeTitle')}</h2>
               <div class="score-display">
                 <div class="score-circle">
                   <span class="score-value"
@@ -392,33 +426,31 @@
                   >
                 </div>
                 <p class="score-text">
-                  You scored {score} out of {docData.examQuestions.length}
+                  {t('document.exam.score', { score, total: docData.examQuestions.length })}
                 </p>
               </div>
 
-              <h3>Review Your Answers</h3>
+              <h3>{t('document.exam.reviewTitle')}</h3>
               {#each docData.examQuestions as question, i}
                 <div
                   class="review-question"
                   class:correct={userAnswers[i] === question.correctAnswer}
                 >
                   <div class="review-header">
-                    <span class="question-number">Question {i + 1}</span>
+                    <span class="question-number">{t('document.exam.reviewQuestion', { index: i + 1 })}</span>
                     <span class="result-badge">
                       {userAnswers[i] === question.correctAnswer
-                        ? "Correct"
-                        : "Incorrect"}
+                        ? t('document.exam.reviewCorrect')
+                        : t('document.exam.reviewIncorrect')}
                     </span>
                   </div>
                   <p class="review-question-text">{question.question}</p>
                   <p class="review-answer">
-                    <strong>Your answer:</strong>
-                    {userAnswers[i] || "Not answered"}
+                    {t('document.exam.reviewYourAnswer', { answer: userAnswers[i] || t('document.exam.reviewNotAnswered') })}
                   </p>
                   {#if userAnswers[i] !== question.correctAnswer}
                     <p class="review-answer correct-answer">
-                      <strong>Correct answer:</strong>
-                      {question.correctAnswer}
+                      {t('document.exam.reviewCorrectAnswer', { answer: question.correctAnswer })}
                     </p>
                   {/if}
                   <p class="review-explanation">{question.explanation}</p>
@@ -426,7 +458,7 @@
               {/each}
 
               <button class="retake-btn" on:click={resetExam}>
-                Retake Exam
+                {t('document.exam.retake')}
               </button>
             </div>
           {/if}
@@ -443,11 +475,17 @@
     padding: 4rem 2rem;
   }
 
+  .processing-note {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
   .loading-spinner {
     width: 50px;
     height: 50px;
     border: 4px solid var(--color-border);
-    border-top-color: #60a5fa;
+    border-top-color: var(--color-accent-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem;
@@ -455,18 +493,18 @@
 
   .error-container button {
     padding: 0.75rem 1.5rem;
-    background: #1e293b;
-    color: #f1f5f9;
-    border: 1px solid #334155;
-    border-radius: 0.5rem;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .error-container button:hover {
-    background: #334155;
-    border-color: #60a5fa;
+    background: var(--color-surface-1);
+    border-color: var(--color-accent-primary);
   }
 
   @keyframes spin {
@@ -480,16 +518,25 @@
 
   .document-header {
     margin-bottom: 2rem;
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .header-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
   }
 
   .document-header h1 {
     font-size: 2rem;
     margin-bottom: 0.5rem;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .doc-meta {
-    color: #94a3b8;
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
   }
 
@@ -498,27 +545,26 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.6rem 1.25rem;
-    background: #1e293b;
-    color: #e2e8f0;
-    border: 1px solid #334155;
-    border-radius: 0.5rem;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
     cursor: pointer;
     margin-bottom: 1rem;
     font-weight: 500;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .back-btn:hover {
-    background: #334155;
-    border-color: #60a5fa;
-    color: #ffffff;
+    background: var(--color-surface-1);
+    border-color: var(--color-accent-primary);
   }
 
   .tabs {
     display: flex;
     gap: 0.25rem;
-    border-bottom: 2px solid #1e2758;
+    border-bottom: 2px solid var(--color-border);
     margin-bottom: 2rem;
   }
 
@@ -530,35 +576,36 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 0.95rem;
-    color: #94a3b8;
-    transition: all 0.2s ease;
+    color: var(--color-text-muted);
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .tab:hover {
-    color: #cbd5e1;
-    background: rgba(96, 165, 250, 0.06);
+    color: var(--color-text-primary);
+    background: var(--color-surface-2);
   }
 
   .tab.active {
-    border-bottom-color: #60a5fa;
-    color: #60a5fa;
+    border-bottom-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
   }
 
   .summary-section {
-    background: var(--color-surface);
+    background: var(--color-surface-1);
     border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    padding: 2rem;
+    border-radius: var(--radius-2);
+    padding: var(--space-6);
   }
 
   .summary-section h2 {
-    color: #f1f5f9;
+    color: var(--color-text-primary);
+    margin-top: 0;
   }
 
   .summary-text {
     line-height: 1.8;
     white-space: pre-wrap;
-    color: #e2e8f0;
+    color: var(--color-text-secondary);
   }
 
   .flashcards-section {
@@ -575,27 +622,27 @@
 
   .card-counter {
     font-weight: 600;
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
   }
 
   .shuffle-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     padding: 0.6rem 1.25rem;
     background: transparent;
-    color: #60a5fa;
-    border: 1.5px solid #60a5fa;
-    border-radius: 0.5rem;
+    color: var(--color-accent-primary);
+    border: 1px solid var(--color-accent-primary);
+    border-radius: var(--radius-1);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .shuffle-btn:hover {
-    background: rgba(96, 165, 250, 0.12);
-    box-shadow: 0 0 16px rgba(96, 165, 250, 0.15);
+    background: var(--color-accent-surface);
+    box-shadow: 0 0 16px var(--color-glow);
     transform: translateY(-1px);
   }
 
@@ -645,38 +692,38 @@
 
   .flashcard-back {
     transform: rotateY(180deg);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: #667eea;
+    background: var(--gradient-accent-strong);
+    color: var(--color-bg);
+    border-color: var(--color-accent-primary);
   }
 
   .card-label {
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #94a3b8;
-    margin-bottom: 1rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-3);
   }
 
   .flashcard-back .card-label {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--color-text-soft);
   }
 
   .card-text {
     font-size: 1.4rem;
     line-height: 1.6;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .flashcard-back .card-text {
-    color: #ffffff;
+    color: var(--color-bg);
   }
 
   .flip-hint {
-    margin-top: 2rem;
-    font-size: 0.85rem;
-    color: #64748b;
+    margin-top: var(--space-4);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
   }
 
   .flashcard-nav {
@@ -688,42 +735,42 @@
   .flashcard-nav button {
     flex: 1;
     padding: 0.875rem 1rem;
-    background: #1e293b;
-    color: #e2e8f0;
-    border: 1px solid #334155;
-    border-radius: 0.5rem;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
     cursor: pointer;
     font-weight: 600;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .flashcard-nav button:hover:not(:disabled) {
-    background: #334155;
-    border-color: #60a5fa;
-    color: #ffffff;
+    background: var(--color-surface-1);
+    border-color: var(--color-accent-primary);
+    color: var(--color-text-primary);
   }
 
   .flashcard-nav button:disabled {
     opacity: 0.25;
     cursor: not-allowed;
-    color: #64748b;
+    color: var(--color-text-muted);
   }
 
   .exam-intro {
     text-align: center;
     padding: 3rem 2rem;
-    background: var(--color-surface);
+    background: var(--color-surface-1);
     border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border-radius: var(--radius-2);
   }
 
   .exam-intro h2 {
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .exam-intro p {
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
   }
 
   .exam-options {
@@ -737,7 +784,7 @@
   .exam-options > p {
     text-align: center;
     margin-bottom: 1rem;
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
   }
 
   .radio-option {
@@ -746,21 +793,21 @@
     gap: 0.875rem;
     padding: 1.125rem 1.25rem;
     margin: 0.625rem 0;
-    border: 2px solid #1e2758;
-    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
     cursor: pointer;
-    background: var(--color-bg);
-    transition: all 0.2s ease;
+    background: var(--color-surface-1);
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .radio-option:hover {
-    border-color: #334155;
-    background: #0f1435;
+    border-color: var(--color-border-light);
+    background: var(--color-surface-2);
   }
 
   .radio-option.radio-selected {
-    border-color: #60a5fa;
-    background: rgba(96, 165, 250, 0.08);
+    border-color: var(--color-accent-primary);
+    background: var(--color-accent-surface);
   }
 
   .radio-option input[type="radio"] {
@@ -772,13 +819,13 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    border: 2px solid #475569;
+    border: 2px solid var(--color-border-light);
     position: relative;
-    transition: all 0.2s ease;
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .radio-selected .radio-dot {
-    border-color: #60a5fa;
+    border-color: var(--color-accent-primary);
   }
 
   .radio-selected .radio-dot::after {
@@ -789,7 +836,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #60a5fa;
+    background: var(--color-accent-primary);
   }
 
   .radio-content {
@@ -800,39 +847,39 @@
 
   .radio-title {
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
     font-size: 0.95rem;
   }
 
   .radio-desc {
     font-size: 0.825rem;
-    color: #94a3b8;
+    color: var(--color-text-muted);
   }
 
   .radio-selected .radio-title {
-    color: #60a5fa;
+    color: var(--color-accent-primary);
   }
 
   .start-exam-btn,
   .submit-btn,
   .retake-btn {
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
+    background: var(--gradient-accent-strong);
+    color: var(--color-bg);
     border: none;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-1);
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     margin-top: 1rem;
-    transition: all 0.2s ease;
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .start-exam-btn:hover,
   .submit-btn:hover:not(:disabled),
   .retake-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 6px 24px var(--color-glow);
   }
 
   .submit-btn:disabled {
@@ -847,13 +894,13 @@
   }
 
   .exam-progress p {
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
   }
 
   .progress-bar {
     height: 8px;
-    background: #1e2758;
+    background: var(--color-border);
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 0.5rem;
@@ -861,21 +908,21 @@
 
   .progress-fill {
     height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-accent-strong);
     transition: width 0.3s ease;
     border-radius: 4px;
   }
 
   .question-card {
-    background: var(--color-surface);
+    background: var(--color-surface-1);
     border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border-radius: var(--radius-2);
     padding: 2rem;
     margin-bottom: 2rem;
   }
 
   .question-card h3 {
-    color: #94a3b8;
+    color: var(--color-text-muted);
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -886,7 +933,7 @@
     font-size: 1.2rem;
     line-height: 1.6;
     margin: 1rem 0 2rem;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .options {
@@ -899,26 +946,26 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    background: #0f172a;
-    border: 2px solid #1e293b;
-    border-radius: 0.75rem;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
     text-align: left;
     cursor: pointer;
-    transition: all 0.2s ease;
-    color: #e2e8f0;
+    transition: all var(--motion-fast) var(--ease-standard);
+    color: var(--color-text-primary);
     font-size: 0.95rem;
     line-height: 1.5;
   }
 
   .option-btn:hover {
-    border-color: #475569;
-    background: #1e293b;
+    border-color: var(--color-border-light);
+    background: var(--color-surface-1);
   }
 
   .option-btn.selected {
-    border-color: #60a5fa;
-    background: rgba(96, 165, 250, 0.1);
-    box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.2);
+    border-color: var(--color-accent-primary);
+    background: var(--color-accent-surface);
+    box-shadow: 0 0 0 1px var(--color-accent-surface);
   }
 
   .option-letter {
@@ -929,23 +976,23 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #1e293b;
-    color: #94a3b8;
+    background: var(--color-surface-2);
+    color: var(--color-text-secondary);
     font-weight: 700;
     font-size: 0.85rem;
-    border: 1px solid #334155;
-    transition: all 0.2s ease;
+    border: 1px solid var(--color-border);
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .option-btn:hover .option-letter {
-    border-color: #475569;
-    color: #cbd5e1;
+    border-color: var(--color-border-light);
+    color: var(--color-text-primary);
   }
 
   .option-btn.selected .option-letter {
-    background: #60a5fa;
-    color: #ffffff;
-    border-color: #60a5fa;
+    background: var(--color-accent-primary);
+    color: var(--color-bg);
+    border-color: var(--color-accent-primary);
   }
 
   .option-text {
@@ -959,38 +1006,38 @@
   .short-answer-input {
     width: 100%;
     padding: 1rem 1.25rem;
-    background: #0f172a;
-    color: #f1f5f9;
-    border: 2px solid #1e293b;
-    border-radius: 0.75rem;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
     font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.2s ease;
+    transition: border-color var(--motion-fast) var(--ease-standard);
   }
 
   .short-answer-input:focus {
     outline: none;
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 3px var(--color-accent-surface);
   }
 
   .short-answer-input::placeholder {
-    color: #475569;
+    color: var(--color-text-muted);
   }
 
   .instant-feedback {
     margin-top: 1.5rem;
     padding: 1rem 1.25rem;
-    border-radius: 0.5rem;
-    background: rgba(239, 68, 68, 0.1);
-    border-left: 4px solid #ef4444;
-    color: #fca5a5;
+    border-radius: var(--radius-1);
+    background: var(--color-danger-surface);
+    border-left: 4px solid var(--color-danger);
+    color: var(--color-danger);
   }
 
   .instant-feedback.correct {
-    background: rgba(34, 197, 94, 0.1);
-    border-left-color: #22c55e;
-    color: #86efac;
+    background: var(--color-success-surface);
+    border-left-color: var(--color-success);
+    color: var(--color-success);
   }
 
   .instant-feedback p {
@@ -1015,45 +1062,45 @@
 
   .exam-navigation button {
     padding: 0.875rem 1.75rem;
-    background: #1e293b;
-    color: #e2e8f0;
-    border: 1px solid #334155;
-    border-radius: 0.5rem;
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
     cursor: pointer;
     font-weight: 600;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .exam-navigation button:hover:not(:disabled) {
-    background: #334155;
-    border-color: #60a5fa;
-    color: #ffffff;
+    background: var(--color-surface-1);
+    border-color: var(--color-accent-primary);
+    color: var(--color-text-primary);
   }
 
   .exam-navigation button:disabled {
     opacity: 0.25;
     cursor: not-allowed;
-    color: #64748b;
+    color: var(--color-text-muted);
   }
 
   .exam-navigation .submit-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
+    background: var(--gradient-accent-strong);
+    color: var(--color-bg);
     border: none;
     margin-top: 0;
   }
 
   .exam-results {
-    background: var(--color-surface);
+    background: var(--color-surface-1);
     border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border-radius: var(--radius-2);
     padding: 2rem;
   }
 
   .exam-results h2,
   .exam-results h3 {
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .score-display {
@@ -1065,36 +1112,36 @@
     width: 180px;
     height: 180px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-accent-strong);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1rem;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 32px var(--color-glow);
   }
 
   .score-value {
     font-size: 3rem;
     font-weight: 800;
-    color: white;
+    color: var(--color-bg);
   }
 
   .score-text {
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
     font-size: 1.1rem;
   }
 
   .review-question {
-    background: #0f172a;
-    border: 1px solid #1e2758;
-    border-left: 4px solid #ef4444;
-    border-radius: 0.5rem;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-danger);
+    border-radius: var(--radius-1);
     padding: 1.5rem;
     margin: 1rem 0;
   }
 
   .review-question.correct {
-    border-left-color: #22c55e;
+    border-left-color: var(--color-success);
   }
 
   .review-header {
@@ -1106,7 +1153,7 @@
 
   .question-number {
     font-weight: 600;
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
   }
 
   .result-badge {
@@ -1119,32 +1166,24 @@
   .review-question-text {
     font-size: 1.1rem;
     margin-bottom: 1rem;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .review-answer {
     margin: 0.5rem 0;
-    color: #cbd5e1;
-  }
-
-  .review-answer strong {
-    color: #e2e8f0;
+    color: var(--color-text-secondary);
   }
 
   .correct-answer {
-    color: #86efac;
-  }
-
-  .correct-answer strong {
-    color: #86efac;
+    color: var(--color-success);
   }
 
   .review-explanation {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #1e2758;
+    border-top: 1px solid var(--color-border);
     font-style: italic;
-    color: #94a3b8;
+    color: var(--color-text-muted);
   }
 
   @media (min-width: 768px) {
@@ -1166,7 +1205,7 @@
     }
 
     .tab.active {
-      border-left-color: #60a5fa;
+      border-left-color: var(--color-accent-primary);
       border-bottom-color: transparent;
     }
 

@@ -1,38 +1,49 @@
 <script>
   import { router } from '../stores/router.js';
+  import { t } from '../lib/i18n/t.js';
+  import { language } from '../lib/stores/language.js';
+
+  $: _lang = $language;
+  $: featureBlocks = [
+    {
+      icon: '📚',
+      title: t('landing.features.upload.title'),
+      description: t('landing.features.upload.description')
+    },
+    {
+      icon: '🤖',
+      title: t('landing.features.analysis.title'),
+      description: t('landing.features.analysis.description')
+    },
+    {
+      icon: '📝',
+      title: t('landing.features.organize.title'),
+      description: t('landing.features.organize.description')
+    }
+  ];
 
   function enterApp() {
-    router.navigate('/app');
+    router.navigate('/dashboard');
   }
 </script>
 
 <div class="landing-container">
   <div class="landing-content">
-    <h1 class="title">AI Study Assistant</h1>
-    <p class="subtitle">Your intelligent companion for learning and research</p>
+    <h1 class="title">{t('landing.title')}</h1>
+    <p class="subtitle">{t('landing.subtitle')}</p>
     
     <div class="features">
-      <div class="feature-card">
-        <div class="feature-icon">📚</div>
-        <h3>Upload Documents</h3>
-        <p>Import PDFs, Word docs, and presentations to analyze and study</p>
-      </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">🤖</div>
-        <h3>AI-Powered Analysis</h3>
-        <p>Get summaries, explanations, and insights from your study materials</p>
-      </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">📝</div>
-        <h3>Smart Organization</h3>
-        <p>Keep all your study materials organized in one place</p>
-      </div>
+      {#each featureBlocks as feature}
+        <div class="feature-card">
+          <div class="feature-icon">{feature.icon}</div>
+          <h3>{feature.title}</h3>
+          <p>{feature.description}</p>
+        </div>
+      {/each}
     </div>
     
     <button class="enter-btn" on:click={enterApp}>
-      Enter
+      {t('landing.enterCta')}
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M5 12h14" />
         <path d="m12 5 7 7-7 7" />
@@ -93,7 +104,7 @@
 
   .feature-card:hover {
     transform: translateY(-4px);
-    border-color: var(--color-accent);
+    border-color: var(--color-accent-primary);
     box-shadow: 0 8px 32px var(--color-glow);
   }
 
@@ -106,7 +117,7 @@
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0 0 0.5rem;
-    color: var(--color-text);
+    color: var(--color-text-primary);
   }
 
   .feature-card p {
@@ -128,13 +139,13 @@
     font-weight: 600;
     border-radius: 0.75rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 16px rgba(96, 165, 250, 0.3);
+    transition: all var(--motion-fast) var(--ease-standard);
+    box-shadow: 0 4px 16px var(--color-shadow);
   }
 
   .enter-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(96, 165, 250, 0.4);
+    box-shadow: 0 6px 24px var(--color-glow);
   }
 
   .enter-btn:active {

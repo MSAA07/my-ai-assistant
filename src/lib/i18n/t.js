@@ -1,34 +1,61 @@
 import { get } from 'svelte/store';
-import { currentDictionary, dictionaries, language } from '../stores/language.js';
 import en from './en.js';
+import ar from './ar.js';
+import { language } from '../stores/language.js';
 
-const lookup = (dictionary, key) => {
-  return key.split('.').reduce((accumulator, part) => {
-    if (accumulator && Object.hasOwn(accumulator, part)) {
-      return accumulator[part];
+export const dictionaries = { en, ar };
+const missingKeys = new Set();
+const isDev = Boolean(import.meta?.env?.DEV);
+
+function resolvePath(obj, path) {
+  return path.split('.').reduce((acc, segment) => {
+    if (acc && typeof acc === 'object' && segment in acc) {
+      return acc[segment];
     }
     return undefined;
-  }, dictionary);
-};
+  }, obj);
+}
 
-const interpolate = (value, replacements = {}) => {
-  return Object.entries(replacements).reduce((output, [token, replacement]) => {
-    const pattern = new RegExp(`{{\\s*${token}\\s*}}`, 'g');
-    return output.replace(pattern, replacement);
-  }, value);
-};
+function format(template, vars) {
+  if (typeof template !== 'string') return template;
+  return template.replace(/\{(\w+)\}/g, (_, key) => {
+    if (vars && key in vars) {
+      return vars[key];
+    }
+    return `{${key}}`;
+  });
+}
 
-export const t = (key, replacements = {}) => {
-  const activeDictionary = get(currentDictionary);
-  const rawValue = lookup(activeDictionary, key) ?? lookup(en, key) ?? key;
+function warnMissing(locale, key) {
+  if (!isDev) return;
+  const signature = `${locale}:${key}`;
+  if (missingKeys.has(signature)) return;
+  missingKeys.add(signature);
+  console.warn(`[i18n] Missing ${locale} translation for "${key}"`);
+}
 
-  if (typeof rawValue !== 'string') {
-    return rawValue;
+export function t(path, vars = {}) {
+  const lang = get(language);
+  const locales = dictionaries[lang] ?? en;
+
+  const value = resolvePath(locales, path);
+  if (value !== undefined) {
+    return format(value, vars);
   }
 
-  return interpolate(rawValue, replacements);
-};
+  if (lang !== 'en') {
+    warnMissing(lang, path);
+  }
 
-export const getLanguageCode = () => get(language).code;
+  const fallback = resolvePath(en, path);
+  if (fallback !== undefined) {
+    return format(fallback, vars);
+  }
 
-export { dictionaries };
+  warnMissing('en', path);
+  return path;
+}
+
+export function registerDictionary(code, dict) {
+  dictionaries[code] = dict;
+}
