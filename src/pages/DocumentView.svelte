@@ -775,10 +775,10 @@
 
   .exam-options {
     margin: 2rem 0;
-    text-align: left;
+    text-align: start;
     max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline-start: auto;
+    margin-inline-end: auto;
   }
 
   .exam-options > p {
@@ -832,7 +832,7 @@
     content: '';
     position: absolute;
     top: 3px;
-    left: 3px;
+    inset-inline-start: 3px;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -949,7 +949,7 @@
     background: var(--color-surface-2);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2);
-    text-align: left;
+    text-align: start;
     cursor: pointer;
     transition: all var(--motion-fast) var(--ease-standard);
     color: var(--color-text-primary);
@@ -1030,13 +1030,13 @@
     padding: 1rem 1.25rem;
     border-radius: var(--radius-1);
     background: var(--color-danger-surface);
-    border-left: 4px solid var(--color-danger);
+    border-inline-start: 4px solid var(--color-danger);
     color: var(--color-danger);
   }
 
   .instant-feedback.correct {
     background: var(--color-success-surface);
-    border-left-color: var(--color-success);
+    border-inline-start-color: var(--color-success);
     color: var(--color-success);
   }
 
@@ -1134,14 +1134,14 @@
   .review-question {
     background: var(--color-surface-2);
     border: 1px solid var(--color-border);
-    border-left: 4px solid var(--color-danger);
+    border-inline-start: 4px solid var(--color-danger);
     border-radius: var(--radius-1);
     padding: 1.5rem;
     margin: 1rem 0;
   }
 
   .review-question.correct {
-    border-left-color: var(--color-success);
+    border-inline-start-color: var(--color-success);
   }
 
   .review-header {
@@ -1200,12 +1200,12 @@
 
     .tab {
       border-bottom: none;
-      border-left: 3px solid transparent;
-      text-align: left;
+      border-inline-start: 3px solid transparent;
+      text-align: start;
     }
 
     .tab.active {
-      border-left-color: var(--color-accent-primary);
+      border-inline-start-color: var(--color-accent-primary);
       border-bottom-color: transparent;
     }
 

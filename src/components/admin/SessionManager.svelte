@@ -120,7 +120,7 @@
   td {
     padding: 0.75rem;
     border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-    text-align: left;
+    text-align: start;
     vertical-align: top;
   }
 
