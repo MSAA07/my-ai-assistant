@@ -1,19 +1,30 @@
 <script>
   import { onMount } from "svelte";
   import { API_BASE } from "../config.js";
-  import { session } from "../stores/auth.js"; // Import session
+  import { session } from "../stores/auth.js";
+  import { t } from "../lib/i18n/t.js";
+  import { language as languageStore } from "../lib/stores/language.js";
 
   let user = null;
   let documents = [];
   let selectedFile = null;
-  let language = "english";
+  let responseLanguage = "english";
+  let errorKey = "";
+  let errorArgs = {};
+  let successKey = "";
+  let successArgs = {};
   let uploading = false;
   let error = "";
   let success = "";
+  $: _lang = $languageStore;
+  $: error = errorKey ? t(errorKey, errorArgs) : "";
+  $: success = successKey ? t(successKey, successArgs) : "";
 
   // Progress tracking
   let uploadProgress = 0;
+  let uploadStageKey = "";
   let uploadStage = "";
+  $: uploadStage = uploadStageKey ? t(uploadStageKey) : "";
   let progressInterval = null;
 
   onMount(async () => {
@@ -34,9 +45,12 @@
       const data = await response.json();
       user = data.user;
       documents = data.documents;
+      errorKey = "";
+      errorArgs = {};
     } catch (err) {
       console.error("Failed to fetch user data:", err);
-      error = "Failed to load user data. Please refresh.";
+      errorKey = "home.alerts.error";
+      errorArgs = {};
     }
   }
 
@@ -44,8 +58,10 @@
     const file = event.target.files[0];
     if (file) {
       selectedFile = file;
-      error = "";
-      success = "";
+      errorKey = "";
+      errorArgs = {};
+      successKey = "";
+      successArgs = {};
     }
   }
 
@@ -55,31 +71,34 @@
       progressInterval = null;
     }
     uploadProgress = 0;
-    uploadStage = "";
+    uploadStageKey = "";
   }
 
   async function handleUpload() {
     if (!selectedFile) {
-      error = "Please select a file first";
+      errorKey = "home.uploadSection.errors.selectFile";
+      errorArgs = {};
       return;
     }
 
     if (!user || (user.role !== 'admin' && user.plan !== 'premium' && user.remainingDocuments <= 0)) {
-       // Check against plan/role if needed, but backend enforces it too
-      error = "You have reached your monthly upload limit";
+      errorKey = "home.uploadSection.errors.limitReached";
+      errorArgs = {};
       return;
     }
 
     uploading = true;
-    error = "";
-    success = "";
+    errorKey = "";
+    errorArgs = {};
+    successKey = "";
+    successArgs = {};
     uploadProgress = 0;
-    uploadStage = "Uploading file...";
+    uploadStageKey = "home.processing.stages.upload";
 
     const formData = new FormData();
     formData.append("file", selectedFile);
     // clerkId removed
-    formData.append("language", language);
+    formData.append("language", responseLanguage);
 
     try {
       const data = await new Promise((resolve, reject) => {
@@ -90,27 +109,27 @@
         xhr.upload.addEventListener("progress", (e) => {
           if (e.lengthComputable) {
             uploadProgress = Math.round((e.loaded / e.total) * 30);
-            uploadStage = "Uploading file...";
+            uploadStageKey = "home.processing.stages.upload";
           }
         });
 
         xhr.upload.addEventListener("load", () => {
           // Upload done, now server is processing
           uploadProgress = 30;
-          uploadStage = "Extracting text from document...";
+          uploadStageKey = "home.processing.stages.extract";
 
           // Simulate server-side progress stages
           let simProgress = 30;
           progressInterval = setInterval(() => {
             if (simProgress < 50) {
               simProgress += 2;
-              uploadStage = "Extracting text from document...";
+              uploadStageKey = "home.processing.stages.extract";
             } else if (simProgress < 85) {
               simProgress += 1;
-              uploadStage = "Generating AI study materials...";
+              uploadStageKey = "home.processing.stages.generate";
             } else if (simProgress < 95) {
               simProgress += 0.5;
-              uploadStage = "Saving to database...";
+              uploadStageKey = "home.processing.stages.save";
             }
             uploadProgress = Math.min(Math.round(simProgress), 95);
           }, 500);
@@ -122,7 +141,7 @@
             const response = JSON.parse(xhr.responseText);
             if (xhr.status >= 200 && xhr.status < 300) {
               uploadProgress = 100;
-              uploadStage = "Complete!";
+              uploadStageKey = "home.processing.complete";
               resolve(response);
             } else {
               const message = response.error || "Failed to upload document";
@@ -136,7 +155,7 @@
 
         xhr.addEventListener("error", () => {
           clearProgress();
-          reject(new Error("Network error. Please try again."));
+          reject(new Error("NETWORK_ERROR"));
         });
 
         xhr.open("POST", `${API_BASE}/api/upload`);
@@ -144,9 +163,13 @@
       });
 
       uploadProgress = 100;
-      uploadStage = "Complete!";
+      uploadStageKey = "home.processing.complete";
 
-      success = `Document processed successfully! Generated ${data.document.flashcards.length} flashcards and ${data.document.examQuestions.length} exam questions.`;
+      successKey = "home.uploadSection.success";
+      successArgs = {
+        flashcards: data.document.flashcards.length,
+        questions: data.document.examQuestions.length,
+      };
       selectedFile = null;
       document.getElementById("file-input").value = "";
       await fetchUserData();
@@ -157,7 +180,14 @@
       }, 1500);
     } catch (err) {
       console.error("Upload error:", err);
-      error = err.message || "Failed to upload document. Please try again.";
+      const message = (err?.message || "").toUpperCase();
+      if (message === "NETWORK_ERROR") {
+        errorKey = "home.uploadSection.errors.network";
+        errorArgs = {};
+      } else {
+        errorKey = "home.uploadSection.errors.uploadFailed";
+        errorArgs = {};
+      }
     } finally {
       clearProgress();
       uploading = false;
@@ -169,7 +199,7 @@
   }
 
   async function deleteDocument(docId) {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+    if (!confirm(t("home.documents.deleteConfirm"))) return;
 
     try {
       const response = await fetch(
@@ -182,12 +212,15 @@
 
       if (response.ok) {
         await fetchUserData();
-        success = "Document deleted successfully";
+        successKey = "home.documents.deleteSuccess";
+        successArgs = {};
       } else {
-        error = "Failed to delete document";
+        errorKey = "home.documents.deleteError";
+        errorArgs = {};
       }
     } catch (err) {
-      error = "Failed to delete document";
+      errorKey = "home.documents.deleteError";
+      errorArgs = {};
     }
   }
 </script>
@@ -202,7 +235,7 @@
           <div class="overlay-check">&#10003;</div>
         {/if}
       </div>
-      <h2>Processing Your Document</h2>
+      <h2>{t('home.processing.title')}</h2>
       <div class="overlay-progress-bar">
         <div class="overlay-progress-fill" style="width: {uploadProgress}%"></div>
       </div>
@@ -213,19 +246,19 @@
       <div class="overlay-steps">
         <div class="step" class:step-active={uploadProgress > 0} class:step-done={uploadProgress >= 30}>
           <span class="step-dot"></span>
-          <span>Upload file</span>
+          <span>{t('home.processing.stages.upload')}</span>
         </div>
         <div class="step" class:step-active={uploadProgress >= 30} class:step-done={uploadProgress >= 50}>
           <span class="step-dot"></span>
-          <span>Extract text</span>
+          <span>{t('home.processing.stages.extract')}</span>
         </div>
         <div class="step" class:step-active={uploadProgress >= 50} class:step-done={uploadProgress >= 90}>
           <span class="step-dot"></span>
-          <span>Generate AI content</span>
+          <span>{t('home.processing.stages.generate')}</span>
         </div>
         <div class="step" class:step-active={uploadProgress >= 90} class:step-done={uploadProgress >= 100}>
           <span class="step-dot"></span>
-          <span>Save results</span>
+          <span>{t('home.processing.stages.save')}</span>
         </div>
       </div>
     </div>
@@ -234,26 +267,25 @@
 
 <div class="study-assistant-container">
   <header class="study-header">
-    <h1>AI Study Assistant</h1>
-    <p>
-      Upload your study materials and get AI-powered summaries, flashcards, and
-      practice exams
-    </p>
+    <h1>{t('home.heroTitle')}</h1>
+    <p>{t('home.heroSubtitle')}</p>
   </header>
 
   {#if user}
     <div class="usage-stats">
       <div class="stat-card">
-        <div class="stat-value" style={user.role === 'admin' ? "font-size:1.8rem" : ""}>{user.role === 'admin' ? "Unlimited" : user.remainingDocuments}</div>
-        <div class="stat-label">Documents Remaining</div>
+        <div class="stat-value" style={user.role === 'admin' ? "font-size:1.8rem" : ""}>
+          {user.role === 'admin' ? t('home.stats.unlimited') : user.remainingDocuments}
+        </div>
+        <div class="stat-label">{t('home.stats.documentsRemaining')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">{user.documentsUsed}/{user.monthlyLimit}</div>
-        <div class="stat-label">Used This Month</div>
+        <div class="stat-label">{t('home.stats.usedThisMonth')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">{documents.length}</div>
-        <div class="stat-label">Total Documents</div>
+        <div class="stat-label">{t('home.stats.totalDocuments')}</div>
       </div>
     </div>
   {/if}
@@ -267,25 +299,25 @@
   {/if}
 
   <div class="upload-section">
-    <h2>Upload New Document</h2>
+    <h2>{t('home.uploadSection.title')}</h2>
 
     <div class="upload-card">
       <div class="language-selector">
-        <span class="lang-label">AI Response Language:</span>
+        <span class="lang-label">{t('home.uploadSection.languageLabel')}:</span>
         <div class="lang-toggle">
           <button
             class="lang-btn"
-            class:lang-active={language === 'english'}
-            on:click={() => language = 'english'}
+            class:lang-active={responseLanguage === 'english'}
+            on:click={() => responseLanguage = 'english'}
           >
-            English
+            {t('home.uploadSection.englishOption')}
           </button>
           <button
             class="lang-btn"
-            class:lang-active={language === 'arabic'}
-            on:click={() => language = 'arabic'}
+            class:lang-active={responseLanguage === 'arabic'}
+            on:click={() => responseLanguage = 'arabic'}
           >
-            العربية (Arabic)
+            {t('home.uploadSection.arabicOption')}
           </button>
         </div>
       </div>
@@ -312,12 +344,12 @@
               <polyline points="17 8 12 3 7 8"/>
               <line x1="12" x2="12" y1="3" y2="15"/>
             </svg>
-            <span class="file-label-text">Click to select a file (PDF, DOCX, PPTX)</span>
+            <span class="file-label-text">{t('home.uploadSection.filePlaceholder')}</span>
           {/if}
         </label>
       </div>
 
-      <p class="file-info">Maximum file size: 25MB</p>
+      <p class="file-info">{t('home.uploadSection.fileInfo')}</p>
 
       <button
         class="upload-btn"
@@ -327,9 +359,9 @@
           (user && user.role !== 'admin' && user.remainingDocuments <= 0)}
       >
         {#if uploading}
-          Processing... (this may take 20-30 seconds)
+          {t('home.uploadSection.submitProcessing')}
         {:else}
-          Upload & Generate Study Materials
+          {t('home.uploadSection.submit')}
         {/if}
       </button>
     </div>
@@ -337,7 +369,7 @@
 
   {#if documents.length > 0}
     <div class="documents-section">
-      <h2>My Documents ({documents.length})</h2>
+      <h2>{t('home.documents.title', { count: documents.length })}</h2>
 
       <div class="documents-grid">
         {#each documents as doc}
@@ -346,25 +378,25 @@
             <div class="doc-info">
               <h3>{doc.originalName}</h3>
               <p class="doc-meta">
-                Uploaded: {new Date(doc.uploadDate).toLocaleDateString()}
+                {t('document.uploaded')}: {new Date(doc.uploadDate).toLocaleDateString()}
               </p>
               <p class="doc-meta">
-                Language: {doc.language === "arabic" ? "العربية" : "English"}
+                {t('document.language')}: {doc.language === "arabic" ? t('home.documents.languageArabic') : t('home.documents.languageEnglish')}
               </p>
               <div class="doc-stats">
-                <span>{doc.flashcards.length} flashcards</span>
-                <span>{doc.examQuestions.length} questions</span>
+                <span>{t('home.documents.flashcardCount', { count: doc.flashcards.length })}</span>
+                <span>{t('home.documents.questionCount', { count: doc.examQuestions.length })}</span>
               </div>
             </div>
             <div class="doc-actions">
               <button class="btn-view" on:click={() => viewDocument(doc.id)}>
-                View & Study
+                {t('home.documents.viewCta')}
               </button>
               <button
                 class="btn-delete"
                 on:click={() => deleteDocument(doc.id)}
               >
-                Delete
+                {t('home.documents.deleteCta')}
               </button>
             </div>
           </div>
@@ -377,11 +409,8 @@
 <style>
   .upload-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(10, 14, 39, 0.92);
+    inset: 0;
+    background: var(--color-backdrop-strong);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -391,7 +420,7 @@
 
   .overlay-content {
     text-align: center;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
     width: 90%;
     max-width: 420px;
   }
@@ -403,8 +432,8 @@
   .overlay-spinner {
     width: 56px;
     height: 56px;
-    border: 4px solid rgba(102, 126, 234, 0.15);
-    border-top-color: #667eea;
+    border: 4px solid var(--color-accent-surface);
+    border-top-color: var(--color-accent-primary);
     border-radius: 50%;
     animation: overlay-spin 0.8s linear infinite;
     margin: 0 auto;
@@ -414,8 +443,8 @@
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: white;
+    background: var(--gradient-success);
+    color: var(--color-bg);
     font-size: 1.75rem;
     display: flex;
     align-items: center;
@@ -437,13 +466,13 @@
   .overlay-content h2 {
     font-size: 1.35rem;
     margin-bottom: 1.5rem;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .overlay-progress-bar {
     width: 100%;
     height: 8px;
-    background: #1e2758;
+    background: var(--color-border);
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 0.75rem;
@@ -451,7 +480,7 @@
 
   .overlay-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: var(--gradient-accent-strong);
     border-radius: 4px;
     transition: width 0.4s ease;
   }
@@ -465,20 +494,20 @@
 
   .overlay-stage {
     font-size: 0.875rem;
-    color: #94a3b8;
+    color: var(--color-text-secondary);
   }
 
   .overlay-percent {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #60a5fa;
+    color: var(--color-accent-primary);
   }
 
   .overlay-steps {
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
-    text-align: left;
+    text-align: start;
   }
 
   .step {
@@ -486,16 +515,16 @@
     align-items: center;
     gap: 0.75rem;
     font-size: 0.85rem;
-    color: #475569;
+    color: var(--color-text-muted);
     transition: color 0.3s ease;
   }
 
   .step.step-active {
-    color: #94a3b8;
+    color: var(--color-text-secondary);
   }
 
   .step.step-done {
-    color: #22c55e;
+    color: var(--color-success);
   }
 
   .step-dot {
@@ -503,17 +532,17 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #334155;
+    background: var(--color-border);
     transition: all 0.3s ease;
   }
 
   .step-active .step-dot {
-    background: #60a5fa;
-    box-shadow: 0 0 8px rgba(96, 165, 250, 0.4);
+    background: var(--color-accent-primary);
+    box-shadow: 0 0 8px var(--color-glow);
   }
 
   .step-done .step-dot {
-    background: #22c55e;
+    background: var(--color-success);
   }
 
   .study-assistant-container {
@@ -531,14 +560,14 @@
     font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-accent-strong);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .study-header p {
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
     font-size: 1.1rem;
   }
 
@@ -560,7 +589,7 @@
   .stat-value {
     font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--gradient-accent-strong);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -568,7 +597,7 @@
   }
 
   .stat-label {
-    color: #94a3b8;
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
   }
 
@@ -580,15 +609,15 @@
   }
 
   .alert-error {
-    background: rgba(239, 68, 68, 0.1);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: var(--color-danger-surface);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger-border);
   }
 
   .alert-success {
-    background: rgba(34, 197, 94, 0.1);
-    color: #86efac;
-    border: 1px solid rgba(34, 197, 94, 0.25);
+    background: var(--color-success-surface);
+    color: var(--color-success);
+    border: 1px solid var(--color-success-border);
   }
 
   .upload-section {
@@ -598,7 +627,7 @@
   .upload-section h2 {
     font-size: 1.8rem;
     margin-bottom: 1.5rem;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .upload-card {
@@ -616,23 +645,23 @@
     display: block;
     font-weight: 600;
     margin-bottom: 0.75rem;
-    color: #e2e8f0;
+    color: var(--color-text-primary);
     font-size: 0.95rem;
   }
 
   .lang-toggle {
     display: inline-flex;
     border-radius: 0.5rem;
-    border: 1px solid #1e2758;
+    border: 1px solid var(--color-border);
     overflow: hidden;
-    background: #0a0e27;
+    background: var(--color-bg);
   }
 
   .lang-btn {
     padding: 0.6rem 1.5rem;
     border: none;
     background: transparent;
-    color: #94a3b8;
+    color: var(--color-text-secondary);
     font-weight: 500;
     font-size: 0.9rem;
     cursor: pointer;
@@ -640,13 +669,13 @@
   }
 
   .lang-btn:hover:not(.lang-active) {
-    color: #cbd5e1;
-    background: rgba(96, 165, 250, 0.05);
+    color: var(--color-text-primary);
+    background: var(--color-surface-2);
   }
 
   .lang-btn.lang-active {
-    background: rgba(96, 165, 250, 0.15);
-    color: #60a5fa;
+    background: var(--color-accent-surface);
+    color: var(--color-accent-primary);
     font-weight: 600;
   }
 
@@ -666,31 +695,31 @@
     justify-content: center;
     min-height: 300px;
     padding: 48px 24px;
-    border: 2px dashed rgba(147, 197, 253, 0.4);
+    border: 2px dashed var(--color-accent-outline);
     border-radius: 12px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: rgba(30, 41, 59, 0.4);
-    color: #94a3b8;
+    background: rgba(30, 36, 51, 0.4);
+    color: var(--color-text-secondary);
   }
 
   .file-label:hover {
-    border-color: rgba(147, 197, 253, 0.7);
-    background: rgba(30, 41, 59, 0.6);
-    color: #cbd5e1;
+    border-color: var(--color-accent-outline-strong);
+    background: rgba(30, 36, 51, 0.6);
+    color: var(--color-text-primary);
   }
 
   .upload-icon {
     width: 48px;
     height: 48px;
     margin-bottom: 16px;
-    color: rgba(147, 197, 253, 0.8);
+    color: var(--color-accent-primary);
     transition: all 0.3s ease;
   }
 
   .file-label:hover .upload-icon {
-    color: rgba(147, 197, 253, 1);
+    color: var(--color-accent-primary);
     transform: translateY(-2px);
   }
 
@@ -700,7 +729,7 @@
   }
 
   .file-info {
-    color: #64748b;
+    color: var(--color-text-muted);
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
@@ -708,8 +737,8 @@
   .upload-btn {
     width: 100%;
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
+    background: var(--gradient-accent-strong);
+    color: var(--color-bg);
     border: none;
     border-radius: 0.5rem;
     font-size: 1.1rem;
@@ -720,7 +749,7 @@
 
   .upload-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.35);
+    box-shadow: 0 6px 24px var(--color-glow);
   }
 
   .upload-btn:disabled {
@@ -732,7 +761,7 @@
   .documents-section h2 {
     font-size: 1.8rem;
     margin-bottom: 1.5rem;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .documents-grid {
@@ -752,7 +781,7 @@
   }
 
   .document-card:hover {
-    border-color: #283170;
+    border-color: var(--color-border-light);
   }
 
   .doc-icon {
@@ -766,11 +795,11 @@
   .doc-info h3 {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
-    color: #f1f5f9;
+    color: var(--color-text-primary);
   }
 
   .doc-meta {
-    color: #94a3b8;
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
     margin: 0.25rem 0;
   }
@@ -780,7 +809,7 @@
     gap: 1.5rem;
     margin-top: 0.75rem;
     font-size: 0.9rem;
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
   }
 
   .doc-actions {
@@ -801,24 +830,24 @@
   }
 
   .btn-view {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
+    background: var(--gradient-accent-strong);
+    color: var(--color-bg);
   }
 
   .btn-view:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 16px var(--color-glow);
   }
 
   .btn-delete {
     background: transparent;
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger-border);
   }
 
   .btn-delete:hover {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.5);
+    background: var(--color-danger-surface);
+    border-color: var(--color-danger-border);
   }
 
   @media (max-width: 768px) {

@@ -84,7 +84,7 @@
   }
 
   .page-header {
-    text-align: left;
+    text-align: start;
   }
 
   .eyebrow {
