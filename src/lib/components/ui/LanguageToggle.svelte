@@ -1,30 +1,31 @@
 <script>
-  import { language, availableLanguages } from '../../stores/language.js';
+  import { availableLanguages, language } from '../../stores/language.js';
   import { t } from '../../i18n/t.js';
 
-  export let compact = false;
+  $: currentLanguage = $language;
 
-  const setLanguage = (code) => {
-    language.setLanguage(code);
-  };
+  function select(lang) {
+    if (lang !== currentLanguage) {
+      $language = lang;
+    }
+  }
+
+  $: localizedLanguages = availableLanguages.map((lang) => ({
+    ...lang,
+    label: t(lang.labelKey),
+  }));
 </script>
 
-<div class="language-toggle" role="radiogroup" aria-label={t('language.toggle')}>
-  {#each availableLanguages as option (option.code)}
+<div class="language-toggle" role="group" aria-label={t('language.toggleLabel')}>
+  {#each localizedLanguages as lang}
     <button
+      class="toggle-option"
       type="button"
-      role="radio"
-      aria-checked={option.code === $language.code}
-      class:active={option.code === $language.code}
-      class:compact
-      on:click={() => setLanguage(option.code)}
+      aria-pressed={currentLanguage === lang.code}
+      on:click={() => select(lang.code)}
     >
-      <span class="language-toggle__abbr">{option.code.toUpperCase()}</span>
-      {#if !compact}
-        <span class="language-toggle__label">
-          {option.code === 'ar' ? option.nativeLabel : option.label}
-        </span>
-      {/if}
+      <span class="option-code">{lang.shortLabel}</span>
+      <span class="option-label">{lang.label}</span>
     </button>
   {/each}
 </div>
@@ -32,62 +33,61 @@
 <style>
   .language-toggle {
     display: inline-flex;
-    padding: 4px;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border-radius: var(--radius-2);
     background: var(--color-surface-1);
-    border-radius: 999px;
     border: 1px solid var(--color-border);
-    gap: 4px;
   }
 
-  button {
-    position: relative;
+  .toggle-option {
+    min-width: 44px;
+    min-height: 44px;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-1);
-    min-inline-size: 44px;
-    min-block-size: 36px;
-    padding: 0 var(--space-2);
-    border: none;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--color-text-muted);
-    font: inherit;
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard);
-  }
-
-  button.active {
-    background: var(--color-accent-bg);
-    color: var(--color-text-primary);
-  }
-
-  button:hover,
-  button:focus-visible {
-    color: var(--color-text-primary);
-    background: var(--color-accent-bg-hover);
-    outline: none;
-  }
-
-  .language-toggle__abbr {
-    font-size: 0.75rem;
+    gap: 0;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-sm);
     font-weight: 600;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-1);
+    cursor: pointer;
+    transition: all var(--motion-fast) var(--ease-standard);
+  }
+
+  .toggle-option[aria-pressed="true"] {
+    color: var(--color-text-primary);
+    background: var(--color-accent-surface);
+    box-shadow: 0 0 0 1px var(--color-accent-primary) inset;
+  }
+
+  .toggle-option:hover {
+    color: var(--color-text-primary);
+  }
+
+  .option-code {
+    font-size: var(--font-size-xs);
     letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .language-toggle__label {
-    font-size: 0.75rem;
+  .option-label {
+    font-size: var(--font-size-sm);
   }
 
-  button.compact {
-    min-inline-size: 36px;
-    padding-inline: var(--space-1);
-  }
+  @media (max-width: 480px) {
+    .toggle-option {
+      padding: var(--space-1) var(--space-2);
+      flex-direction: row;
+      gap: var(--space-1);
+    }
 
-  @media (max-width: 640px) {
-    button {
-      min-inline-size: 40px;
+    .option-label {
+      font-size: var(--font-size-xs);
     }
   }
 </style>
