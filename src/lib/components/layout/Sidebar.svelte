@@ -2,6 +2,7 @@
   import { direction } from '../../stores/language.js';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
   import { t } from '../../i18n/t.js';
+  import { ENABLE_ARABIC_UI } from '../../config/features.js';
 
   export let items = [];
   export let secondaryItems = [];
@@ -66,13 +67,15 @@
       </a>
     {/each}
 
-    <div class="language-card">
-      <div>
-        <p class="language-title">{t('language.sidebarLabel')}</p>
-        <p class="language-description">{t('language.sidebarDescription')}</p>
+    {#if ENABLE_ARABIC_UI}
+      <div class="language-card">
+        <div>
+          <p class="language-title">{t('language.sidebarLabel')}</p>
+          <p class="language-description">{t('language.sidebarDescription')}</p>
+        </div>
+        <LanguageToggle />
       </div>
-      <LanguageToggle />
-    </div>
+    {/if}
   </div>
 </aside>
 
