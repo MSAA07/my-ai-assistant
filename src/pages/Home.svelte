@@ -975,6 +975,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 152px;
   }
 
   .btn-primary,
@@ -990,11 +991,13 @@
 
   .btn-primary {
     border: none;
-    background: var(--gradient-accent-strong);
-    color: var(--color-bg);
+    background: var(--color-accent-primary);
+    color: var(--color-text-primary);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-primary) 75%, white 25%);
   }
 
   .btn-primary:hover {
+    background: var(--color-accent-light);
     transform: translateY(-1px);
     box-shadow: 0 4px 16px var(--color-glow);
   }
