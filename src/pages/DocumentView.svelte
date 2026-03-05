@@ -1,11 +1,11 @@
 <script>
-  import { onMount } from "svelte";
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
   import StatusBadge from "../lib/components/ui/StatusBadge.svelte";
 
   export let documentId;
+  export let documentSection = "summary";
 
   let docData = null;
   let loading = true;
@@ -15,6 +15,9 @@
   let error = "";
   let processingStatus = "complete";
   let activeTab = "summary";
+  let fetchedDocumentId = "";
+
+  const VALID_TABS = new Set(["summary", "flashcards", "exam"]);
 
   // Flashcard state
   let currentCardIndex = 0;
@@ -41,11 +44,26 @@
   $: _lang = $languageStore;
   $: error = errorKey ? t(errorKey, errorArgs) : customError;
 
-  onMount(async () => {
-    await fetchDocument();
-  });
+  $: normalizedTab = VALID_TABS.has((documentSection || "").toLowerCase())
+    ? (documentSection || "summary").toLowerCase()
+    : "summary";
+
+  $: if (activeTab !== normalizedTab) {
+    activeTab = normalizedTab;
+    onTabChanged(activeTab);
+  }
+
+  $: if (documentId && documentId !== fetchedDocumentId) {
+    fetchedDocumentId = documentId;
+    fetchDocument();
+  }
 
   async function fetchDocument() {
+    loading = true;
+    errorKey = "";
+    errorArgs = {};
+    customError = "";
+
     try {
       const response = await fetch(
         `${API_BASE}/api/document/${documentId}`,
@@ -64,7 +82,7 @@
           errorArgs = {};
           customError = "";
         } else {
-          shuffledCards = [...docData.flashcards];
+          shuffledCards = [...(docData.flashcards || [])];
           errorKey = "";
           errorArgs = {};
           customError = "";
@@ -89,8 +107,7 @@
     }
   }
 
-  function setTab(tab) {
-    activeTab = tab;
+  function onTabChanged(tab) {
     if (tab === "flashcards") {
       if (shuffledCards.length > 0) {
         currentCardIndex = 0;
@@ -101,6 +118,11 @@
         resetExam();
       }
     }
+  }
+
+  function setTab(tab) {
+    const nextTab = VALID_TABS.has(tab) ? tab : "summary";
+    window.location.hash = `/documents/${documentId}/${nextTab}`;
   }
 
   // Flashcard functions
@@ -177,7 +199,7 @@
   }
 
   function goBack() {
-    window.location.hash = '/dashboard';
+    window.location.hash = '/documents';
   }
 </script>
 
@@ -224,14 +246,14 @@
         class:active={activeTab === "flashcards"}
         on:click={() => setTab("flashcards")}
       >
-        {t('document.tabs.flashcards', { count: docData.flashcards.length })}
+        {t('document.tabs.flashcards', { count: docData.flashcardCount ?? (docData.flashcards ? docData.flashcards.length : 0) })}
       </button>
       <button
         class="tab"
         class:active={activeTab === "exam"}
         on:click={() => setTab("exam")}
       >
-        {t('document.tabs.exam', { count: docData.examQuestions.length })}
+        {t('document.tabs.exam', { count: docData.questionCount ?? (docData.examQuestions ? docData.examQuestions.length : 0) })}
       </button>
     </div>
 

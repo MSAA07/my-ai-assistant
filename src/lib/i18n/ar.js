@@ -30,6 +30,7 @@ export default {
   nav: {
     dashboard: 'لوحة التحكم',
     documents: 'مستنداتي',
+    upload: 'رفع',
     exams: 'الاختبارات',
     flashcards: 'البطاقات التعليمية',
     adminPanel: 'لوحة الإدارة',

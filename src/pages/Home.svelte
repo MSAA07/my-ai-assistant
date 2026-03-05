@@ -234,7 +234,7 @@
 
       // Navigate to the document view
       setTimeout(() => {
-        window.location.hash = `/document/${data.document.id}`;
+        window.location.hash = `/documents/${data.document.id}`;
       }, 1500);
     } catch (err) {
       console.error("Upload error:", err);
@@ -253,7 +253,7 @@
   }
 
   function viewDocument(docId) {
-    window.location.hash = `/document/${docId}`;
+    window.location.hash = `/documents/${docId}`;
   }
 
   async function deleteDocument(docId) {

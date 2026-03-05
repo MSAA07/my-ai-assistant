@@ -1,7 +1,5 @@
 import Home from './pages/Home.svelte';
 import Documents from './pages/Documents.svelte';
-import Exams from './pages/Exams.svelte';
-import Flashcards from './pages/Flashcards.svelte';
 import Settings from './pages/Settings.svelte';
 import AdminDashboard from './components/AdminDashboard.svelte';
 import DocumentView from './pages/DocumentView.svelte';
@@ -10,7 +8,10 @@ export const DEFAULT_AUTH_PATH = '/dashboard';
 
 const LEGACY_REDIRECTS = new Map([
   ['/app', DEFAULT_AUTH_PATH],
-  ['/app/', DEFAULT_AUTH_PATH]
+  ['/app/', DEFAULT_AUTH_PATH],
+  ['/exams', '/documents'],
+  ['/flashcards', '/documents'],
+  ['/summary', '/documents']
 ]);
 
 export const STATIC_ROUTES = [
@@ -35,26 +36,14 @@ export const STATIC_ROUTES = [
     showInBottomNav: true
   },
   {
-    id: 'exams',
-    path: '/exams',
-    component: Exams,
-    labelKey: 'nav.exams',
-    pageTitleKey: 'nav.exams',
-    icon: 'exams',
+    id: 'upload',
+    path: '/upload',
+    component: Home,
+    labelKey: 'nav.upload',
+    pageTitleKey: 'home.uploadSection.title',
+    icon: 'upload',
     showInSidebar: true,
-    showInBottomNav: true,
-    comingSoon: true
-  },
-  {
-    id: 'flashcards',
-    path: '/flashcards',
-    component: Flashcards,
-    labelKey: 'nav.flashcards',
-    pageTitleKey: 'nav.flashcards',
-    icon: 'flashcards',
-    showInSidebar: true,
-    showInBottomNav: true,
-    comingSoon: true
+    showInBottomNav: true
   },
   {
     id: 'settings',
@@ -84,20 +73,31 @@ const STATIC_ROUTE_MAP = new Map(STATIC_ROUTES.map((route) => [route.path, route
 const DOCUMENT_ROUTE = {
   id: 'documents-detail',
   parentNavId: 'documents',
-  path: '/document/:id',
+  path: '/documents/:id/:section?',
   component: DocumentView,
   pageTitleKey: 'nav.documents',
   match(path) {
-    if (!path.startsWith('/document/')) {
+    if (!path.startsWith('/documents/')) {
       return null;
     }
 
-    const documentId = path.slice('/document/'.length);
+    const segments = path.split('/').filter(Boolean);
+    if (segments.length < 2) {
+      return null;
+    }
+
+    const documentId = segments[1];
     if (!documentId) {
       return null;
     }
 
-    return { params: { documentId } };
+    const section = (segments[2] ?? 'summary').toLowerCase();
+    const validSections = new Set(['summary', 'flashcards', 'exam']);
+    if (!validSections.has(section)) {
+      return null;
+    }
+
+    return { params: { documentId, documentSection: section } };
   }
 };
 
@@ -105,6 +105,10 @@ export const DYNAMIC_ROUTES = [DOCUMENT_ROUTE];
 
 export function normalizeAppPath(path = '/') {
   if (!path) return '/';
+  if (path.startsWith('/document/')) {
+    const documentId = path.slice('/document/'.length);
+    return documentId ? `/documents/${documentId}` : '/documents';
+  }
   const trimmed = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
   return LEGACY_REDIRECTS.get(trimmed) ?? trimmed;
 }

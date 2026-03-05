@@ -48,7 +48,7 @@
   }
 
   function viewDocument(docId) {
-    window.location.hash = `/document/${docId}`;
+    window.location.hash = `/documents/${docId}`;
   }
 
   function openDeleteModal(doc) {
