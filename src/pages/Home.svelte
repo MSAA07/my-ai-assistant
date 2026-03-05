@@ -29,6 +29,12 @@
   $: uploadStage = uploadStageKey ? t(uploadStageKey) : "";
   let progressInterval = null;
 
+  $: normalizedRole = (user?.role || "").toLowerCase();
+  $: remainingDocumentsValue = user?.remainingDocuments ?? user?.documentsRemaining ?? 0;
+  $: usedThisMonthValue = user?.documentsUsed ?? user?.usedThisMonth ?? 0;
+  $: monthlyLimitValue = user?.monthlyLimit ?? 0;
+  $: totalDocumentsValue = Array.isArray(documents) ? documents.length : 0;
+
   onMount(async () => {
     await fetchUserData();
   });
@@ -46,8 +52,9 @@
       );
       if (!response.ok) throw new Error('Failed to fetch data');
       const data = await response.json();
-      user = data.user;
-      documents = data.documents || [];
+      const payload = data?.data ?? data;
+      user = payload?.user ?? null;
+      documents = Array.isArray(payload?.documents) ? payload.documents : [];
       errorKey = "";
       errorArgs = {};
     } catch (err) {
@@ -132,7 +139,7 @@
       return;
     }
 
-    if (!user || (user.role?.toLowerCase() !== 'admin' && user.plan !== 'premium' && user.remainingDocuments <= 0)) {
+    if (!user || (normalizedRole !== 'admin' && user.plan !== 'premium' && remainingDocumentsValue <= 0)) {
       errorKey = "home.uploadSection.errors.limitReached";
       errorArgs = {};
       return;
@@ -340,17 +347,17 @@
   {:else if user}
     <div class="usage-stats">
       <div class="stat-card">
-        <div class="stat-value" style={user.role?.toLowerCase() === 'admin' ? "font-size:1.8rem" : ""}>
-          {user.role?.toLowerCase() === 'admin' ? t('home.stats.unlimited') : (user.remainingDocuments ?? '--')}
+        <div class="stat-value" style={normalizedRole === 'admin' ? "font-size:1.8rem" : ""}>
+          {normalizedRole === 'admin' ? t('home.stats.unlimited') : remainingDocumentsValue}
         </div>
         <div class="stat-label">{t('home.stats.documentsRemaining')}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{user.documentsUsed ?? 0}/{user.monthlyLimit ?? 0}</div>
+        <div class="stat-value">{usedThisMonthValue}/{monthlyLimitValue}</div>
         <div class="stat-label">{t('home.stats.usedThisMonth')}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{documents ? documents.length : 0}</div>
+        <div class="stat-value">{totalDocumentsValue}</div>
         <div class="stat-label">{t('home.stats.totalDocuments')}</div>
       </div>
     </div>
@@ -441,7 +448,7 @@
       <button
         class="upload-btn"
         on:click={handleUpload}
-        disabled={!selectedFile || uploading || (user && user.role?.toLowerCase() !== 'admin' && user.remainingDocuments <= 0)}
+        disabled={!selectedFile || uploading || (user && normalizedRole !== 'admin' && remainingDocumentsValue <= 0)}
       >
         {#if uploading}
           {t('home.uploadSection.submitProcessing')}
