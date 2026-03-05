@@ -9,8 +9,8 @@
   --color-shadow: color-mix(in srgb, var(--color-bg) 25%, black 75%);
   --color-glow: color-mix(in srgb, var(--color-accent-primary) 25%, transparent);
   --color-text: var(--color-text-primary);
-  --color-text-secondary: color-mix(in srgb, var(--color-text-primary) 65%, var(--color-text-muted) 35%);
-  --color-text-tertiary: var(--color-text-muted);
+  --color-text-secondary: color-mix(in srgb, var(--color-text-primary) 82%, var(--color-text-muted) 18%);
+  --color-text-tertiary: color-mix(in srgb, var(--color-text-primary) 68%, var(--color-text-muted) 32%);
   --color-accent: var(--color-accent-primary);
   --color-accent-light: color-mix(in srgb, var(--color-accent-primary) 60%, white 40%);
   --color-accent-bg: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
@@ -42,12 +42,13 @@ body {
   padding: 0;
   font-family: var(--font-family-base);
   background: var(--color-bg);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   line-height: 1.6;
 }
 
 #app {
   min-height: 100vh;
+  color: var(--color-text-primary);
 }
 
 a {
@@ -101,6 +102,34 @@ h1, h2, h3, h4, h5, h6 {
 
 p {
   color: var(--color-text-secondary);
+}
+
+/* Foundation contrast guards */
+.stat-value {
+  color: var(--color-text-primary) !important;
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  opacity: 1 !important;
+}
+
+.stats dt {
+  color: var(--color-text-secondary) !important;
+  opacity: 1 !important;
+}
+
+.flashcard-front,
+.flashcard-back {
+  color: var(--color-text-primary) !important;
+  opacity: 1 !important;
+}
+
+.flashcard-front .card-label,
+.flashcard-back .card-label,
+.flashcard-front .card-text,
+.flashcard-back .card-text,
+.flashcard-front .flip-hint,
+.flashcard-back .flip-hint {
+  color: inherit !important;
+  opacity: 1 !important;
 }
 
 button {

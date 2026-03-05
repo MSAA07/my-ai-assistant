@@ -7,10 +7,13 @@
   --color-surface-1: #1e2433;
   --color-surface-2: #232a3c;
   --color-border: #2a3147;
-  --color-text-primary: #e8eaf0;
-  --color-text-muted: #8b92a5;
+  --color-text-primary: #eef2ff;
+  --color-text-muted: #b8c0d6;
   --color-accent-primary: #6c63ff;
   --color-accent-secondary: #00d4aa;
+
+  /* Readable text on accent / gradient surfaces */
+  --color-text-soft: #e6ebff;
 
   /* Semantic colors */
   --color-success: #00d4aa;
