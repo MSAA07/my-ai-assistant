@@ -14,6 +14,8 @@
   let successKey = "";
   let successArgs = {};
   let uploading = false;
+  let isLoadingDashboard = true;
+  let isDragActive = false;
   let error = "";
   let success = "";
   $: _lang = $languageStore;
@@ -32,6 +34,7 @@
   });
 
   async function fetchUserData() {
+    isLoadingDashboard = true;
     try {
       // Use the new /api/user/me endpoint with credentials
       const response = await fetch(
@@ -44,25 +47,73 @@
       if (!response.ok) throw new Error('Failed to fetch data');
       const data = await response.json();
       user = data.user;
-      documents = data.documents;
+      documents = data.documents || [];
       errorKey = "";
       errorArgs = {};
     } catch (err) {
       console.error("Failed to fetch user data:", err);
       errorKey = "home.alerts.error";
       errorArgs = {};
+    } finally {
+      isLoadingDashboard = false;
     }
   }
 
   function handleFileSelect(event) {
     const file = event.target.files[0];
-    if (file) {
-      selectedFile = file;
-      errorKey = "";
-      errorArgs = {};
-      successKey = "";
-      successArgs = {};
+    validateAndSelectFile(file);
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault();
+    if (!uploading) isDragActive = true;
+  }
+
+  function handleDragLeave(event) {
+    event.preventDefault();
+    isDragActive = false;
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    isDragActive = false;
+    if (uploading) return;
+
+    const file = event.dataTransfer.files[0];
+    validateAndSelectFile(file);
+  }
+
+  function validateAndSelectFile(file) {
+    if (!file) return;
+    
+    // Check file type
+    const validTypes = [
+      "application/pdf", 
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    ];
+    
+    // Simple extension check fallback
+    const validExtensions = ['.pdf', '.docx', '.pptx'];
+    const hasValidExt = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+
+    if (!validTypes.includes(file.type) && !hasValidExt) {
+       errorKey = "home.uploadSection.errors.invalidType";
+       errorArgs = {};
+       return;
     }
+
+    if (file.size > 25 * 1024 * 1024) { // 25MB limit
+       errorKey = "home.uploadSection.errors.fileTooLarge";
+       errorArgs = {}; 
+       return;
+    }
+
+    selectedFile = file;
+    errorKey = "";
+    errorArgs = {};
+    successKey = "";
+    successArgs = {};
   }
 
   function clearProgress() {
@@ -81,7 +132,7 @@
       return;
     }
 
-    if (!user || (user.role !== 'admin' && user.plan !== 'premium' && user.remainingDocuments <= 0)) {
+    if (!user || (user.role?.toLowerCase() !== 'admin' && user.plan !== 'premium' && user.remainingDocuments <= 0)) {
       errorKey = "home.uploadSection.errors.limitReached";
       errorArgs = {};
       return;
@@ -271,20 +322,35 @@
     <p>{t('home.heroSubtitle')}</p>
   </header>
 
-  {#if user}
+  {#if isLoadingDashboard}
+    <div class="usage-stats">
+      <div class="stat-card skeleton">
+        <div class="stat-value skeleton-text"></div>
+        <div class="stat-label skeleton-text-sm"></div>
+      </div>
+      <div class="stat-card skeleton">
+        <div class="stat-value skeleton-text"></div>
+        <div class="stat-label skeleton-text-sm"></div>
+      </div>
+      <div class="stat-card skeleton">
+        <div class="stat-value skeleton-text"></div>
+        <div class="stat-label skeleton-text-sm"></div>
+      </div>
+    </div>
+  {:else if user}
     <div class="usage-stats">
       <div class="stat-card">
-        <div class="stat-value" style={user.role === 'admin' ? "font-size:1.8rem" : ""}>
-          {user.role === 'admin' ? t('home.stats.unlimited') : user.remainingDocuments}
+        <div class="stat-value" style={user.role?.toLowerCase() === 'admin' ? "font-size:1.8rem" : ""}>
+          {user.role?.toLowerCase() === 'admin' ? t('home.stats.unlimited') : (user.remainingDocuments ?? '--')}
         </div>
         <div class="stat-label">{t('home.stats.documentsRemaining')}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{user.documentsUsed}/{user.monthlyLimit}</div>
+        <div class="stat-value">{user.documentsUsed ?? 0}/{user.monthlyLimit ?? 0}</div>
         <div class="stat-label">{t('home.stats.usedThisMonth')}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{documents.length}</div>
+        <div class="stat-value">{documents ? documents.length : 0}</div>
         <div class="stat-label">{t('home.stats.totalDocuments')}</div>
       </div>
     </div>
@@ -301,7 +367,15 @@
   <div class="upload-section">
     <h2>{t('home.uploadSection.title')}</h2>
 
-    <div class="upload-card">
+    <div 
+      class="upload-card" 
+      class:drag-active={isDragActive}
+      on:dragover={handleDragOver}
+      on:dragleave={handleDragLeave}
+      on:drop={handleDrop}
+      role="region"
+      aria-label={t('home.uploadSection.title')}
+    >
       <div class="language-selector">
         <span class="lang-label">{t('home.uploadSection.languageLabel')}:</span>
         <div class="lang-toggle">
@@ -330,14 +404,26 @@
           on:change={handleFileSelect}
           disabled={uploading}
         />
-        <label for="file-input" class="file-label">
-          {#if selectedFile}
-            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" x2="12" y1="3" y2="15"/>
+        <label for="file-input" class="file-label" class:active={isDragActive}>
+          {#if isDragActive}
+            <div class="drag-overlay">
+              <svg class="upload-icon bounce" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" x2="12" y1="3" y2="15"/>
+              </svg>
+              <span class="file-label-text">{t('home.uploadSection.dragActive')}</span>
+            </div>
+          {:else if selectedFile}
+            <svg class="upload-icon success" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
-            <span class="file-label-text">{selectedFile.name}</span>
+            <span class="file-label-text highlight">{selectedFile.name}</span>
+            <span class="file-status-text">{t('home.uploadSection.fileSelected')}</span>
           {:else}
             <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -345,18 +431,17 @@
               <line x1="12" x2="12" y1="3" y2="15"/>
             </svg>
             <span class="file-label-text">{t('home.uploadSection.filePlaceholder')}</span>
+            <span class="file-constraints">{t('home.uploadSection.constraints')}</span>
           {/if}
         </label>
       </div>
 
-      <p class="file-info">{t('home.uploadSection.fileInfo')}</p>
+      <!-- Removed separate file-info p since it's now integrated in the drop zone -->
 
       <button
         class="upload-btn"
         on:click={handleUpload}
-        disabled={!selectedFile ||
-          uploading ||
-          (user && user.role !== 'admin' && user.remainingDocuments <= 0)}
+        disabled={!selectedFile || uploading || (user && user.role?.toLowerCase() !== 'admin' && user.remainingDocuments <= 0)}
       >
         {#if uploading}
           {t('home.uploadSection.submitProcessing')}
@@ -384,16 +469,16 @@
                 {t('document.language')}: {doc.language === "arabic" ? t('home.documents.languageArabic') : t('home.documents.languageEnglish')}
               </p>
               <div class="doc-stats">
-                <span>{t('home.documents.flashcardCount', { count: doc.flashcards.length })}</span>
-                <span>{t('home.documents.questionCount', { count: doc.examQuestions.length })}</span>
+                <span>{t('home.documents.flashcardCount', { count: doc.flashcardCount ?? (doc.flashcards ? doc.flashcards.length : 0) })}</span>
+                <span>{t('home.documents.questionCount', { count: doc.questionCount ?? (doc.examQuestions ? doc.examQuestions.length : 0) })}</span>
               </div>
             </div>
             <div class="doc-actions">
-              <button class="btn-view" on:click={() => viewDocument(doc.id)}>
+              <button class="btn-primary" on:click={() => viewDocument(doc.id)}>
                 {t('home.documents.viewCta')}
               </button>
               <button
-                class="btn-delete"
+                class="btn-secondary"
                 on:click={() => deleteDocument(doc.id)}
               >
                 {t('home.documents.deleteCta')}
@@ -407,6 +492,29 @@
 </div>
 
 <style>
+  /* Skeletons */
+  .skeleton {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .skeleton-text {
+    height: 2.5rem;
+    width: 60%;
+    background: var(--color-surface-2);
+    border-radius: 4px;
+    margin: 0 auto 0.5rem;
+  }
+  .skeleton-text-sm {
+    height: 1rem;
+    width: 80%;
+    background: var(--color-surface-2);
+    border-radius: 4px;
+    margin: 0 auto;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+  }
+
   .upload-overlay {
     position: fixed;
     inset: 0;
@@ -635,6 +743,12 @@
     border: 2px dashed var(--color-border);
     border-radius: 1rem;
     padding: 2rem;
+    transition: all 0.2s ease;
+  }
+  
+  .upload-card.drag-active {
+    border-color: var(--color-accent-primary);
+    background: var(--color-surface-2);
   }
 
   .language-selector {
@@ -702,12 +816,22 @@
     transition: all 0.3s ease;
     background: rgba(30, 36, 51, 0.4);
     color: var(--color-text-secondary);
+    position: relative;
+    overflow: hidden;
   }
 
-  .file-label:hover {
+  .file-label:hover, .file-label.active {
     border-color: var(--color-accent-outline-strong);
     background: rgba(30, 36, 51, 0.6);
     color: var(--color-text-primary);
+  }
+
+  .drag-overlay {
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--color-accent-primary);
   }
 
   .upload-icon {
@@ -716,6 +840,19 @@
     margin-bottom: 16px;
     color: var(--color-accent-primary);
     transition: all 0.3s ease;
+  }
+  
+  .upload-icon.bounce {
+    animation: bounce 1s infinite;
+  }
+  
+  .upload-icon.success {
+    color: var(--color-success);
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
 
   .file-label:hover .upload-icon {
@@ -727,11 +864,24 @@
     font-size: 1rem;
     font-weight: 500;
   }
+  
+  .file-label-text.highlight {
+    color: var(--color-accent-primary);
+    font-weight: 600;
+  }
 
-  .file-info {
+  .file-constraints {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
     color: var(--color-text-muted);
+  }
+  
+  .file-status-text {
+    display: block;
+    margin-top: 0.5rem;
     font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    color: var(--color-success);
+    font-weight: 500;
   }
 
   .upload-btn {
@@ -753,8 +903,11 @@
   }
 
   .upload-btn:disabled {
-    opacity: 0.4;
+    background: var(--color-surface-2);
+    color: var(--color-text-muted);
+    opacity: 0.7;
     cursor: not-allowed;
+    box-shadow: none;
     transform: none;
   }
 
@@ -818,36 +971,38 @@
     gap: 0.5rem;
   }
 
-  .btn-view,
-  .btn-delete {
+  .btn-primary,
+  .btn-secondary {
     padding: 0.6rem 1.5rem;
     border-radius: 0.5rem;
-    border: none;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 0.9rem;
+    width: 100%;
   }
 
-  .btn-view {
+  .btn-primary {
+    border: none;
     background: var(--gradient-accent-strong);
     color: var(--color-bg);
   }
 
-  .btn-view:hover {
+  .btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 16px var(--color-glow);
   }
 
-  .btn-delete {
+  .btn-secondary {
     background: transparent;
-    color: var(--color-danger);
-    border: 1px solid var(--color-danger-border);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
   }
 
-  .btn-delete:hover {
+  .btn-secondary:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
     background: var(--color-danger-surface);
-    border-color: var(--color-danger-border);
   }
 
   @media (max-width: 768px) {
@@ -865,11 +1020,6 @@
     }
 
     .doc-actions {
-      width: 100%;
-    }
-
-    .btn-view,
-    .btn-delete {
       width: 100%;
     }
 

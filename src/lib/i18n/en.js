@@ -102,12 +102,17 @@ export default {
       englishOption: 'English',
       arabicOption: 'Arabic',
       filePlaceholder: 'Click to select a file (PDF, DOCX, PPTX)',
+      dragActive: 'Release to drop file',
+      fileSelected: 'File selected — ready to generate',
+      constraints: 'PDF, DOCX, PPTX (Max 25MB)',
       selectedFileLabel: '{name}',
       fileInfo: 'Maximum file size: 25MB',
       submit: 'Upload & Generate Study Materials',
       submitProcessing: 'Processing... (this may take 20-30 seconds)',
       errors: {
         selectFile: 'Please select a file first',
+        invalidType: 'Invalid file type. Please upload PDF, DOCX, or PPTX.',
+        fileTooLarge: 'File is too large. Maximum size is 25MB.',
         limitReached: 'You have reached your monthly upload limit',
         uploadFailed: 'Failed to upload document. Please try again.',
         network: 'Network error. Please try again.'

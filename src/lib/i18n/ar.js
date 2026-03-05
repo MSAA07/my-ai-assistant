@@ -102,12 +102,17 @@ export default {
       englishOption: 'الإنجليزية',
       arabicOption: 'العربية',
       filePlaceholder: 'انقر لاختيار ملف (PDF, DOCX, PPTX)',
+      dragActive: 'أفلت الملف هنا',
+      fileSelected: 'تم اختيار الملف — جاهز للإنشاء',
+      constraints: 'PDF, DOCX, PPTX (أقصى حجم 25MB)',
       selectedFileLabel: '{name}',
       fileInfo: 'الحد الأقصى لحجم الملف: 25 ميغابايت',
       submit: 'رفع وإنشاء مواد دراسية',
       submitProcessing: 'جاري المعالجة... (قد يستغرق 20-30 ثانية)',
       errors: {
         selectFile: 'يرجى اختيار ملف أولاً',
+        invalidType: 'نوع الملف غير صالح. يرجى رفع ملف PDF أو DOCX أو PPTX.',
+        fileTooLarge: 'حجم الملف كبير جداً. الحد الأقصى هو 25 ميغابايت.',
         limitReached: 'لقد وصلت إلى الحد الشهري للرفع',
         uploadFailed: 'فشل رفع المستند. حاول مرة أخرى.',
         network: 'خطأ في الشبكة. حاول مرة أخرى.'

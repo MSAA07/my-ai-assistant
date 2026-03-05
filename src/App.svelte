@@ -30,7 +30,7 @@
   }
 
   $: isAuthenticated = !!$session;
-  $: isAdmin = $session?.user?.role === 'admin';
+  $: isAdmin = $session?.user?.role?.toLowerCase() === 'admin';
   $: plan = $session?.user?.plan ?? 'free';
   $: isPaidPlan = plan === 'pro' || plan === 'premium';
   $: planLabel = isPaidPlan ? t('nav.proBadge') : t('nav.freeBadge');
