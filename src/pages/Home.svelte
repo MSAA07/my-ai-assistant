@@ -893,25 +893,27 @@
   .upload-btn {
     width: 100%;
     padding: 1rem 2rem;
-    background: var(--gradient-accent-strong);
-    color: var(--color-bg);
-    border: none;
+    background: var(--color-accent-primary);
+    color: var(--color-text-primary);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 70%, white 30%);
     border-radius: 0.5rem;
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .upload-btn:hover:not(:disabled) {
+    background: var(--color-accent-light);
     transform: translateY(-2px);
     box-shadow: 0 6px 24px var(--color-glow);
   }
 
   .upload-btn:disabled {
-    background: var(--color-surface-2);
-    color: var(--color-text-muted);
-    opacity: 0.7;
+    background: color-mix(in srgb, var(--color-surface-2) 85%, var(--color-bg) 15%);
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
+    opacity: 1;
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
