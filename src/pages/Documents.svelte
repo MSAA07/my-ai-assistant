@@ -131,28 +131,28 @@
       {#each documents as doc}
         <article class="document-card">
           <div class="card-head">
-            <div>
+            <div class="title-row">
               <h3>{doc.originalName}</h3>
-              <p class="meta">
-                {t('documentsPage.labels.uploaded')}: {new Date(doc.uploadDate).toLocaleDateString()}
-                · {t('documentsPage.labels.language')}:
-                {doc.language === 'arabic' ? t('home.documents.languageArabic') : t('home.documents.languageEnglish')}
-              </p>
+              <StatusBadge
+                status={resolveStatusTone(doc.processingStatus)}
+                label={t(`documentsPage.statuses.${doc.processingStatus ?? 'queued'}`)}
+              />
             </div>
-            <StatusBadge
-              status={resolveStatusTone(doc.processingStatus)}
-              label={t(`documentsPage.statuses.${doc.processingStatus ?? 'queued'}`)}
-            />
+            <p class="meta">
+              {t('documentsPage.labels.uploaded')}: {new Date(doc.uploadDate).toLocaleDateString()}
+              · {t('documentsPage.labels.language')}:
+              {doc.language === 'arabic' ? t('home.documents.languageArabic') : t('home.documents.languageEnglish')}
+            </p>
           </div>
 
           <dl class="stats">
             <div>
               <dt>{t('documentsPage.columns.flashcards')}</dt>
-              <dd>{doc.flashcards.length}</dd>
+              <dd>{doc.flashcardCount ?? doc.flashcards?.length ?? 0}</dd>
             </div>
             <div>
               <dt>{t('documentsPage.columns.exams')}</dt>
-              <dd>{doc.examQuestions.length}</dd>
+              <dd>{doc.questionCount ?? doc.examQuestions?.length ?? 0}</dd>
             </div>
           </dl>
 
@@ -189,7 +189,7 @@
 
   .page-header {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: space-between;
     gap: var(--space-4);
     flex-wrap: wrap;
@@ -215,7 +215,7 @@
   }
 
   .refresh-btn {
-    align-self: flex-start;
+    align-self: flex-end;
     padding: 0.75rem 1.25rem;
     border-radius: var(--radius-1);
     border: 1px solid var(--color-border);
@@ -269,7 +269,8 @@
   .documents-grid {
     display: grid;
     gap: var(--space-4);
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
   }
 
   .document-card {
@@ -280,19 +281,34 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+    height: 100%;
+    min-height: 272px;
   }
 
   .card-head {
     display: flex;
-    justify-content: space-between;
-    gap: var(--space-3);
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .title-row {
+    display: flex;
     align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
   }
 
   .card-head h3 {
     margin: 0 0 0.35rem;
     font-size: 1.1rem;
     color: var(--color-text-primary);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: calc(1.35em * 2);
   }
 
   .meta {
@@ -313,7 +329,8 @@
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--color-text-muted);
+    color: var(--color-text-secondary);
+    font-weight: 600;
   }
 
   .stats dd {
@@ -326,6 +343,7 @@
   .card-actions {
     display: flex;
     gap: var(--space-2);
+    margin-top: auto;
   }
 
   .card-actions button {
@@ -348,14 +366,15 @@
   }
 
   .danger-btn {
-    border: 1px solid var(--color-danger);
-    background: var(--color-danger-surface);
-    color: var(--color-danger);
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
   }
 
   .danger-btn:hover {
-    background: var(--color-danger);
-    color: var(--color-bg);
+    border-color: var(--color-danger);
+    background: var(--color-danger-surface);
+    color: var(--color-danger);
   }
 
   .primary-btn {
@@ -370,7 +389,25 @@
     box-shadow: 0 10px 30px var(--color-shadow);
   }
 
+  @media (max-width: 1024px) {
+    .documents-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
   @media (max-width: 640px) {
+    .documents-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-header {
+      align-items: flex-start;
+    }
+
+    .refresh-btn {
+      align-self: flex-start;
+    }
+
     .card-actions {
       flex-direction: column;
     }
