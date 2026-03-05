@@ -17,7 +17,7 @@
   let activeTab = "summary";
   let fetchedDocumentId = "";
 
-  const VALID_TABS = new Set(["summary", "flashcards", "exam"]);
+  const VALID_TABS = new Set(["summary", "flashcards", "exam", "notes", "activity"]);
 
   // Flashcard state
   let currentCardIndex = 0;
@@ -484,6 +484,16 @@
               </button>
             </div>
           {/if}
+        </div>
+      {:else if activeTab === "notes"}
+        <div class="summary-section">
+          <h2>Notes</h2>
+          <div class="summary-text">{t('common.comingSoon')}</div>
+        </div>
+      {:else if activeTab === "activity"}
+        <div class="summary-section">
+          <h2>Activity</h2>
+          <div class="summary-text">{t('common.comingSoon')}</div>
         </div>
       {/if}
     </div>

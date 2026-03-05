@@ -9,6 +9,7 @@ export const DEFAULT_AUTH_PATH = '/dashboard';
 const LEGACY_REDIRECTS = new Map([
   ['/app', DEFAULT_AUTH_PATH],
   ['/app/', DEFAULT_AUTH_PATH],
+  ['/home', '/dashboard'],
   ['/exams', '/documents'],
   ['/flashcards', '/documents'],
   ['/summary', '/documents']
@@ -92,7 +93,7 @@ const DOCUMENT_ROUTE = {
     }
 
     const section = (segments[2] ?? 'summary').toLowerCase();
-    const validSections = new Set(['summary', 'flashcards', 'exam']);
+    const validSections = new Set(['summary', 'flashcards', 'exam', 'notes', 'activity']);
     if (!validSections.has(section)) {
       return null;
     }
@@ -101,7 +102,20 @@ const DOCUMENT_ROUTE = {
   }
 };
 
-export const DYNAMIC_ROUTES = [DOCUMENT_ROUTE];
+const ADMIN_WILDCARD_ROUTE = {
+  id: 'admin-wildcard',
+  parentNavId: 'admin',
+  path: '/admin/*',
+  component: AdminDashboard,
+  pageTitleKey: 'nav.adminPanel',
+  requiresAdmin: true,
+  match(path) {
+    if (!path.startsWith('/admin/')) return null;
+    return { params: { adminPath: path.slice('/admin/'.length) } };
+  }
+};
+
+export const DYNAMIC_ROUTES = [DOCUMENT_ROUTE, ADMIN_WILDCARD_ROUTE];
 
 export function normalizeAppPath(path = '/') {
   if (!path) return '/';
