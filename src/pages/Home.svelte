@@ -704,11 +704,10 @@
   .stat-value {
     font-size: 2.5rem;
     font-weight: 800;
-    background: var(--gradient-accent-strong);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-text-primary);
+    -webkit-text-fill-color: var(--color-text-primary);
     margin-bottom: 0.5rem;
+    opacity: 1;
   }
 
   .stat-label {
