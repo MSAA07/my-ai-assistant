@@ -150,6 +150,8 @@ export default {
     processingFailed: 'Document processing failed. Please try again.',
     aiGenerating: 'AI is generating study materials...',
     aiGeneratingNote: 'This usually takes about 20 seconds.',
+    processingProgress: 'Progress {progress}%',
+    jobStatusError: 'Unable to check processing status. Please try again.',
     back: 'Back',
     backToDashboard: 'Back to Dashboard',
     uploaded: 'Uploaded',

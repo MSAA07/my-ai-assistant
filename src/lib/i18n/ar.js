@@ -150,6 +150,8 @@ export default {
     processingFailed: 'فشلت معالجة المستند. يرجى المحاولة مرة أخرى.',
     aiGenerating: 'الذكاء الاصطناعي يقوم بإنشاء المواد الدراسية...',
     aiGeneratingNote: 'يستغرق ذلك عادة حوالي 20 ثانية.',
+    processingProgress: 'التقدم {progress}%',
+    jobStatusError: 'تعذر التحقق من حالة المعالجة. يرجى المحاولة مرة أخرى.',
     back: 'رجوع',
     backToDashboard: 'العودة إلى لوحة التحكم',
     uploaded: 'تاريخ الرفع',

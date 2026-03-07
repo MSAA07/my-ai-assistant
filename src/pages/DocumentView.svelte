@@ -1,8 +1,12 @@
 <script>
+  import { onDestroy } from "svelte";
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
   import StatusBadge from "../lib/components/ui/StatusBadge.svelte";
+
+  const JUST_UPLOADED_DOCUMENT_KEY = "just-uploaded-document-id";
+  const JUST_UPLOADED_JOB_CONTEXT_KEY = "just-uploaded-job-context";
 
   export let documentId;
   export let documentSection = "summary";
@@ -16,6 +20,11 @@
   let processingStatus = "complete";
   let activeTab = "summary";
   let fetchedDocumentId = "";
+  let pollTimeout = null;
+  let showProcessingPlaceholder = false;
+  let jobId = "";
+  let jobStatus = "";
+  let jobProgressPct = 0;
 
   const VALID_TABS = new Set(["summary", "flashcards", "exam", "notes", "activity"]);
 
@@ -54,15 +63,219 @@
   }
 
   $: if (documentId && documentId !== fetchedDocumentId) {
+    clearPollTimeout();
     fetchedDocumentId = documentId;
-    fetchDocument();
-  }
-
-  async function fetchDocument() {
-    loading = true;
+    docData = null;
+    shuffledCards = [];
+    processingStatus = "complete";
     errorKey = "";
     errorArgs = {};
     customError = "";
+    resetJobState();
+
+    const freshJobContext = getFreshUploadJobContext(documentId);
+    if (freshJobContext) {
+      loading = false;
+      showProcessingPlaceholder = true;
+      processingStatus = "queued";
+      jobId = freshJobContext.jobId;
+      jobStatus = "queued";
+      pollJobStatus(freshJobContext.jobId, documentId);
+    } else {
+      showProcessingPlaceholder = isFreshUpload(documentId);
+      fetchDocument({ background: showProcessingPlaceholder });
+    }
+  }
+
+  onDestroy(() => {
+    clearPollTimeout();
+  });
+
+  function clearPollTimeout() {
+    if (pollTimeout) {
+      clearTimeout(pollTimeout);
+      pollTimeout = null;
+    }
+  }
+
+  function resetJobState() {
+    jobId = "";
+    jobStatus = "";
+    jobProgressPct = 0;
+  }
+
+  function clampProgress(progress) {
+    const numericProgress = Number(progress);
+    if (!Number.isFinite(numericProgress)) {
+      return 0;
+    }
+
+    return Math.min(100, Math.max(0, Math.round(numericProgress)));
+  }
+
+  function isFreshUpload(docId) {
+    return typeof window !== "undefined"
+      && sessionStorage.getItem(JUST_UPLOADED_DOCUMENT_KEY) === docId;
+  }
+
+  function getFreshUploadJobContext(docId) {
+    if (!isFreshUpload(docId) || typeof window === "undefined") {
+      return null;
+    }
+
+    const rawContext = sessionStorage.getItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
+    if (!rawContext) {
+      return null;
+    }
+
+    try {
+      const context = JSON.parse(rawContext);
+      if (context?.documentId === docId && context?.jobId) {
+        return context;
+      }
+    } catch (error) {
+      console.error("Invalid stored upload job context:", error);
+    }
+
+    sessionStorage.removeItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
+    return null;
+  }
+
+  function clearFreshUpload(docId) {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (sessionStorage.getItem(JUST_UPLOADED_DOCUMENT_KEY) === docId) {
+      sessionStorage.removeItem(JUST_UPLOADED_DOCUMENT_KEY);
+    }
+
+    const rawContext = sessionStorage.getItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
+    if (!rawContext) {
+      return;
+    }
+
+    try {
+      const context = JSON.parse(rawContext);
+      if (context?.documentId === docId) {
+        sessionStorage.removeItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
+      }
+    } catch {
+      sessionStorage.removeItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
+    }
+  }
+
+  async function pollJobStatus(targetJobId = jobId, targetDocumentId = documentId) {
+    if (!targetJobId || !targetDocumentId) {
+      showProcessingPlaceholder = false;
+      loading = false;
+      errorKey = "document.jobStatusError";
+      errorArgs = {};
+      customError = "";
+      resetJobState();
+      return;
+    }
+
+    clearPollTimeout();
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/jobs/${targetJobId}`,
+        { credentials: "include" }
+      );
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (targetDocumentId !== documentId || targetJobId !== jobId) {
+        return;
+      }
+
+      if (!response.ok || !data || typeof data.status !== "string") {
+        clearFreshUpload(targetDocumentId);
+        showProcessingPlaceholder = false;
+        loading = false;
+        errorKey = "document.jobStatusError";
+        errorArgs = {};
+        customError = "";
+        resetJobState();
+        return;
+      }
+
+      jobStatus = data.status;
+      jobProgressPct = clampProgress(data.progressPct);
+
+      if (jobStatus === "queued" || jobStatus === "running") {
+        processingStatus = jobStatus;
+        showProcessingPlaceholder = true;
+        loading = false;
+        pollTimeout = setTimeout(() => {
+          pollJobStatus(targetJobId, targetDocumentId);
+        }, 2000);
+        return;
+      }
+
+      if (jobStatus === "succeeded") {
+        jobProgressPct = 100;
+        clearFreshUpload(targetDocumentId);
+        showProcessingPlaceholder = true;
+        await fetchDocument({ background: true });
+        return;
+      }
+
+      if (jobStatus === "failed") {
+        clearFreshUpload(targetDocumentId);
+        showProcessingPlaceholder = false;
+        loading = false;
+        processingStatus = "failed";
+        errorArgs = {};
+        if (data.errorMessage) {
+          errorKey = "";
+          customError = data.errorMessage;
+        } else {
+          errorKey = "document.processingFailed";
+          customError = "";
+        }
+        resetJobState();
+        return;
+      }
+
+      clearFreshUpload(targetDocumentId);
+      showProcessingPlaceholder = false;
+      loading = false;
+      errorKey = "document.jobStatusError";
+      errorArgs = {};
+      customError = "";
+      resetJobState();
+    } catch (err) {
+      if (targetDocumentId !== documentId || targetJobId !== jobId) {
+        return;
+      }
+
+      clearFreshUpload(targetDocumentId);
+      showProcessingPlaceholder = false;
+      loading = false;
+      errorKey = "document.jobStatusError";
+      errorArgs = {};
+      customError = "";
+      resetJobState();
+    }
+  }
+
+  async function fetchDocument({ background = false } = {}) {
+    if (!background) {
+      loading = true;
+    }
+
+    errorKey = "";
+    errorArgs = {};
+    customError = "";
+
+    clearPollTimeout();
 
     try {
       const response = await fetch(
@@ -76,18 +289,30 @@
         processingStatus = docData.processingStatus || 'complete';
 
         if (processingStatus === 'queued' || processingStatus === 'running') {
-          setTimeout(fetchDocument, 2000);
+          showProcessingPlaceholder = true;
+          pollTimeout = setTimeout(() => {
+            fetchDocument({ background: true });
+          }, 2000);
         } else if (processingStatus === 'failed') {
+          showProcessingPlaceholder = false;
+          clearFreshUpload(documentId);
+          resetJobState();
           errorKey = "document.processingFailed";
           errorArgs = {};
           customError = "";
         } else {
+          showProcessingPlaceholder = false;
+          clearFreshUpload(documentId);
+          resetJobState();
           shuffledCards = [...(docData.flashcards || [])];
           errorKey = "";
           errorArgs = {};
           customError = "";
         }
       } else {
+        showProcessingPlaceholder = false;
+        clearFreshUpload(documentId);
+        resetJobState();
         if (data.error) {
           errorKey = "";
           errorArgs = {};
@@ -99,6 +324,9 @@
         }
       }
     } catch (err) {
+      showProcessingPlaceholder = false;
+      clearFreshUpload(documentId);
+      resetJobState();
       errorKey = "document.loadingError";
       errorArgs = {};
       customError = "";
@@ -203,7 +431,7 @@
   }
 </script>
 
-{#if loading}
+{#if loading && !showProcessingPlaceholder}
   <div class="loading-container">
     <div class="loading-spinner"></div>
     <p>{t('document.loading')}</p>
@@ -214,11 +442,32 @@
     <p>{error}</p>
     <button on:click={goBack}>{t('document.backToDashboard')}</button>
   </div>
-{:else if processingStatus === 'queued' || processingStatus === 'running'}
+{:else if processingStatus === 'queued' || processingStatus === 'running' || showProcessingPlaceholder}
   <div class="loading-container">
     <div class="loading-spinner"></div>
     <p>{t('document.aiGenerating')}</p>
     <p class="processing-note">{t('document.aiGeneratingNote')}</p>
+    {#if jobId}
+      <div class="processing-progress">
+        <div class="processing-progress-meta">
+          <p>{t('document.processingProgress', { progress: jobProgressPct })}</p>
+          <span>{jobProgressPct}%</span>
+        </div>
+        <div
+          class="processing-progress-bar"
+          role="progressbar"
+          aria-label={t('document.processingProgress', { progress: jobProgressPct })}
+          aria-valuenow={jobProgressPct}
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div
+            class="processing-progress-fill"
+            style={`width: ${jobProgressPct}%`}
+          ></div>
+        </div>
+      </div>
+    {/if}
   </div>
 {:else if docData}
   <div class="document-view">
@@ -511,6 +760,47 @@
     color: var(--color-text-secondary);
     font-size: 0.9rem;
     margin-top: 0.5rem;
+  }
+
+  .processing-progress {
+    width: min(100%, 420px);
+    margin: 1.5rem auto 0;
+    text-align: start;
+  }
+
+  .processing-progress-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .processing-progress-meta p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .processing-progress-meta span {
+    color: var(--color-accent-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .processing-progress-bar {
+    width: 100%;
+    height: 0.75rem;
+    background: var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .processing-progress-fill {
+    height: 100%;
+    background: var(--gradient-accent-strong);
+    border-radius: inherit;
+    transition: width var(--motion-fast) var(--ease-standard);
   }
 
   .loading-spinner {
