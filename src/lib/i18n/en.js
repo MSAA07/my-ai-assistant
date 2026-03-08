@@ -97,6 +97,11 @@ export default {
     alerts: {
       error: 'Failed to load user data. Please refresh.'
     },
+    quotaReached: {
+      title: 'Monthly upload limit reached',
+      body: 'You have used all uploads available in your current monthly plan. You can upload more documents when your quota resets next month.',
+      upgradeHint: 'Upgrade your plan if you want a higher monthly upload limit.'
+    },
     uploadSection: {
       title: 'Upload New Document',
       languageLabel: 'AI Response Language',

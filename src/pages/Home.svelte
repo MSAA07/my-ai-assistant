@@ -29,6 +29,8 @@
   $: normalizedRole = (user?.role || "").toLowerCase();
   $: remainingDocumentsValue = user?.remainingDocuments ?? user?.documentsRemaining ?? 0;
   $: canUploadDocuments = normalizedRole === "admin" || remainingDocumentsValue > 0;
+  $: showQuotaReachedMessage = !isLoadingDashboard && !!user && !canUploadDocuments;
+  $: showUploadSection = !isLoadingDashboard && !!user && canUploadDocuments;
   $: usedThisMonthValue = user?.documentsUsed ?? user?.usedThisMonth ?? 0;
   $: monthlyLimitValue = user?.monthlyLimit ?? 0;
   $: totalDocumentsValue = Array.isArray(documents) ? documents.length : 0;
@@ -256,7 +258,15 @@
     <div class="alert alert-error">{error}</div>
   {/if}
 
-  {#if !isLoadingDashboard && user && canUploadDocuments}
+  {#if showQuotaReachedMessage}
+    <section class="quota-message" role="status" aria-live="polite">
+      <h2>{t("home.quotaReached.title")}</h2>
+      <p>{t("home.quotaReached.body")}</p>
+      <p class="quota-message-secondary">{t("home.quotaReached.upgradeHint")}</p>
+    </section>
+  {/if}
+
+  {#if showUploadSection}
     <div class="upload-section">
       <h2>{t('home.uploadSection.title')}</h2>
 
@@ -438,6 +448,33 @@
     background: var(--color-danger-surface);
     color: var(--color-danger);
     border: 1px solid var(--color-danger-border);
+  }
+
+  .quota-message {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 24%, var(--color-border) 76%);
+    border-radius: 1rem;
+    box-shadow: 0 16px 40px color-mix(in srgb, var(--color-shadow) 70%, transparent 30%);
+  }
+
+  .quota-message h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.35rem;
+    color: var(--color-text-primary);
+  }
+
+  .quota-message p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  .quota-message-secondary {
+    margin-top: 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
   }
 
   .upload-section {
