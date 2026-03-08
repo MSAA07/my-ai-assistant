@@ -1,110 +1,79 @@
-# AI Study Assistant
+# AI Study Assistant Frontend
 
-Upload your study materials and get AI-powered summaries, flashcards, and practice exams instantly.
+Svelte + Vite frontend for the AI Study Assistant. The UI uploads study documents, tracks document-owned processing state, and renders summaries, flashcards, and exam questions returned by the backend.
 
-## Features
+## Lifecycle Model
 
-- **Document Upload**: Support for PDF, DOCX, and PPTX files (up to 25MB)
-- **AI Summaries**: Automatically generated summaries using GPT-4o-mini
-- **Flashcards**: Interactive flashcards with flip animation and shuffle
-- **Practice Exams**: Multiple choice, true/false, and short answer questions
-- **Multi-language Support**: Generate content in English or Arabic
-- **Progress Tracking**: Track your exam scores and flashcard mastery
+The frontend treats the `Document` record as the source of truth for processing state.
 
-## Tech Stack
+- `queued`
+- `processing`
+- `complete`
+- `failed`
 
-- **Frontend**: Svelte + Vite
-- **Backend**: Node.js + Express
-- **Database**: PostgreSQL + Prisma ORM
-- **AI**: OpenAI GPT-4o-mini
-- **File Processing**: pdf-parse, mammoth
+`/api/jobs/:id` is still polled for worker progress, but list and detail views both rely on `Document.processingStatus`, `processingJobId`, `processingError`, and `processedAt`.
 
-## Quick Start
+## Key Frontend Flows
 
-### 1. Install Dependencies
+- Upload a PDF, DOCX, or PPTX with `POST /api/upload`
+- Refresh safely while processing by reloading `GET /api/document/:id`
+- Keep the dashboard list in sync with `GET /api/user/me`
+- Open a document directly and render finalized study materials after `complete`
+
+## Backend Endpoints Used by the UI
+
+- `POST /api/auth/sign-up/email`
+- `POST /api/auth/sign-in/email`
+- `GET /api/auth/get-session`
+- `POST /api/auth/sign-out`
+- `GET /api/user/me`
+- `POST /api/upload`
+- `GET /api/document/:id`
+- `GET /api/jobs/:id`
+- `DELETE /api/document/:id`
+- `POST /api/flashcard/progress`
+- `POST /api/exam/attempt`
+
+## Local Development
+
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-### 2. Configure Environment Variables
+Start the dev server:
 
 ```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your:
-- `DATABASE_URL`: PostgreSQL connection string
-- `OPENAI_API_KEY`: Your OpenAI API key
-
-### 3. Setup Database
-
-```bash
-npx prisma db push
-```
-
-### 4. Run the Application
-
-**Development Mode:**
-```bash
-# Terminal 1 - Frontend
 npm run dev
-
-# Terminal 2 - Backend
-npm run dev:server
 ```
 
-Or run both with:
+Create a production build:
+
 ```bash
-npm run dev:all
+npm run build
 ```
 
-The app will be available at:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3001
+Preview the built app locally:
 
-## Project Structure
-
-```
-my-ai-assistant/
-├── src/
-│   ├── pages/           # Svelte pages
-│   ├── components/      # Reusable components
-│   ├── stores/          # Svelte stores
-│   └── styles/          # Global styles
-├── prisma/
-│   └── schema.prisma    # Database schema
-├── server.js            # Express API server
-└── package.json
+```bash
+npm run preview
 ```
 
-## Usage
+## Environment
 
-1. Open the app in your browser
-2. Select your preferred language (English or Arabic)
-3. Upload a PDF, DOCX, or PPTX file
-4. Wait for AI processing (20-30 seconds)
-5. Study using the generated:
-   - Summary
-   - Flashcards
-   - Practice exam
+- `VITE_API_BASE_URL`
+  Optional explicit backend base URL.
 
-## API Endpoints
+If `VITE_API_BASE_URL` is not set, the frontend derives a safe fallback from the current hostname:
 
-- `GET /api/health` - Health check
-- `GET /api/user/:clerkId` - Get user info and documents
-- `POST /api/upload` - Upload and process document
-- `GET /api/document/:id` - Get document by ID
-- `DELETE /api/document/:id` - Delete document
-- `POST /api/exam/attempt` - Save exam attempt
-- `POST /api/flashcard/progress` - Save flashcard progress
+- local development -> `http://localhost:3001`
+- Vercel preview/stage deployments -> Railway staging backend
+- Vercel production deployments -> Railway production backend
 
-## License
+## Deployment
 
-MIT
+- `stage` auto-deploys to Vercel preview
+- `production` auto-deploys to Vercel production
 
-## Branches
-
-- `main` - Development/Live
-- `stage` - Testing/Integration
-- `production` - Stable releases
+The frontend expects the backend worker lifecycle to be stable before production promotion, including worker leases, stale-job recovery, and document/list detail consistency across refreshes.
