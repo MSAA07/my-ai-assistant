@@ -4,6 +4,15 @@
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
 
+  const UPLOAD_ERROR_KEYS = new Set([
+    "home.uploadSection.errors.selectFile",
+    "home.uploadSection.errors.invalidType",
+    "home.uploadSection.errors.fileTooLarge",
+    "home.uploadSection.errors.limitReached",
+    "home.uploadSection.errors.uploadFailed",
+    "home.uploadSection.errors.network",
+  ]);
+
   let user = null;
   let documents = [];
   let selectedFile = null;
@@ -19,9 +28,18 @@
 
   $: normalizedRole = (user?.role || "").toLowerCase();
   $: remainingDocumentsValue = user?.remainingDocuments ?? user?.documentsRemaining ?? 0;
+  $: canUploadDocuments = normalizedRole === "admin" || remainingDocumentsValue > 0;
   $: usedThisMonthValue = user?.documentsUsed ?? user?.usedThisMonth ?? 0;
   $: monthlyLimitValue = user?.monthlyLimit ?? 0;
   $: totalDocumentsValue = Array.isArray(documents) ? documents.length : 0;
+  $: if (!canUploadDocuments) {
+    selectedFile = null;
+    isDragActive = false;
+    if (UPLOAD_ERROR_KEYS.has(errorKey)) {
+      errorKey = "";
+      errorArgs = {};
+    }
+  }
 
   onMount(async () => {
     await fetchUserData();
@@ -55,13 +73,23 @@
   }
 
   function handleFileSelect(event) {
+    if (!canUploadDocuments) {
+      event.target.value = "";
+      return;
+    }
+
     const file = event.target.files[0];
     validateAndSelectFile(file);
   }
 
   function handleDragOver(event) {
     event.preventDefault();
-    if (!uploading) isDragActive = true;
+    if (!canUploadDocuments || uploading) {
+      isDragActive = false;
+      return;
+    }
+
+    isDragActive = true;
   }
 
   function handleDragLeave(event) {
@@ -72,15 +100,15 @@
   function handleDrop(event) {
     event.preventDefault();
     isDragActive = false;
-    if (uploading) return;
+    if (!canUploadDocuments || uploading) return;
 
     const file = event.dataTransfer.files[0];
     validateAndSelectFile(file);
   }
 
   function validateAndSelectFile(file) {
-    if (!file) return;
-    
+    if (!canUploadDocuments || !file) return;
+
     // Check file type
     const validTypes = [
       "application/pdf", 
@@ -110,14 +138,14 @@
   }
 
   async function handleUpload() {
-    if (!selectedFile) {
-      errorKey = "home.uploadSection.errors.selectFile";
+    if (!user || !canUploadDocuments) {
+      errorKey = "home.uploadSection.errors.limitReached";
       errorArgs = {};
       return;
     }
 
-    if (!user || (normalizedRole !== 'admin' && user.plan !== 'premium' && remainingDocumentsValue <= 0)) {
-      errorKey = "home.uploadSection.errors.limitReached";
+    if (!selectedFile) {
+      errorKey = "home.uploadSection.errors.selectFile";
       errorArgs = {};
       return;
     }
@@ -228,93 +256,95 @@
     <div class="alert alert-error">{error}</div>
   {/if}
 
-  <div class="upload-section">
-    <h2>{t('home.uploadSection.title')}</h2>
+  {#if !isLoadingDashboard && user && canUploadDocuments}
+    <div class="upload-section">
+      <h2>{t('home.uploadSection.title')}</h2>
 
-    <div 
-      class="upload-card" 
-      class:drag-active={isDragActive}
-      on:dragover={handleDragOver}
-      on:dragleave={handleDragLeave}
-      on:drop={handleDrop}
-      role="region"
-      aria-label={t('home.uploadSection.title')}
-    >
-      <div class="language-selector">
-        <span class="lang-label">{t('home.uploadSection.languageLabel')}:</span>
-        <div class="lang-toggle">
-          <button
-            class="lang-btn"
-            class:lang-active={responseLanguage === 'english'}
-            on:click={() => responseLanguage = 'english'}
-          >
-            {t('home.uploadSection.englishOption')}
-          </button>
-          <button
-            class="lang-btn"
-            class:lang-active={responseLanguage === 'arabic'}
-            on:click={() => responseLanguage = 'arabic'}
-          >
-            {t('home.uploadSection.arabicOption')}
-          </button>
+      <div 
+        class="upload-card" 
+        class:drag-active={isDragActive}
+        on:dragover={handleDragOver}
+        on:dragleave={handleDragLeave}
+        on:drop={handleDrop}
+        role="region"
+        aria-label={t('home.uploadSection.title')}
+      >
+        <div class="language-selector">
+          <span class="lang-label">{t('home.uploadSection.languageLabel')}:</span>
+          <div class="lang-toggle">
+            <button
+              class="lang-btn"
+              class:lang-active={responseLanguage === 'english'}
+              on:click={() => responseLanguage = 'english'}
+            >
+              {t('home.uploadSection.englishOption')}
+            </button>
+            <button
+              class="lang-btn"
+              class:lang-active={responseLanguage === 'arabic'}
+              on:click={() => responseLanguage = 'arabic'}
+            >
+              {t('home.uploadSection.arabicOption')}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="file-input-wrapper">
-        <input
-          type="file"
-          id="file-input"
-          accept=".pdf,.docx,.pptx"
-          on:change={handleFileSelect}
-          disabled={uploading}
-        />
-        <label for="file-input" class="file-label" class:active={isDragActive}>
-          {#if isDragActive}
-            <div class="drag-overlay">
-              <svg class="upload-icon bounce" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="file-input-wrapper">
+          <input
+            type="file"
+            id="file-input"
+            accept=".pdf,.docx,.pptx"
+            on:change={handleFileSelect}
+            disabled={uploading || !canUploadDocuments}
+          />
+          <label for="file-input" class="file-label" class:active={isDragActive}>
+            {#if isDragActive}
+              <div class="drag-overlay">
+                <svg class="upload-icon bounce" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" x2="12" y1="3" y2="15"/>
+                </svg>
+                <span class="file-label-text">{t('home.uploadSection.dragActive')}</span>
+              </div>
+            {:else if selectedFile}
+              <svg class="upload-icon success" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span class="file-label-text highlight">{selectedFile.name}</span>
+              <span class="file-status-text">{t('home.uploadSection.fileSelected')}</span>
+            {:else}
+              <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" x2="12" y1="3" y2="15"/>
               </svg>
-              <span class="file-label-text">{t('home.uploadSection.dragActive')}</span>
-            </div>
-          {:else if selectedFile}
-            <svg class="upload-icon success" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            <span class="file-label-text highlight">{selectedFile.name}</span>
-            <span class="file-status-text">{t('home.uploadSection.fileSelected')}</span>
+              <span class="file-label-text">{t('home.uploadSection.filePlaceholder')}</span>
+              <span class="file-constraints">{t('home.uploadSection.constraints')}</span>
+            {/if}
+          </label>
+        </div>
+
+        <!-- Removed separate file-info p since it's now integrated in the drop zone -->
+
+        <button
+          class="upload-btn"
+          on:click={handleUpload}
+          disabled={!selectedFile || uploading || !canUploadDocuments}
+        >
+          {#if uploading}
+            {t('home.uploadSection.submitProcessing')}
           {:else}
-            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" x2="12" y1="3" y2="15"/>
-            </svg>
-            <span class="file-label-text">{t('home.uploadSection.filePlaceholder')}</span>
-            <span class="file-constraints">{t('home.uploadSection.constraints')}</span>
+            {t('home.uploadSection.submit')}
           {/if}
-        </label>
+        </button>
       </div>
-
-      <!-- Removed separate file-info p since it's now integrated in the drop zone -->
-
-      <button
-        class="upload-btn"
-        on:click={handleUpload}
-        disabled={!selectedFile || uploading || (user && normalizedRole !== 'admin' && remainingDocumentsValue <= 0)}
-      >
-        {#if uploading}
-          {t('home.uploadSection.submitProcessing')}
-        {:else}
-          {t('home.uploadSection.submit')}
-        {/if}
-      </button>
     </div>
-  </div>
+  {/if}
 
 </div>
 
