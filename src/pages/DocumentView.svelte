@@ -179,6 +179,8 @@
           customError = nextDocument?.processingError || "";
           return;
         }
+
+        return;
       }
 
       processingStatus = "failed";
