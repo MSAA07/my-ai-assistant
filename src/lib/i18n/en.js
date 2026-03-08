@@ -147,13 +147,19 @@ export default {
     loading: 'Loading document...',
     loadingError: 'Failed to load document',
     notFound: 'Document not found',
+    processingFailedTitle: 'We could not finish processing this document.',
     processingFailed: 'Document processing failed. Please try again.',
+    processingFailedHelp: 'Go back to your documents or upload the file again from the dashboard.',
     aiGenerating: 'AI is generating study materials...',
     aiGeneratingNote: 'This usually takes about 20 seconds.',
+    finalizing: 'Finalizing your document...',
+    finalizingNote: 'Your study materials are ready. Loading the full document view now.',
     processingProgress: 'Progress {progress}%',
     jobStatusError: 'Unable to check processing status. Please try again.',
     back: 'Back',
+    backToDocuments: 'Back to Documents',
     backToDashboard: 'Back to Dashboard',
+    uploadAgain: 'Upload Again',
     uploaded: 'Uploaded',
     language: 'Language',
     tabs: {
@@ -166,6 +172,7 @@ export default {
       cardCounter: 'Card {current} of {total}',
       question: 'Question',
       answer: 'Answer',
+      empty: 'No flashcards are available for this document.',
       flipHint: 'Click to flip',
       previous: 'Previous',
       next: 'Next'
@@ -198,6 +205,7 @@ export default {
       reviewNotAnswered: 'Not answered',
       reviewCorrect: 'Correct',
       reviewIncorrect: 'Incorrect',
+      empty: 'No exam questions are available for this document.',
       retake: 'Retake Exam'
     }
   },
@@ -217,6 +225,7 @@ export default {
     },
     statuses: {
       queued: 'Queued',
+      processing: 'Processing',
       running: 'Processing',
       complete: 'Ready',
       failed: 'Failed',

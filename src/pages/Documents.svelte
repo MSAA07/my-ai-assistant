@@ -8,6 +8,7 @@
 
   const statusToneMap = {
     queued: 'processing',
+    processing: 'processing',
     running: 'processing',
     complete: 'ready',
     failed: 'failed'

@@ -147,13 +147,19 @@ export default {
     loading: 'جاري تحميل المستند...',
     loadingError: 'فشل تحميل المستند',
     notFound: 'المستند غير موجود',
+    processingFailedTitle: 'تعذر إكمال معالجة هذا المستند.',
     processingFailed: 'فشلت معالجة المستند. يرجى المحاولة مرة أخرى.',
+    processingFailedHelp: 'يمكنك العودة إلى المستندات أو رفع الملف مرة أخرى من لوحة التحكم.',
     aiGenerating: 'الذكاء الاصطناعي يقوم بإنشاء المواد الدراسية...',
     aiGeneratingNote: 'يستغرق ذلك عادة حوالي 20 ثانية.',
+    finalizing: 'جارٍ إنهاء تجهيز المستند...',
+    finalizingNote: 'المواد الدراسية أصبحت جاهزة. جارٍ تحميل عرض المستند الكامل الآن.',
     processingProgress: 'التقدم {progress}%',
     jobStatusError: 'تعذر التحقق من حالة المعالجة. يرجى المحاولة مرة أخرى.',
     back: 'رجوع',
+    backToDocuments: 'العودة إلى المستندات',
     backToDashboard: 'العودة إلى لوحة التحكم',
+    uploadAgain: 'رفع ملف آخر',
     uploaded: 'تاريخ الرفع',
     language: 'اللغة',
     tabs: {
@@ -166,6 +172,7 @@ export default {
       cardCounter: 'البطاقة {current} من {total}',
       question: 'السؤال',
       answer: 'الإجابة',
+      empty: 'لا توجد بطاقات تعليمية متاحة لهذا المستند.',
       flipHint: 'انقر للقلب',
       previous: 'السابق',
       next: 'التالي'
@@ -198,6 +205,7 @@ export default {
       reviewNotAnswered: 'لم تتم الإجابة',
       reviewCorrect: 'صحيح',
       reviewIncorrect: 'خاطئ',
+      empty: 'لا توجد أسئلة اختبار متاحة لهذا المستند.',
       retake: 'إعادة الاختبار'
     }
   },
@@ -217,6 +225,7 @@ export default {
     },
     statuses: {
       queued: 'قيد الانتظار',
+      processing: 'قيد المعالجة',
       running: 'قيد المعالجة',
       complete: 'جاهز',
       failed: 'فشل',

@@ -4,9 +4,6 @@
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
 
-  const JUST_UPLOADED_DOCUMENT_KEY = "just-uploaded-document-id";
-  const JUST_UPLOADED_JOB_CONTEXT_KEY = "just-uploaded-job-context";
-
   let user = null;
   let documents = [];
   let selectedFile = null;
@@ -162,18 +159,12 @@
         xhr.send(formData);
       });
 
-      const jobId = data?.jobId;
       const documentId = data?.documentId ?? data?.document?.id;
-      if (!jobId || !documentId) {
-        throw new Error("Upload succeeded without job or document context");
+      if (!documentId) {
+        throw new Error("Upload succeeded without document context");
       }
 
       if (typeof window !== "undefined") {
-        sessionStorage.setItem(JUST_UPLOADED_DOCUMENT_KEY, documentId);
-        sessionStorage.setItem(
-          JUST_UPLOADED_JOB_CONTEXT_KEY,
-          JSON.stringify({ documentId, jobId })
-        );
         window.location.hash = `/documents/${documentId}`;
       }
     } catch (err) {

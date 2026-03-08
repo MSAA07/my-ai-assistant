@@ -5,8 +5,7 @@
   import { language as languageStore } from "../lib/stores/language.js";
   import StatusBadge from "../lib/components/ui/StatusBadge.svelte";
 
-  const JUST_UPLOADED_DOCUMENT_KEY = "just-uploaded-document-id";
-  const JUST_UPLOADED_JOB_CONTEXT_KEY = "just-uploaded-job-context";
+  const POLL_INTERVAL_MS = 2000;
 
   export let documentId;
   export let documentSection = "summary";
@@ -17,14 +16,10 @@
   let errorArgs = {};
   let customError = "";
   let error = "";
-  let processingStatus = "complete";
+  let processingStatus = "queued";
   let activeTab = "summary";
   let fetchedDocumentId = "";
   let pollTimeout = null;
-  let showProcessingPlaceholder = false;
-  let jobId = "";
-  let jobStatus = "";
-  let jobProgressPct = 0;
 
   const VALID_TABS = new Set(["summary", "flashcards", "exam", "notes", "activity"]);
 
@@ -43,7 +38,7 @@
 
   const statusMap = {
     queued: "processing",
-    running: "processing",
+    processing: "processing",
     complete: "ready",
     failed: "failed"
   };
@@ -52,6 +47,13 @@
 
   $: _lang = $languageStore;
   $: error = errorKey ? t(errorKey, errorArgs) : customError;
+  $: safeFlashcards = Array.isArray(docData?.flashcards) ? docData.flashcards : [];
+  $: safeExamQuestions = Array.isArray(docData?.examQuestions) ? docData.examQuestions : [];
+  $: currentFlashcard = safeFlashcards[currentCardIndex] ?? null;
+  $: isProcessingActive = Boolean(docData) && (processingStatus === "queued" || processingStatus === "processing");
+  $: isProcessingFailure = Boolean(docData) && processingStatus === "failed";
+  $: processingTitle = t("document.aiGenerating");
+  $: processingNote = t("document.aiGeneratingNote");
 
   $: normalizedTab = VALID_TABS.has((documentSection || "").toLowerCase())
     ? (documentSection || "summary").toLowerCase()
@@ -63,32 +65,13 @@
   }
 
   $: if (documentId && documentId !== fetchedDocumentId) {
-    clearPollTimeout();
     fetchedDocumentId = documentId;
-    docData = null;
-    shuffledCards = [];
-    processingStatus = "complete";
-    errorKey = "";
-    errorArgs = {};
-    customError = "";
-    resetJobState();
-
-    const freshJobContext = getFreshUploadJobContext(documentId);
-    if (freshJobContext) {
-      loading = false;
-      showProcessingPlaceholder = true;
-      processingStatus = "queued";
-      jobId = freshJobContext.jobId;
-      jobStatus = "queued";
-      pollJobStatus(freshJobContext.jobId, documentId);
-    } else {
-      showProcessingPlaceholder = isFreshUpload(documentId);
-      fetchDocument({ background: showProcessingPlaceholder });
-    }
+    resetDocumentState();
+    void fetchDocument();
   }
 
   onDestroy(() => {
-    clearPollTimeout();
+    stopPolling();
   });
 
   function clearPollTimeout() {
@@ -98,172 +81,59 @@
     }
   }
 
-  function resetJobState() {
-    jobId = "";
-    jobStatus = "";
-    jobProgressPct = 0;
-  }
-
-  function clampProgress(progress) {
-    const numericProgress = Number(progress);
-    if (!Number.isFinite(numericProgress)) {
-      return 0;
-    }
-
-    return Math.min(100, Math.max(0, Math.round(numericProgress)));
-  }
-
-  function isFreshUpload(docId) {
-    return typeof window !== "undefined"
-      && sessionStorage.getItem(JUST_UPLOADED_DOCUMENT_KEY) === docId;
-  }
-
-  function getFreshUploadJobContext(docId) {
-    if (!isFreshUpload(docId) || typeof window === "undefined") {
-      return null;
-    }
-
-    const rawContext = sessionStorage.getItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
-    if (!rawContext) {
-      return null;
-    }
-
-    try {
-      const context = JSON.parse(rawContext);
-      if (context?.documentId === docId && context?.jobId) {
-        return context;
-      }
-    } catch (error) {
-      console.error("Invalid stored upload job context:", error);
-    }
-
-    sessionStorage.removeItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
-    return null;
-  }
-
-  function clearFreshUpload(docId) {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    if (sessionStorage.getItem(JUST_UPLOADED_DOCUMENT_KEY) === docId) {
-      sessionStorage.removeItem(JUST_UPLOADED_DOCUMENT_KEY);
-    }
-
-    const rawContext = sessionStorage.getItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
-    if (!rawContext) {
-      return;
-    }
-
-    try {
-      const context = JSON.parse(rawContext);
-      if (context?.documentId === docId) {
-        sessionStorage.removeItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
-      }
-    } catch {
-      sessionStorage.removeItem(JUST_UPLOADED_JOB_CONTEXT_KEY);
-    }
-  }
-
-  async function pollJobStatus(targetJobId = jobId, targetDocumentId = documentId) {
-    if (!targetJobId || !targetDocumentId) {
-      showProcessingPlaceholder = false;
-      loading = false;
-      errorKey = "document.jobStatusError";
-      errorArgs = {};
-      customError = "";
-      resetJobState();
-      return;
-    }
-
+  function stopPolling() {
     clearPollTimeout();
+  }
 
-    try {
-      const response = await fetch(
-        `${API_BASE}/api/jobs/${targetJobId}`,
-        { credentials: "include" }
-      );
+  function schedulePoll(callback, delay = POLL_INTERVAL_MS) {
+    clearPollTimeout();
+    pollTimeout = setTimeout(() => {
+      void callback();
+    }, delay);
+  }
 
-      let data = null;
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
+  function resetDocumentState() {
+    stopPolling();
+    docData = null;
+    loading = true;
+    processingStatus = "queued";
+    errorKey = "";
+    errorArgs = {};
+    customError = "";
+    currentCardIndex = 0;
+    showAnswer = false;
+    shuffledCards = [];
+    resetExam();
+  }
 
-      if (targetDocumentId !== documentId || targetJobId !== jobId) {
-        return;
-      }
+  function normalizeDocumentStatus(status) {
+    const normalizedStatus = typeof status === "string" ? status.toLowerCase() : "";
 
-      if (!response.ok || !data || typeof data.status !== "string") {
-        clearFreshUpload(targetDocumentId);
-        showProcessingPlaceholder = false;
-        loading = false;
-        errorKey = "document.jobStatusError";
-        errorArgs = {};
-        customError = "";
-        resetJobState();
-        return;
-      }
-
-      jobStatus = data.status;
-      jobProgressPct = clampProgress(data.progressPct);
-
-      if (jobStatus === "queued" || jobStatus === "running") {
-        processingStatus = jobStatus;
-        showProcessingPlaceholder = true;
-        loading = false;
-        pollTimeout = setTimeout(() => {
-          pollJobStatus(targetJobId, targetDocumentId);
-        }, 2000);
-        return;
-      }
-
-      if (jobStatus === "succeeded") {
-        jobProgressPct = 100;
-        clearFreshUpload(targetDocumentId);
-        showProcessingPlaceholder = true;
-        await fetchDocument({ background: true });
-        return;
-      }
-
-      if (jobStatus === "failed") {
-        clearFreshUpload(targetDocumentId);
-        showProcessingPlaceholder = false;
-        loading = false;
-        processingStatus = "failed";
-        errorArgs = {};
-        if (data.errorMessage) {
-          errorKey = "";
-          customError = data.errorMessage;
-        } else {
-          errorKey = "document.processingFailed";
-          customError = "";
-        }
-        resetJobState();
-        return;
-      }
-
-      clearFreshUpload(targetDocumentId);
-      showProcessingPlaceholder = false;
-      loading = false;
-      errorKey = "document.jobStatusError";
-      errorArgs = {};
-      customError = "";
-      resetJobState();
-    } catch (err) {
-      if (targetDocumentId !== documentId || targetJobId !== jobId) {
-        return;
-      }
-
-      clearFreshUpload(targetDocumentId);
-      showProcessingPlaceholder = false;
-      loading = false;
-      errorKey = "document.jobStatusError";
-      errorArgs = {};
-      customError = "";
-      resetJobState();
+    if (normalizedStatus === "queued" || normalizedStatus === "processing" || normalizedStatus === "complete" || normalizedStatus === "failed") {
+      return normalizedStatus;
     }
+
+    return "failed";
+  }
+
+  function isDocumentPayloadReady(document) {
+    const hasSummary = typeof document?.summary === "string"
+      && document.summary.trim().length > 0;
+    const hasFlashcards = Array.isArray(document?.flashcards)
+      && document.flashcards.length > 0;
+    const hasExamQuestions = Array.isArray(document?.examQuestions)
+      && document.examQuestions.length > 0;
+
+    return Boolean(document?.id) && hasSummary && hasFlashcards && hasExamQuestions;
+  }
+
+  function setDocument(nextDocument) {
+    docData = nextDocument;
+    processingStatus = normalizeDocumentStatus(nextDocument?.processingStatus);
+    shuffledCards = [...(Array.isArray(nextDocument?.flashcards) ? nextDocument.flashcards : [])];
+    currentCardIndex = 0;
+    showAnswer = false;
+    resetExam();
   }
 
   async function fetchDocument({ background = false } = {}) {
@@ -282,51 +152,47 @@
         `${API_BASE}/api/document/${documentId}`,
         { credentials: 'include' }
       );
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
+
+      if (fetchedDocumentId !== documentId) {
+        return;
+      }
 
       if (response.ok) {
-        docData = data.document;
-        processingStatus = docData.processingStatus || 'complete';
+        const nextDocument = data.document;
+        setDocument(nextDocument);
 
-        if (processingStatus === 'queued' || processingStatus === 'running') {
-          showProcessingPlaceholder = true;
-          pollTimeout = setTimeout(() => {
-            fetchDocument({ background: true });
-          }, 2000);
-        } else if (processingStatus === 'failed') {
-          showProcessingPlaceholder = false;
-          clearFreshUpload(documentId);
-          resetJobState();
-          errorKey = "document.processingFailed";
-          errorArgs = {};
-          customError = "";
-        } else {
-          showProcessingPlaceholder = false;
-          clearFreshUpload(documentId);
-          resetJobState();
-          shuffledCards = [...(docData.flashcards || [])];
-          errorKey = "";
-          errorArgs = {};
-          customError = "";
+        if (processingStatus === 'queued' || processingStatus === 'processing') {
+          schedulePoll(() => fetchDocument({ background: true }));
+          return;
         }
-      } else {
-        showProcessingPlaceholder = false;
-        clearFreshUpload(documentId);
-        resetJobState();
-        if (data.error) {
-          errorKey = "";
+
+        if (processingStatus === 'failed') {
+          customError = nextDocument?.processingError || t('document.processingFailed');
+          return;
+        }
+
+        if (!isDocumentPayloadReady(nextDocument)) {
+          processingStatus = "failed";
+          errorKey = "document.loadingError";
           errorArgs = {};
-          customError = data.error;
-        } else {
-          errorKey = "document.notFound";
-          errorArgs = {};
-          customError = "";
+          customError = nextDocument?.processingError || "";
+          return;
         }
       }
+
+      processingStatus = "failed";
+      if (data?.error) {
+        customError = data.error;
+      } else {
+        errorKey = "document.notFound";
+      }
     } catch (err) {
-      showProcessingPlaceholder = false;
-      clearFreshUpload(documentId);
-      resetJobState();
+      if (fetchedDocumentId !== documentId) {
+        return;
+      }
+
+      processingStatus = "failed";
       errorKey = "document.loadingError";
       errorArgs = {};
       customError = "";
@@ -337,7 +203,7 @@
 
   function onTabChanged(tab) {
     if (tab === "flashcards") {
-      if (shuffledCards.length > 0) {
+      if (safeFlashcards.length > 0) {
         currentCardIndex = 0;
         showAnswer = false;
       }
@@ -380,9 +246,13 @@
 
   // Exam functions
   function startExam() {
+    if (safeExamQuestions.length === 0) {
+      return;
+    }
+
     examStarted = true;
     currentQuestionIndex = 0;
-    userAnswers = new Array(docData.examQuestions.length).fill(null);
+    userAnswers = new Array(safeExamQuestions.length).fill(null);
     examComplete = false;
   }
 
@@ -400,7 +270,7 @@
   }
 
   function nextQuestion() {
-    if (currentQuestionIndex < docData.examQuestions.length - 1) {
+    if (currentQuestionIndex < safeExamQuestions.length - 1) {
       currentQuestionIndex++;
     }
   }
@@ -414,7 +284,7 @@
   function submitExam() {
     // Calculate score
     let correct = 0;
-    docData.examQuestions.forEach((q, i) => {
+    safeExamQuestions.forEach((q, i) => {
       if (userAnswers[i] === q.correctAnswer) {
         correct++;
       }
@@ -429,45 +299,36 @@
   function goBack() {
     window.location.hash = '/documents';
   }
+
+  function goToDashboard() {
+    window.location.hash = '/dashboard';
+  }
 </script>
 
-{#if loading && !showProcessingPlaceholder}
+{#if loading && !docData}
   <div class="loading-container">
     <div class="loading-spinner"></div>
     <p>{t('document.loading')}</p>
   </div>
 {:else if error}
   <div class="error-container">
-    <h2>{t('status.failed')}</h2>
+    <h2>{isProcessingFailure ? t('document.processingFailedTitle') : t('status.failed')}</h2>
     <p>{error}</p>
-    <button on:click={goBack}>{t('document.backToDashboard')}</button>
+    {#if isProcessingFailure}
+      <p class="error-note">{t('document.processingFailedHelp')}</p>
+      <div class="error-actions">
+        <button class="secondary-action" on:click={goBack}>{t('document.backToDocuments')}</button>
+        <button class="primary-action" on:click={goToDashboard}>{t('document.uploadAgain')}</button>
+      </div>
+    {:else}
+      <button on:click={goBack}>{t('document.backToDocuments')}</button>
+    {/if}
   </div>
-{:else if processingStatus === 'queued' || processingStatus === 'running' || showProcessingPlaceholder}
+{:else if isProcessingActive}
   <div class="loading-container">
     <div class="loading-spinner"></div>
-    <p>{t('document.aiGenerating')}</p>
-    <p class="processing-note">{t('document.aiGeneratingNote')}</p>
-    {#if jobId}
-      <div class="processing-progress">
-        <div class="processing-progress-meta">
-          <p>{t('document.processingProgress', { progress: jobProgressPct })}</p>
-          <span>{jobProgressPct}%</span>
-        </div>
-        <div
-          class="processing-progress-bar"
-          role="progressbar"
-          aria-label={t('document.processingProgress', { progress: jobProgressPct })}
-          aria-valuenow={jobProgressPct}
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          <div
-            class="processing-progress-fill"
-            style={`width: ${jobProgressPct}%`}
-          ></div>
-        </div>
-      </div>
-    {/if}
+    <p>{processingTitle}</p>
+    <p class="processing-note">{processingNote}</p>
   </div>
 {:else if docData}
   <div class="document-view">
@@ -495,14 +356,14 @@
         class:active={activeTab === "flashcards"}
         on:click={() => setTab("flashcards")}
       >
-        {t('document.tabs.flashcards', { count: docData.flashcardCount ?? (docData.flashcards ? docData.flashcards.length : 0) })}
+        {t('document.tabs.flashcards', { count: docData.flashcardCount ?? safeFlashcards.length })}
       </button>
       <button
         class="tab"
         class:active={activeTab === "exam"}
         on:click={() => setTab("exam")}
       >
-        {t('document.tabs.exam', { count: docData.questionCount ?? (docData.examQuestions ? docData.examQuestions.length : 0) })}
+        {t('document.tabs.exam', { count: docData.questionCount ?? safeExamQuestions.length })}
       </button>
     </div>
 
@@ -516,53 +377,63 @@
         </div>
       {:else if activeTab === "flashcards"}
         <div class="flashcards-section">
-          <div class="flashcard-controls">
-            <button class="shuffle-btn" on:click={shuffleCards}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-              {t('document.flashcards.shuffle')}
-            </button>
-            <span class="card-counter">
-              {t('document.flashcards.cardCounter', { current: currentCardIndex + 1, total: shuffledCards.length })}
-            </span>
-          </div>
+          {#if !currentFlashcard}
+            <div class="summary-section">
+              <div class="summary-text">{t('document.flashcards.empty')}</div>
+            </div>
+          {:else}
+            <div class="flashcard-controls">
+              <button class="shuffle-btn" on:click={shuffleCards}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                {t('document.flashcards.shuffle')}
+              </button>
+              <span class="card-counter">
+                {t('document.flashcards.cardCounter', { current: currentCardIndex + 1, total: shuffledCards.length })}
+              </span>
+            </div>
 
-          <div class="flashcard" class:flipped={showAnswer} on:click={flipCard} on:keydown={(e) => e.key === 'Enter' && flipCard()} role="button" tabindex="0">
-            <div class="flashcard-inner">
-              <div class="flashcard-front">
-                <div class="card-label">{t('document.flashcards.question')}</div>
-                <div class="card-text">
-                  {shuffledCards[currentCardIndex].question}
+            <div class="flashcard" class:flipped={showAnswer} on:click={flipCard} on:keydown={(e) => e.key === 'Enter' && flipCard()} role="button" tabindex="0">
+              <div class="flashcard-inner">
+                <div class="flashcard-front">
+                  <div class="card-label">{t('document.flashcards.question')}</div>
+                  <div class="card-text">
+                    {currentFlashcard.question}
+                  </div>
+                  <div class="flip-hint">{t('document.flashcards.flipHint')}</div>
                 </div>
-                <div class="flip-hint">{t('document.flashcards.flipHint')}</div>
-              </div>
-              <div class="flashcard-back">
-                <div class="card-label">{t('document.flashcards.answer')}</div>
-                <div class="card-text">
-                  {shuffledCards[currentCardIndex].answer}
+                <div class="flashcard-back">
+                  <div class="card-label">{t('document.flashcards.answer')}</div>
+                  <div class="card-text">
+                    {currentFlashcard.answer}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="flashcard-nav">
-            <button on:click={previousCard} disabled={currentCardIndex === 0}>
-              {t('document.flashcards.previous')}
-            </button>
-            <button
-              on:click={nextCard}
-              disabled={currentCardIndex === shuffledCards.length - 1}
-            >
-              {t('document.flashcards.next')}
-            </button>
-          </div>
+            <div class="flashcard-nav">
+              <button on:click={previousCard} disabled={currentCardIndex === 0}>
+                {t('document.flashcards.previous')}
+              </button>
+              <button
+                on:click={nextCard}
+                disabled={currentCardIndex === shuffledCards.length - 1}
+              >
+                {t('document.flashcards.next')}
+              </button>
+            </div>
+          {/if}
         </div>
       {:else if activeTab === "exam"}
         <div class="exam-section">
-          {#if !examStarted}
+          {#if safeExamQuestions.length === 0}
+            <div class="summary-section">
+              <div class="summary-text">{t('document.exam.empty')}</div>
+            </div>
+          {:else if !examStarted}
             <div class="exam-intro">
               <h2>{t('document.exam.readyTitle')}</h2>
               <p>
-                {t('document.exam.questionCount', { count: docData.examQuestions.length })}
+                {t('document.exam.questionCount', { count: safeExamQuestions.length })}
               </p>
 
               <div class="exam-options">
@@ -603,16 +474,16 @@
                 <div
                   class="progress-fill"
                   style="width: {((currentQuestionIndex + 1) /
-                    docData.examQuestions.length) *
+                    safeExamQuestions.length) *
                     100}%"
                 ></div>
               </div>
               <p>
-                {t('document.exam.progress', { current: currentQuestionIndex + 1, total: docData.examQuestions.length })}
+                {t('document.exam.progress', { current: currentQuestionIndex + 1, total: safeExamQuestions.length })}
               </p>
             </div>
 
-            {#each docData.examQuestions as question, i}
+            {#each safeExamQuestions as question, i}
               {#if i === currentQuestionIndex}
                 <div class="question-card">
                   <h3>{t('document.exam.questionNumber', { index: i + 1 })}</h3>
@@ -673,7 +544,7 @@
                 {t('document.exam.previous')}
               </button>
 
-              {#if currentQuestionIndex < docData.examQuestions.length - 1}
+              {#if currentQuestionIndex < safeExamQuestions.length - 1}
                 <button on:click={nextQuestion}>{t('document.exam.next')}</button>
               {:else}
                 <button
@@ -692,17 +563,17 @@
                 <div class="score-circle">
                   <span class="score-value"
                     >{Math.round(
-                      (score / docData.examQuestions.length) * 100,
+                      (score / safeExamQuestions.length) * 100,
                     )}%</span
                   >
                 </div>
                 <p class="score-text">
-                  {t('document.exam.score', { score, total: docData.examQuestions.length })}
+                  {t('document.exam.score', { score, total: safeExamQuestions.length })}
                 </p>
               </div>
 
               <h3>{t('document.exam.reviewTitle')}</h3>
-              {#each docData.examQuestions as question, i}
+              {#each safeExamQuestions as question, i}
                 <div
                   class="review-question"
                   class:correct={userAnswers[i] === question.correctAnswer}
@@ -762,45 +633,17 @@
     margin-top: 0.5rem;
   }
 
-  .processing-progress {
-    width: min(100%, 420px);
-    margin: 1.5rem auto 0;
-    text-align: start;
-  }
-
-  .processing-progress-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .processing-progress-meta p {
-    margin: 0;
+  .error-note {
     color: var(--color-text-secondary);
-    font-size: 0.95rem;
+    margin-top: 0.5rem;
   }
 
-  .processing-progress-meta span {
-    color: var(--color-accent-primary);
-    font-size: 0.95rem;
-    font-weight: 700;
-  }
-
-  .processing-progress-bar {
-    width: 100%;
-    height: 0.75rem;
-    background: var(--color-border);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  .processing-progress-fill {
-    height: 100%;
-    background: var(--gradient-accent-strong);
-    border-radius: inherit;
-    transition: width var(--motion-fast) var(--ease-standard);
+  .error-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
   }
 
   .loading-spinner {
@@ -827,6 +670,17 @@
   .error-container button:hover {
     background: var(--color-surface-1);
     border-color: var(--color-accent-primary);
+  }
+
+  .error-container .primary-action {
+    background: var(--gradient-accent-strong);
+    color: var(--color-bg);
+    border: none;
+  }
+
+  .error-container .primary-action:hover {
+    background: var(--gradient-accent-strong);
+    box-shadow: 0 6px 24px var(--color-glow);
   }
 
   @keyframes spin {
