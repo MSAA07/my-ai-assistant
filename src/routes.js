@@ -10,6 +10,7 @@ const LEGACY_REDIRECTS = new Map([
   ['/app', DEFAULT_AUTH_PATH],
   ['/app/', DEFAULT_AUTH_PATH],
   ['/home', '/dashboard'],
+  ['/upload', DEFAULT_AUTH_PATH],
   ['/exams', '/documents'],
   ['/flashcards', '/documents'],
   ['/summary', '/documents']
@@ -33,16 +34,6 @@ export const STATIC_ROUTES = [
     labelKey: 'nav.documents',
     pageTitleKey: 'nav.documents',
     icon: 'documents',
-    showInSidebar: true,
-    showInBottomNav: true
-  },
-  {
-    id: 'upload',
-    path: '/upload',
-    component: Home,
-    labelKey: 'nav.upload',
-    pageTitleKey: 'home.uploadSection.title',
-    icon: 'upload',
     showInSidebar: true,
     showInBottomNav: true
   },

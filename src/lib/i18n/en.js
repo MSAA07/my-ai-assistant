@@ -30,7 +30,6 @@ export default {
   nav: {
     dashboard: 'Dashboard',
     documents: 'My Documents',
-    upload: 'Upload',
     exams: 'Exams',
     flashcards: 'Flashcards',
     adminPanel: 'Admin Panel',
