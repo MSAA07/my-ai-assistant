@@ -6,6 +6,7 @@
   import StatusBadge from "../lib/components/ui/StatusBadge.svelte";
 
   const POLL_INTERVAL_MS = 2000;
+  const EXCERPT_PAGE_LIMIT = 25;
   const FEATURE_KEYS = ["summary", "flashcards", "exam"];
 
   export let documentId;
@@ -26,6 +27,14 @@
   let summaryLength = "medium";
   let flashcardsIncludeExplanations = false;
   let examQuestionCount = 10;
+  let sourceExcerpts = [];
+  let sourceLoading = false;
+  let sourceLoadingMore = false;
+  let sourceError = "";
+  let sourcePage = 1;
+  let sourceTotal = 0;
+  let sourceHasMore = false;
+  let sourceDocumentId = "";
 
   const VALID_TABS = new Set(["summary", "flashcards", "exam", "notes", "activity"]);
 
@@ -56,9 +65,16 @@
   $: safeFlashcards = Array.isArray(docData?.flashcards) ? docData.flashcards : [];
   $: safeExamQuestions = Array.isArray(docData?.examQuestions) ? docData.examQuestions : [];
   $: hasSummaryContent = hasText(docData?.summary);
+  $: hasAnyGeneratedContent = hasSummaryContent || safeFlashcards.length > 0 || safeExamQuestions.length > 0;
   $: currentFlashcard = shuffledCards[currentCardIndex] ?? null;
   $: isProcessingActive = Boolean(docData) && isExtractionActiveStatus(processingStatus);
   $: isProcessingFailure = Boolean(docData) && processingStatus === "failed";
+  $: hasAnyGenerationInProgress = FEATURE_KEYS.some((featureKey) => isGenerationActiveStatus(
+    normalizeGenerationStatus(docData?.generationState?.[featureKey]?.status)
+  ));
+  $: hasAnyGenerationFailed = FEATURE_KEYS.some((featureKey) => normalizeGenerationStatus(
+    docData?.generationState?.[featureKey]?.status
+  ) === "failed");
   $: processingTitle = t("document.extracting");
   $: processingNote = t("document.extractingNote");
   $: summaryFeature = createFeatureState("summary", docData, processingStatus, pendingFeatureRequests, featureRequestErrors, _lang);
@@ -78,6 +94,11 @@
     fetchedDocumentId = documentId;
     resetDocumentState();
     void fetchDocument();
+  }
+
+  $: if (docData?.id && processingStatus === "complete" && sourceDocumentId !== docData.id && !sourceLoading) {
+    sourceDocumentId = docData.id;
+    void fetchSourceExcerpts({ page: 1, append: false });
   }
 
   onDestroy(() => {
@@ -138,6 +159,14 @@
     currentCardIndex = 0;
     showAnswer = false;
     shuffledCards = [];
+    sourceExcerpts = [];
+    sourceLoading = false;
+    sourceLoadingMore = false;
+    sourceError = "";
+    sourcePage = 1;
+    sourceTotal = 0;
+    sourceHasMore = false;
+    sourceDocumentId = "";
     resetExam();
   }
 
@@ -327,6 +356,63 @@
     if (examQuestionsChanged) {
       resetExam();
     }
+  }
+
+  async function fetchSourceExcerpts({ page = 1, append = false } = {}) {
+    if (!documentId || processingStatus !== "complete") {
+      return;
+    }
+
+    if (append) {
+      sourceLoadingMore = true;
+    } else {
+      sourceLoading = true;
+    }
+    sourceError = "";
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/document/${documentId}/excerpts?page=${page}&limit=${EXCERPT_PAGE_LIMIT}`,
+        { credentials: "include" }
+      );
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || t("document.source.loadError"));
+      }
+
+      const nextExcerpts = Array.isArray(data?.excerpts) ? data.excerpts : [];
+      sourceExcerpts = append ? [...sourceExcerpts, ...nextExcerpts] : nextExcerpts;
+      sourcePage = Number(data?.pagination?.page || page);
+      sourceTotal = Number(data?.pagination?.total || sourceExcerpts.length);
+      sourceHasMore = Boolean(data?.pagination?.hasMore);
+    } catch (err) {
+      sourceError = normalizeString(err?.message) || t("document.source.loadError");
+    } finally {
+      sourceLoading = false;
+      sourceLoadingMore = false;
+    }
+  }
+
+  function loadMoreSourceExcerpts() {
+    if (sourceLoadingMore || !sourceHasMore) {
+      return;
+    }
+
+    void fetchSourceExcerpts({ page: sourcePage + 1, append: true });
+  }
+
+  function getExcerptTypeLabel(excerptType) {
+    const normalized = normalizeString(excerptType).toLowerCase();
+    if (normalized === "speaker_note") {
+      return t("document.source.speakerNote");
+    }
+
+    if (normalized === "slide_text") {
+      return t("document.source.slideText");
+    }
+
+    return t("document.source.excerpt");
   }
 
   async function fetchDocument({ background = false } = {}) {
@@ -606,7 +692,7 @@
     <div class="document-header">
       <div class="header-line">
         <button class="back-btn" on:click={goBack}>{t('document.back')}</button>
-        <StatusBadge status={statusTone} />
+        <StatusBadge status={statusTone} label={t(`documentsPage.statuses.${processingStatus}`)} />
       </div>
       <h1>{docData.originalName}</h1>
       <p class="doc-meta">
@@ -614,6 +700,86 @@
       </p>
     </div>
 
+    <section class="hub-panel lifecycle-panel">
+      <h2>{t("document.hub.statusTitle")}</h2>
+      <p class="panel-note">{t("document.hub.statusSubtitle")}</p>
+      {#if hasAnyGenerationInProgress}
+        <div class="feature-banner">
+          {t("document.hub.generationRunning")}
+        </div>
+      {:else if hasAnyGenerationFailed}
+        <div class="feature-banner feature-banner--error">
+          {t("document.hub.generationFailed")}
+        </div>
+      {/if}
+    </section>
+
+    <section class="hub-panel source-panel">
+      <div class="panel-title-row">
+        <h2>{t("document.source.title")}</h2>
+        <span class="meta-pill">{t("document.source.count", { count: sourceTotal || sourceExcerpts.length })}</span>
+      </div>
+      <p class="panel-note">{t("document.source.description")}</p>
+
+      {#if sourceLoading && sourceExcerpts.length === 0}
+        <div class="source-empty">{t("document.source.loading")}</div>
+      {:else if sourceError && sourceExcerpts.length === 0}
+        <div class="source-empty">
+          <p>{sourceError}</p>
+          <button class="secondary-action" type="button" on:click={() => fetchSourceExcerpts({ page: 1, append: false })}>
+            {t("document.source.retry")}
+          </button>
+        </div>
+      {:else if sourceExcerpts.length === 0}
+        <div class="source-empty">{t("document.source.empty")}</div>
+      {:else}
+        <div class="source-list">
+          {#each sourceExcerpts as excerpt}
+            <article class="source-item">
+              <p class="source-item-meta">
+                {t("document.source.page", { page: excerpt.slideOrPage })} · {getExcerptTypeLabel(excerpt.excerptType)}
+              </p>
+              <p class="source-item-content">{excerpt.content}</p>
+            </article>
+          {/each}
+        </div>
+        {#if sourceHasMore}
+          <button class="secondary-action" type="button" disabled={sourceLoadingMore} on:click={loadMoreSourceExcerpts}>
+            {sourceLoadingMore ? t("document.source.loadingMore") : t("document.source.loadMore")}
+          </button>
+        {/if}
+      {/if}
+    </section>
+
+    <section class="hub-panel actions-panel">
+      <h2>{t("document.hub.actionsTitle")}</h2>
+      <p class="panel-note">
+        {hasAnyGeneratedContent ? t("document.hub.actionsSubtitleExisting") : t("document.hub.actionsSubtitleEmpty")}
+      </p>
+      <div class="quick-actions-grid">
+        <article class="quick-action-card">
+          <h3>{t("document.tabs.summary")}</h3>
+          <button class="feature-action-btn" on:click={() => triggerGeneration("summary")} disabled={!summaryFeature.canSubmit}>
+            {t(getFeatureActionLabelKey(summaryFeature))}
+          </button>
+        </article>
+        <article class="quick-action-card">
+          <h3>{t("document.tabs.flashcards", { count: docData.flashcardCount ?? safeFlashcards.length })}</h3>
+          <button class="feature-action-btn" on:click={() => triggerGeneration("flashcards")} disabled={!flashcardsFeature.canSubmit}>
+            {t(getFeatureActionLabelKey(flashcardsFeature))}
+          </button>
+        </article>
+        <article class="quick-action-card">
+          <h3>{t("document.tabs.exam", { count: docData.questionCount ?? safeExamQuestions.length })}</h3>
+          <button class="feature-action-btn" on:click={() => triggerGeneration("exam")} disabled={!examFeature.canSubmit}>
+            {t(getFeatureActionLabelKey(examFeature))}
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <section class="hub-panel study-panel">
+    <h2>{t("document.hub.materialsTitle")}</h2>
     <div class="tabs">
       <button
         class="tab"
@@ -998,6 +1164,7 @@
         </div>
       {/if}
     </div>
+    </section>
   </div>
 {/if}
 
@@ -1071,6 +1238,119 @@
   .document-view {
     max-width: 100%;
     padding: 1rem;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .hub-panel {
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    padding: var(--space-5);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .panel-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .panel-title-row h2,
+  .hub-panel h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+
+  .panel-note {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .quick-actions-grid {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .quick-action-card {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    padding: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .quick-action-card h3 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+  }
+
+  .source-list {
+    display: grid;
+    gap: var(--space-3);
+    max-height: 460px;
+    overflow: auto;
+    padding-inline-end: 0.25rem;
+  }
+
+  .source-item {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    padding: var(--space-3);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .source-item-meta {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  .source-item-content {
+    margin: 0;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  .source-empty {
+    min-height: 96px;
+    display: grid;
+    align-content: center;
+    gap: var(--space-3);
+    color: var(--color-text-secondary);
+  }
+
+  .secondary-action {
+    justify-self: start;
+    min-height: 40px;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-1);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    font-weight: 600;
   }
 
   .document-header {

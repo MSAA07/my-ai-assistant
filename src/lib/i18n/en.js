@@ -196,6 +196,31 @@ export default {
       flashcards: 'Flashcards ({count})',
       exam: 'Mock Exam ({count})'
     },
+    hub: {
+      statusTitle: 'Document lifecycle',
+      statusSubtitle: 'Extraction status comes from the document lifecycle and generation runs per study tool.',
+      generationRunning: 'A study-material generation is in progress. Existing content remains available.',
+      generationFailed: 'A recent generation failed. You can retry from the relevant study tool.',
+      actionsTitle: 'Generation actions',
+      actionsSubtitleEmpty: 'No generated study materials yet. Start by generating one or more study tools.',
+      actionsSubtitleExisting: 'Generate more or regenerate any study tool without leaving this workspace.',
+      materialsTitle: 'Study materials'
+    },
+    source: {
+      title: 'Source content',
+      description: 'Extracted document excerpts used for generation. Keep reading while study tools generate.',
+      count: '{count} excerpts',
+      loading: 'Loading extracted source content...',
+      loadError: 'Failed to load source content.',
+      retry: 'Retry loading source',
+      empty: 'No readable source excerpts are available for this document yet.',
+      page: 'Page/Slide {page}',
+      loadMore: 'Load more excerpts',
+      loadingMore: 'Loading more...',
+      slideText: 'Slide text',
+      speakerNote: 'Speaker note',
+      excerpt: 'Excerpt'
+    },
     summary: {
       generatePrompt: 'Generate a summary when you are ready to study this document.'
     },
