@@ -61,9 +61,9 @@
   $: isProcessingFailure = Boolean(docData) && processingStatus === "failed";
   $: processingTitle = t("document.extracting");
   $: processingNote = t("document.extractingNote");
-  $: summaryFeature = createFeatureState("summary", _lang);
-  $: flashcardsFeature = createFeatureState("flashcards", _lang);
-  $: examFeature = createFeatureState("exam", _lang);
+  $: summaryFeature = createFeatureState("summary", docData, processingStatus, pendingFeatureRequests, featureRequestErrors, _lang);
+  $: flashcardsFeature = createFeatureState("flashcards", docData, processingStatus, pendingFeatureRequests, featureRequestErrors, _lang);
+  $: examFeature = createFeatureState("exam", docData, processingStatus, pendingFeatureRequests, featureRequestErrors, _lang);
 
   $: normalizedTab = VALID_TABS.has((documentSection || "").toLowerCase())
     ? (documentSection || "summary").toLowerCase()
@@ -187,20 +187,22 @@
     };
   }
 
-  function createFeatureState(featureKey) {
-    const generation = docData?.generationState?.[featureKey] ?? {};
+  function createFeatureState(featureKey, document, extractionStatus, pendingRequests, requestErrors, _langSignal) {
+    void _langSignal;
+
+    const generation = document?.generationState?.[featureKey] ?? {};
     const status = normalizeGenerationStatus(generation?.status);
-    const { hasMirrorContent } = getFeatureContentState(featureKey);
-    const isBusy = pendingFeatureRequests[featureKey] || isGenerationActiveStatus(status);
-    const errorMessage = normalizeString(featureRequestErrors[featureKey]) || normalizeString(generation?.errorMessage);
-    const shouldUseRegenerate = hasMirrorContent || status === "complete" || status === "failed";
+    const { hasMirrorContent } = getFeatureContentState(featureKey, document);
+    const isBusy = Boolean(pendingRequests?.[featureKey]) || isGenerationActiveStatus(status);
+    const errorMessage = normalizeString(requestErrors?.[featureKey]) || normalizeString(generation?.errorMessage);
+    const shouldUseRegenerate = hasMirrorContent || status === "complete";
 
     return {
       status,
       errorMessage,
       hasMirrorContent,
       isBusy,
-      canSubmit: processingStatus === "complete" && !isBusy,
+      canSubmit: extractionStatus === "complete" && !isBusy,
       shouldUseRegenerate
     };
   }
@@ -442,7 +444,14 @@
   }
 
   async function triggerGeneration(featureKey) {
-    const feature = createFeatureState(featureKey);
+    const feature = createFeatureState(
+      featureKey,
+      docData,
+      processingStatus,
+      pendingFeatureRequests,
+      featureRequestErrors,
+      _lang
+    );
     if (!documentId || !feature.canSubmit) {
       return;
     }
