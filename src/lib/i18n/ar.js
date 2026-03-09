@@ -154,6 +154,8 @@ export default {
     processingFailedTitle: 'تعذر إكمال معالجة هذا المستند.',
     processingFailed: 'فشلت معالجة المستند. يرجى المحاولة مرة أخرى.',
     processingFailedHelp: 'يمكنك العودة إلى المستندات أو رفع الملف مرة أخرى من لوحة التحكم.',
+    extracting: 'جاري استخراج نص المستند...',
+    extractingNote: 'يستغرق ذلك عادة بضع ثوانٍ قبل أن تصبح أدوات الدراسة جاهزة للإنشاء عند الطلب.',
     aiGenerating: 'الذكاء الاصطناعي يقوم بإنشاء المواد الدراسية...',
     aiGeneratingNote: 'يستغرق ذلك عادة حوالي 20 ثانية.',
     finalizing: 'جارٍ إنهاء تجهيز المستند...',
@@ -164,6 +166,29 @@ export default {
     backToDocuments: 'العودة إلى المستندات',
     backToDashboard: 'العودة إلى لوحة التحكم',
     uploadAgain: 'رفع ملف آخر',
+    actions: {
+      generate: 'إنشاء',
+      regenerate: 'إعادة الإنشاء',
+      retry: 'إعادة المحاولة',
+      generating: 'جارٍ الإنشاء...'
+    },
+    options: {
+      summaryLength: 'طول الملخص',
+      short: 'قصير',
+      medium: 'متوسط',
+      long: 'طويل',
+      includeExplanations: 'تضمين الشروحات',
+      questionCount: 'عدد الأسئلة'
+    },
+    generation: {
+      queuedNoContent: 'تمت إضافة عملية الإنشاء إلى قائمة الانتظار لهذه الأداة.',
+      runningNoContent: 'جارٍ إنشاء المحتوى الآن. أعد المحاولة بعد قليل.',
+      regenerating: 'جارٍ إعادة الإنشاء. سيبقى المحتوى الحالي متاحًا حتى تكتمل النسخة الجديدة.',
+      failedNoContent: 'فشل الإنشاء. حاول مرة أخرى.',
+      failedWithContent: 'فشلت آخر عملية إنشاء. يتم عرض المحتوى السابق.',
+      missingContent: 'اكتملت عملية الإنشاء ولكن لا يوجد محتوى متاح بعد. حاول مرة أخرى.',
+      requestFailed: 'تعذر بدء الإنشاء. يرجى المحاولة مرة أخرى.'
+    },
     uploaded: 'تاريخ الرفع',
     language: 'اللغة',
     tabs: {
@@ -171,17 +196,23 @@ export default {
       flashcards: 'البطاقات التعليمية ({count})',
       exam: 'الاختبار التجريبي ({count})'
     },
+    summary: {
+      generatePrompt: 'أنشئ ملخصًا عندما تكون مستعدًا لدراسة هذا المستند.'
+    },
     flashcards: {
       shuffle: 'إعادة ترتيب',
       cardCounter: 'البطاقة {current} من {total}',
       question: 'السؤال',
       answer: 'الإجابة',
+      explanation: 'الشرح',
       empty: 'لا توجد بطاقات تعليمية متاحة لهذا المستند.',
+      generatePrompt: 'أنشئ بطاقات تعليمية لبدء مراجعة هذا المستند.',
       flipHint: 'انقر للقلب',
       previous: 'السابق',
       next: 'التالي'
     },
     exam: {
+      generatePrompt: 'أنشئ اختبارًا تجريبيًا عندما تكون مستعدًا لاختبار نفسك.',
       readyTitle: 'هل أنت مستعد للاختبار التجريبي؟',
       questionCount: 'يحتوي هذا الاختبار على {count} سؤالاً',
       feedbackPrompt: 'كيف تفضل عرض الإجابات؟',

@@ -154,6 +154,8 @@ export default {
     processingFailedTitle: 'We could not finish processing this document.',
     processingFailed: 'Document processing failed. Please try again.',
     processingFailedHelp: 'Go back to your documents or upload the file again from the dashboard.',
+    extracting: 'Extracting document text...',
+    extractingNote: 'This usually takes a few seconds before study tools can be generated on demand.',
     aiGenerating: 'AI is generating study materials...',
     aiGeneratingNote: 'This usually takes about 20 seconds.',
     finalizing: 'Finalizing your document...',
@@ -164,6 +166,29 @@ export default {
     backToDocuments: 'Back to Documents',
     backToDashboard: 'Back to Dashboard',
     uploadAgain: 'Upload Again',
+    actions: {
+      generate: 'Generate',
+      regenerate: 'Regenerate',
+      retry: 'Retry',
+      generating: 'Generating...'
+    },
+    options: {
+      summaryLength: 'Summary length',
+      short: 'Short',
+      medium: 'Medium',
+      long: 'Long',
+      includeExplanations: 'Include explanations',
+      questionCount: 'Question count'
+    },
+    generation: {
+      queuedNoContent: 'Generation is queued for this study tool.',
+      runningNoContent: 'Generation is in progress. Check back in a moment.',
+      regenerating: 'Regenerating. Your current content stays available until the new version finishes.',
+      failedNoContent: 'Generation failed. Try again.',
+      failedWithContent: 'The latest generation failed. Showing your previous content.',
+      missingContent: 'Generation completed, but no content is available yet. Try again.',
+      requestFailed: 'Failed to start generation. Please try again.'
+    },
     uploaded: 'Uploaded',
     language: 'Language',
     tabs: {
@@ -171,17 +196,23 @@ export default {
       flashcards: 'Flashcards ({count})',
       exam: 'Mock Exam ({count})'
     },
+    summary: {
+      generatePrompt: 'Generate a summary when you are ready to study this document.'
+    },
     flashcards: {
       shuffle: 'Shuffle',
       cardCounter: 'Card {current} of {total}',
       question: 'Question',
       answer: 'Answer',
+      explanation: 'Explanation',
       empty: 'No flashcards are available for this document.',
+      generatePrompt: 'Generate flashcards to start reviewing this document.',
       flipHint: 'Click to flip',
       previous: 'Previous',
       next: 'Next'
     },
     exam: {
+      generatePrompt: 'Generate a mock exam when you are ready to test yourself.',
       readyTitle: 'Ready for the Mock Exam?',
       questionCount: 'This exam contains {count} questions',
       feedbackPrompt: 'How would you like to review answers?',
