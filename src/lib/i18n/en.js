@@ -29,6 +29,7 @@ export default {
   },
   nav: {
     dashboard: 'Dashboard',
+    study: 'Study Hub',
     documents: 'My Documents',
     exams: 'Exams',
     flashcards: 'Flashcards',

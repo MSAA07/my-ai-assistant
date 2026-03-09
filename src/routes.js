@@ -3,6 +3,8 @@ import Documents from './pages/Documents.svelte';
 import Settings from './pages/Settings.svelte';
 import AdminDashboard from './components/AdminDashboard.svelte';
 import DocumentView from './pages/DocumentView.svelte';
+import StudyHubIndex from './pages/StudyHubIndex.svelte';
+import StudyHubDocument from './pages/StudyHubDocument.svelte';
 
 export const DEFAULT_AUTH_PATH = '/dashboard';
 
@@ -16,6 +18,16 @@ const LEGACY_REDIRECTS = new Map([
   ['/summary', '/documents']
 ]);
 
+const LEGACY_DOCUMENT_SECTION_MAP = {
+  summary: 'summary',
+  flashcards: 'flashcards',
+  exam: 'exams',
+  exams: 'exams',
+  exports: 'exports',
+  notes: 'summary',
+  activity: 'summary'
+};
+
 export const STATIC_ROUTES = [
   {
     id: 'dashboard',
@@ -24,6 +36,16 @@ export const STATIC_ROUTES = [
     labelKey: 'nav.dashboard',
     pageTitleKey: 'nav.dashboard',
     icon: 'dashboard',
+    showInSidebar: true,
+    showInBottomNav: true
+  },
+  {
+    id: 'study',
+    path: '/study',
+    component: StudyHubIndex,
+    labelKey: 'nav.study',
+    pageTitleKey: 'nav.study',
+    icon: 'documents',
     showInSidebar: true,
     showInBottomNav: true
   },
@@ -62,19 +84,19 @@ export const STATIC_ROUTES = [
 
 const STATIC_ROUTE_MAP = new Map(STATIC_ROUTES.map((route) => [route.path, route]));
 
-const DOCUMENT_ROUTE = {
-  id: 'documents-detail',
-  parentNavId: 'documents',
-  path: '/documents/:id/:section?',
-  component: DocumentView,
-  pageTitleKey: 'nav.documents',
+const STUDY_ROUTE = {
+  id: 'study-detail',
+  parentNavId: 'study',
+  path: '/study/:id/:section?',
+  component: StudyHubDocument,
+  pageTitleKey: 'nav.study',
   match(path) {
-    if (!path.startsWith('/documents/')) {
+    if (!path.startsWith('/study/')) {
       return null;
     }
 
     const segments = path.split('/').filter(Boolean);
-    if (segments.length < 2) {
+    if (segments.length < 2 || segments.length > 3) {
       return null;
     }
 
@@ -83,7 +105,37 @@ const DOCUMENT_ROUTE = {
       return null;
     }
 
-    const section = (segments[2] ?? 'summary').toLowerCase();
+    const allowedSections = new Set(['summary', 'flashcards', 'exams', 'exports']);
+    const requestedSection = (segments[2] ?? 'summary').toLowerCase();
+    const studyTab = allowedSections.has(requestedSection) ? requestedSection : 'summary';
+
+    return { params: { documentId, studyTab } };
+  }
+};
+
+const DOCUMENT_ROUTE = {
+  id: 'documents-detail',
+  parentNavId: 'documents',
+  path: '/legacy/documents/:id/:section?',
+  component: DocumentView,
+  pageTitleKey: 'nav.documents',
+  match(path) {
+    const isLegacyPath = path.startsWith('/legacy/documents/') || path.startsWith('/documents-legacy/');
+    if (!isLegacyPath) {
+      return null;
+    }
+
+    const segments = path.split('/').filter(Boolean);
+    if (segments.length < 3) {
+      return null;
+    }
+
+    const documentId = segments[2];
+    if (!documentId) {
+      return null;
+    }
+
+    const section = (segments[3] ?? 'summary').toLowerCase();
     const validSections = new Set(['summary', 'flashcards', 'exam', 'notes', 'activity']);
     if (!validSections.has(section)) {
       return null;
@@ -106,13 +158,24 @@ const ADMIN_WILDCARD_ROUTE = {
   }
 };
 
-export const DYNAMIC_ROUTES = [DOCUMENT_ROUTE, ADMIN_WILDCARD_ROUTE];
+export const DYNAMIC_ROUTES = [STUDY_ROUTE, DOCUMENT_ROUTE, ADMIN_WILDCARD_ROUTE];
 
 export function normalizeAppPath(path = '/') {
   if (!path) return '/';
   if (path.startsWith('/document/')) {
     const documentId = path.slice('/document/'.length);
-    return documentId ? `/documents/${documentId}` : '/documents';
+    return documentId ? `/study/${documentId}` : '/study';
+  }
+  if (path.startsWith('/documents/')) {
+    const segments = path.split('/').filter(Boolean);
+    const documentId = segments[1];
+    if (!documentId) {
+      return '/study';
+    }
+
+    const section = (segments[2] ?? 'summary').toLowerCase();
+    const mappedSection = LEGACY_DOCUMENT_SECTION_MAP[section] ?? 'summary';
+    return `/study/${documentId}/${mappedSection}`;
   }
   const trimmed = path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
   return LEGACY_REDIRECTS.get(trimmed) ?? trimmed;
