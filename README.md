@@ -1,60 +1,71 @@
-# AI Study Assistant Frontend
+﻿# AI Study Assistant Frontend
 
-Svelte + Vite frontend for the AI Study Assistant. The UI uploads study documents, tracks document-owned processing state, and renders summaries, flashcards, and exam questions returned by the backend.
+Svelte 5 + Vite frontend for the AI Study Assistant.
 
-## Lifecycle Model
+## What the UI does
 
-The frontend treats the `Document` record as the source of truth for processing state.
+- Authenticates users through Better Auth cookie sessions
+- Uploads PDF/DOCX/PPTX documents
+- Tracks extraction status from `Document.processingStatus`
+- Triggers on-demand generation for summary, flashcards, and exam content
+- Displays source excerpts from `/api/document/:id/excerpts`
 
+## Lifecycle model used by the UI
+
+Extraction state source of truth:
 - `queued`
 - `processing`
 - `complete`
 - `failed`
 
-`/api/jobs/:id` is still polled for worker progress, but list and detail views both rely on `Document.processingStatus`, `processingJobId`, `processingError`, and `processedAt`.
+Generation state source of truth:
+- `document.generationState.summary`
+- `document.generationState.flashcards`
+- `document.generationState.exam`
 
-## Key Frontend Flows
+`/api/jobs/:id` is used for worker status polling, but page rendering is based on document + generation state.
 
-- Upload a PDF, DOCX, or PPTX with `POST /api/upload`
-- Refresh safely while processing by reloading `GET /api/document/:id`
-- Keep the dashboard list in sync with `GET /api/user/me`
-- Open a document directly and render finalized study materials after `complete`
+## Backend endpoints used by the frontend
 
-## Backend Endpoints Used by the UI
-
+Auth:
 - `POST /api/auth/sign-up/email`
 - `POST /api/auth/sign-in/email`
 - `GET /api/auth/get-session`
 - `POST /api/auth/sign-out`
+
+Core:
 - `GET /api/user/me`
 - `POST /api/upload`
 - `GET /api/document/:id`
-- `GET /api/jobs/:id`
 - `DELETE /api/document/:id`
+- `GET /api/document/:id/excerpts`
+- `POST /api/document/:id/generations`
+- `GET /api/document/:id/generations`
+- `GET /api/jobs/:id`
 - `POST /api/flashcard/progress`
 - `POST /api/exam/attempt`
 
-## Local Development
+## Local development
 
-Install dependencies:
+Install:
 
 ```bash
 npm install
 ```
 
-Start the dev server:
+Run dev server:
 
 ```bash
 npm run dev
 ```
 
-Create a production build:
+Build:
 
 ```bash
 npm run build
 ```
 
-Preview the built app locally:
+Preview build:
 
 ```bash
 npm run preview
@@ -62,18 +73,17 @@ npm run preview
 
 ## Environment
 
+Primary frontend env var:
 - `VITE_API_BASE_URL`
-  Optional explicit backend base URL.
 
-If `VITE_API_BASE_URL` is not set, the frontend derives a safe fallback from the current hostname:
-
-- local development -> `http://localhost:3001`
-- Vercel preview/stage deployments -> Railway staging backend
-- Vercel production deployments -> Railway production backend
+If `VITE_API_BASE_URL` is not set, the app derives API base from hostname in `src/config.js`:
+- local host -> `http://localhost:3001`
+- Vercel stage/preview host -> staging backend
+- Vercel production host -> production backend
 
 ## Deployment
 
-- `stage` auto-deploys to Vercel preview
-- `production` auto-deploys to Vercel production
+- Push to `stage` triggers staging/preview deployment
+- Push to `production` triggers production deployment
 
-The frontend expects the backend worker lifecycle to be stable before production promotion, including worker leases, stale-job recovery, and document/list detail consistency across refreshes.
+Last Updated: March 9, 2026
