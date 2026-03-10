@@ -27,6 +27,20 @@ export function requestGeneration(documentId, payload) {
   });
 }
 
+export function saveFlashcardProgress(payload) {
+  return requestJson('/api/flashcard/progress', {
+    method: 'POST',
+    body: payload
+  });
+}
+
+export function saveLegacyExamAttempt(payload) {
+  return requestJson('/api/exam/attempt', {
+    method: 'POST',
+    body: payload
+  });
+}
+
 export function listFlashcardSets(documentId, { page = 1, limit = 20 } = {}) {
   return requestJson(`/api/document/${documentId}/flashcard-sets?page=${page}&limit=${limit}`);
 }

@@ -296,6 +296,79 @@ export default {
       reviewIncorrect: 'Ø®Ø§Ø·Ø¦',
       empty: 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø£Ø³Ø¦Ù„Ø© Ø§Ø®ØªØ¨Ø§Ø± Ù…ØªØ§Ø­Ø© Ù„Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯.',
       retake: 'Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±'
+    },
+    activity: {
+      backToHub: 'Back to document hub',
+      section: {
+        summary: 'Summary mode',
+        flashcards: 'Flashcards mode',
+        exam: 'Exam mode'
+      },
+      subtitle: {
+        summary: 'Focused reading view for the generated summary.',
+        flashcards: 'Study one card at a time with quick confidence tracking.',
+        exam: 'Take the exam in a clean question flow.'
+      },
+      states: {
+        extractionProcessing: 'Document extraction is still running',
+        generationProcessing: 'Generation is in progress',
+        processingContinues: 'Processing continues in the background if you leave this view.'
+      },
+      actions: {
+        generateSummary: 'Generate summary',
+        generateFlashcards: 'Generate flashcards',
+        generateExam: 'Generate exam',
+        revealAnswer: 'Reveal answer',
+        hideAnswer: 'Hide answer',
+        markCorrect: 'Mark correct',
+        markIncorrect: 'Mark incorrect',
+        previous: 'Previous',
+        next: 'Next',
+        startExam: 'Start exam',
+        submitExam: 'Submit exam',
+        retakeExam: 'Retake exam'
+      },
+      summary: {
+        title: 'Summary',
+        regenerating: 'Regenerating in the background. Your current summary remains visible.'
+      },
+      flashcards: {
+        progressLabel: 'Card {current}/{total} · Correct {correct} · Incorrect {incorrect}',
+        questionLabel: 'Question',
+        answerLabel: 'Answer',
+        progressSaveError: 'Could not save flashcard progress. Try again.'
+      },
+      exam: {
+        introTitle: 'Ready to start your exam?',
+        introDescription: 'This exam has {count} questions.',
+        questionLabel: 'Question {index}',
+        answeredCount: '{answered} answered out of {total}',
+        submittingTitle: 'Completing your exam',
+        submittingBody: 'Scoring your attempt and saving progress.',
+        resultsTitle: 'Exam results',
+        scoreLabel: 'Score: {score}/{total}',
+        reviewTitle: 'Review',
+        yourAnswer: 'Your answer: {answer}',
+        correctAnswer: 'Correct answer: {answer}',
+        notAnswered: 'Not answered',
+        saveAttemptError: 'Could not save this exam attempt.'
+      },
+      regenerate: {
+        title: 'Regenerate with guidance',
+        description: 'Tell the assistant what should improve before regenerating.',
+        reasonLabel: 'Main reason',
+        customLabel: 'Optional instruction',
+        customPlaceholder: 'Example: focus more on formulas and worked examples.',
+        confirm: 'Regenerate',
+        cancel: 'Cancel',
+        running: 'Regenerating...',
+        reasons: {
+          missingParts: 'Missing parts',
+          notComprehensiveEnough: 'Not comprehensive enough',
+          tooShort: 'Too short',
+          tooGeneric: 'Too generic'
+        }
+      }
     }
   },
   documentsPage: {

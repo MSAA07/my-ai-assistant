@@ -63,11 +63,17 @@ When extraction is complete:
 On-demand generation actions:
 - queue generation: `POST /api/document/:id/generations`
 - read generation state: `GET /api/document/:id/generations` (also mirrored in document payload)
+- regeneration UX can pass optional `options.regenerationGuidance` (`reasonKey`, `customInstruction`) with the same generation endpoint
 
 Supported generation features in UI:
 - summary
 - flashcards
 - exam
+
+Study activity modes:
+- Summary mode: focused reading + secondary regenerate
+- Flashcards mode: one card at a time, reveal answer, mark correct/incorrect, prev/next
+- Exam mode: intro/start, question flow, submit/complete, results/review
 
 ### Progress tracking
 
