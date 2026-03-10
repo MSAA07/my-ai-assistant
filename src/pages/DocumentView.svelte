@@ -49,12 +49,12 @@
   $: mode = normalizeMode(documentSection);
   $: activeFeatureKey = mode === 'flashcards' ? 'flashcards' : mode === 'exam' ? 'exam' : 'summary';
   $: extractionStatus = normalizeDocumentStatus(docData?.processingStatus);
-  $: showProcessingBanner = Boolean(docData) && (isExtractionActive(extractionStatus) || hasActiveGeneration(docData));
+  $: showProcessingBanner = Boolean(docData) && (isExtractionActive(extractionStatus) || hasActiveGeneration(docData, pendingGeneration));
   $: title = text(docData?.originalName) || text(docData?.title) || t('document.hub.untitled');
 
-  $: summaryFeature = featureState('summary');
-  $: flashcardsFeature = featureState('flashcards');
-  $: examFeature = featureState('exam');
+  $: summaryFeature = featureState('summary', { document: docData, extractionStatus, pendingGeneration, generationErrors });
+  $: flashcardsFeature = featureState('flashcards', { document: docData, extractionStatus, pendingGeneration, generationErrors });
+  $: examFeature = featureState('exam', { document: docData, extractionStatus, pendingGeneration, generationErrors });
   $: activeFeature = activeFeatureKey === 'summary' ? summaryFeature : activeFeatureKey === 'flashcards' ? flashcardsFeature : examFeature;
 
   $: flashcards = Array.isArray(docData?.flashcards) ? docData.flashcards : [];
@@ -122,32 +122,38 @@
     return status === 'queued' || status === 'running';
   }
 
-  function hasFeatureContent(featureKey, document = docData) {
+  function hasFeatureContent(featureKey, document) {
     if (featureKey === 'summary') return Boolean(text(document?.summary));
     if (featureKey === 'flashcards') return Array.isArray(document?.flashcards) && document.flashcards.length > 0;
     return Array.isArray(document?.examQuestions) && document.examQuestions.length > 0;
   }
 
-  function hasActiveGeneration(document = docData) {
+  function hasActiveGeneration(document, pendingByFeature = pendingGeneration) {
     return FEATURES.some((featureKey) => {
       const status = normalizeGenerationStatus(document?.generationState?.[featureKey]?.status);
-      return isGenerationActive(status) || pendingGeneration[featureKey];
+      return isGenerationActive(status) || Boolean(pendingByFeature?.[featureKey]);
     });
   }
 
-  function featureState(featureKey) {
-    const generation = docData?.generationState?.[featureKey] ?? {};
+  function featureState(featureKey, context = {}) {
+    const {
+      document = docData,
+      extractionStatus: currentExtractionStatus = extractionStatus,
+      pendingGeneration: pendingByFeature = pendingGeneration,
+      generationErrors: featureErrors = generationErrors,
+    } = context;
+    const generation = document?.generationState?.[featureKey] ?? {};
     const status = normalizeGenerationStatus(generation?.status);
-    const hasContent = hasFeatureContent(featureKey);
-    const busy = Boolean(pendingGeneration[featureKey]) || isGenerationActive(status);
-    const errorMessage = text(generationErrors[featureKey]) || text(generation?.errorMessage);
+    const hasContent = hasFeatureContent(featureKey, document);
+    const busy = Boolean(pendingByFeature?.[featureKey]) || isGenerationActive(status);
+    const errorMessage = text(featureErrors?.[featureKey]) || text(generation?.errorMessage);
     return {
       key: featureKey,
       status,
       busy,
       hasContent,
-      canGenerate: extractionStatus === 'complete' && !busy,
-      canRegenerate: extractionStatus === 'complete' && hasContent && !busy,
+      canGenerate: currentExtractionStatus === 'complete' && !busy,
+      canRegenerate: currentExtractionStatus === 'complete' && hasContent && !busy,
       shouldRegenerate: hasContent || status === 'complete',
       errorMessage,
     };
@@ -338,7 +344,7 @@
   async function submitRegeneration(event) {
     if (regenerateSubmitting) return;
     regenerateSubmitting = true;
-    const target = featureState(regenerateFeatureKey);
+    const target = featureState(regenerateFeatureKey, { document: docData, extractionStatus, pendingGeneration, generationErrors });
     const queued = await queueGeneration(target, { regenerate: true, guidance: event?.detail });
     regenerateSubmitting = false;
     if (queued) regenerateModalOpen = false;
