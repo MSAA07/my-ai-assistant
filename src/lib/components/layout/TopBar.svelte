@@ -116,11 +116,16 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-4);
-    height: var(--size-topbar);
+    min-height: var(--size-topbar);
     padding: 0 var(--space-4);
-    background: var(--color-surface-overlay);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-overlay) 92%, white 8%) 0%,
+      var(--color-surface-overlay) 100%
+    );
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
 
   .topbar h1 {
@@ -132,16 +137,17 @@
   .topbar-right {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   .plan-pill {
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.7rem;
     border-radius: 999px;
     background: var(--color-success-surface);
     color: var(--color-success);
     font-size: 0.8rem;
     font-weight: 600;
+    border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
   }
 
   .icon-button {
@@ -152,7 +158,7 @@
     justify-content: center;
     border-radius: var(--radius-1);
     border: 1px solid var(--color-border);
-    background: transparent;
+    background: color-mix(in srgb, var(--color-surface-1) 88%, transparent);
     color: var(--color-text-muted);
     cursor: pointer;
     transition: all var(--motion-fast) var(--ease-standard);
@@ -161,6 +167,7 @@
   .icon-button:hover {
     color: var(--color-text-primary);
     border-color: var(--color-accent-primary);
+    background: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
   }
 
   .icon-button:disabled {
@@ -183,7 +190,7 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    border: 1px solid transparent;
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 36%, transparent);
     background: var(--color-accent-surface);
     color: var(--color-accent-primary);
     font-weight: 700;

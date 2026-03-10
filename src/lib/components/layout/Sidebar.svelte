@@ -85,12 +85,17 @@
     top: 0;
     height: 100vh;
     width: var(--size-sidebar);
-    background: var(--color-sidebar);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-sidebar) 93%, white 7%) 0%,
+      var(--color-sidebar) 100%
+    );
     border-inline-end: 1px solid var(--color-border);
     padding: var(--space-5) var(--space-3);
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
+    box-shadow: 14px 0 30px rgba(0, 0, 0, 0.18);
   }
 
   .sidebar.rtl {
@@ -108,7 +113,7 @@
   .brand {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -122,7 +127,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--color-accent-surface);
+    background: color-mix(in srgb, var(--color-accent-surface) 82%, transparent);
     color: var(--color-accent-primary);
     font-size: 0.95rem;
   }
@@ -140,19 +145,19 @@
     border-radius: var(--radius-2);
     color: var(--color-text-secondary);
     text-decoration: none;
-    min-height: 48px;
+    min-height: 46px;
     transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .nav-item:hover {
-    background: var(--color-surface-2);
+    background: color-mix(in srgb, var(--color-surface-2) 86%, transparent);
     color: var(--color-text-primary);
   }
 
   .nav-item.active {
     background: var(--color-accent-surface);
     color: var(--color-text-primary);
-    box-shadow: inset 0 0 0 1px var(--color-accent-primary);
+    box-shadow: inset 0 0 0 1px var(--color-accent-primary), 0 8px 20px rgba(108, 99, 255, 0.18);
   }
 
   .nav-icon {
@@ -162,7 +167,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: var(--color-surface-2);
+    background: color-mix(in srgb, var(--color-surface-2) 92%, transparent);
     color: inherit;
   }
 

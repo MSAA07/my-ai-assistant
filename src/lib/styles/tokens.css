@@ -11,6 +11,13 @@
   --color-text-muted: #b8c0d6;
   --color-accent-primary: #6c63ff;
   --color-accent-secondary: #00d4aa;
+  --color-accent-surface: rgba(108, 99, 255, 0.16);
+  --color-success-surface: rgba(0, 212, 170, 0.16);
+  --color-danger-surface: rgba(255, 77, 109, 0.14);
+  --color-danger-border: rgba(255, 77, 109, 0.35);
+  --color-surface-overlay: rgba(15, 17, 23, 0.82);
+  --color-accent-outline: rgba(108, 99, 255, 0.38);
+  --color-accent-outline-strong: rgba(108, 99, 255, 0.65);
 
   /* Readable text on accent / gradient surfaces */
   --color-text-soft: #e6ebff;
@@ -36,12 +43,16 @@
   --radius-1: 8px;
   --radius-2: 12px;
   --radius-3: 16px;
-  --size-topbar: 60px;
-  --size-sidebar: 240px;
+  --size-topbar: 64px;
+  --size-sidebar: 248px;
   --size-drawer: 400px;
 
   /* Motion */
   --motion-fast: 120ms;
   --motion-normal: 200ms;
   --ease-standard: cubic-bezier(.2, .0, .2, 1);
+
+  /* Effects */
+  --gradient-accent-strong: linear-gradient(135deg, #7a72ff 0%, #00d4aa 100%);
+  --shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.32);
 }

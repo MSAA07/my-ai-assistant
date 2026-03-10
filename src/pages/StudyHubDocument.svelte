@@ -3,6 +3,7 @@
   import { onDestroy } from 'svelte';
   import { API_BASE } from '../config.js';
   import SourceRefsCompact from '../lib/components/ui/SourceRefsCompact.svelte';
+  import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import {
     createExamAttempt,
     createExamExport,
@@ -30,6 +31,7 @@
   const POLL_INTERVAL_MS = 2500;
   const EXPORT_POLL_INTERVAL_MS = 3500;
   const EXAM_AUTOSAVE_DELAY_MS = 1200;
+  const STALE_EXPORT_THRESHOLD_MS = 12 * 60 * 1000;
 
   let docsForSwitcher = [];
   let currentDocumentId = '';
@@ -150,6 +152,17 @@
   $: reviewAnswersByQuestion = normalizeAnswers(reviewPayload?.answers, reviewQuestions);
   $: reviewScorePercent = getScorePercent(reviewPayload?.score, reviewPayload?.totalQuestions);
   $: hasActiveExportJobs = exportArtifacts.some((artifact) => artifact?.status === 'queued' || artifact?.status === 'running');
+  $: staleQueuedExports = exportArtifacts.filter((artifact) => isStaleQueuedExport(artifact));
+  $: canRequestExport = Boolean(selectedExportExamId) && !exportActionBusy && !hasActiveExportJobs;
+  $: extractionTone = extractionStatus === 'complete' ? 'ready' : extractionStatus === 'failed' ? 'failed' : 'processing';
+  $: examProgressPercent = examQuestions.length > 0
+    ? Math.round((answeredExamCount / examQuestions.length) * 100)
+    : 0;
+  $: flashcardProgressPercent = studyCards.length > 0
+    ? Math.round(((flashcardCardIndex + 1) / studyCards.length) * 100)
+    : 0;
+  $: summaryWordCount = countWords(documentData?.summary ?? '');
+  $: summaryReadTimeMinutes = summaryWordCount > 0 ? Math.max(1, Math.round(summaryWordCount / 180)) : 0;
 
   onDestroy(() => {
     clearPollTimer();
@@ -338,6 +351,14 @@
       return examAutosaveSavedAt ? `Autosave: saved ${formatRelativeTime(examAutosaveSavedAt)}` : 'Autosave: saved';
     }
     return 'Autosave: idle';
+  }
+
+  function countWords(value) {
+    if (typeof value !== 'string') {
+      return 0;
+    }
+    const words = value.trim().match(/\S+/g);
+    return words ? words.length : 0;
   }
 
   async function fetchDocumentOptions() {
@@ -1101,7 +1122,7 @@
         examId: selectedExportExamId,
         format: 'pdf'
       });
-      exportsNotice = 'Export queued. Status will auto-refresh while jobs are queued or running.';
+      exportsNotice = 'Export request queued. Exports are in beta, so queued status may persist on staging.';
       await loadExportArtifacts({ force: true });
     } catch (err) {
       exportsError = err?.message || 'Failed to queue export';
@@ -1188,16 +1209,38 @@
   function exportStatusTone(status) {
     if (status === 'complete') return 'ready';
     if (status === 'failed') return 'failed';
-    if (status === 'queued' || status === 'running') return 'processing';
-    return 'info';
+    return 'processing';
   }
 
-  function exportStatusHint(status) {
-    if (status === 'queued') return 'Queued for processing.';
+  function isStaleQueuedExport(artifact) {
+    if (!artifact || artifact.status !== 'queued') {
+      return false;
+    }
+    const createdAt = new Date(artifact.createdAt || 0).getTime();
+    if (!Number.isFinite(createdAt) || createdAt <= 0) {
+      return false;
+    }
+    return Date.now() - createdAt >= STALE_EXPORT_THRESHOLD_MS;
+  }
+
+  function exportStatusHint(artifact) {
+    const status = typeof artifact?.status === 'string' ? artifact.status.toLowerCase() : '';
+
+    if (status === 'queued') {
+      return isStaleQueuedExport(artifact)
+        ? 'Queued for a long time. Export pipeline is in beta on staging.'
+        : 'Queued. Export processing may take longer while beta flow is being hardened.';
+    }
     if (status === 'running') return 'Export generation is running.';
     if (status === 'complete') return 'Ready to download.';
     if (status === 'failed') return 'Failed. Create a new export request to retry.';
     return 'Status pending.';
+  }
+
+  function formatQuestionType(type) {
+    if (type === 'true_false') return 'True / False';
+    if (type === 'mcq') return 'Multiple choice';
+    return 'Short answer';
   }
 </script>
 
@@ -1222,7 +1265,11 @@
         <button type="button" class="link-btn" on:click={goBackToStudyHub}>Back to Study Hub</button>
         <p class="eyebrow">Study Hub</p>
         <h1>{documentData.originalName}</h1>
-        <p class="meta">Status: {documentData.processingStatus || 'unknown'} | Language: {documentData.language || 'unknown'} | Uploaded: {formatDate(documentData.uploadDate)}</p>
+        <div class="header-meta">
+          <StatusBadge status={extractionTone} label={documentData.processingStatus || 'unknown'} />
+          <p class="meta-chip">Language: <strong>{documentData.language || 'unknown'}</strong></p>
+          <p class="meta-chip">Uploaded: <strong>{formatDate(documentData.uploadDate)}</strong></p>
+        </div>
       </div>
       <div class="header-actions">
         <label class="switcher">
@@ -1309,6 +1356,11 @@
             <p>Summary generation is in progress. Refresh to check updates.</p>
           </section>
         {:else if summaryHasContent}
+          <div class="summary-metrics">
+            <p class="metric"><span>Words</span><strong>{summaryWordCount}</strong></p>
+            <p class="metric"><span>Sections</span><strong>{structuredSummarySections.length || 1}</strong></p>
+            <p class="metric"><span>Read time</span><strong>{summaryReadTimeMinutes} min</strong></p>
+          </div>
           <div class="summary-output">
             {#if structuredSummarySections.length > 0}
               {#each structuredSummarySections as section}
@@ -1336,7 +1388,7 @@
         {:else}
           <section class="state-panel">
             <h3>No summary yet</h3>
-            <p>Generate a summary to get a structured overview for this document.</p>
+            <p>Generate a summary to get a structured, readable overview for this document.</p>
             <div class="row row-start">
               <button type="button" on:click={regenerateSummary} disabled={!summaryCanGenerate}>
                 Generate summary
@@ -1433,6 +1485,18 @@
             </section>
           {:else if currentStudyCard}
             <article class="flashcard">
+              <div class="progress-header">
+                <p class="meta">Card {flashcardCardIndex + 1} of {studyCards.length}</p>
+                <div class="progress-track" aria-hidden="true">
+                  <span class="progress-fill" style={`width: ${flashcardProgressPercent}%`}></span>
+                </div>
+              </div>
+              <div class="flashcard-state-row">
+                <span class="state-pill">Last result: {currentStudyCard?.state?.lastResult || 'unseen'}</span>
+                {#if currentStudyCard?.state?.mastered}
+                  <span class="state-pill state-pill--success">Mastered</span>
+                {/if}
+              </div>
               <h3>{currentStudyCard.question}</h3>
               {#if flashcardShowAnswer}
                 <p class="answer">{currentStudyCard.answer}</p>
@@ -1464,7 +1528,7 @@
                 <button type="button" on:click={() => { flashcardCardIndex = Math.max(flashcardCardIndex - 1, 0); flashcardShowAnswer = false; }} disabled={flashcardCardIndex === 0}>
                   Previous
                 </button>
-                <span>{flashcardCardIndex + 1} / {studyCards.length}</span>
+                <span class="meta">{flashcardProgressPercent}% complete</span>
                 <button type="button" on:click={() => { flashcardCardIndex = Math.min(flashcardCardIndex + 1, studyCards.length - 1); flashcardShowAnswer = false; }} disabled={flashcardCardIndex >= studyCards.length - 1}>
                   Next
                 </button>
@@ -1544,7 +1608,7 @@
               </select>
             </label>
             <button type="button" on:click={startNewAttempt} disabled={!selectedExamId || examActionBusy || hasInProgressAttempt}>
-              {examActionBusy ? 'Working...' : 'Create attempt'}
+              {examActionBusy ? 'Working...' : 'Start new attempt'}
             </button>
             {#if hasInProgressAttempt}
               <button type="button" class="secondary-btn" on:click={() => saveAttempt({ manual: true })} disabled={examActionBusy || examSaveBusy}>
@@ -1557,6 +1621,14 @@
             {/if}
           </div>
 
+          {#if currentAttempt}
+            <div class="attempt-strip">
+              <StatusBadge status={currentAttempt.status === 'submitted' ? 'ready' : 'processing'} label={currentAttempt.status} />
+              <p class="meta">Feedback mode: <strong>{currentAttempt.feedbackMode || examFeedbackMode}</strong></p>
+              <p class="meta">Last saved: <strong>{currentAttempt.lastSavedAt ? formatDateTime(currentAttempt.lastSavedAt) : 'Not saved yet'}</strong></p>
+            </div>
+          {/if}
+
           {#if hasInProgressAttempt}
             <p class="inline-banner">In-progress attempt found. You can resume, save, submit, or restart.</p>
             <p class="meta">{examAutosaveLabel()}</p>
@@ -1568,8 +1640,14 @@
               <p>Preparing questions and attempt state.</p>
             </section>
           {:else if examDetail && examQuestions.length > 0}
-            <p class="meta">Questions: {examQuestions.length} | Answered: {answeredExamCount} / {examQuestions.length}</p>
+            <div class="exam-progress-row">
+              <p class="meta">Questions: {examQuestions.length} | Answered: {answeredExamCount} / {examQuestions.length}</p>
+              <div class="progress-track" aria-hidden="true">
+                <span class="progress-fill" style={`width: ${examProgressPercent}%`}></span>
+              </div>
+            </div>
             <article class="exam-box">
+              <p class="question-type">{formatQuestionType(examQuestion.questionType)}</p>
               <h3>Question {examQuestionIndex + 1} of {examQuestions.length}</h3>
               <p>{examQuestion.question}</p>
 
@@ -1653,12 +1731,18 @@
           </button>
         </div>
 
-        <p class="inline-banner">Export status is available now. Full PDF export pipeline hardening is still in progress, so queued/running states may take longer.</p>
+        <section class="beta-banner">
+          <h3>Export is beta in this phase</h3>
+          <p>Status tracking is available, but queued/running exports can remain pending on staging while pipeline hardening continues.</p>
+        </section>
         {#if exportsNotice}
           <p class="inline-note">{exportsNotice}</p>
         {/if}
         {#if exportsError}
           <p class="inline-error">{exportsError}</p>
+        {/if}
+        {#if staleQueuedExports.length > 0}
+          <p class="inline-warning">{staleQueuedExports.length} export request(s) have been queued for an extended time.</p>
         {/if}
 
         <div class="row">
@@ -1671,10 +1755,13 @@
               {/each}
             </select>
           </label>
-          <button type="button" on:click={requestExamExport} disabled={!selectedExportExamId || exportActionBusy}>
+          <button type="button" on:click={requestExamExport} disabled={!canRequestExport}>
             {exportActionBusy ? 'Queuing export...' : 'Request export'}
           </button>
         </div>
+        {#if hasActiveExportJobs}
+          <p class="meta">A queued/running export already exists. New requests are temporarily disabled to reduce duplicate pending jobs.</p>
+        {/if}
         <p class="meta">
           Last updated: {exportsLastUpdatedAt ? formatDateTime(exportsLastUpdatedAt) : 'not yet'}
           {#if hasActiveExportJobs}
@@ -1692,7 +1779,7 @@
             <h3>No exports yet</h3>
             <p>Request an export once you have an exam selected.</p>
             <div class="row row-start">
-              <button type="button" on:click={requestExamExport} disabled={!selectedExportExamId || exportActionBusy}>
+              <button type="button" on:click={requestExamExport} disabled={!canRequestExport}>
                 Request export
               </button>
               <button type="button" class="secondary-btn" on:click={refreshActiveTab} disabled={exportsLoading}>Retry</button>
@@ -1703,9 +1790,9 @@
             {#each exportArtifacts as artifact}
               <article class="export-item">
                 <p><strong>{artifact.fileName || artifact.id}</strong></p>
-                <p>Status: <span class={`status-${exportStatusTone(artifact.status)}`}>{artifact.status}</span></p>
+                <p>Status: <StatusBadge status={exportStatusTone(artifact.status)} label={artifact.status} /></p>
                 <p>Created: {artifact.createdAt ? new Date(artifact.createdAt).toLocaleString() : 'Unknown'}</p>
-                <p class="meta">{exportStatusHint(artifact.status)}</p>
+                <p class="meta">{exportStatusHint(artifact)}</p>
                 {#if artifact.errorMessage}
                   <p class="inline-error">{artifact.errorMessage}</p>
                 {/if}
@@ -1727,38 +1814,477 @@
 </div>
 
 <style>
-  .study-workspace { display: grid; gap: var(--space-4); }
-  .workspace-header { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); flex-wrap: wrap; }
-  .eyebrow { margin: 0; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; color: var(--color-text-muted); }
-  h1 { margin: 0.25rem 0; color: var(--color-text-primary); font-size: 1.6rem; }
-  h2, h3 { margin: 0; color: var(--color-text-primary); }
-  .meta { margin: 0; color: var(--color-text-secondary); }
-  .header-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-  .switcher { display: grid; gap: 0.35rem; color: var(--color-text-secondary); font-size: 0.85rem; }
-  select, input, button { min-height: 40px; border-radius: var(--radius-1); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-text-primary); padding: 0.5rem 0.75rem; font: inherit; }
-  button { cursor: pointer; font-weight: 600; }
-  .secondary-btn { background: var(--color-surface-1); }
-  .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .tabs button.active { border-color: var(--color-accent-primary); background: var(--color-accent-surface); }
-  .panel { border: 1px solid var(--color-border); border-radius: var(--radius-2); padding: var(--space-4); background: var(--color-surface-1); display: grid; gap: var(--space-3); }
-  .panel.error, .inline-error { color: var(--color-danger); }
-  .inline-banner { margin: 0; padding: 0.75rem; border-radius: var(--radius-1); border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-info) 14%, transparent); color: var(--color-text-primary); }
-  .summary-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-  .summary-output { display: grid; gap: var(--space-3); }
-  .summary-section p { white-space: pre-wrap; line-height: 1.6; }
-  .row { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; justify-content: space-between; }
-  .flashcard, .exam-box, .export-item { border: 1px solid var(--color-border); border-radius: var(--radius-1); background: var(--color-surface-2); padding: var(--space-3); display: grid; gap: var(--space-2); }
-  .answer { font-weight: 700; color: var(--color-text-primary); }
-  .options { display: grid; gap: 0.5rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .options button.selected { border-color: var(--color-accent-primary); background: var(--color-accent-surface); }
-  .review-item { border-top: 1px solid var(--color-border); padding-top: var(--space-2); }
-  .review-item p { margin: 0; color: var(--color-text-secondary); }
-  .status-ready { color: var(--color-success); }
-  .status-failed { color: var(--color-danger); }
-  .status-processing { color: var(--color-info); }
-  .export-list { display: grid; gap: var(--space-2); }
+  .study-workspace {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface-1) 92%, white 8%) 0%,
+      var(--color-surface-1) 100%
+    );
+  }
+
+  .eyebrow {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  h1 {
+    margin: 0.25rem 0 0.5rem;
+    color: var(--color-text-primary);
+    font-size: 1.75rem;
+    line-height: 1.35;
+    word-break: break-word;
+  }
+
+  h2,
+  h3 {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+
+  .meta {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+  }
+
+  .meta strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .meta-chip {
+    margin: 0;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-surface-2) 88%, transparent);
+    border: 1px solid var(--color-border);
+    font-size: 0.83rem;
+    color: var(--color-text-secondary);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .switcher {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+  }
+
+  select,
+  input,
+  button {
+    min-height: 40px;
+    border-radius: var(--radius-1);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    padding: 0.5rem 0.75rem;
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    font-weight: 600;
+    transition: border-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+  }
+
+  button:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--color-accent-primary) 58%, var(--color-border) 42%);
+    transform: translateY(-1px);
+  }
+
+  button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .secondary-btn {
+    background: color-mix(in srgb, var(--color-surface-1) 94%, transparent);
+  }
+
+  .link-btn {
+    border: none;
+    background: transparent;
+    color: var(--color-accent-primary);
+    padding: 0;
+    min-height: 0;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.35rem;
+    border-radius: var(--radius-2);
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-1) 80%, transparent);
+  }
+
+  .tabs button {
+    min-height: 38px;
+    border-radius: 10px;
+    background: transparent;
+  }
+
+  .tabs button.active {
+    border-color: var(--color-accent-primary);
+    background: var(--color-accent-surface);
+  }
+
+  .panel {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    padding: var(--space-4);
+    background: var(--color-surface-1);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .state-panel {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--color-surface-2) 88%, transparent);
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .state-panel-error {
+    border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%);
+  }
+
+  .inline-error {
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-1);
+    background: var(--color-danger-surface);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+    color: var(--color-danger);
+  }
+
+  .inline-note {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+  }
+
+  .inline-banner {
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: var(--radius-1);
+    border: 1px solid color-mix(in srgb, var(--color-info) 28%, transparent);
+    background: color-mix(in srgb, var(--color-info) 14%, transparent);
+    color: var(--color-text-primary);
+  }
+
+  .inline-warning {
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: var(--radius-1);
+    border: 1px solid color-mix(in srgb, var(--color-warning) 34%, transparent);
+    background: color-mix(in srgb, var(--color-warning) 16%, transparent);
+    color: color-mix(in srgb, var(--color-warning) 84%, white 16%);
+  }
+
+  .summary-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .summary-metrics {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .metric {
+    margin: 0;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-surface-2) 85%, transparent);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .metric span {
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    font-size: 0.72rem;
+  }
+
+  .summary-output {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 85ch;
+  }
+
+  .summary-section {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--color-surface-2) 90%, transparent);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .summary-section h3 {
+    font-size: 1.04rem;
+    letter-spacing: 0.01em;
+  }
+
+  .summary-section p {
+    margin: 0;
+    white-space: pre-wrap;
+    line-height: 1.75;
+  }
+
+  .summary-section ul {
+    margin: 0;
+    padding-inline-start: 1.2rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .summary-section li {
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+  }
+
+  .row {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .row.row-start {
+    justify-content: flex-start;
+  }
+
+  .progress-header,
+  .exam-progress-row {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-border) 80%, transparent);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--gradient-accent-strong);
+    transition: width var(--motion-normal) var(--ease-standard);
+  }
+
+  .flashcard,
+  .exam-box,
+  .export-item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    background: var(--color-surface-2);
+    padding: var(--space-3);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .flashcard-state-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .state-pill {
+    padding: 0.24rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-1) 82%, transparent);
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    text-transform: capitalize;
+  }
+
+  .state-pill--success {
+    border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+    color: var(--color-success);
+    background: var(--color-success-surface);
+  }
+
+  .answer {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+  }
+
+  .attempt-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--radius-1);
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-surface-2) 86%, transparent);
+  }
+
+  .question-type {
+    margin: 0;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-muted);
+    font-weight: 700;
+  }
+
+  .options {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .options button.selected {
+    border-color: var(--color-accent-primary);
+    background: var(--color-accent-surface);
+  }
+
+  .review-item {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-2);
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .review-item p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .status-correct {
+    color: var(--color-success) !important;
+    font-weight: 600;
+  }
+
+  .status-incorrect {
+    color: var(--color-danger) !important;
+    font-weight: 600;
+  }
+
+  .beta-banner {
+    border: 1px solid color-mix(in srgb, var(--color-warning) 32%, var(--color-border) 68%);
+    border-radius: var(--radius-1);
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .beta-banner h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .beta-banner p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  .export-list {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .export-item a {
+    color: var(--color-accent-primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .export-item a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 900px) {
+    .workspace-header {
+      padding: var(--space-3);
+    }
+
+    h1 {
+      font-size: 1.45rem;
+    }
+  }
+
   @media (max-width: 640px) {
-    .row { align-items: stretch; justify-content: flex-start; }
-    .options { grid-template-columns: 1fr; }
+    .row {
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+
+    .header-actions {
+      width: 100%;
+    }
+
+    .header-actions > * {
+      flex: 1 1 220px;
+    }
+
+    .summary-actions > * {
+      flex: 1 1 140px;
+    }
+
+    .options {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
