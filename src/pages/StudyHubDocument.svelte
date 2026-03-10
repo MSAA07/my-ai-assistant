@@ -116,10 +116,6 @@
   $: summaryHasContent = typeof documentData?.summary === 'string' && documentData.summary.trim().length > 0;
   $: summaryBanner = getSummaryBanner(summaryStatus, summaryHasContent);
   $: structuredSummarySections = splitSummarySections(documentData?.summary ?? '');
-  $: legacyFlashcardCount = Array.isArray(documentData?.flashcards) ? documentData.flashcards.length : 0;
-  $: legacyExamQuestionCount = Array.isArray(documentData?.examQuestions) ? documentData.examQuestions.length : 0;
-  $: hasLegacyFlashcards = legacyFlashcardCount > 0;
-  $: hasLegacyExamQuestions = legacyExamQuestionCount > 0;
 
   $: flashcardCards = Array.isArray(flashcardSet?.cards) ? flashcardSet.cards : [];
   $: hiddenFlashcardCount = flashcardCards.filter((card) => card?.state?.isHidden).length;
@@ -435,10 +431,6 @@
 
   function goBackToStudyHub() {
     window.location.hash = '/study';
-  }
-
-  function openLegacyDocumentView() {
-    window.location.hash = `/legacy/documents/${currentDocumentId}/summary`;
   }
 
   async function regenerateSummary() {
@@ -1287,7 +1279,6 @@
         <button type="button" class="secondary-btn" on:click={() => fetchDocumentState()} disabled={loadingDocument}>
           {loadingDocument ? 'Refreshing...' : 'Refresh document'}
         </button>
-        <button type="button" class="secondary-btn" on:click={openLegacyDocumentView}>Open legacy view</button>
       </div>
     </header>
 
@@ -1298,13 +1289,12 @@
           <p>Study tools become fully available when extraction is complete.</p>
         {:else}
           <h2>Document processing failed</h2>
-          <p>This document may be partially migrated. Retry loading or use the legacy document view.</p>
+          <p>We could not finish processing this document. Retry loading from the library.</p>
         {/if}
         <div class="row row-start">
           <button type="button" class="secondary-btn" on:click={() => fetchDocumentState()} disabled={loadingDocument}>
             {loadingDocument ? 'Refreshing...' : 'Refresh status'}
           </button>
-          <button type="button" class="secondary-btn" on:click={openLegacyDocumentView}>Open legacy view</button>
         </div>
       </section>
     {/if}
@@ -1443,10 +1433,6 @@
             {#if flashcardGenerationStatus === 'failed'}
               <p class="inline-error">Latest flashcard generation failed. Retry generation.</p>
             {/if}
-            {#if hasLegacyFlashcards}
-              <p class="meta">Legacy flashcards exist for this document ({legacyFlashcardCount}).</p>
-              <button type="button" class="secondary-btn" on:click={openLegacyDocumentView}>Open legacy view</button>
-            {/if}
           </section>
         {:else}
           <div class="row">
@@ -1584,10 +1570,6 @@
             {/if}
             {#if examGenerationStatus === 'failed'}
               <p class="inline-error">Latest exam generation failed. Retry generation.</p>
-            {/if}
-            {#if hasLegacyExamQuestions}
-              <p class="meta">Legacy exam questions exist for this document ({legacyExamQuestionCount}).</p>
-              <button type="button" class="secondary-btn" on:click={openLegacyDocumentView}>Open legacy view</button>
             {/if}
           </section>
         {:else}

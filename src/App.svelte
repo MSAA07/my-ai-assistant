@@ -128,7 +128,7 @@
         <div class="access-denied">
           <h1>{t('access.deniedTitle')}</h1>
           <p>{t('access.deniedMessage')}</p>
-          <a href="#/dashboard">{t('access.backToDashboard')}</a>
+          <a href="#/home">{t('access.backToDashboard')}</a>
         </div>
       {:else if ActiveComponent}
         <svelte:component this={ActiveComponent} {...componentProps} />
@@ -136,7 +136,7 @@
         <div class="not-found">
           <h1>404</h1>
           <p>{t('errors.notFoundTitle')}</p>
-          <a href="#/dashboard">{t('errors.notFoundCta')}</a>
+          <a href="#/home">{t('errors.notFoundCta')}</a>
         </div>
       {/if}
     </AppShell>
@@ -148,7 +148,7 @@
           <div class="access-denied">
             <h1>{t('access.deniedTitle')}</h1>
             <p>{t('access.deniedMessage')}</p>
-            <a href="#/dashboard">{t('access.backToDashboard')}</a>
+            <a href="#/home">{t('access.backToDashboard')}</a>
           </div>
         {:else if ActiveComponent}
           <svelte:component this={ActiveComponent} {...componentProps} />
@@ -156,7 +156,7 @@
           <div class="not-found">
             <h1>404</h1>
             <p>{t('errors.notFoundTitle')}</p>
-            <a href="#/dashboard">{t('errors.notFoundCta')}</a>
+            <a href="#/home">{t('errors.notFoundCta')}</a>
           </div>
         {/if}
       </main>

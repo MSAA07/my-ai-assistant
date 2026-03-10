@@ -8,7 +8,7 @@ export default {
   access: {
     deniedTitle: 'تم رفض الوصول',
     deniedMessage: 'ليس لديك صلاحية لعرض هذه الصفحة.',
-    backToDashboard: 'العودة إلى لوحة التحكم'
+    backToDashboard: 'العودة إلى الصفحة الرئيسية'
   },
   errors: {
     notFoundTitle: 'الصفحة غير موجودة',
@@ -28,8 +28,10 @@ export default {
     comingSoonDetail: 'نعمل حالياً على إكمال هذه الميزة.'
   },
   nav: {
-    dashboard: 'لوحة التحكم',
-    documents: 'مستنداتي',
+    home: 'الرئيسية',
+    dashboard: 'الرئيسية',
+    study: 'مكتبة مركز الدراسة',
+    documents: 'المكتبة',
     exams: 'الاختبارات',
     flashcards: 'البطاقات التعليمية',
     adminPanel: 'لوحة الإدارة',
@@ -40,7 +42,7 @@ export default {
     mobileLabel: 'التنقل الأساسي'
   },
   topbar: {
-    defaultTitle: 'لوحة التحكم',
+    defaultTitle: 'الرئيسية',
     notifications: 'الإشعارات',
     notificationsComingSoon: 'الإشعارات (قريباً)',
     profile: 'الملف الشخصي',
@@ -153,7 +155,7 @@ export default {
     notFound: 'المستند غير موجود',
     processingFailedTitle: 'تعذر إكمال معالجة هذا المستند.',
     processingFailed: 'فشلت معالجة المستند. يرجى المحاولة مرة أخرى.',
-    processingFailedHelp: 'يمكنك العودة إلى المستندات أو رفع الملف مرة أخرى من لوحة التحكم.',
+    processingFailedHelp: 'يمكنك العودة إلى مكتبة الدراسة أو رفع الملف مرة أخرى من الصفحة الرئيسية.',
     extracting: 'جاري استخراج نص المستند...',
     extractingNote: 'يستغرق ذلك عادة بضع ثوانٍ قبل أن تصبح أدوات الدراسة جاهزة للإنشاء عند الطلب.',
     aiGenerating: 'الذكاء الاصطناعي يقوم بإنشاء المواد الدراسية...',
@@ -164,7 +166,7 @@ export default {
     jobStatusError: 'تعذر التحقق من حالة المعالجة. يرجى المحاولة مرة أخرى.',
     back: 'رجوع',
     backToDocuments: 'العودة إلى المستندات',
-    backToDashboard: 'العودة إلى لوحة التحكم',
+    backToDashboard: 'العودة إلى الصفحة الرئيسية',
     uploadAgain: 'رفع ملف آخر',
     actions: {
       generate: 'إنشاء',
@@ -270,11 +272,11 @@ export default {
     }
   },
   documentsPage: {
-    eyebrow: 'مساحة العمل',
-    title: 'المستندات',
-    description: 'كل عمليات الرفع المعالجة تظهر هنا. يمكنك فتحها أو مراجعتها أو حذفها في أي وقت.',
+    eyebrow: 'مركز الدراسة',
+    title: 'المكتبة',
+    description: 'تصفح المواد المرفوعة وافتح أي مستند للمتابعة.',
     emptyTitle: 'لا يوجد مستندات بعد',
-    emptyDescription: 'ارفع أول مستند من لوحة التحكم لبدء إنشاء المواد الدراسية.',
+    emptyDescription: 'ارفع أول مستند من الصفحة الرئيسية لبدء مكتبة الدراسة.',
     labels: {
       uploaded: 'تاريخ الرفع',
       language: 'اللغة'
@@ -293,13 +295,17 @@ export default {
     },
     actions: {
       refresh: 'تحديث القائمة',
-      uploadCta: 'رفع من لوحة التحكم',
+      uploadCta: 'رفع',
       view: 'فتح',
+      rename: 'إعادة تسمية',
+      more: 'إجراءات إضافية',
+      renamePrompt: 'أعد تسمية هذا المستند',
       delete: 'حذف',
       deleting: 'جاري الحذف...'
     },
     errors: {
       load: 'تعذر تحميل المستندات حالياً.',
+      rename: 'فشلت إعادة تسمية المستند. حاول مرة أخرى.',
       delete: 'فشل حذف المستند. حاول مرة أخرى.'
     },
     deleteConfirmTitle: 'حذف المستند؟',

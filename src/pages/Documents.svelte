@@ -123,7 +123,7 @@
       title={t('documentsPage.emptyTitle')}
       description={t('documentsPage.emptyDescription')}
     >
-      <button class="primary-btn" type="button" on:click={() => (window.location.hash = '/dashboard')}>
+      <button class="primary-btn" type="button" on:click={() => (window.location.hash = '/home')}>
         {t('documentsPage.actions.uploadCta')}
       </button>
     </EmptyState>

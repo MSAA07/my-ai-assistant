@@ -195,7 +195,7 @@
       }
 
       if (typeof window !== "undefined") {
-        window.location.hash = `/documents/${documentId}`;
+        window.location.hash = `/study?highlight=${encodeURIComponent(documentId)}`;
       }
     } catch (err) {
       console.error("Upload error:", err);

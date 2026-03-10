@@ -1,21 +1,23 @@
 import Home from './pages/Home.svelte';
-import Documents from './pages/Documents.svelte';
 import Settings from './pages/Settings.svelte';
 import AdminDashboard from './components/AdminDashboard.svelte';
 import DocumentView from './pages/DocumentView.svelte';
 import StudyHubIndex from './pages/StudyHubIndex.svelte';
 import StudyHubDocument from './pages/StudyHubDocument.svelte';
 
-export const DEFAULT_AUTH_PATH = '/dashboard';
+export const DEFAULT_AUTH_PATH = '/home';
 
 const LEGACY_REDIRECTS = new Map([
   ['/app', DEFAULT_AUTH_PATH],
   ['/app/', DEFAULT_AUTH_PATH],
-  ['/home', '/dashboard'],
+  ['/dashboard', DEFAULT_AUTH_PATH],
+  ['/dashboard/', DEFAULT_AUTH_PATH],
   ['/upload', DEFAULT_AUTH_PATH],
-  ['/exams', '/documents'],
-  ['/flashcards', '/documents'],
-  ['/summary', '/documents']
+  ['/documents', '/study'],
+  ['/documents/', '/study'],
+  ['/exams', '/study'],
+  ['/flashcards', '/study'],
+  ['/summary', '/study']
 ]);
 
 const LEGACY_DOCUMENT_SECTION_MAP = {
@@ -30,11 +32,11 @@ const LEGACY_DOCUMENT_SECTION_MAP = {
 
 export const STATIC_ROUTES = [
   {
-    id: 'dashboard',
-    path: '/dashboard',
+    id: 'home',
+    path: '/home',
     component: Home,
-    labelKey: 'nav.dashboard',
-    pageTitleKey: 'nav.dashboard',
+    labelKey: 'nav.home',
+    pageTitleKey: 'nav.home',
     icon: 'dashboard',
     showInSidebar: true,
     showInBottomNav: true
@@ -45,16 +47,6 @@ export const STATIC_ROUTES = [
     component: StudyHubIndex,
     labelKey: 'nav.study',
     pageTitleKey: 'nav.study',
-    icon: 'documents',
-    showInSidebar: true,
-    showInBottomNav: true
-  },
-  {
-    id: 'documents',
-    path: '/documents',
-    component: Documents,
-    labelKey: 'nav.documents',
-    pageTitleKey: 'nav.documents',
     icon: 'documents',
     showInSidebar: true,
     showInBottomNav: true
@@ -115,10 +107,10 @@ const STUDY_ROUTE = {
 
 const DOCUMENT_ROUTE = {
   id: 'documents-detail',
-  parentNavId: 'documents',
+  parentNavId: 'study',
   path: '/legacy/documents/:id/:section?',
   component: DocumentView,
-  pageTitleKey: 'nav.documents',
+  pageTitleKey: 'nav.study',
   match(path) {
     const isLegacyPath = path.startsWith('/legacy/documents/') || path.startsWith('/documents-legacy/');
     if (!isLegacyPath) {

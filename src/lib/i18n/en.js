@@ -8,7 +8,7 @@ export default {
   access: {
     deniedTitle: 'Access Denied',
     deniedMessage: 'You do not have permission to view this page.',
-    backToDashboard: 'Back to dashboard'
+    backToDashboard: 'Back to home'
   },
   errors: {
     notFoundTitle: 'Page not found',
@@ -28,9 +28,10 @@ export default {
     comingSoonDetail: 'We are putting the finishing touches on this experience.'
   },
   nav: {
-    dashboard: 'Dashboard',
-    study: 'Study Hub',
-    documents: 'My Documents',
+    home: 'Home',
+    dashboard: 'Home',
+    study: 'Study Hub Library',
+    documents: 'Library',
     exams: 'Exams',
     flashcards: 'Flashcards',
     adminPanel: 'Admin Panel',
@@ -41,7 +42,7 @@ export default {
     mobileLabel: 'Primary navigation'
   },
   topbar: {
-    defaultTitle: 'Dashboard',
+    defaultTitle: 'Home',
     notifications: 'Notifications',
     notificationsComingSoon: 'Notifications (coming soon)',
     profile: 'Profile',
@@ -154,7 +155,7 @@ export default {
     notFound: 'Document not found',
     processingFailedTitle: 'We could not finish processing this document.',
     processingFailed: 'Document processing failed. Please try again.',
-    processingFailedHelp: 'Go back to your documents or upload the file again from the dashboard.',
+    processingFailedHelp: 'Go back to your library or upload the file again from home.',
     extracting: 'Extracting document text...',
     extractingNote: 'This usually takes a few seconds before study tools can be generated on demand.',
     aiGenerating: 'AI is generating study materials...',
@@ -165,7 +166,7 @@ export default {
     jobStatusError: 'Unable to check processing status. Please try again.',
     back: 'Back',
     backToDocuments: 'Back to Documents',
-    backToDashboard: 'Back to Dashboard',
+    backToDashboard: 'Back to Home',
     uploadAgain: 'Upload Again',
     actions: {
       generate: 'Generate',
@@ -271,11 +272,11 @@ export default {
     }
   },
   documentsPage: {
-    eyebrow: 'Workspace',
-    title: 'Documents',
-    description: 'Every processed upload lives here. Open, review, or clean up entries anytime.',
+    eyebrow: 'Study Hub',
+    title: 'Library',
+    description: 'Browse your uploaded materials and open one to continue studying.',
     emptyTitle: 'No documents yet',
-    emptyDescription: 'Upload your first document from the dashboard to start generating study materials.',
+    emptyDescription: 'Upload your first document from home to start your library.',
     labels: {
       uploaded: 'Uploaded',
       language: 'Language'
@@ -294,13 +295,17 @@ export default {
     },
     actions: {
       refresh: 'Refresh list',
-      uploadCta: 'Upload from dashboard',
+      uploadCta: 'Upload',
       view: 'Open',
+      rename: 'Rename',
+      more: 'More actions',
+      renamePrompt: 'Rename this document',
       delete: 'Delete',
       deleting: 'Deleting...'
     },
     errors: {
       load: 'Unable to load your documents right now.',
+      rename: 'Failed to rename the document. Please try again.',
       delete: 'Failed to delete the document. Please try again.'
     },
     deleteConfirmTitle: 'Delete document?',

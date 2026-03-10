@@ -17,9 +17,10 @@ This document describes how the frontend is wired to backend APIs and how UI sta
 - Uses `AppShell` layout by default
 
 2. Route state (`src/stores/router.js` + `src/routes.js`)
-- Static routes: dashboard, documents, settings, admin
+- Static routes: home, study, settings, admin
 - Dynamic routes:
-  - `/documents/:id/:section?`
+  - `/study/:id/:section?`
+  - `/legacy/documents/:id/:section?`
   - `/admin/*`
 
 3. Auth state (`src/stores/auth.js`)
@@ -41,11 +42,12 @@ This document describes how the frontend is wired to backend APIs and how UI sta
 
 All calls include credentials so browser session cookies are sent.
 
-### Dashboard and upload
+### Home, upload, and library flow
 
-- Dashboard requests `GET /api/user/me`
+- Home requests `GET /api/user/me`
 - Upload sends `POST /api/upload` with `multipart/form-data`
-- After upload, UI navigates to `/documents/:id`
+- After upload, UI navigates to `/study?highlight=:id`
+- Study Hub Library requests `GET /api/user/me` and is the canonical browse/select surface for documents
 
 ### Document view lifecycle behavior
 
@@ -91,7 +93,7 @@ Compatibility mirrors still consumed by UI:
 
 - Route/page errors are surfaced as user-facing messages
 - Upload/network errors are normalized to translated keys
-- Failed processing state shows recovery navigation back to dashboard/documents
+- Failed processing state shows recovery navigation back to home/library
 
 ## Deployment Mapping
 
@@ -111,4 +113,4 @@ Update this file when:
 - lifecycle status contract changes
 - environment host mapping changes
 
-Last Updated: March 9, 2026
+Last Updated: March 10, 2026

@@ -23,7 +23,7 @@
   ];
 
   function enterApp() {
-    router.navigate('/dashboard');
+    router.navigate('/home');
   }
 </script>
 

@@ -500,7 +500,15 @@
 
   function setTab(tab) {
     const nextTab = VALID_TABS.has(tab) ? tab : "summary";
-    window.location.hash = `/documents/${documentId}/${nextTab}`;
+    const tabMap = {
+      summary: "summary",
+      flashcards: "flashcards",
+      exam: "exams",
+      notes: "summary",
+      activity: "summary"
+    };
+    const mappedTab = tabMap[nextTab] ?? "summary";
+    window.location.hash = `/study/${documentId}/${mappedTab}`;
   }
 
   function setFeaturePending(featureKey, value) {
@@ -654,11 +662,11 @@
   }
 
   function goBack() {
-    window.location.hash = "/documents";
+    window.location.hash = "/study";
   }
 
-  function goToDashboard() {
-    window.location.hash = "/dashboard";
+  function goToHome() {
+    window.location.hash = "/home";
   }
 </script>
 
@@ -675,7 +683,7 @@
       <p class="error-note">{t('document.processingFailedHelp')}</p>
       <div class="error-actions">
         <button class="secondary-action" on:click={goBack}>{t('document.backToDocuments')}</button>
-        <button class="primary-action" on:click={goToDashboard}>{t('document.uploadAgain')}</button>
+        <button class="primary-action" on:click={goToHome}>{t('document.uploadAgain')}</button>
       </div>
     {:else}
       <button on:click={goBack}>{t('document.backToDocuments')}</button>

@@ -1,7 +1,10 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { API_BASE } from '../config.js';
+  import { routeParams } from '../stores/router.js';
+  import { t } from '../lib/i18n/t.js';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
+  import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
 
   const statusToneMap = {
     queued: 'processing',
@@ -14,21 +17,33 @@
   let documents = [];
   let loading = true;
   let error = '';
+  let actionError = '';
+  let actionBusyId = '';
+  let openMenuId = '';
+  let confirmOpen = false;
+  let pendingDeleteDoc = null;
 
-  $: readyCount = documents.filter((doc) => doc?.processingStatus === 'complete').length;
-  $: processingCount = documents.filter((doc) => {
-    const status = doc?.processingStatus;
-    return status === 'queued' || status === 'processing' || status === 'running';
-  }).length;
-  $: failedCount = documents.filter((doc) => doc?.processingStatus === 'failed').length;
+  $: highlightDocumentId = typeof $routeParams?.highlight === 'string' ? $routeParams.highlight : '';
+  $: deleteTitle = t('documentsPage.deleteConfirmTitle');
+  $: deleteDescription = t('documentsPage.deleteConfirmDescription', {
+    name: pendingDeleteDoc?.originalName ?? t('documentsPage.deleteUnknown')
+  });
+  $: deleteLabel = t('documentsPage.actions.delete');
+  $: cancelLabel = t('confirmModal.cancel');
 
   onMount(() => {
     void loadDocuments();
+    window.addEventListener('click', closeMenu);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener('click', closeMenu);
   });
 
   async function loadDocuments() {
     loading = true;
     error = '';
+    actionError = '';
 
     try {
       const response = await fetch(`${API_BASE}/api/user/me`, {
@@ -37,142 +52,245 @@
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Failed to load documents');
+        throw new Error(data?.error || t('documentsPage.errors.load'));
       }
 
-      documents = Array.isArray(data?.documents) ? data.documents : [];
+      const nextDocuments = Array.isArray(data?.documents) ? data.documents : [];
+      documents = nextDocuments.sort((a, b) => {
+        const left = new Date(b?.uploadDate ?? 0).getTime();
+        const right = new Date(a?.uploadDate ?? 0).getTime();
+        return left - right;
+      });
     } catch (err) {
-      error = err?.message || 'Failed to load documents';
+      error = err?.message || t('documentsPage.errors.load');
     } finally {
       loading = false;
     }
   }
 
-  function openStudyHub(documentId) {
-    window.location.hash = `/study/${documentId}`;
+  function closeMenu() {
+    openMenuId = '';
   }
 
-  function resolveStatusTone(status) {
-    return statusToneMap[status] ?? 'info';
+  function goToHome() {
+    window.location.hash = '/home';
+  }
+
+  function toggleMenu(event, docId) {
+    event.stopPropagation();
+    openMenuId = openMenuId === docId ? '' : docId;
+  }
+
+  function getStatusKey(doc) {
+    const status = typeof doc?.processingStatus === 'string' ? doc.processingStatus.toLowerCase() : 'unknown';
+    return statusToneMap[status] ? status : 'unknown';
+  }
+
+  function getStatusTone(doc) {
+    return statusToneMap[getStatusKey(doc)] ?? 'info';
   }
 
   function formatDate(value) {
-    return value ? new Date(value).toLocaleDateString() : 'Unknown';
+    if (!value) {
+      return 'Unknown';
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? 'Unknown' : parsed.toLocaleDateString();
   }
 
-  function flashcardCount(doc) {
-    const value = Number(doc?.flashcardCount);
-    if (Number.isFinite(value)) {
-      return value;
+  function getFileType(doc) {
+    const originalName = typeof doc?.originalName === 'string' ? doc.originalName : '';
+    const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
+    if (!extension) {
+      return 'FILE';
     }
-    return Array.isArray(doc?.flashcards) ? doc.flashcards.length : 0;
+    return extension.slice(0, 5).toUpperCase();
   }
 
-  function examQuestionCount(doc) {
-    const value = Number(doc?.questionCount);
-    if (Number.isFinite(value)) {
-      return value;
+  async function renameDocument(doc) {
+    openMenuId = '';
+    const currentName = typeof doc?.originalName === 'string' ? doc.originalName.trim() : '';
+    if (!currentName) return;
+
+    const nextNameInput = window.prompt(t('documentsPage.actions.renamePrompt'), currentName);
+    if (nextNameInput === null) {
+      return;
     }
-    return Array.isArray(doc?.examQuestions) ? doc.examQuestions.length : 0;
+
+    const nextName = nextNameInput.trim();
+    if (!nextName || nextName === currentName) {
+      return;
+    }
+
+    actionBusyId = doc.id;
+    actionError = '';
+    try {
+      const response = await fetch(`${API_BASE}/api/document/${doc.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ originalName: nextName })
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || t('documentsPage.errors.rename'));
+      }
+
+      await loadDocuments();
+    } catch (err) {
+      actionError = err?.message || t('documentsPage.errors.rename');
+    } finally {
+      actionBusyId = '';
+    }
   }
 
-  function readinessLabel(doc) {
-    const status = doc?.processingStatus;
-    if (status !== 'complete') {
-      return 'Extraction in progress';
-    }
+  function openDeleteModal(event, doc) {
+    event.stopPropagation();
+    pendingDeleteDoc = doc;
+    confirmOpen = true;
+    openMenuId = '';
+  }
 
-    const hasSummary = typeof doc?.summary === 'string' && doc.summary.trim().length > 0;
-    if (hasSummary || flashcardCount(doc) > 0 || examQuestionCount(doc) > 0) {
-      return 'Study materials available';
-    }
+  function closeDeleteModal() {
+    confirmOpen = false;
+    pendingDeleteDoc = null;
+  }
 
-    return 'Ready for generation';
+  async function handleDelete() {
+    if (!pendingDeleteDoc?.id) return;
+
+    actionBusyId = pendingDeleteDoc.id;
+    actionError = '';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/document/${pendingDeleteDoc.id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || t('documentsPage.errors.delete'));
+      }
+
+      closeDeleteModal();
+      await loadDocuments();
+    } catch (err) {
+      actionError = err?.message || t('documentsPage.errors.delete');
+    } finally {
+      actionBusyId = '';
+    }
   }
 </script>
 
-<div class="study-index">
+<div class="library-page">
   <header class="page-header">
     <div>
-      <p class="eyebrow">Study Hub</p>
-      <h1>Choose a document</h1>
-      <p class="subtitle">Open any document to continue summary, flashcard, exam, and export workflows.</p>
+      <p class="eyebrow">{t('documentsPage.eyebrow')}</p>
+      <h1>{t('documentsPage.title')}</h1>
+      <p class="subtitle">{t('documentsPage.description')}</p>
     </div>
-    <button type="button" class="refresh-btn" on:click={loadDocuments} disabled={loading}>
-      {loading ? 'Refreshing...' : 'Refresh'}
+    <button type="button" class="upload-btn" on:click={goToHome}>
+      {t('documentsPage.actions.uploadCta')}
     </button>
   </header>
 
   {#if loading}
-    <section class="panel">
-      <p>Loading documents...</p>
-    </section>
-  {:else if error}
-    <section class="panel error">
-      <p>{error}</p>
-    </section>
-  {:else if documents.length === 0}
-    <section class="panel">
-      <h2>No study documents yet</h2>
-      <p>Upload a document from the dashboard to start using Study Hub.</p>
-      <button type="button" class="primary-btn" on:click={() => (window.location.hash = '/dashboard')}>
-        Go to dashboard
-      </button>
+    <section class="state-panel">
+      <p>{t('common.loading')}</p>
     </section>
   {:else}
-    <section class="health-strip">
-      <article class="health-card">
-        <p class="health-label">Total</p>
-        <p class="health-value">{documents.length}</p>
-      </article>
-      <article class="health-card health-card--ready">
-        <p class="health-label">Ready</p>
-        <p class="health-value">{readyCount}</p>
-      </article>
-      <article class="health-card health-card--processing">
-        <p class="health-label">Processing</p>
-        <p class="health-value">{processingCount}</p>
-      </article>
-      <article class="health-card health-card--failed">
-        <p class="health-label">Needs attention</p>
-        <p class="health-value">{failedCount}</p>
-      </article>
-    </section>
+    {#if error}
+      <p class="inline-error">{error}</p>
+    {/if}
+    {#if actionError}
+      <p class="inline-error">{actionError}</p>
+    {/if}
 
-    <section class="documents-grid">
-      {#each documents as doc}
-        <article class="document-card">
-          <div class="card-head">
-            <h3>{doc.originalName}</h3>
-            <StatusBadge status={resolveStatusTone(doc.processingStatus)} label={doc.processingStatus ?? 'unknown'} />
-          </div>
-          <p class="readiness">{readinessLabel(doc)}</p>
-          <div class="meta-grid">
-            <p class="meta"><span>Uploaded</span>{formatDate(doc.uploadDate)}</p>
-            <p class="meta"><span>Language</span>{doc.language ?? 'unknown'}</p>
-            <p class="meta"><span>Flashcards</span>{flashcardCount(doc)}</p>
-            <p class="meta"><span>Exam questions</span>{examQuestionCount(doc)}</p>
-          </div>
-          <button type="button" class="primary-btn" on:click={() => openStudyHub(doc.id)}>
-            Open Study Hub
-          </button>
-        </article>
-      {/each}
-    </section>
+    {#if documents.length === 0}
+      <section class="state-panel">
+        <h2>{t('documentsPage.emptyTitle')}</h2>
+        <p>{t('documentsPage.emptyDescription')}</p>
+        <button type="button" class="upload-btn" on:click={goToHome}>
+          {t('documentsPage.actions.uploadCta')}
+        </button>
+      </section>
+    {:else}
+      <section class="documents-grid">
+        {#each documents as doc}
+          <article class={`document-card ${highlightDocumentId === doc.id ? 'highlight' : ''}`}>
+            <div class="card-top">
+              <p class="file-type">{getFileType(doc)}</p>
+              <div class="menu-wrap">
+                <button
+                  type="button"
+                  class="menu-trigger"
+                  aria-label={t('documentsPage.actions.more')}
+                  aria-expanded={openMenuId === doc.id}
+                  on:click={(event) => toggleMenu(event, doc.id)}
+                >
+                  ...
+                </button>
+                {#if openMenuId === doc.id}
+                  <div class="menu">
+                    <button
+                      type="button"
+                      on:click={() => renameDocument(doc)}
+                      disabled={actionBusyId === doc.id}
+                    >
+                      {t('documentsPage.actions.rename')}
+                    </button>
+                    <button
+                      type="button"
+                      on:click={(event) => openDeleteModal(event, doc)}
+                      disabled={actionBusyId === doc.id}
+                    >
+                      {t('documentsPage.actions.delete')}
+                    </button>
+                  </div>
+                {/if}
+              </div>
+            </div>
+
+            <a class="card-link" href={`#/study/${doc.id}`}>
+              <h2>{doc.originalName}</h2>
+              <p class="meta">
+                {t('documentsPage.labels.uploaded')}: {formatDate(doc.uploadDate)}
+              </p>
+              <StatusBadge
+                status={getStatusTone(doc)}
+                label={t(`documentsPage.statuses.${getStatusKey(doc)}`)}
+              />
+            </a>
+          </article>
+        {/each}
+      </section>
+    {/if}
   {/if}
+
+  <ConfirmModal
+    open={confirmOpen}
+    title={deleteTitle}
+    description={deleteDescription}
+    confirmLabel={actionBusyId === pendingDeleteDoc?.id ? t('documentsPage.actions.deleting') : deleteLabel}
+    cancelLabel={cancelLabel}
+    on:confirm={handleDelete}
+    on:cancel={closeDeleteModal}
+  />
 </div>
 
 <style>
-  .study-index {
+  .library-page {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-4);
   }
 
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: var(--space-4);
+    gap: var(--space-3);
     flex-wrap: wrap;
   }
 
@@ -186,95 +304,22 @@
 
   h1 {
     margin: 0.25rem 0;
+    font-size: 2rem;
     color: var(--color-text-primary);
-    font-size: 1.9rem;
   }
 
   .subtitle {
     margin: 0;
     color: var(--color-text-secondary);
-    max-width: 70ch;
   }
 
-  .refresh-btn,
-  .primary-btn {
-    min-height: 42px;
-    padding: 0.65rem 1rem;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
-  }
-
-  .refresh-btn:hover:not(:disabled),
-  .primary-btn:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--color-accent-primary) 60%, var(--color-border) 40%);
-    transform: translateY(-1px);
-  }
-
-  .primary-btn {
-    border: none;
-    background: var(--gradient-accent-strong);
-    color: var(--color-bg);
-  }
-
-  .panel {
+  .state-panel {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2);
-    background: var(--color-surface-1);
     padding: var(--space-4);
-  }
-
-  .panel.error {
-    border-color: var(--color-danger);
-    color: var(--color-danger);
-    background: var(--color-danger-surface);
-  }
-
-  .health-strip {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-3);
-  }
-
-  .health-card {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
     background: var(--color-surface-1);
-    padding: var(--space-3);
     display: grid;
-    gap: 0.35rem;
-  }
-
-  .health-card--ready {
-    border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border) 55%);
-  }
-
-  .health-card--processing {
-    border-color: color-mix(in srgb, var(--color-info) 45%, var(--color-border) 55%);
-  }
-
-  .health-card--failed {
-    border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border) 55%);
-  }
-
-  .health-label {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-  }
-
-  .health-value {
-    margin: 0;
-    color: var(--color-text-primary);
-    font-size: 1.5rem;
-    font-weight: 700;
+    gap: var(--space-2);
   }
 
   .documents-grid {
@@ -286,21 +331,92 @@
   .document-card {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2);
-    background: linear-gradient(160deg, color-mix(in srgb, var(--color-surface-1) 92%, white 8%) 0%, var(--color-surface-1) 100%);
-    padding: var(--space-4);
+    padding: var(--space-3);
+    background: var(--color-surface-1);
     display: grid;
     gap: var(--space-2);
-    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    transition: border-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
   }
 
-  .card-head {
+  .document-card:hover {
+    border-color: var(--color-accent-primary);
+    transform: translateY(-1px);
+  }
+
+  .document-card.highlight {
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 1px var(--color-accent-primary);
+  }
+
+  .card-top {
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-2);
-    align-items: flex-start;
   }
 
-  .document-card h3 {
+  .file-type {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    font-weight: 700;
+  }
+
+  .menu-wrap {
+    position: relative;
+  }
+
+  .menu-trigger {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .menu {
+    position: absolute;
+    top: 36px;
+    inset-inline-end: 0;
+    min-width: 132px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    background: var(--color-surface-1);
+    box-shadow: 0 12px 24px var(--color-shadow);
+    padding: 0.35rem;
+    display: grid;
+    gap: 0.25rem;
+    z-index: 5;
+  }
+
+  .menu button {
+    min-height: 36px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-1);
+    background: transparent;
+    color: var(--color-text-primary);
+    text-align: start;
+    cursor: pointer;
+    font-size: 0.88rem;
+  }
+
+  .menu button:hover:not(:disabled) {
+    border-color: var(--color-border);
+    background: var(--color-surface-2);
+  }
+
+  .menu button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  h2 {
     margin: 0;
     color: var(--color-text-primary);
     font-size: 1rem;
@@ -308,59 +424,47 @@
     word-break: break-word;
   }
 
-  .readiness {
-    margin: 0;
-    color: var(--color-text-secondary);
-    font-size: 0.92rem;
-  }
-
-  .meta-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-2);
-    padding: var(--space-2);
-    border-radius: var(--radius-1);
-    background: color-mix(in srgb, var(--color-surface-2) 86%, transparent);
-  }
-
   .meta {
     margin: 0;
     color: var(--color-text-secondary);
-    font-size: 0.85rem;
+    font-size: 0.88rem;
+  }
+
+  .card-link {
+    color: inherit;
+    text-decoration: none;
     display: grid;
-    gap: 0.25rem;
+    gap: var(--space-2);
   }
 
-  .meta span {
-    color: var(--color-text-muted);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+  .upload-btn {
+    min-height: 42px;
+    border-radius: var(--radius-1);
+    border: none;
+    padding: 0.65rem 1rem;
+    background: var(--gradient-accent-strong);
+    color: var(--color-bg);
     font-weight: 600;
+    cursor: pointer;
   }
 
-  @media (max-width: 1100px) {
+  .inline-error {
+    margin: 0;
+    border: 1px solid color-mix(in srgb, var(--color-danger) 36%, transparent);
+    border-radius: var(--radius-1);
+    background: var(--color-danger-surface);
+    color: var(--color-danger);
+    padding: 0.7rem 0.85rem;
+  }
+
+  @media (max-width: 1024px) {
     .documents-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 900px) {
-    .health-strip {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   @media (max-width: 640px) {
-    .health-strip {
-      grid-template-columns: 1fr;
-    }
-
     .documents-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .meta-grid {
       grid-template-columns: 1fr;
     }
   }
