@@ -16,7 +16,7 @@ export default {
   },
   language: {
     english: 'English',
-    arabic: 'العربية',
+    arabic: 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
     toggleLabel: 'Switch language',
     sidebarLabel: 'Interface language',
     sidebarDescription: 'Applies instantly across the workspace.'
@@ -110,7 +110,7 @@ export default {
       arabicOption: 'Arabic',
       filePlaceholder: 'Click to select a file (PDF, DOCX, PPTX)',
       dragActive: 'Release to drop file',
-      fileSelected: 'File selected — ready to generate',
+      fileSelected: 'File selected â€” ready to generate',
       constraints: 'PDF, DOCX, PPTX (Max 25MB)',
       selectedFileLabel: '{name}',
       fileInfo: 'Maximum file size: 25MB',
@@ -199,6 +199,33 @@ export default {
       exam: 'Mock Exam ({count})'
     },
     hub: {
+      backToStudyHub: 'Back to Study Hub',
+      untitled: 'Untitled document',
+      featuresTitle: 'Study features',
+      readyHint: 'Generated and ready to open.',
+      features: {
+        summary: 'Summary',
+        flashcards: 'Flashcards',
+        exam: 'Mock Exam'
+      },
+      states: {
+        notGenerated: 'Not generated',
+        generating: 'Generating',
+        waitingForExtraction: 'Waiting for document processing to finish before generation can start.'
+      },
+      actions: {
+        open: 'Open'
+      },
+      meta: {
+        fileType: 'File type'
+      },
+      processing: {
+        extractingTitle: 'Document is still processing',
+        extractingBody: 'We are extracting this document so study features can be generated.',
+        generatingTitle: 'Study generation in progress',
+        generatingBody: 'One or more study features are currently generating.',
+        continues: 'Generation continues in the background even if you leave this page.'
+      },
       statusTitle: 'Document lifecycle',
       statusSubtitle: 'Extraction status comes from the document lifecycle and generation runs per study tool.',
       generationRunning: 'A study-material generation is in progress. Existing content remains available.',
