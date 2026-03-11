@@ -86,4 +86,11 @@ If `VITE_API_BASE_URL` is not set, the app derives API base from hostname in `sr
 - Push to `stage` triggers staging/preview deployment
 - Push to `production` triggers production deployment
 
-Last Updated: March 9, 2026
+## Styling Layer Conventions
+
+- `src/lib/styles/tokens.css` is the single source of truth for raw color values, semantic aliases, effect tokens, and theme branching (`[data-theme="light"]`).
+- `src/styles/global.css` contains foundation-only rules (reset/base/typography/app chrome/form baseline/focus-visible/selection/scrollbar).
+- Feature or component class selectors must not be added to `global.css`.
+- `.svelte` component styles should use semantic tokens and keep concerns local (layout/structure/state), avoiding new raw palette/shadow constants.
+
+Last Updated: March 12, 2026

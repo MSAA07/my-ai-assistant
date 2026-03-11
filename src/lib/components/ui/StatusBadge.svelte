@@ -44,19 +44,19 @@
 
   .status-badge[data-tone='info'] {
     background: color-mix(in srgb, var(--color-info) 14%, transparent);
-    color: color-mix(in srgb, var(--color-info) 80%, #fff 20%);
+    color: color-mix(in srgb, var(--color-info) 80%, var(--color-text-soft) 20%);
     border-color: color-mix(in srgb, var(--color-info) 30%, transparent);
   }
 
   .status-badge[data-tone='success'] {
     background: color-mix(in srgb, var(--color-success) 14%, transparent);
-    color: color-mix(in srgb, var(--color-success) 70%, #fff 30%);
+    color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-soft) 30%);
     border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
   }
 
   .status-badge[data-tone='danger'] {
     background: color-mix(in srgb, var(--color-danger) 14%, transparent);
-    color: color-mix(in srgb, var(--color-danger) 80%, #fff 20%);
+    color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-soft) 20%);
     border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
   }
 </style>

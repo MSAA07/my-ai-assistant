@@ -125,7 +125,7 @@
     );
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-panel);
   }
 
   .topbar h1 {
@@ -210,7 +210,7 @@
     background: var(--color-surface-1);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2);
-    box-shadow: 0 20px 40px var(--color-shadow);
+    box-shadow: var(--shadow-menu);
     min-width: 220px;
     padding: var(--space-2);
     display: grid;

@@ -7,7 +7,7 @@
 <style>
   .footer {
     border-top: 1px solid var(--color-border);
-    background: linear-gradient(180deg, var(--color-bg) 0%, #060920 100%);
+    background: var(--gradient-footer);
     padding: 40px 2rem;
     text-align: center;
   }

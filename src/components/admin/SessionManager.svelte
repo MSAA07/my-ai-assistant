@@ -85,9 +85,9 @@
 
 <style>
   .session-panel {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--color-surface-panel);
     border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid var(--color-border-panel);
     padding: 1.5rem;
   }
 
@@ -101,7 +101,7 @@
   button {
     padding: 0.4rem 1rem;
     border-radius: 999px;
-    border: 1px solid rgba(96, 165, 250, 0.4);
+    border: 1px solid var(--color-accent-outline);
     background: transparent;
     color: var(--color-text);
     cursor: pointer;
@@ -119,7 +119,7 @@
   th,
   td {
     padding: 0.75rem;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    border-bottom: 1px solid var(--color-border-panel);
     text-align: start;
     vertical-align: top;
   }
@@ -137,8 +137,8 @@
   }
 
   .danger {
-    border: 1px solid rgba(239, 68, 68, 0.5);
-    color: #fca5a5;
+    border: 1px solid var(--color-danger-border);
+    color: var(--color-danger-soft);
     background: transparent;
     border-radius: 999px;
     padding: 0.3rem 0.8rem;
@@ -150,6 +150,6 @@
   }
 
   .error {
-    color: #fca5a5;
+    color: var(--color-danger-soft);
   }
 </style>

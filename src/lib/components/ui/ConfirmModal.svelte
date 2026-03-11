@@ -102,7 +102,7 @@
     border-radius: var(--radius-2);
     border: 1px solid var(--color-border);
     padding: var(--space-5);
-    box-shadow: 0 20px 50px var(--color-shadow);
+    box-shadow: var(--shadow-modal);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);

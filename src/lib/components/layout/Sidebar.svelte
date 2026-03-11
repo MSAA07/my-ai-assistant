@@ -95,7 +95,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
-    box-shadow: 14px 0 30px rgba(0, 0, 0, 0.18);
+    box-shadow: var(--shadow-soft);
   }
 
   .sidebar.rtl {
@@ -157,7 +157,7 @@
   .nav-item.active {
     background: var(--color-accent-surface);
     color: var(--color-text-primary);
-    box-shadow: inset 0 0 0 1px var(--color-accent-primary), 0 8px 20px rgba(108, 99, 255, 0.18);
+    box-shadow: inset 0 0 0 1px var(--color-accent-primary), 0 8px 20px var(--color-glow);
   }
 
   .nav-icon {

@@ -116,7 +116,7 @@
     padding: var(--space-5);
     display: grid;
     gap: var(--space-4);
-    box-shadow: 0 20px 40px var(--color-shadow);
+    box-shadow: var(--shadow-menu);
   }
 
   .modal-header {

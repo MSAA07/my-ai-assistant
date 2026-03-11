@@ -563,7 +563,7 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: rgba(30, 36, 51, 0.4);
+    background: color-mix(in srgb, var(--color-surface-1) 65%, transparent);
     color: var(--color-text-secondary);
     position: relative;
     overflow: hidden;
@@ -571,7 +571,7 @@
 
   .file-label:hover, .file-label.active {
     border-color: var(--color-accent-outline-strong);
-    background: rgba(30, 36, 51, 0.6);
+    background: color-mix(in srgb, var(--color-surface-1) 82%, transparent);
     color: var(--color-text-primary);
   }
 

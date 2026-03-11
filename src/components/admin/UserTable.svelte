@@ -318,9 +318,9 @@
 
 <style>
   .user-panel {
-    background: rgba(15, 23, 42, 0.6);
+    background: var(--color-surface-panel);
     border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid var(--color-border-panel);
     padding: 1.5rem;
   }
 
@@ -353,16 +353,16 @@
   .filters select,
   .form-grid input,
   .form-grid select {
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: var(--color-surface-panel-elevated);
+    border: 1px solid var(--color-border-panel-strong);
     border-radius: 0.6rem;
     padding: 0.6rem 0.8rem;
     color: var(--color-text);
   }
 
   .create-user {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: var(--color-surface-panel-strong);
+    border: 1px solid var(--color-border-panel);
     border-radius: 0.8rem;
     padding: 1rem;
     margin-bottom: 1.5rem;
@@ -377,9 +377,9 @@
   }
 
   .primary {
-    background: linear-gradient(135deg, #60a5fa, #818cf8);
+    background: var(--gradient-admin-action);
     border: none;
-    color: #0f172a;
+    color: var(--color-text-on-dark);
     font-weight: 600;
     border-radius: 0.6rem;
     padding: 0.6rem 1rem;
@@ -389,7 +389,7 @@
   .refresh {
     padding: 0.45rem 1rem;
     border-radius: 999px;
-    border: 1px solid rgba(96, 165, 250, 0.4);
+    border: 1px solid var(--color-accent-outline);
     background: transparent;
     color: var(--color-text);
     cursor: pointer;
@@ -411,15 +411,15 @@
   .bulk-actions button {
     padding: 0.35rem 0.9rem;
     border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color-border-panel) 70%, var(--color-border-panel-strong) 30%);
     background: transparent;
     color: var(--color-text);
     cursor: pointer;
   }
 
   .bulk-actions .danger {
-    border-color: rgba(239, 68, 68, 0.5);
-    color: #fca5a5;
+    border-color: var(--color-danger-border);
+    color: var(--color-danger-soft);
   }
 
   .bulk-actions button:disabled {
@@ -435,7 +435,7 @@
   th,
   td {
     padding: 0.75rem;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    border-bottom: 1px solid var(--color-border-panel);
     text-align: start;
     vertical-align: top;
   }
@@ -456,23 +456,23 @@
   .actions button {
     padding: 0.35rem 0.8rem;
     border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.3);
+    border: 1px solid color-mix(in srgb, var(--color-border-panel) 70%, var(--color-border-panel-strong) 30%);
     background: transparent;
     color: var(--color-text);
     cursor: pointer;
   }
 
   .actions .danger {
-    border-color: rgba(239, 68, 68, 0.5);
-    color: #fca5a5;
+    border-color: var(--color-danger-border);
+    color: var(--color-danger-soft);
   }
 
   .user-banned {
-    color: #f87171;
+    color: var(--color-danger-soft-strong);
   }
 
   .error {
-    color: #fca5a5;
+    color: var(--color-danger-soft);
   }
 
   @media (max-width: 768px) {

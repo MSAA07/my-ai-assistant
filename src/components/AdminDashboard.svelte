@@ -98,7 +98,7 @@
     padding: 0.6rem 1.2rem;
     border-radius: 999px;
     border: 1px solid transparent;
-    background: rgba(96, 165, 250, 0.08);
+    background: var(--color-accent-bg);
     color: var(--color-text-secondary);
     font-weight: 600;
     cursor: pointer;
@@ -107,13 +107,13 @@
 
   .tab:hover {
     color: var(--color-text);
-    border-color: rgba(96, 165, 250, 0.35);
+    border-color: var(--color-accent-outline);
   }
 
   .tab.active {
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.25), rgba(139, 92, 246, 0.2));
+    background: var(--gradient-admin-action-soft);
     color: var(--color-text);
-    border-color: rgba(96, 165, 250, 0.5);
+    border-color: var(--color-accent-outline-strong);
   }
 
   .admin-content {

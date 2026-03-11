@@ -1,31 +1,3 @@
-/* ========================================
-   Derived Theme Values
-   ======================================== */
-
-:root {
-  --color-surface: var(--color-surface-1);
-  --color-surface-hover: var(--color-surface-2);
-  --color-border-light: color-mix(in srgb, var(--color-border) 75%, transparent);
-  --color-shadow: color-mix(in srgb, var(--color-bg) 25%, black 75%);
-  --color-glow: color-mix(in srgb, var(--color-accent-primary) 25%, transparent);
-  --color-text: var(--color-text-primary);
-  --color-text-secondary: color-mix(in srgb, var(--color-text-primary) 82%, var(--color-text-muted) 18%);
-  --color-text-tertiary: color-mix(in srgb, var(--color-text-primary) 68%, var(--color-text-muted) 32%);
-  --color-accent: var(--color-accent-primary);
-  --color-accent-light: color-mix(in srgb, var(--color-accent-primary) 60%, white 40%);
-  --color-accent-bg: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
-  --color-accent-bg-hover: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
-  --gradient-accent: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
-  --gradient-hero: radial-gradient(circle at top, color-mix(in srgb, var(--color-accent-primary) 35%, transparent) 0%, transparent 70%);
-  --gradient-card-border: linear-gradient(135deg, color-mix(in srgb, var(--color-border) 70%, transparent), color-mix(in srgb, var(--color-accent-primary) 15%, transparent));
-  --gradient-bg-radial: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-accent-primary) 20%, transparent) 0%, transparent 60%);
-  --color-code-bg: color-mix(in srgb, var(--color-surface-1) 85%, black 15%);
-}
-
-/* ========================================
-   Base Reset & Defaults
-   ======================================== */
-
 *,
 *::before,
 *::after {
@@ -35,6 +7,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark light;
 }
 
 body {
@@ -54,16 +27,12 @@ body {
 a {
   color: var(--color-accent);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--motion-fast) var(--ease-standard);
 }
 
 a:hover {
   color: var(--color-accent-light);
 }
-
-/* ========================================
-   Scrollbar
-   ======================================== */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -83,20 +52,17 @@ a:hover {
   background: var(--color-border-light);
 }
 
-/* ========================================
-   Selection
-   ======================================== */
-
 ::selection {
   background: color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
   color: var(--color-text-primary);
 }
 
-/* ========================================
-   Global Visibility & Dark Theme Defaults
-   ======================================== */
-
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--color-text-primary);
 }
 
@@ -104,40 +70,19 @@ p {
   color: var(--color-text-secondary);
 }
 
-/* Foundation contrast guards */
-.stat-value {
-  color: var(--color-text-primary) !important;
-  -webkit-text-fill-color: var(--color-text-primary) !important;
-  opacity: 1 !important;
-}
-
-.stats dt {
-  color: var(--color-text-secondary) !important;
-  opacity: 1 !important;
-}
-
-.flashcard-front,
-.flashcard-back {
-  color: var(--color-text-primary) !important;
-  opacity: 1 !important;
-}
-
-.flashcard-front .card-label,
-.flashcard-back .card-label,
-.flashcard-front .card-text,
-.flashcard-back .card-text,
-.flashcard-front .flip-hint,
-.flashcard-back .flip-hint {
-  color: inherit !important;
-  opacity: 1 !important;
-}
-
 button {
   font-family: inherit;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   color: var(--color-text-primary);
   background: var(--color-surface-1);
   border: 1px solid var(--color-border);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }

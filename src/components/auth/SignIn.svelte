@@ -53,9 +53,9 @@
     margin: 4rem auto;
     padding: 2.5rem;
     background: var(--color-surface);
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-2);
+    box-shadow: var(--shadow-panel);
+    border: 1px solid var(--color-border-light);
   }
   
   h2 {
@@ -71,16 +71,16 @@
   label {
     display: block;
     margin-bottom: 0.5rem;
-    color: var(--color-text-secondary, #ccc);
+    color: var(--color-text-secondary);
   }
   
   input {
     width: 100%;
     padding: 0.8rem;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: rgba(0,0,0,0.2);
-    color: white;
+    border-radius: var(--radius-1);
+    border: 1px solid var(--color-border-light);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
     font-size: 1rem;
   }
   
@@ -93,17 +93,17 @@
     width: 100%;
     padding: 0.8rem;
     background: var(--color-accent);
-    color: white;
+    color: var(--color-text-soft);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-1);
     font-size: 1rem;
     cursor: pointer;
     font-weight: 600;
-    transition: background 0.2s;
+    transition: background var(--motion-fast) var(--ease-standard);
   }
   
   .btn-primary:hover:not(:disabled) {
-    background: #4a90e2; /* Slightly darker accent */
+    background: var(--color-accent-hover);
   }
   
   .btn-primary:disabled {
@@ -112,10 +112,10 @@
   }
   
   .error {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+    background: var(--color-danger-surface);
     padding: 0.75rem;
-    border-radius: 6px;
+    border-radius: var(--radius-1);
     margin-bottom: 1rem;
     text-align: center;
   }
@@ -124,7 +124,7 @@
     margin-top: 1.5rem;
     text-align: center;
     font-size: 0.9rem;
-    color: #888;
+    color: var(--color-text-muted);
   }
   
   .link-btn {

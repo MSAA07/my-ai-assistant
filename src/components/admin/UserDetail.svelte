@@ -314,7 +314,7 @@
   .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: color-mix(in srgb, var(--color-bg) 65%, rgba(0, 0, 0, 0.55) 35%);
+    background: var(--color-backdrop-strong);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -330,7 +330,7 @@
     width: min(900px, 100%);
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 32px 64px color-mix(in srgb, var(--color-bg) 70%, transparent);
+    box-shadow: var(--shadow-modal-strong);
   }
 
   header {
@@ -503,7 +503,7 @@
   .danger:hover,
   .danger:focus-visible {
     background: color-mix(in srgb, var(--color-danger) 18%, transparent);
-    color: color-mix(in srgb, var(--color-danger) 80%, #fff 20%);
+    color: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-soft) 20%);
     outline: none;
   }
 
