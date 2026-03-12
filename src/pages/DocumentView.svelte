@@ -1,6 +1,9 @@
 <script>
   import { onDestroy } from 'svelte';
   import { t } from '../lib/i18n/t.js';
+  import Button from '../lib/components/ui/Button.svelte';
+  import Card from '../lib/components/ui/Card.svelte';
+  import FieldShell from '../lib/components/ui/FieldShell.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import GuidedRegenerateModal from '../lib/components/ui/GuidedRegenerateModal.svelte';
   import {
@@ -497,51 +500,51 @@
 </script>
 
 {#if loading && !docData}
-  <section class="panel">
+  <Card as="section" class="activity-panel" variant="base" padding="md">
     <p>{t('document.loading')}</p>
-  </section>
+  </Card>
 {:else if !docData}
-  <section class="panel panel-error">
+  <Card as="section" class="activity-panel activity-panel-error" variant="base" padding="md" border="strong">
     <h2>{t('document.processingFailedTitle')}</h2>
     <p>{pageError || t('document.notFound')}</p>
-    <button type="button" class="btn secondary" on:click={goBackToHub}>{t('document.activity.backToHub')}</button>
-  </section>
+    <Button type="button" variant="secondary" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
+  </Card>
 {:else}
   <div class="activity mode-{mode}">
     <header class="activity-header">
-      <button type="button" class="back-link" on:click={goBackToHub}>{t('document.activity.backToHub')}</button>
+      <Button type="button" class="activity-back-link" variant="ghost" size="sm" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
       <div>
         <p class="eyebrow">{mode === 'summary' ? t('document.activity.section.summary') : mode === 'flashcards' ? t('document.activity.section.flashcards') : t('document.activity.section.exam')}</p>
         <h1>{title}</h1>
         <p class="sub">{mode === 'summary' ? t('document.activity.subtitle.summary') : mode === 'flashcards' ? t('document.activity.subtitle.flashcards') : t('document.activity.subtitle.exam')}</p>
       </div>
       {#if activeFeature.hasContent}
-        <button type="button" class="btn secondary" on:click={() => openRegenerateModal(activeFeature)} disabled={!activeFeature.canRegenerate}>
+        <Button type="button" variant="secondary" on:click={() => openRegenerateModal(activeFeature)} disabled={!activeFeature.canRegenerate}>
           {activeFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
-        </button>
+        </Button>
       {/if}
     </header>
 
     {#if extractionStatus === 'failed'}
-      <section class="panel panel-error">
+      <Card as="section" class="activity-panel activity-panel-error" variant="base" padding="md" border="strong">
         <div class="row">
           <h2>{t('document.processingFailedTitle')}</h2>
           <StatusBadge status="failed" label={t('status.failed')} />
         </div>
         <p>{text(docData?.processingError) || t('document.processingFailed')}</p>
-      </section>
+      </Card>
     {:else if showProcessingBanner}
-      <section class="panel">
+      <Card as="section" class="activity-panel" variant="base" padding="md">
         <div class="row">
           <h2>{isExtractionActive(extractionStatus) ? t('document.activity.states.extractionProcessing') : t('document.activity.states.generationProcessing')}</h2>
           <StatusBadge status="processing" label={t('status.processing')} />
         </div>
         <p>{t('document.activity.states.processingContinues')}</p>
-      </section>
+      </Card>
     {/if}
 
     {#if mode === 'summary'}
-      <section class="surface">
+      <Card as="section" class="activity-surface" variant="base" padding="md">
         {#if summaryFeature.hasContent}
           <article class="reader">
             <h2>{t('document.activity.summary.title')}</h2>
@@ -553,62 +556,62 @@
         {:else}
           <div class="empty">
             <p>{summaryFeature.errorMessage || t('document.summary.generatePrompt')}</p>
-            <button type="button" class="btn primary" on:click={() => queueGeneration(summaryFeature, { regenerate: summaryFeature.shouldRegenerate })} disabled={!summaryFeature.canGenerate}>
+            <Button type="button" variant="primary" on:click={() => queueGeneration(summaryFeature, { regenerate: summaryFeature.shouldRegenerate })} disabled={!summaryFeature.canGenerate}>
               {summaryFeature.busy ? t('document.actions.generating') : t('document.activity.actions.generateSummary')}
-            </button>
+            </Button>
           </div>
         {/if}
-      </section>
+      </Card>
     {/if}
 
     {#if mode === 'flashcards'}
-      <section class="surface">
+      <Card as="section" class="activity-surface" variant="base" padding="md">
         {#if flashcardsFeature.hasContent}
           <p class="progress">{t('document.activity.flashcards.progressLabel', { current: flashcardIndex + 1, total: flashcards.length, correct: flashcardsCorrect, incorrect: flashcardsIncorrect })}</p>
-          <article class="card" class:card-answer={revealAnswer}>
+          <Card as="article" class={`flashcard-panel ${revealAnswer ? 'flashcard-panel-answer' : ''}`} variant="soft" padding="md">
             <p class="card-side">{revealAnswer ? t('document.activity.flashcards.answerLabel') : t('document.activity.flashcards.questionLabel')}</p>
             <h2>{revealAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</h2>
             {#if revealAnswer && text(currentFlashcard?.explanation)}
               <p class="explanation">{currentFlashcard.explanation}</p>
             {/if}
-          </article>
+          </Card>
           <div class="controls">
             {#if !revealAnswer}
-              <button type="button" class="btn primary" on:click={() => (revealAnswer = true)}>{t('document.activity.actions.revealAnswer')}</button>
+              <Button type="button" variant="primary" on:click={() => (revealAnswer = true)}>{t('document.activity.actions.revealAnswer')}</Button>
             {:else}
-              <button type="button" class="btn secondary" on:click={() => (revealAnswer = false)}>{t('document.activity.actions.hideAnswer')}</button>
-              <button type="button" class="btn success" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markCorrect')}</button>
-              <button type="button" class="btn danger" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markIncorrect')}</button>
+              <Button type="button" variant="secondary" on:click={() => (revealAnswer = false)}>{t('document.activity.actions.hideAnswer')}</Button>
+              <Button type="button" variant="success" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markCorrect')}</Button>
+              <Button type="button" variant="danger" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markIncorrect')}</Button>
             {/if}
           </div>
           {#if flashcardProgressError}<p class="error">{flashcardProgressError}</p>{/if}
           <div class="controls">
-            <button type="button" class="btn secondary" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</button>
-            <button type="button" class="btn secondary" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</button>
+            <Button type="button" variant="secondary" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</Button>
+            <Button type="button" variant="secondary" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</Button>
           </div>
         {:else}
           <div class="empty">
             <p>{flashcardsFeature.errorMessage || t('document.flashcards.generatePrompt')}</p>
-            <button type="button" class="btn primary" on:click={() => queueGeneration(flashcardsFeature, { regenerate: flashcardsFeature.shouldRegenerate })} disabled={!flashcardsFeature.canGenerate}>
+            <Button type="button" variant="primary" on:click={() => queueGeneration(flashcardsFeature, { regenerate: flashcardsFeature.shouldRegenerate })} disabled={!flashcardsFeature.canGenerate}>
               {flashcardsFeature.busy ? t('document.actions.generating') : t('document.activity.actions.generateFlashcards')}
-            </button>
+            </Button>
           </div>
         {/if}
-      </section>
+      </Card>
     {/if}
 
     {#if mode === 'exam'}
-      <section class="surface">
+      <Card as="section" class="activity-surface" variant="base" padding="md">
         {#if examFeature.hasContent}
           {#if examPhase === 'intro'}
-            <article class="panel exam-intro">
+            <Card as="article" class="activity-panel exam-intro" variant="soft" padding="md">
               <h2>{t('document.activity.exam.introTitle')}</h2>
               <p>{t('document.activity.exam.introDescription', { count: examQuestions.length })}</p>
-              <button type="button" class="btn primary" on:click={startExam}>{t('document.activity.actions.startExam')}</button>
-            </article>
+              <Button type="button" variant="primary" on:click={startExam}>{t('document.activity.actions.startExam')}</Button>
+            </Card>
           {:else if examPhase === 'question'}
             <p class="progress">{t('document.exam.progress', { current: currentQuestionIndex + 1, total: examQuestions.length })} · {t('document.activity.exam.answeredCount', { answered: examAnsweredCount, total: examQuestions.length })}</p>
-            <article class="panel question">
+            <Card as="article" class="activity-panel question" variant="soft" padding="md">
               <p class="eyebrow">{t('document.activity.exam.questionLabel', { index: currentQuestionIndex + 1 })}</p>
               <h2>{currentExamQuestion?.question}</h2>
               {#if questionOptions(currentExamQuestion).length > 0}
@@ -621,24 +624,26 @@
                   {/each}
                 </div>
               {:else}
-                <input class="answer-input" type="text" value={examAnswers[currentQuestionIndex] || ''} placeholder={t('document.exam.inputPlaceholder')} on:input={(event) => setExamAnswer(event.currentTarget.value)} />
+                <FieldShell class="answer-input-shell">
+                  <input class="answer-input" type="text" value={examAnswers[currentQuestionIndex] || ''} placeholder={t('document.exam.inputPlaceholder')} on:input={(event) => setExamAnswer(event.currentTarget.value)} />
+                </FieldShell>
               {/if}
-            </article>
+            </Card>
             <div class="controls">
-              <button type="button" class="btn secondary" on:click={previousQuestion} disabled={currentQuestionIndex === 0}>{t('document.activity.actions.previous')}</button>
+              <Button type="button" variant="secondary" on:click={previousQuestion} disabled={currentQuestionIndex === 0}>{t('document.activity.actions.previous')}</Button>
               {#if currentQuestionIndex < examQuestions.length - 1}
-                <button type="button" class="btn secondary" on:click={nextQuestion}>{t('document.activity.actions.next')}</button>
+                <Button type="button" variant="secondary" on:click={nextQuestion}>{t('document.activity.actions.next')}</Button>
               {:else}
-                <button type="button" class="btn primary" on:click={submitExam} disabled={examSubmitting}>{t('document.activity.actions.submitExam')}</button>
+                <Button type="button" variant="primary" on:click={submitExam} disabled={examSubmitting}>{t('document.activity.actions.submitExam')}</Button>
               {/if}
             </div>
           {:else if examPhase === 'submitting'}
-            <article class="panel exam-intro">
+            <Card as="article" class="activity-panel exam-intro" variant="soft" padding="md">
               <h2>{t('document.activity.exam.submittingTitle')}</h2>
               <p>{t('document.activity.exam.submittingBody')}</p>
-            </article>
+            </Card>
           {:else}
-            <article class="panel">
+            <Card as="article" class="activity-panel" variant="soft" padding="md">
               <h2>{t('document.activity.exam.resultsTitle')}</h2>
               <p>{t('document.activity.exam.scoreLabel', { score: examScore, total: examQuestions.length })}</p>
               {#if examSubmitError}<p class="error">{examSubmitError}</p>{/if}
@@ -652,18 +657,18 @@
                   </article>
                 {/each}
               </div>
-              <button type="button" class="btn primary" on:click={() => resetExamState(examQuestions.length)}>{t('document.activity.actions.retakeExam')}</button>
-            </article>
+              <Button type="button" variant="primary" on:click={() => resetExamState(examQuestions.length)}>{t('document.activity.actions.retakeExam')}</Button>
+            </Card>
           {/if}
         {:else}
           <div class="empty">
             <p>{examFeature.errorMessage || t('document.exam.generatePrompt')}</p>
-            <button type="button" class="btn primary" on:click={() => queueGeneration(examFeature, { regenerate: examFeature.shouldRegenerate })} disabled={!examFeature.canGenerate}>
+            <Button type="button" variant="primary" on:click={() => queueGeneration(examFeature, { regenerate: examFeature.shouldRegenerate })} disabled={!examFeature.canGenerate}>
               {examFeature.busy ? t('document.actions.generating') : t('document.activity.actions.generateExam')}
-            </button>
+            </Button>
           </div>
         {/if}
-      </section>
+      </Card>
     {/if}
   </div>
 {/if}
@@ -684,40 +689,202 @@
 />
 
 <style>
-  .activity { display: grid; gap: 1rem; }
-  .activity-header { display: grid; gap: 0.75rem; grid-template-columns: auto 1fr auto; align-items: start; }
-  .back-link { border: 0; background: transparent; padding: 0; color: var(--color-accent-primary); text-decoration: underline; cursor: pointer; }
-  .eyebrow { margin: 0; color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
-  h1, h2, h3, p { margin: 0; }
-  .sub { color: var(--color-text-secondary); margin-top: 0.2rem; }
-  .panel, .surface { border: 1px solid var(--color-border); border-radius: var(--radius-2); background: var(--color-surface-1); padding: var(--space-4); display: grid; gap: 0.75rem; }
-  .surface { gap: 1rem; }
-  .panel-error { border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%); }
-  .row { display: flex; justify-content: space-between; gap: 0.5rem; align-items: start; }
-  .reader p { line-height: 1.8; white-space: pre-wrap; color: var(--color-text-secondary); }
-  .empty { display: grid; gap: 0.75rem; min-height: 160px; align-content: center; }
-  .progress { color: var(--color-text-secondary); }
-  .note { color: color-mix(in srgb, var(--color-info) 80%, white 20%); }
-  .error { color: var(--color-danger); }
-  .card { border: 1px solid var(--color-border); border-radius: var(--radius-2); background: var(--color-surface-2); padding: 1.25rem; display: grid; gap: 0.75rem; min-height: 220px; align-content: center; }
-  .card-answer { border-color: color-mix(in srgb, var(--color-accent-primary) 55%, var(--color-border) 45%); }
-  .card-side { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted); font-weight: 700; }
-  .explanation { color: var(--color-text-secondary); line-height: 1.6; }
-  .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .btn { min-height: 42px; border-radius: var(--radius-1); border: 1px solid var(--color-border); padding: 0 0.9rem; font: inherit; font-weight: 600; cursor: pointer; }
-  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-  .primary { background: var(--gradient-accent-strong); color: var(--color-bg); border-color: transparent; }
-  .secondary { background: var(--color-surface-2); color: var(--color-text-primary); }
-  .success { background: color-mix(in srgb, var(--color-success) 85%, black 15%); border-color: transparent; color: var(--color-bg); }
-  .danger { background: color-mix(in srgb, var(--color-danger) 85%, black 15%); border-color: transparent; color: var(--color-bg); }
-  .stack { display: grid; gap: 0.5rem; }
-  .option { border: 1px solid var(--color-border); border-radius: var(--radius-1); background: var(--color-surface-2); color: var(--color-text-primary); min-height: 44px; padding: 0.5rem 0.65rem; display: flex; gap: 0.65rem; align-items: center; cursor: pointer; text-align: left; }
-  .option-selected { border-color: color-mix(in srgb, var(--color-accent-primary) 70%, var(--color-border) 30%); background: var(--color-accent-surface); }
-  .option-letter { width: 1.65rem; height: 1.65rem; border-radius: 8px; border: 1px solid var(--color-border); display: grid; place-items: center; font-size: 0.8rem; font-weight: 700; }
-  .answer-input { width: 100%; min-height: 44px; border-radius: var(--radius-1); border: 1px solid var(--color-border); background: var(--color-surface-2); color: var(--color-text-primary); padding: 0 0.75rem; font: inherit; }
-  .review { border: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%); border-radius: var(--radius-1); background: color-mix(in srgb, var(--color-danger-surface) 50%, transparent); padding: 0.65rem; display: grid; gap: 0.25rem; }
-  .review-correct { border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border) 60%); background: color-mix(in srgb, var(--color-success-surface) 45%, transparent); }
-  .review-question { color: var(--color-text-primary); font-weight: 600; }
-  @media (max-width: 900px) { .activity-header { grid-template-columns: 1fr; } }
-  @media (max-width: 640px) { .controls .btn { width: 100%; } }
+  .activity {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .activity-header {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+  }
+
+  .activity :global(.activity-back-link) {
+    color: var(--color-accent-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    min-height: 0;
+    padding-inline: 0;
+  }
+
+  .eyebrow {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+
+  .sub {
+    color: var(--color-text-secondary);
+    margin-top: 0.2rem;
+  }
+
+  :global(.activity-panel),
+  :global(.activity-surface) {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  :global(.activity-surface) {
+    gap: var(--space-4);
+  }
+
+  :global(.activity-panel-error) {
+    border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%);
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    align-items: start;
+    flex-wrap: wrap;
+  }
+
+  .reader p {
+    line-height: 1.8;
+    white-space: pre-wrap;
+    color: var(--color-text-secondary);
+  }
+
+  .empty {
+    display: grid;
+    gap: 0.75rem;
+    min-height: 160px;
+    align-content: center;
+  }
+
+  .progress {
+    color: var(--color-text-secondary);
+  }
+
+  .note {
+    color: color-mix(in srgb, var(--color-info) 80%, white 20%);
+  }
+
+  .error {
+    color: var(--color-danger);
+  }
+
+  :global(.flashcard-panel) {
+    display: grid;
+    gap: 0.75rem;
+    min-height: 220px;
+    align-content: center;
+  }
+
+  :global(.flashcard-panel-answer) {
+    border-color: color-mix(in srgb, var(--color-accent-primary) 55%, var(--color-border) 45%);
+  }
+
+  .card-side {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    font-weight: 700;
+  }
+
+  .explanation {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  .controls {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .stack {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .option {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    background: var(--color-surface-2);
+    color: var(--color-text-primary);
+    min-height: 44px;
+    padding: 0.5rem 0.65rem;
+    display: flex;
+    gap: 0.65rem;
+    align-items: center;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+  }
+
+  .option-selected {
+    border-color: color-mix(in srgb, var(--color-accent-primary) 70%, var(--color-border) 30%);
+    background: var(--color-accent-surface);
+  }
+
+  .option-letter {
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    display: grid;
+    place-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  :global(.answer-input-shell) {
+    margin-top: var(--space-1);
+  }
+
+  .answer-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font: inherit;
+  }
+
+  .review {
+    border: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%);
+    border-radius: var(--radius-1);
+    background: color-mix(in srgb, var(--color-danger-surface) 50%, transparent);
+    padding: 0.65rem;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .review-correct {
+    border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border) 60%);
+    background: color-mix(in srgb, var(--color-success-surface) 45%, transparent);
+  }
+
+  .review-question {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    .activity-header {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .controls :global(.ui-button) {
+      width: 100%;
+    }
+  }
 </style>

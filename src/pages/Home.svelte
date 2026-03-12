@@ -3,6 +3,9 @@
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
+  import Button from "../lib/components/ui/Button.svelte";
+  import Card from "../lib/components/ui/Card.svelte";
+  import Tabs from "../lib/components/ui/Tabs.svelte";
 
   const UPLOAD_ERROR_KEYS = new Set([
     "home.uploadSection.errors.selectFile",
@@ -25,6 +28,16 @@
   let error = "";
   $: _lang = $languageStore;
   $: error = errorKey ? t(errorKey, errorArgs) : "";
+  $: languageOptions = [
+    {
+      value: "english",
+      label: t("home.uploadSection.englishOption"),
+    },
+    {
+      value: "arabic",
+      label: t("home.uploadSection.arabicOption"),
+    },
+  ];
 
   $: normalizedRole = (user?.role || "").toLowerCase();
   $: remainingDocumentsValue = user?.remainingDocuments ?? user?.documentsRemaining ?? 0;
@@ -212,6 +225,13 @@
     }
   }
 
+  function handleLanguageChange(event) {
+    const nextLanguage = event?.detail?.value;
+    if (nextLanguage === "english" || nextLanguage === "arabic") {
+      responseLanguage = nextLanguage;
+    }
+  }
+
 </script>
 
 <div class="study-assistant-container">
@@ -222,57 +242,59 @@
 
   {#if isLoadingDashboard}
     <div class="usage-stats">
-      <div class="stat-card skeleton">
+      <Card class="home-stat-card home-skeleton-card skeleton" variant="raised" padding="md">
         <div class="stat-value skeleton-text"></div>
         <div class="stat-label skeleton-text-sm"></div>
-      </div>
-      <div class="stat-card skeleton">
+      </Card>
+      <Card class="home-stat-card home-skeleton-card skeleton" variant="raised" padding="md">
         <div class="stat-value skeleton-text"></div>
         <div class="stat-label skeleton-text-sm"></div>
-      </div>
-      <div class="stat-card skeleton">
+      </Card>
+      <Card class="home-stat-card home-skeleton-card skeleton" variant="raised" padding="md">
         <div class="stat-value skeleton-text"></div>
         <div class="stat-label skeleton-text-sm"></div>
-      </div>
+      </Card>
     </div>
   {:else if user}
     <div class="usage-stats">
-      <div class="stat-card">
+      <Card class="home-stat-card" variant="raised" padding="md">
         <div class="stat-value" style={normalizedRole === 'admin' ? "font-size:1.8rem" : ""}>
           {normalizedRole === 'admin' ? t('home.stats.unlimited') : remainingDocumentsValue}
         </div>
         <div class="stat-label">{t('home.stats.documentsRemaining')}</div>
-      </div>
-      <div class="stat-card">
+      </Card>
+      <Card class="home-stat-card" variant="raised" padding="md">
         <div class="stat-value">{usedThisMonthValue}/{monthlyLimitValue}</div>
         <div class="stat-label">{t('home.stats.usedThisMonth')}</div>
-      </div>
-      <div class="stat-card">
+      </Card>
+      <Card class="home-stat-card" variant="raised" padding="md">
         <div class="stat-value">{totalDocumentsValue}</div>
         <div class="stat-label">{t('home.stats.totalDocuments')}</div>
-      </div>
+      </Card>
     </div>
   {/if}
 
   {#if error}
-    <div class="alert alert-error">{error}</div>
+    <Card class="home-alert home-alert-error" variant="soft" border="strong" padding="sm">{error}</Card>
   {/if}
 
   {#if showQuotaReachedMessage}
-    <section class="quota-message" role="status" aria-live="polite">
+    <Card class="quota-message" variant="raised" border="accent" padding="lg" role="status" aria-live="polite">
       <h2>{t("home.quotaReached.title")}</h2>
       <p>{t("home.quotaReached.body")}</p>
       <p class="quota-message-secondary">{t("home.quotaReached.upgradeHint")}</p>
-    </section>
+    </Card>
   {/if}
 
   {#if showUploadSection}
     <div class="upload-section">
       <h2>{t('home.uploadSection.title')}</h2>
 
-      <div 
-        class="upload-card" 
-        class:drag-active={isDragActive}
+      <Card
+        class={`upload-card ${isDragActive ? "drag-active" : ""}`}
+        variant="soft"
+        border="dashed"
+        padding="lg"
         on:dragover={handleDragOver}
         on:dragleave={handleDragLeave}
         on:drop={handleDrop}
@@ -281,22 +303,13 @@
       >
         <div class="language-selector">
           <span class="lang-label">{t('home.uploadSection.languageLabel')}:</span>
-          <div class="lang-toggle">
-            <button
-              class="lang-btn"
-              class:lang-active={responseLanguage === 'english'}
-              on:click={() => responseLanguage = 'english'}
-            >
-              {t('home.uploadSection.englishOption')}
-            </button>
-            <button
-              class="lang-btn"
-              class:lang-active={responseLanguage === 'arabic'}
-              on:click={() => responseLanguage = 'arabic'}
-            >
-              {t('home.uploadSection.arabicOption')}
-            </button>
-          </div>
+          <Tabs
+            class="lang-toggle"
+            ariaLabel={t("home.uploadSection.languageLabel")}
+            items={languageOptions}
+            value={responseLanguage}
+            on:change={handleLanguageChange}
+          />
         </div>
 
         <div class="file-input-wrapper">
@@ -341,18 +354,21 @@
 
         <!-- Removed separate file-info p since it's now integrated in the drop zone -->
 
-        <button
-          class="upload-btn"
+        <Button
+          class="upload-submit"
+          variant="primary"
+          block
           on:click={handleUpload}
           disabled={!selectedFile || uploading || !canUploadDocuments}
+          loading={uploading}
         >
           {#if uploading}
             {t('home.uploadSection.submitProcessing')}
           {:else}
             {t('home.uploadSection.submit')}
           {/if}
-        </button>
-      </div>
+        </Button>
+      </Card>
     </div>
   {/if}
 
@@ -360,7 +376,7 @@
 
 <style>
   /* Skeletons */
-  .skeleton {
+  :global(.skeleton) {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   .skeleton-text {
@@ -385,12 +401,14 @@
   .study-assistant-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
   }
 
   .study-header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: var(--space-4);
   }
 
   .study-header h1 {
@@ -411,16 +429,13 @@
   .usage-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
   }
 
-  .stat-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    padding: 1.5rem;
+  .usage-stats :global(.home-stat-card) {
     text-align: center;
+    min-height: 128px;
   }
 
   .stat-value {
@@ -437,35 +452,29 @@
     font-size: 0.9rem;
   }
 
-  .alert {
-    padding: 1rem 1.5rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1.5rem;
+  :global(.home-alert) {
+    margin-bottom: var(--space-4);
     font-weight: 500;
   }
 
-  .alert-error {
-    background: var(--color-danger-surface);
+  :global(.home-alert-error) {
     color: var(--color-danger);
-    border: 1px solid var(--color-danger-border);
+    border-color: var(--color-danger-border);
+    background: var(--color-danger-surface);
   }
 
-  .quota-message {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: var(--color-surface);
-    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 24%, var(--color-border) 76%);
-    border-radius: 1rem;
-    box-shadow: 0 16px 40px color-mix(in srgb, var(--color-shadow) 70%, transparent 30%);
+  :global(.quota-message) {
+    margin-bottom: var(--space-4);
+    box-shadow: var(--ui-shadow-md);
   }
 
-  .quota-message h2 {
+  :global(.quota-message h2) {
     margin: 0 0 0.75rem;
     font-size: 1.35rem;
     color: var(--color-text-primary);
   }
 
-  .quota-message p {
+  :global(.quota-message p) {
     margin: 0;
     color: var(--color-text-secondary);
     line-height: 1.6;
@@ -478,7 +487,7 @@
   }
 
   .upload-section {
-    margin-bottom: 3rem;
+    margin-bottom: var(--space-4);
   }
 
   .upload-section h2 {
@@ -487,17 +496,16 @@
     color: var(--color-text-primary);
   }
 
-  .upload-card {
-    background: var(--color-surface);
-    border: 2px dashed var(--color-border);
-    border-radius: 1rem;
-    padding: 2rem;
-    transition: all 0.2s ease;
+  :global(.upload-card) {
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard);
   }
   
-  .upload-card.drag-active {
+  :global(.upload-card.drag-active) {
     border-color: var(--color-accent-primary);
-    background: var(--color-surface-2);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, var(--ui-surface-base) 88%);
+    box-shadow: var(--ui-focus-ring);
   }
 
   .language-selector {
@@ -512,34 +520,8 @@
     font-size: 0.95rem;
   }
 
-  .lang-toggle {
-    display: inline-flex;
-    border-radius: 0.5rem;
-    border: 1px solid var(--color-border);
-    overflow: hidden;
-    background: var(--color-bg);
-  }
-
-  .lang-btn {
-    padding: 0.6rem 1.5rem;
-    border: none;
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .lang-btn:hover:not(.lang-active) {
-    color: var(--color-text-primary);
-    background: var(--color-surface-2);
-  }
-
-  .lang-btn.lang-active {
-    background: var(--color-accent-surface);
-    color: var(--color-accent-primary);
-    font-weight: 600;
+  :global(.lang-toggle) {
+    display: inline-grid;
   }
 
   .file-input-wrapper {
@@ -633,50 +615,24 @@
     font-weight: 500;
   }
 
-  .upload-btn {
-    width: 100%;
-    padding: 1rem 2rem;
-    background: var(--color-accent-primary);
-    color: var(--color-text-primary);
-    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 70%, white 30%);
-    border-radius: 0.5rem;
+  :global(.upload-submit) {
+    min-height: var(--ui-control-height-lg);
     font-size: 1.1rem;
     font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .upload-btn:hover:not(:disabled) {
-    background: var(--color-accent-light);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px var(--color-glow);
-  }
-
-  .upload-btn:disabled {
-    background: color-mix(in srgb, var(--color-surface-2) 85%, var(--color-bg) 15%);
-    color: var(--color-text-secondary);
-    border-color: var(--color-border);
-    opacity: 1;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
   }
 
   @media (max-width: 768px) {
     .study-assistant-container {
-      padding: 1rem;
+      padding: var(--space-3);
     }
 
     .study-header h1 {
       font-size: 1.75rem;
     }
 
-    .lang-toggle {
+    :global(.lang-toggle) {
       display: flex;
-    }
-
-    .lang-btn {
-      flex: 1;
+      width: 100%;
     }
   }
 </style>

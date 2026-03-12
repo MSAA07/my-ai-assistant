@@ -1,6 +1,9 @@
 <script>
   import { onDestroy } from 'svelte';
   import { t } from '../lib/i18n/t.js';
+  import Badge from '../lib/components/ui/Badge.svelte';
+  import Button from '../lib/components/ui/Button.svelte';
+  import Card from '../lib/components/ui/Card.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import { getDocument, requestGeneration } from '../lib/api/studyHub.js';
 
@@ -441,64 +444,64 @@
 
 <div class="document-hub">
   <header class="hub-header">
-    <button type="button" class="back-link" on:click={goBackToLibrary}>
+    <Button type="button" class="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
       {t('document.hub.backToStudyHub')}
-    </button>
+    </Button>
 
     <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
 
     {#if metaItems.length > 0}
       <div class="meta-row">
         {#each metaItems as item (item.key)}
-          <p class="meta-chip">
+          <Badge tone="neutral" size="sm" class="meta-chip">
             <span>{item.label}:</span>
             <strong>{item.value}</strong>
-          </p>
+          </Badge>
         {/each}
       </div>
     {/if}
   </header>
 
   {#if loading && !documentData}
-    <section class="state-panel">
+    <Card as="section" class="state-panel" variant="base" padding="md">
       <p>{t('document.loading')}</p>
-    </section>
+    </Card>
   {:else if !documentData}
-    <section class="state-panel state-panel-error">
+    <Card as="section" class="state-panel state-panel-error" variant="base" padding="md" border="strong">
       <h2>{t('document.processingFailedTitle')}</h2>
       <p>{error || t('document.notFound')}</p>
       <div class="row">
-        <button type="button" on:click={goBackToLibrary}>{t('document.hub.backToStudyHub')}</button>
+        <Button type="button" variant="secondary" on:click={goBackToLibrary}>{t('document.hub.backToStudyHub')}</Button>
       </div>
-    </section>
+    </Card>
   {:else}
     {#if error}
       <p class="inline-error">{error}</p>
     {/if}
 
     {#if extractionStatus === 'failed'}
-      <section class="state-panel state-panel-error">
+      <Card as="section" class="state-panel state-panel-error" variant="base" padding="md" border="strong">
         <div class="row">
           <h2>{t('document.processingFailedTitle')}</h2>
           <StatusBadge status="failed" label={t('status.failed')} />
         </div>
         <p>{normalizeString(documentData?.processingError) || t('document.processingFailed')}</p>
         <p>{t('document.hub.processing.continues')}</p>
-      </section>
+      </Card>
     {:else if showProcessingBanner}
-      <section class="state-panel processing-panel">
+      <Card as="section" class="state-panel processing-panel" variant="soft" padding="md" border="strong">
         <div class="row">
           <h2>{processingTitle}</h2>
           <StatusBadge status={processingTone} label={isExtractionProcessing ? t('status.processing') : t('document.hub.states.generating')} />
         </div>
         <p>{processingBody}</p>
         <p>{t('document.hub.processing.continues')}</p>
-      </section>
+      </Card>
     {/if}
 
     <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
       {#each featureCards as card (card.key)}
-        <article class="feature-card">
+        <Card as="article" class="feature-card" variant="raised" padding="md" border={card.showHintAsError ? 'strong' : 'subtle'}>
           <div class="feature-card-header">
             <h2>{card.title}</h2>
             <StatusBadge status={card.stateTone} label={card.stateLabel} />
@@ -507,25 +510,26 @@
           <p class:feature-hint-error={card.showHintAsError} class="feature-hint">{card.hint}</p>
 
           <div class="feature-actions">
-            <button
+            <Button
               type="button"
+              variant="primary"
               on:click={() => runPrimaryAction(card)}
               disabled={!card.canPrimaryAction}
             >
               {card.primaryLabel}
-            </button>
+            </Button>
 
             {#if card.canRegenerate}
-              <button
+              <Button
                 type="button"
-                class="secondary-btn"
+                variant="secondary"
                 on:click={() => regenerateFeature(card)}
               >
                 {t('document.actions.regenerate')}
-              </button>
+              </Button>
             {/if}
           </div>
-        </article>
+        </Card>
       {/each}
     </section>
   {/if}
@@ -542,20 +546,16 @@
     gap: var(--space-2);
   }
 
-  .back-link {
-    border: none;
-    background: transparent;
+  .document-hub :global(.back-link) {
     color: var(--color-accent-primary);
-    padding: 0;
     min-height: 0;
     justify-self: start;
     font-weight: 600;
-    cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .back-link:hover {
+  .document-hub :global(.back-link:hover) {
     color: color-mix(in srgb, var(--color-accent-primary) 75%, white 25%);
   }
 
@@ -579,48 +579,36 @@
     gap: 0.5rem;
   }
 
-  .meta-chip {
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
+  .document-hub :global(.meta-chip) {
     gap: 0.35rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-surface-1) 90%, transparent);
-    color: var(--color-text-secondary);
     font-size: 0.82rem;
   }
 
-  .meta-chip strong {
+  .document-hub :global(.meta-chip strong) {
     color: var(--color-text-primary);
     font-weight: 600;
   }
 
-  .state-panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    background: var(--color-surface-1);
-    padding: var(--space-4);
+  .document-hub :global(.state-panel) {
     display: grid;
     gap: var(--space-2);
   }
 
-  .state-panel h2,
-  .state-panel p {
+  .document-hub :global(.state-panel h2),
+  .document-hub :global(.state-panel p) {
     margin: 0;
   }
 
-  .state-panel p {
+  .document-hub :global(.state-panel p) {
     color: var(--color-text-secondary);
     line-height: 1.6;
   }
 
-  .state-panel-error {
+  .document-hub :global(.state-panel-error) {
     border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%);
   }
 
-  .processing-panel {
+  .document-hub :global(.processing-panel) {
     border-color: color-mix(in srgb, var(--color-info) 28%, var(--color-border) 72%);
     background: color-mix(in srgb, var(--color-info) 10%, var(--color-surface-1) 90%);
   }
@@ -631,11 +619,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .feature-card {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    background: var(--color-surface-1);
-    padding: var(--space-4);
+  .document-hub :global(.feature-card) {
     display: grid;
     gap: var(--space-3);
   }
@@ -662,34 +646,6 @@
     display: flex;
     gap: var(--space-2);
     flex-wrap: wrap;
-  }
-
-  button {
-    min-height: 40px;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: var(--gradient-accent-strong);
-    color: var(--color-bg);
-    padding: 0.5rem 0.9rem;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
-  }
-
-  button:hover:not(:disabled) {
-    transform: translateY(-1px);
-  }
-
-  button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .secondary-btn {
-    background: color-mix(in srgb, var(--color-surface-2) 88%, transparent);
-    color: var(--color-text-primary);
   }
 
   .row {
@@ -724,7 +680,7 @@
       flex-direction: column;
     }
 
-    .feature-actions button {
+    .feature-actions :global(.ui-button) {
       width: 100%;
     }
   }

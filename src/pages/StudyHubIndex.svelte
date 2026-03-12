@@ -4,6 +4,7 @@
   import { routeParams } from '../stores/router.js';
   import { t } from '../lib/i18n/t.js';
   import Button from '../lib/components/ui/Button.svelte';
+  import Card from '../lib/components/ui/Card.svelte';
   import MenuItem from '../lib/components/ui/MenuItem.svelte';
   import MenuSurface from '../lib/components/ui/MenuSurface.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
@@ -194,15 +195,15 @@
       <h1>{t('documentsPage.title')}</h1>
       <p class="subtitle">{t('documentsPage.description')}</p>
     </div>
-    <Button type="button" className="upload-btn" variant="primary" on:click={goToHome}>
+    <Button type="button" variant="primary" on:click={goToHome}>
       {t('documentsPage.actions.uploadCta')}
     </Button>
   </header>
 
   {#if loading}
-    <section class="state-panel">
+    <Card as="section" class="state-panel" variant="base" padding="md">
       <p>{t('common.loading')}</p>
-    </section>
+    </Card>
   {:else}
     {#if error}
       <p class="inline-error">{error}</p>
@@ -212,33 +213,39 @@
     {/if}
 
     {#if documents.length === 0}
-      <section class="state-panel">
+      <Card as="section" class="state-panel" variant="base" padding="md">
         <h2>{t('documentsPage.emptyTitle')}</h2>
         <p>{t('documentsPage.emptyDescription')}</p>
-        <Button type="button" className="upload-btn" variant="primary" on:click={goToHome}>
+        <Button type="button" variant="primary" on:click={goToHome}>
           {t('documentsPage.actions.uploadCta')}
         </Button>
-      </section>
+      </Card>
     {:else}
       <section class="documents-grid">
         {#each documents as doc}
-          <article class={`document-card ${highlightDocumentId === doc.id ? 'highlight' : ''}`}>
+          <Card
+            as="article"
+            class="document-card"
+            variant="raised"
+            padding="sm"
+            hoverable
+            border={highlightDocumentId === doc.id ? 'accent' : 'subtle'}
+          >
             <div class="card-top">
               <p class="file-type">{getFileType(doc)}</p>
               <div class="menu-wrap">
                 <Button
                   type="button"
-                  className="menu-trigger"
                   variant="ghost"
                   size="icon"
                   aria-label={t('documentsPage.actions.more')}
                   aria-expanded={openMenuId === doc.id}
                   on:click={(event) => toggleMenu(event, doc.id)}
                 >
-                  ...
+                  <span slot="icon">⋯</span>
                 </Button>
                 {#if openMenuId === doc.id}
-                  <MenuSurface className="menu" minWidth="140px">
+                  <MenuSurface class="library-menu" minWidth="140px">
                     <MenuItem on:click={() => renameDocument(doc)} disabled={actionBusyId === doc.id}>
                       {t('documentsPage.actions.rename')}
                     </MenuItem>
@@ -264,7 +271,7 @@
                 label={t(`documentsPage.statuses.${getStatusKey(doc)}`)}
               />
             </a>
-          </article>
+          </Card>
         {/each}
       </section>
     {/if}
@@ -314,11 +321,7 @@
     color: var(--color-text-secondary);
   }
 
-  .state-panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    padding: var(--space-4);
-    background: var(--color-surface-1);
+  .library-page :global(.state-panel) {
     display: grid;
     gap: var(--space-2);
   }
@@ -329,25 +332,9 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .document-card {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    padding: var(--space-3);
-    background: var(--color-surface-1);
+  .library-page :global(.document-card) {
     display: grid;
     gap: var(--space-2);
-    cursor: pointer;
-    transition: border-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
-  }
-
-  .document-card:hover {
-    border-color: var(--color-accent-primary);
-    transform: translateY(-1px);
-  }
-
-  .document-card.highlight {
-    border-color: var(--color-accent-primary);
-    box-shadow: 0 0 0 1px var(--color-accent-primary);
   }
 
   .card-top {
@@ -370,28 +357,7 @@
     position: relative;
   }
 
-  .menu-trigger {
-    width: 32px;
-    height: 32px;
-    min-height: 32px;
-    min-width: 32px;
-    border-radius: 50%;
-    padding: 0;
-    color: var(--color-text-secondary);
-  }
-
-  .menu-trigger :global(.ui-button__icon),
-  .menu-trigger :global(.ui-button__spinner) {
-    display: none;
-  }
-
-  .menu-trigger :global(.ui-button__label) {
-    line-height: 1;
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
-  }
-
-  .menu {
+  .library-page :global(.library-menu) {
     position: absolute;
     top: 36px;
     inset-inline-end: 0;
@@ -417,10 +383,6 @@
     text-decoration: none;
     display: grid;
     gap: var(--space-2);
-  }
-
-  .upload-btn {
-    min-height: 42px;
   }
 
   .inline-error {

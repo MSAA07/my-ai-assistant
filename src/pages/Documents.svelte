@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import { API_BASE } from '../config.js';
   import { t } from '../lib/i18n/t.js';
+  import Button from '../lib/components/ui/Button.svelte';
+  import Card from '../lib/components/ui/Card.svelte';
   import EmptyState from '../lib/components/ui/EmptyState.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
@@ -106,31 +108,31 @@
       <h1>{t('documentsPage.title')}</h1>
       <p class="subtitle">{t('documentsPage.description')}</p>
     </div>
-    <button class="refresh-btn" type="button" on:click={fetchDocuments} disabled={loading}>
+    <Button type="button" variant="secondary" on:click={fetchDocuments} disabled={loading}>
       {t('documentsPage.actions.refresh')}
-    </button>
+    </Button>
   </header>
 
   {#if loading}
-    <div class="loading-state">
+    <Card class="loading-state" variant="base" padding="lg">
       <div class="spinner"></div>
       <p>{t('common.loading')}</p>
-    </div>
+    </Card>
   {:else if errorMessage}
-    <div class="alert alert-error">{errorMessage}</div>
+    <Card class="alert alert-error" variant="soft" border="strong" padding="md">{errorMessage}</Card>
   {:else if documents.length === 0}
     <EmptyState
       title={t('documentsPage.emptyTitle')}
       description={t('documentsPage.emptyDescription')}
     >
-      <button class="primary-btn" type="button" on:click={() => (window.location.hash = '/home')}>
+      <Button type="button" variant="primary" on:click={() => (window.location.hash = '/home')}>
         {t('documentsPage.actions.uploadCta')}
-      </button>
+      </Button>
     </EmptyState>
   {:else}
     <section class="documents-grid">
       {#each documents as doc}
-        <article class="document-card">
+        <Card as="article" class="document-card" variant="raised" padding="md">
           <div class="card-head">
             <div class="title-row">
               <h3>{doc.originalName}</h3>
@@ -158,14 +160,14 @@
           </dl>
 
           <div class="card-actions">
-            <button type="button" class="secondary-btn" on:click={() => viewDocument(doc.id)}>
+            <Button type="button" variant="secondary" on:click={() => viewDocument(doc.id)}>
               {t('documentsPage.actions.view')}
-            </button>
-            <button type="button" class="danger-btn" on:click={() => openDeleteModal(doc)}>
+            </Button>
+            <Button type="button" variant="danger" on:click={() => openDeleteModal(doc)}>
               {t('documentsPage.actions.delete')}
-            </button>
+            </Button>
           </div>
-        </article>
+        </Card>
       {/each}
     </section>
   {/if}
@@ -196,6 +198,10 @@
     flex-wrap: wrap;
   }
 
+  .page-header :global(.ui-button) {
+    align-self: flex-end;
+  }
+
   .eyebrow {
     margin: 0;
     text-transform: uppercase;
@@ -215,33 +221,8 @@
     color: var(--color-text-secondary);
   }
 
-  .refresh-btn {
-    align-self: flex-end;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-1);
-    color: var(--color-text-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
-  }
-
-  .refresh-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .refresh-btn:not(:disabled):hover {
-    border-color: var(--color-accent-primary);
-  }
-
-  .loading-state,
-  .alert {
-    border-radius: var(--radius-2);
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-1);
+  .documents-page :global(.loading-state),
+  .documents-page :global(.alert) {
     text-align: center;
   }
 
@@ -261,7 +242,7 @@
     }
   }
 
-  .alert-error {
+  .documents-page :global(.alert-error) {
     color: var(--color-danger);
     border-color: var(--color-danger);
     background: var(--color-danger-surface);
@@ -274,11 +255,7 @@
     align-items: stretch;
   }
 
-  .document-card {
-    padding: var(--space-4);
-    border-radius: var(--radius-3);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-1);
+  .documents-page :global(.document-card) {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -347,47 +324,8 @@
     margin-top: auto;
   }
 
-  .card-actions button {
+  .card-actions :global(.ui-button) {
     flex: 1;
-    min-height: 44px;
-    border-radius: var(--radius-1);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
-  }
-
-  .secondary-btn {
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
-  }
-
-  .secondary-btn:hover {
-    border-color: var(--color-accent-primary);
-  }
-
-  .danger-btn {
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-secondary);
-  }
-
-  .danger-btn:hover {
-    border-color: var(--color-danger);
-    background: var(--color-danger-surface);
-    color: var(--color-danger);
-  }
-
-  .primary-btn {
-    border: none;
-    background: var(--gradient-accent);
-    color: var(--color-bg);
-    padding: 0 1.5rem;
-    min-height: 44px;
-    border-radius: var(--radius-1);
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 10px 30px var(--color-shadow);
   }
 
   @media (max-width: 1024px) {
@@ -405,7 +343,7 @@
       align-items: flex-start;
     }
 
-    .refresh-btn {
+    .page-header :global(.ui-button) {
       align-self: flex-start;
     }
 

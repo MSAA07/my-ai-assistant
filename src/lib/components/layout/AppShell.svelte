@@ -87,10 +87,12 @@
 
   .content-wrapper {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1160px;
     margin: 0 auto;
     padding: var(--space-5);
     box-sizing: border-box;
+    display: grid;
+    gap: var(--space-4);
   }
 
   @media (max-width: 1024px) {
@@ -107,6 +109,7 @@
 
     .content-wrapper {
       padding-bottom: calc(var(--space-5) + 72px);
+      gap: var(--space-3);
     }
   }
 </style>
