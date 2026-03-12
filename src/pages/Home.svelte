@@ -3,10 +3,9 @@
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
-  import Button from "../lib/components/ui/Button.svelte";
   import Card from "../lib/components/ui/Card.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
-  import UploadModal from "../lib/components/ui/UploadModal.svelte";
+  import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
   import { readPageCache, writePageCache } from "../stores/pageCache.js";
 
   const UPLOAD_ERROR_KEYS = new Set([
@@ -34,7 +33,6 @@
   let responseLanguage = "english";
   let errorKey = "";
   let errorArgs = {};
-  let uploadModalOpen = false;
   let uploading = false;
   let isLoadingDashboard = true;
   let isRefreshingDashboard = false;
@@ -57,7 +55,6 @@
 
   $: if (!canUploadDocuments) {
     selectedFiles = [];
-    uploadModalOpen = false;
     clearUploadError();
   }
 
@@ -117,15 +114,8 @@
     errorArgs = args;
   }
 
-  function openUploadModal() {
-    if (!canUploadDocuments || uploading) return;
-    uploadModalOpen = true;
-    clearUploadError();
-  }
-
-  function closeUploadModal() {
+  function clearSelectedFiles() {
     if (uploading) return;
-    uploadModalOpen = false;
     selectedFiles = [];
     clearUploadError();
   }
@@ -256,7 +246,6 @@
         }
       }
 
-      uploadModalOpen = false;
       selectedFiles = [];
 
       if (typeof window !== "undefined") {
@@ -323,18 +312,7 @@
   {/if}
 
   {#if showUploadSection}
-    <Card class="upload-launcher" variant="raised" padding="lg">
-      <div>
-        <h2>{t('home.uploadSection.title')}</h2>
-        <p>{t('home.uploadSection.modalDescription')}</p>
-      </div>
-      <Button variant="primary" size="lg" on:click={openUploadModal} disabled={uploading || !canUploadDocuments}>
-        {t('home.uploadSection.openModalCta')}
-      </Button>
-    </Card>
-
-    <UploadModal
-      open={uploadModalOpen}
+    <UploadPanel
       busy={uploading}
       maxFiles={MAX_UPLOAD_FILES}
       files={selectedFiles}
@@ -350,9 +328,8 @@
       submitLabel={t('home.uploadSection.next')}
       submitBusyLabel={t('home.uploadSection.submitProcessing')}
       removeFileLabel={t('home.uploadSection.removeFile')}
-      closeLabel={t('common.close')}
       errorMessage={uploadError}
-      on:close={closeUploadModal}
+      on:cancel={clearSelectedFiles}
       on:submit={handleUpload}
       on:filesSelected={handleFilesSelected}
       on:removeFile={handleRemoveSelectedFile}
@@ -455,28 +432,6 @@
     font-size: 0.95rem;
   }
 
-  :global(.upload-launcher.ui-card) {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-4);
-  }
-
-  :global(.upload-launcher) h2,
-  :global(.upload-launcher) p {
-    margin: 0;
-  }
-
-  :global(.upload-launcher) h2 {
-    color: var(--color-text-primary);
-    font-size: 1.55rem;
-  }
-
-  :global(.upload-launcher) p {
-    color: var(--color-text-secondary);
-    margin-top: var(--space-1);
-  }
-
   @media (max-width: 768px) {
     .study-assistant-container {
       padding: var(--space-3);
@@ -484,11 +439,6 @@
 
     .study-header h1 {
       font-size: 1.75rem;
-    }
-
-    :global(.upload-launcher.ui-card) {
-      flex-direction: column;
-      align-items: stretch;
     }
   }
 </style>
