@@ -7,9 +7,13 @@
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import UserDetail from './UserDetail.svelte';
   import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
+
+  const CACHE_KEY = 'page:admin:users';
 
   let users = [];
   let loading = true;
+  let refreshing = false;
   let error = '';
   let search = '';
   let roleFilter = 'all';
@@ -46,9 +50,13 @@
     return params.toString();
   };
 
-  async function fetchUsers() {
-    loading = true;
-    error = '';
+  async function fetchUsers({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const query = buildQuery();
@@ -62,11 +70,23 @@
       }
 
       users = data.users || [];
+      writePageCache(CACHE_KEY, {
+        loaded: true,
+        users,
+        search,
+        roleFilter,
+        statusFilter,
+        planFilter
+      });
       selectedUserIds = selectedUserIds.filter((id) => users.some((user) => user.id === id));
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
@@ -82,7 +102,7 @@
       body: JSON.stringify({ reason: 'Admin action' })
     });
 
-    await fetchUsers();
+    await fetchUsers({ background: true });
   }
 
   async function toggleRole(user) {
@@ -93,7 +113,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role })
     });
-    await fetchUsers();
+    await fetchUsers({ background: true });
   }
 
   async function deleteUser(user) {
@@ -102,7 +122,7 @@
       method: 'DELETE',
       credentials: 'include'
     });
-    await fetchUsers();
+    await fetchUsers({ background: true });
   }
 
   async function bulkSuspend() {
@@ -124,7 +144,7 @@
     );
 
     selectedUserIds = [];
-    await fetchUsers();
+    await fetchUsers({ background: true });
   }
 
   async function bulkDelete() {
@@ -141,7 +161,7 @@
     );
 
     selectedUserIds = [];
-    await fetchUsers();
+    await fetchUsers({ background: true });
   }
 
   async function createUser() {
@@ -179,7 +199,7 @@
 
   function handleSearchInput() {
     if (searchTimeout) clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(fetchUsers, 400);
+    searchTimeout = setTimeout(() => void fetchUsers({ background: users.length > 0 }), 400);
   }
 
   function toggleSelectAll() {
@@ -188,7 +208,18 @@
 
   $: allSelected = selectedUserIds.length === users.length && users.length > 0;
 
-  onMount(fetchUsers);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded) {
+      users = Array.isArray(cached.users) ? cached.users : [];
+      search = cached.search || '';
+      roleFilter = cached.roleFilter || 'all';
+      statusFilter = cached.statusFilter || 'all';
+      planFilter = cached.planFilter || 'all';
+      loading = false;
+    }
+    void fetchUsers({ background: Boolean(cached?.loaded) });
+  });
 
   onDestroy(() => {
     if (searchTimeout) clearTimeout(searchTimeout);
@@ -196,7 +227,9 @@
 </script>
 
 <DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="980px">
-  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchUsers}>Refresh</Button>
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchUsers({ background: users.length > 0 })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
   <svelte:fragment slot="filters">
     <FieldShell className="filter-field" label="Search">
@@ -209,7 +242,7 @@
     </FieldShell>
 
     <FieldShell className="filter-field" label="Role">
-      <select bind:value={roleFilter} on:change={fetchUsers}>
+      <select bind:value={roleFilter} on:change={() => fetchUsers({ background: users.length > 0 })}>
         <option value="all">All roles</option>
         <option value="admin">Admin</option>
         <option value="user">User</option>
@@ -217,7 +250,7 @@
     </FieldShell>
 
     <FieldShell className="filter-field" label="Status">
-      <select bind:value={statusFilter} on:change={fetchUsers}>
+      <select bind:value={statusFilter} on:change={() => fetchUsers({ background: users.length > 0 })}>
         <option value="all">All status</option>
         <option value="active">Active</option>
         <option value="banned">Banned</option>
@@ -225,7 +258,7 @@
     </FieldShell>
 
     <FieldShell className="filter-field" label="Plan">
-      <select bind:value={planFilter} on:change={fetchUsers}>
+      <select bind:value={planFilter} on:change={() => fetchUsers({ background: users.length > 0 })}>
         <option value="all">All plans</option>
         <option value="free">Free</option>
         <option value="premium">Premium</option>
@@ -300,7 +333,7 @@
   <svelte:fragment slot="state">
     {#if error}
       <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
-    {:else if loading}
+    {:else if loading && users.length === 0}
       <p class="ui-data-state-note">Loading users...</p>
     {:else if users.length === 0}
       <p class="ui-data-state-note">No users match your filters.</p>

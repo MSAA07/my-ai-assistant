@@ -5,9 +5,13 @@
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
+
+  const CACHE_KEY = 'page:admin:audit';
 
   let logs = [];
   let loading = true;
+  let refreshing = false;
   let error = '';
   let actionFilter = 'all';
   let adminFilter = '';
@@ -32,9 +36,13 @@
     'VIEW_AUDIT_LOGS'
   ];
 
-  async function fetchLogs() {
-    loading = true;
-    error = '';
+  async function fetchLogs({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const params = new URLSearchParams();
@@ -51,22 +59,43 @@
       }
 
       logs = data.logs || [];
+      writePageCache(CACHE_KEY, {
+        loaded: true,
+        logs,
+        actionFilter,
+        adminFilter
+      });
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
-  onMount(fetchLogs);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded) {
+      logs = Array.isArray(cached.logs) ? cached.logs : [];
+      actionFilter = cached.actionFilter || 'all';
+      adminFilter = cached.adminFilter || '';
+      loading = false;
+    }
+    void fetchLogs({ background: Boolean(cached?.loaded) });
+  });
 </script>
 
 <DataSurface title="Audit Logs" description="Track sensitive admin activity and security events." tableMinWidth="920px">
-  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchLogs}>Refresh</Button>
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchLogs({ background: logs.length > 0 })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
   <svelte:fragment slot="filters">
     <FieldShell label="Action">
-      <select bind:value={actionFilter} on:change={fetchLogs}>
+      <select bind:value={actionFilter} on:change={() => fetchLogs({ background: logs.length > 0 })}>
         <option value="all">All actions</option>
         {#each actions as action}
           <option value={action}>{action.replaceAll('_', ' ')}</option>
@@ -75,12 +104,12 @@
     </FieldShell>
 
     <FieldShell label="Admin ID">
-      <input placeholder="Admin ID" bind:value={adminFilter} on:change={fetchLogs} />
+      <input placeholder="Admin ID" bind:value={adminFilter} on:change={() => fetchLogs({ background: logs.length > 0 })} />
     </FieldShell>
   </svelte:fragment>
 
   <svelte:fragment slot="state">
-    {#if loading}
+    {#if loading && logs.length === 0}
       <p class="ui-data-state-note">Loading logs...</p>
     {:else if error}
       <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>

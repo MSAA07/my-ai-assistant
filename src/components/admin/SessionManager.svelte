@@ -4,14 +4,22 @@
   import Card from '../../lib/components/ui/Card.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
+
+  const CACHE_KEY = 'page:admin:sessions';
 
   let sessions = [];
   let loading = true;
+  let refreshing = false;
   let error = '';
 
-  async function fetchSessions() {
-    loading = true;
-    error = '';
+  async function fetchSessions({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const response = await fetch(`${API_BASE}/api/admin/sessions`, {
@@ -24,10 +32,15 @@
       }
 
       sessions = data.sessions || [];
+      writePageCache(CACHE_KEY, { loaded: true, sessions });
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
@@ -36,17 +49,26 @@
       method: 'DELETE',
       credentials: 'include'
     });
-    await fetchSessions();
+    await fetchSessions({ background: true });
   }
 
-  onMount(fetchSessions);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded) {
+      sessions = Array.isArray(cached.sessions) ? cached.sessions : [];
+      loading = false;
+    }
+    void fetchSessions({ background: Boolean(cached?.loaded) });
+  });
 </script>
 
 <DataSurface title="Active Sessions" description="Current active login sessions across users." tableMinWidth="760px">
-  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchSessions}>Refresh</Button>
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchSessions({ background: sessions.length > 0 })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
   <svelte:fragment slot="state">
-    {#if loading}
+    {#if loading && sessions.length === 0}
       <p class="ui-data-state-note">Loading sessions...</p>
     {:else if error}
       <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>

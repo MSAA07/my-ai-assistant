@@ -4,9 +4,13 @@
   import Card from '../../lib/components/ui/Card.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
+
+  const CACHE_KEY = 'page:admin:stats';
 
   let stats = null;
   let loading = true;
+  let refreshing = false;
   let error = '';
 
   const formatBytes = (bytes) => {
@@ -18,9 +22,13 @@
     return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
   };
 
-  async function fetchStats() {
-    loading = true;
-    error = '';
+  async function fetchStats({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const response = await fetch(`${API_BASE}/api/admin/analytics`, {
@@ -33,21 +41,35 @@
       }
 
       stats = data;
+      writePageCache(CACHE_KEY, { loaded: true, stats });
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
-  onMount(fetchStats);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded && cached?.stats) {
+      stats = cached.stats;
+      loading = false;
+    }
+    void fetchStats({ background: Boolean(cached?.loaded && cached?.stats) });
+  });
 </script>
 
 <DataSurface title="Platform Overview" description="Key activity and usage indicators.">
-  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchStats}>Refresh</Button>
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchStats({ background: Boolean(stats) })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
   <svelte:fragment slot="state">
-    {#if loading}
+    {#if loading && !stats}
       <p class="ui-data-state-note">Loading analytics...</p>
     {:else if error}
       <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>

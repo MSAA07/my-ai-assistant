@@ -4,9 +4,13 @@
   import Card from '../../lib/components/ui/Card.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
+
+  const CACHE_KEY = 'page:admin:storage';
 
   let users = [];
   let loading = true;
+  let refreshing = false;
   let error = '';
 
   const formatBytes = (bytes) => {
@@ -18,9 +22,13 @@
     return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
   };
 
-  async function fetchStorage() {
-    loading = true;
-    error = '';
+  async function fetchStorage({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const response = await fetch(`${API_BASE}/api/admin/storage`, {
@@ -33,21 +41,35 @@
       }
 
       users = data.users || [];
+      writePageCache(CACHE_KEY, { loaded: true, users });
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
-  onMount(fetchStorage);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded) {
+      users = Array.isArray(cached.users) ? cached.users : [];
+      loading = false;
+    }
+    void fetchStorage({ background: Boolean(cached?.loaded) });
+  });
 </script>
 
 <DataSurface title="Storage Breakdown" description="Storage distribution by user account." tableMinWidth="700px">
-  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchStorage}>Refresh</Button>
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchStorage({ background: users.length > 0 })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
   <svelte:fragment slot="state">
-    {#if loading}
+    {#if loading && users.length === 0}
       <p class="ui-data-state-note">Loading storage data...</p>
     {:else if error}
       <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
