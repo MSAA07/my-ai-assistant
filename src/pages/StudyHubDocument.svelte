@@ -492,7 +492,7 @@
     </Card>
   {:else}
     {#if error}
-      <p class="inline-error">{error}</p>
+      <Card class="inline-error" variant="soft" border="strong" padding="sm">{error}</Card>
     {/if}
 
     {#if extractionStatus === 'failed'}
@@ -517,7 +517,7 @@
 
     <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
       {#each featureCards as card (card.key)}
-        <Card as="article" class="feature-card" variant="raised" padding="md" border={card.showHintAsError ? 'strong' : 'subtle'}>
+        <Card as="article" class="feature-card" variant="base" padding="md" hoverable border={card.showHintAsError ? 'strong' : 'subtle'}>
           <div class="feature-card-header">
             <h2>{card.title}</h2>
             <StatusBadge status={card.stateTone} label={card.stateLabel} />
@@ -563,22 +563,22 @@
   }
 
   .document-hub :global(.back-link) {
-    color: var(--color-accent-primary);
+    color: var(--color-text-secondary);
     min-height: 0;
     justify-self: start;
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    font-weight: 500;
+    padding-inline: 0;
   }
 
   .document-hub :global(.back-link:hover) {
-    color: color-mix(in srgb, var(--color-accent-primary) 75%, white 25%);
+    color: var(--color-text-primary);
   }
 
   h1 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: 1.8rem;
+    font-size: clamp(1.1rem, 2.6vw, 1.35rem);
+    font-weight: 600;
     line-height: 1.3;
     word-break: break-word;
   }
@@ -586,18 +586,19 @@
   h2 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
   }
 
   .meta-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.35rem;
   }
 
   .document-hub :global(.meta-chip) {
-    gap: 0.35rem;
-    font-size: 0.82rem;
+    gap: 0.3rem;
+    font-size: 0.68rem;
   }
 
   .document-hub :global(.meta-chip strong) {
@@ -617,7 +618,8 @@
 
   .document-hub :global(.state-panel p) {
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: 1.45;
+    font-size: var(--font-size-sm);
   }
 
   .document-hub :global(.state-panel-error) {
@@ -625,8 +627,8 @@
   }
 
   .document-hub :global(.processing-panel) {
-    border-color: color-mix(in srgb, var(--color-info) 28%, var(--color-border) 72%);
-    background: color-mix(in srgb, var(--color-info) 10%, var(--color-surface-1) 90%);
+    border-color: color-mix(in srgb, var(--color-info) 24%, var(--color-border) 76%);
+    background: color-mix(in srgb, var(--color-info) 8%, var(--ui-surface-base) 92%);
   }
 
   .features-grid {
@@ -637,7 +639,7 @@
 
   .document-hub :global(.feature-card) {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   .feature-card-header {
@@ -650,8 +652,9 @@
   .feature-hint {
     margin: 0;
     color: var(--color-text-secondary);
-    line-height: 1.6;
-    min-height: 52px;
+    line-height: 1.45;
+    min-height: 0;
+    font-size: var(--font-size-sm);
   }
 
   .feature-hint-error {
@@ -672,13 +675,8 @@
     flex-wrap: wrap;
   }
 
-  .inline-error {
-    margin: 0;
-    border: 1px solid color-mix(in srgb, var(--color-danger) 36%, transparent);
-    border-radius: var(--radius-1);
-    background: var(--color-danger-surface);
+  :global(.inline-error) {
     color: var(--color-danger);
-    padding: 0.7rem 0.85rem;
   }
 
   @media (max-width: 1024px) {

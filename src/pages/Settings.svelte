@@ -1,5 +1,7 @@
 <script>
   import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
+  import Button from '../lib/components/ui/Button.svelte';
+  import Section from '../lib/components/ui/Section.svelte';
   import SettingsPanelSkeleton from '../lib/components/ui/SettingsPanelSkeleton.svelte';
   import ThemeToggle from '../lib/components/ui/ThemeToggle.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
@@ -41,69 +43,67 @@
       <p class="subtitle">{t('settings.subtitle')}</p>
     </header>
 
-    <section class="settings-section" id="language">
-      <div>
-        <h2>{t('settings.language.title')}</h2>
-        <p>
-          {#if ENABLE_ARABIC_UI}
-            {t('settings.language.description')}
-          {:else}
-            {t('settings.language.disabled')}
-          {/if}
-        </p>
-      </div>
+    <Section
+      id="language"
+      className="settings-section"
+      title={t('settings.language.title')}
+      description={ENABLE_ARABIC_UI ? t('settings.language.description') : t('settings.language.disabled')}
+    >
       {#if ENABLE_ARABIC_UI}
         <LanguageToggle />
       {/if}
-    </section>
+    </Section>
 
-    <section class="settings-section">
-      <div>
-        <h2>{t('settings.theme.title')}</h2>
-        <p>{t('settings.theme.description')}</p>
+    <Section
+      className="settings-section"
+      title={t('settings.theme.title')}
+      description={t('settings.theme.description')}
+    >
+      <div class="theme-row">
+        <ThemeToggle value={$theme} on:change={handleThemeChange} />
+        <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
       </div>
-      <ThemeToggle value={$theme} on:change={handleThemeChange} />
-      <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
       <p class="helper">{t('settings.theme.helper')}</p>
-    </section>
+    </Section>
 
-    <section class="settings-section" id="plan">
-      <div class="account-header">
-        <div>
-          <h2>{t('settings.account.title')}</h2>
-          <p>{t('settings.account.description')}</p>
-        </div>
+    <Section
+      id="plan"
+      className="settings-section"
+      title={t('settings.account.title')}
+      description={t('settings.account.description')}
+    >
+      <div slot="actions">
         <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
       </div>
 
-      <div class="account-card">
+      <article class="account-card">
         <div>
           <h3>{userName}</h3>
           <p>{userEmail}</p>
         </div>
 
         <div class="actions">
-          <button type="button" class="ghost" disabled title={t('common.comingSoon')}>
+          <Button type="button" variant="secondary" size="sm" disabled title={t('common.comingSoon')}>
             {t('settings.account.actions.profile')}
-          </button>
-          <button type="button" class="danger" on:click={handleLogout} disabled={loggingOut}>
+          </Button>
+          <Button type="button" variant="danger" size="sm" on:click={handleLogout} loading={loggingOut}>
             {loggingOut ? t('settings.account.actions.loggingOut') : t('settings.account.actions.logout')}
-          </button>
+          </Button>
         </div>
-      </div>
-    </section>
+      </article>
+    </Section>
   </div>
 {/if}
 
 <style>
   .settings-page {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
   }
 
   .page-header {
-    text-align: start;
+    display: grid;
+    gap: var(--space-1);
   }
 
   .eyebrow {
@@ -115,74 +115,71 @@
   }
 
   h1 {
-    margin: 0.25rem 0;
-    font-size: 2.25rem;
+    margin: 0;
+    font-size: clamp(1.12rem, 2.4vw, 1.35rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: var(--color-text-primary);
   }
 
   .subtitle {
     margin: 0;
     color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    max-width: 72ch;
   }
 
-  .settings-section {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-3);
-    background: var(--color-surface-1);
-    padding: var(--space-5);
+  :global(.settings-section) {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
-  h2 {
-    margin: 0;
-    color: var(--color-text-primary);
-  }
-
-  .settings-section p {
+  :global(.settings-section p) {
     margin: 0;
     color: var(--color-text-secondary);
   }
 
+  .theme-row {
+    display: grid;
+    gap: var(--space-2);
+  }
+
   .theme-current {
-    font-size: 0.95rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-primary);
-    font-weight: 600;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .helper {
-    font-size: 0.9rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-muted);
   }
 
-  .account-header {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-3);
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
   .account-card {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    padding: var(--space-4);
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-md);
+    padding: var(--space-3);
+    background: var(--ui-surface-raised);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-3);
-    background: var(--color-surface-2);
   }
 
   .account-card h3 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.2rem;
     color: var(--color-text-primary);
+    font-size: var(--font-size-md);
+    font-weight: 600;
   }
 
   .account-card p {
     margin: 0;
     color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
   }
 
   .actions {
@@ -192,35 +189,13 @@
     align-items: center;
   }
 
-  .actions button {
-    min-height: 44px;
-    padding: 0 1.5rem;
-    border-radius: var(--radius-1);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
-  }
-
-  .actions button:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .ghost {
-    border: 1px dashed var(--color-border);
-    background: transparent;
-    color: var(--color-text-secondary);
-  }
-
-  .danger {
-    border: none;
-    background: var(--color-danger);
-    color: var(--color-bg);
-  }
-
   @media (max-width: 640px) {
-    .settings-section {
-      padding: var(--space-4);
+    .actions {
+      width: 100%;
+    }
+
+    .actions :global(.ui-button) {
+      width: 100%;
     }
   }
 </style>

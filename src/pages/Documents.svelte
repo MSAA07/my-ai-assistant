@@ -126,7 +126,7 @@
 
 <div class="documents-page">
   <header class="page-header">
-    <div>
+    <div class="heading">
       <p class="eyebrow">{t('documentsPage.eyebrow')}</p>
       <h1>{t('documentsPage.title')}</h1>
       <p class="subtitle">{t('documentsPage.description')}</p>
@@ -152,7 +152,7 @@
   {:else}
     <section class="documents-grid">
       {#each documents as doc}
-        <Card as="article" class="document-card" variant="raised" padding="md">
+        <Card as="article" class="document-card" variant="base" padding="md" border="subtle">
           <div class="card-head">
             <div class="title-row">
               <h3>{doc.originalName}</h3>
@@ -205,21 +205,21 @@
 
 <style>
   .documents-page {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
   }
 
   .page-header {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-4);
     flex-wrap: wrap;
   }
 
-  .page-header :global(.ui-button) {
-    align-self: flex-end;
+  .heading {
+    display: grid;
+    gap: var(--space-1);
   }
 
   .eyebrow {
@@ -231,13 +231,16 @@
   }
 
   h1 {
-    margin: 0.25rem 0;
-    font-size: 2rem;
+    margin: 0;
+    font-size: clamp(1.12rem, 2.4vw, 1.35rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: var(--color-text-primary);
   }
 
   .subtitle {
     margin: 0;
+    font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
   }
 
@@ -253,7 +256,7 @@
 
   .documents-grid {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
   }
@@ -261,9 +264,9 @@
   .documents-page :global(.document-card) {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-3);
     height: 100%;
-    min-height: 272px;
+    min-height: 220px;
   }
 
   .card-head {
@@ -280,10 +283,11 @@
   }
 
   .card-head h3 {
-    margin: 0 0 0.35rem;
-    font-size: 1.1rem;
+    margin: 0;
+    font-size: 0.96rem;
+    font-weight: 600;
     color: var(--color-text-primary);
-    line-height: 1.35;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -294,7 +298,7 @@
 
   .meta {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
   }
 
@@ -307,17 +311,17 @@
 
   .stats dt {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.67rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     color: var(--color-text-secondary);
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .stats dd {
-    margin: 0.25rem 0 0;
-    font-size: 1.5rem;
-    font-weight: 700;
+    margin: 0.18rem 0 0;
+    font-size: 1.1rem;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
@@ -340,14 +344,6 @@
   @media (max-width: 640px) {
     .documents-grid {
       grid-template-columns: 1fr;
-    }
-
-    .page-header {
-      align-items: flex-start;
-    }
-
-    .page-header :global(.ui-button) {
-      align-self: flex-start;
     }
 
     .card-actions {

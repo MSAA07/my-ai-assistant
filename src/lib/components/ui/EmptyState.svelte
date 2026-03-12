@@ -23,7 +23,7 @@
 </Card>
 
 <style>
-  .empty-state {
+  :global(.empty-state) {
     gap: var(--space-2);
     justify-items: center;
     text-align: center;
@@ -64,7 +64,7 @@
   }
 
   @media (max-width: 640px) {
-    .empty-state {
+    :global(.empty-state) {
       padding: var(--space-5);
     }
   }

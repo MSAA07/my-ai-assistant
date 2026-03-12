@@ -707,31 +707,35 @@
 <style>
   .activity {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .activity-header {
     display: grid;
-    gap: var(--space-3);
-    grid-template-columns: auto 1fr auto;
+    gap: var(--space-2);
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
 
   .activity :global(.activity-back-link) {
-    color: var(--color-accent-primary);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    grid-column: 1 / -1;
+    color: var(--color-text-secondary);
     min-height: 0;
     padding-inline: 0;
+    text-decoration: none;
+  }
+
+  .activity :global(.activity-back-link:hover) {
+    color: var(--color-text-primary);
   }
 
   .eyebrow {
     margin: 0;
     color: var(--color-text-muted);
-    font-size: 0.75rem;
+    font-size: 0.67rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
+    letter-spacing: 0.07em;
+    font-weight: 600;
   }
 
   h1,
@@ -741,9 +745,22 @@
     margin: 0;
   }
 
+  .activity-header h1 {
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+  }
+
+  .activity-header h2 {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
   .sub {
     color: var(--color-text-secondary);
     margin-top: 0.2rem;
+    font-size: var(--font-size-sm);
   }
 
   :global(.activity-panel),
@@ -753,7 +770,7 @@
   }
 
   :global(.activity-surface) {
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   :global(.activity-panel-error) {
@@ -769,34 +786,49 @@
   }
 
   .reader p {
-    line-height: 1.8;
+    line-height: 1.55;
     white-space: pre-wrap;
     color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
   }
 
   .empty {
     display: grid;
-    gap: 0.75rem;
-    min-height: 160px;
+    gap: var(--space-2);
+    min-height: 140px;
     align-content: center;
+    border: 1px dashed var(--ui-border-subtle);
+    border-radius: var(--ui-radius-md);
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--ui-surface-base) 96%, transparent);
   }
 
   .progress {
     color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .note {
-    color: color-mix(in srgb, var(--color-info) 80%, white 20%);
+    color: color-mix(in srgb, var(--color-info) 68%, var(--color-text-secondary) 32%);
+    font-size: var(--font-size-xs);
   }
 
   .error {
+    margin: 0;
     color: var(--color-danger);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+    padding: 0.5rem 0.62rem;
+    font-size: var(--font-size-xs);
   }
 
   :global(.flashcard-panel) {
     display: grid;
-    gap: 0.75rem;
-    min-height: 220px;
+    gap: var(--space-2);
+    min-height: 180px;
     align-content: center;
   }
 
@@ -805,16 +837,17 @@
   }
 
   .card-side {
-    font-size: 0.75rem;
+    font-size: 0.67rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     color: var(--color-text-muted);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .explanation {
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: 1.45;
+    font-size: var(--font-size-sm);
   }
 
   .controls {
@@ -825,38 +858,52 @@
 
   .stack {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .option {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-1);
-    background: var(--color-surface-2);
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-surface-base);
     color: var(--color-text-primary);
-    min-height: 44px;
-    padding: 0.5rem 0.65rem;
+    min-height: var(--ui-control-height-md);
+    padding: 0.45rem 0.58rem;
     display: flex;
-    gap: 0.65rem;
+    gap: 0.5rem;
     align-items: center;
     cursor: pointer;
     text-align: left;
     font: inherit;
+    font-size: var(--font-size-sm);
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .option:hover {
+    border-color: var(--ui-border-strong);
+    background: color-mix(in srgb, var(--ui-surface-raised) 82%, transparent);
   }
 
   .option-selected {
-    border-color: color-mix(in srgb, var(--color-accent-primary) 70%, var(--color-border) 30%);
-    background: var(--color-accent-surface);
+    border-color: var(--ui-border-accent);
+    background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+  }
+
+  .option:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring);
   }
 
   .option-letter {
-    width: 1.65rem;
-    height: 1.65rem;
-    border-radius: 8px;
-    border: 1px solid var(--color-border);
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: var(--ui-radius-sm);
+    border: 1px solid var(--ui-border-subtle);
     display: grid;
     place-items: center;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.67rem;
+    font-weight: 600;
   }
 
   :global(.answer-input-shell) {
@@ -865,8 +912,8 @@
 
   .answer-input {
     width: 100%;
-    min-height: 44px;
-    padding: 0 0.75rem;
+    min-height: var(--ui-control-height-md);
+    padding: 0;
     border: none;
     background: transparent;
     color: var(--color-text-primary);
@@ -874,17 +921,18 @@
   }
 
   .review {
-    border: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%);
-    border-radius: var(--radius-1);
-    background: color-mix(in srgb, var(--color-danger-surface) 50%, transparent);
-    padding: 0.65rem;
+    border: 1px solid color-mix(in srgb, var(--color-danger) 24%, var(--ui-border-subtle) 76%);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--color-danger) 8%, var(--ui-surface-base) 92%);
+    padding: 0.52rem 0.62rem;
     display: grid;
     gap: 0.25rem;
+    font-size: var(--font-size-sm);
   }
 
   .review-correct {
-    border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border) 60%);
-    background: color-mix(in srgb, var(--color-success-surface) 45%, transparent);
+    border-color: color-mix(in srgb, var(--color-success) 24%, var(--ui-border-subtle) 76%);
+    background: color-mix(in srgb, var(--color-success) 8%, var(--ui-surface-base) 92%);
   }
 
   .review-question {

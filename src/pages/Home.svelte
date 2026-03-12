@@ -265,38 +265,39 @@
   }
 </script>
 
-<div class="study-assistant-container">
-  <header class="study-header">
+<div class="home-page">
+  <header class="page-header">
+    <p class="eyebrow">{t('nav.home')}</p>
     <h1>{t('home.heroTitle')}</h1>
-    <p>{t('home.heroSubtitle')}</p>
+    <p class="subtitle">{t('home.heroSubtitle')}</p>
     {#if isRefreshingDashboard}
       <p class="refresh-indicator">{t('common.loading')}</p>
     {/if}
   </header>
 
   {#if isLoadingDashboard}
-    <div class="usage-stats">
+    <section class="stats-grid">
       <DashboardCardSkeleton />
       <DashboardCardSkeleton />
       <DashboardCardSkeleton />
-    </div>
+    </section>
   {:else if user}
-    <div class="usage-stats">
-      <Card class="home-stat-card" variant="raised" padding="md">
-        <div class="stat-value" style={normalizedRole === 'admin' ? "font-size:1.8rem" : ""}>
+    <section class="stats-grid">
+      <Card class="home-stat-card" variant="base" padding="md">
+        <div class={`stat-value ${normalizedRole === 'admin' ? 'stat-value-admin' : ''}`}>
           {normalizedRole === 'admin' ? t('home.stats.unlimited') : remainingDocumentsValue}
         </div>
         <div class="stat-label">{t('home.stats.documentsRemaining')}</div>
       </Card>
-      <Card class="home-stat-card" variant="raised" padding="md">
+      <Card class="home-stat-card" variant="base" padding="md">
         <div class="stat-value">{usedThisMonthValue}/{monthlyLimitValue}</div>
         <div class="stat-label">{t('home.stats.usedThisMonth')}</div>
       </Card>
-      <Card class="home-stat-card" variant="raised" padding="md">
+      <Card class="home-stat-card" variant="base" padding="md">
         <div class="stat-value">{totalDocumentsValue}</div>
         <div class="stat-label">{t('home.stats.totalDocuments')}</div>
       </Card>
-    </div>
+    </section>
   {/if}
 
   {#if error}
@@ -304,7 +305,7 @@
   {/if}
 
   {#if showQuotaReachedMessage}
-    <Card class="quota-message" variant="raised" border="accent" padding="lg" role="status" aria-live="polite">
+    <Card class="quota-message" variant="soft" border="accent" padding="md" role="status" aria-live="polite">
       <h2>{t("home.quotaReached.title")}</h2>
       <p>{t("home.quotaReached.body")}</p>
       <p class="quota-message-secondary">{t("home.quotaReached.upgradeHint")}</p>
@@ -312,133 +313,150 @@
   {/if}
 
   {#if showUploadSection}
-    <UploadPanel
-      busy={uploading}
-      maxFiles={MAX_UPLOAD_FILES}
-      files={selectedFiles}
-      accept={VALID_EXTENSIONS.join(',')}
-      multiple={true}
-      title={t('home.uploadSection.modalTitle')}
-      description={t('home.uploadSection.modalDescription')}
-      dropzoneTitle={t('home.uploadSection.dropzoneTitle')}
-      dropzoneOr={t('home.uploadSection.dropzoneOr')}
-      browseLabel={t('home.uploadSection.browse')}
-      supportLabel={t('home.uploadSection.supportedFiles')}
-      cancelLabel={t('home.uploadSection.cancel')}
-      submitLabel={t('home.uploadSection.next')}
-      submitBusyLabel={t('home.uploadSection.submitProcessing')}
-      removeFileLabel={t('home.uploadSection.removeFile')}
-      errorMessage={uploadError}
-      on:cancel={clearSelectedFiles}
-      on:submit={handleUpload}
-      on:filesSelected={handleFilesSelected}
-      on:removeFile={handleRemoveSelectedFile}
-    />
+    <section class="upload-section" aria-label={t('home.uploadSection.modalTitle')}>
+      <UploadPanel
+        busy={uploading}
+        maxFiles={MAX_UPLOAD_FILES}
+        files={selectedFiles}
+        accept={VALID_EXTENSIONS.join(',')}
+        multiple={true}
+        title={t('home.uploadSection.modalTitle')}
+        description={t('home.uploadSection.modalDescription')}
+        dropzoneTitle={t('home.uploadSection.dropzoneTitle')}
+        dropzoneOr={t('home.uploadSection.dropzoneOr')}
+        browseLabel={t('home.uploadSection.browse')}
+        supportLabel={t('home.uploadSection.supportedFiles')}
+        cancelLabel={t('home.uploadSection.cancel')}
+        submitLabel={t('home.uploadSection.next')}
+        submitBusyLabel={t('home.uploadSection.submitProcessing')}
+        removeFileLabel={t('home.uploadSection.removeFile')}
+        errorMessage={uploadError}
+        on:cancel={clearSelectedFiles}
+        on:submit={handleUpload}
+        on:filesSelected={handleFilesSelected}
+        on:removeFile={handleRemoveSelectedFile}
+      />
+    </section>
   {/if}
 </div>
 
 <style>
-  .study-assistant-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--space-5);
+  .home-page {
     display: grid;
     gap: var(--space-4);
   }
 
-  .study-header {
-    text-align: center;
-    margin-bottom: var(--space-4);
+  .page-header {
+    display: grid;
+    gap: var(--space-1);
   }
 
-  .study-header h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    background: var(--gradient-accent-strong);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .study-header p {
-    color: var(--color-text-secondary);
-    font-size: 1.1rem;
-  }
-
-  .refresh-indicator {
-    font-size: 0.9rem;
-    margin: 0.35rem 0 0;
+  .eyebrow {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
     color: var(--color-text-muted);
   }
 
-  .usage-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-4);
-    margin-bottom: var(--space-4);
+  .page-header h1 {
+    margin: 0;
+    font-size: clamp(1.15rem, 2.6vw, 1.45rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 
-  .usage-stats :global(.home-stat-card) {
-    text-align: center;
-    min-height: 128px;
+  .subtitle {
+    margin: 0;
+    color: var(--color-text-secondary);
+    max-width: 70ch;
+    font-size: var(--font-size-sm);
+  }
+
+  .refresh-indicator {
+    font-size: var(--font-size-xs);
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .home-page :global(.home-stat-card) {
+    min-height: 108px;
+    gap: var(--space-2);
   }
 
   .stat-value {
-    font-size: 2.5rem;
-    font-weight: 800;
+    font-size: 1.6rem;
+    font-weight: 600;
     color: var(--color-text-primary);
-    -webkit-text-fill-color: var(--color-text-primary);
-    margin-bottom: 0.5rem;
-    opacity: 1;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .stat-value-admin {
+    font-size: 1.2rem;
   }
 
   .stat-label {
     color: var(--color-text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
-  :global(.home-alert) {
-    margin-bottom: var(--space-4);
+  .home-alert {
     font-weight: 500;
   }
 
-  :global(.home-alert-error) {
+  .home-alert-error {
     color: var(--color-danger);
     border-color: var(--color-danger-border);
     background: var(--color-danger-surface);
   }
 
   :global(.quota-message) {
-    margin-bottom: var(--space-4);
-    box-shadow: var(--ui-shadow-md);
+    display: grid;
+    gap: var(--space-2);
   }
 
   :global(.quota-message h2) {
-    margin: 0 0 0.75rem;
-    font-size: 1.35rem;
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
   :global(.quota-message p) {
     margin: 0;
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: 1.45;
+    font-size: var(--font-size-sm);
   }
 
   .quota-message-secondary {
-    margin-top: 0.75rem;
+    margin-top: 0;
     color: var(--color-text-muted);
-    font-size: 0.95rem;
+    font-size: var(--font-size-xs);
   }
 
-  @media (max-width: 768px) {
-    .study-assistant-container {
-      padding: var(--space-3);
-    }
+  .upload-section {
+    min-width: 0;
+  }
 
-    .study-header h1 {
-      font-size: 1.75rem;
+  @media (max-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 680px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

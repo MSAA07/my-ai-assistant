@@ -5,6 +5,7 @@
   import { t } from '../lib/i18n/t.js';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
+  import EmptyState from '../lib/components/ui/EmptyState.svelte';
   import MenuItem from '../lib/components/ui/MenuItem.svelte';
   import MenuSurface from '../lib/components/ui/MenuSurface.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
@@ -209,44 +210,44 @@
 
 <div class="library-page">
   <header class="page-header">
-    <div>
+    <div class="heading">
       <p class="eyebrow">{t('documentsPage.eyebrow')}</p>
       <h1>{t('documentsPage.title')}</h1>
       <p class="subtitle">{t('documentsPage.description')}</p>
     </div>
-    <Button type="button" variant="primary" on:click={goToHome}>
-      {t('documentsPage.actions.uploadCta')}
-    </Button>
+    <div class="header-actions">
+      <Button type="button" variant="secondary" on:click={() => loadDocuments({ background: documents.length > 0 })} disabled={loading || refreshing}>
+        {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
+      </Button>
+      <Button type="button" variant="primary" on:click={goToHome}>
+        {t('documentsPage.actions.uploadCta')}
+      </Button>
+    </div>
   </header>
-  {#if refreshing}
-    <p class="refreshing-state">{t('common.loading')}</p>
-  {/if}
 
   {#if loading}
     <DocumentListSkeleton />
   {:else}
     {#if error}
-      <p class="inline-error">{error}</p>
+      <Card class="inline-error" variant="soft" border="strong" padding="sm">{error}</Card>
     {/if}
     {#if actionError}
-      <p class="inline-error">{actionError}</p>
+      <Card class="inline-error" variant="soft" border="strong" padding="sm">{actionError}</Card>
     {/if}
 
     {#if documents.length === 0}
-      <Card as="section" class="state-panel" variant="base" padding="md">
-        <h2>{t('documentsPage.emptyTitle')}</h2>
-        <p>{t('documentsPage.emptyDescription')}</p>
+      <EmptyState title={t('documentsPage.emptyTitle')} description={t('documentsPage.emptyDescription')}>
         <Button type="button" variant="primary" on:click={goToHome}>
           {t('documentsPage.actions.uploadCta')}
         </Button>
-      </Card>
+      </EmptyState>
     {:else}
       <section class="documents-grid">
         {#each documents as doc}
           <Card
             as="article"
             class="document-card"
-            variant="raised"
+            variant="base"
             padding="sm"
             hoverable
             border={highlightDocumentId === doc.id ? 'accent' : 'subtle'}
@@ -317,8 +318,19 @@
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
     gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .heading {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .header-actions {
+    display: inline-flex;
+    gap: var(--space-2);
     flex-wrap: wrap;
   }
 
@@ -331,25 +343,17 @@
   }
 
   h1 {
-    margin: 0.25rem 0;
-    font-size: 2rem;
+    margin: 0;
+    font-size: clamp(1.12rem, 2.4vw, 1.35rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: var(--color-text-primary);
   }
 
   .subtitle {
     margin: 0;
+    font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
-  }
-
-  .library-page :global(.state-panel) {
-    display: grid;
-    gap: var(--space-2);
-  }
-
-  .refreshing-state {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
   }
 
   .documents-grid {
@@ -385,7 +389,7 @@
 
   .library-page :global(.library-menu) {
     position: absolute;
-    top: 36px;
+    top: calc(var(--ui-control-height-md) + 4px);
     inset-inline-end: 0;
     z-index: 5;
   }
@@ -393,7 +397,8 @@
   h2 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: 1rem;
+    font-size: 0.94rem;
+    font-weight: 600;
     line-height: 1.45;
     word-break: break-word;
   }
@@ -401,7 +406,7 @@
   .meta {
     margin: 0;
     color: var(--color-text-secondary);
-    font-size: 0.88rem;
+    font-size: var(--font-size-xs);
   }
 
   .card-link {
@@ -409,15 +414,17 @@
     text-decoration: none;
     display: grid;
     gap: var(--space-2);
+    padding: 0.12rem 0;
   }
 
-  .inline-error {
-    margin: 0;
-    border: 1px solid color-mix(in srgb, var(--color-danger) 36%, transparent);
-    border-radius: var(--radius-1);
-    background: var(--color-danger-surface);
+  .card-link:hover h2 {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-text-primary) 45%, transparent);
+    text-underline-offset: 0.18em;
+  }
+
+  :global(.inline-error) {
     color: var(--color-danger);
-    padding: 0.7rem 0.85rem;
   }
 
   @media (max-width: 1024px) {
@@ -429,6 +436,14 @@
   @media (max-width: 640px) {
     .documents-grid {
       grid-template-columns: 1fr;
+    }
+
+    .header-actions {
+      width: 100%;
+    }
+
+    .header-actions :global(.ui-button) {
+      flex: 1;
     }
   }
 </style>
