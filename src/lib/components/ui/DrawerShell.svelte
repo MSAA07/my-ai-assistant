@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import { t } from '../../i18n/t.js';
+  import Button from './Button.svelte';
 
   export let open = false;
   export let title = '';
@@ -41,9 +42,9 @@
         <h2 id={title ? titleId : undefined}>{title}</h2>
         <slot name="subtitle"></slot>
       </div>
-      <button type="button" class="drawer__close" on:click={handleClose}>
+      <Button type="button" className="drawer__close" variant="ghost" size="sm" on:click={handleClose}>
         {t('drawer.close')}
-      </button>
+      </Button>
     </header>
     <div class="drawer__scroll">
       <div class="drawer__content">
@@ -120,25 +121,8 @@
   }
 
   .drawer__close {
-    min-inline-size: 44px;
-    min-block-size: 36px;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-muted);
-    font: inherit;
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard);
-  }
-
-  .drawer__close:hover,
-  .drawer__close:focus-visible {
-    color: var(--color-text-primary);
-    background: var(--color-surface-2);
-    border-color: var(--color-accent-primary);
-    outline: none;
+    min-inline-size: 70px;
+    justify-self: end;
   }
 
   .drawer__scroll {

@@ -1,5 +1,8 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import Button from './Button.svelte';
+  import FieldShell from './FieldShell.svelte';
+  import ModalSurface from './ModalSurface.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -39,98 +42,83 @@
       customInstruction: customInstruction.trim(),
     });
   }
-
-  function handleOverlayClick(event) {
-    if (event.target === event.currentTarget) {
-      close();
-    }
-  }
 </script>
 
-{#if open}
-  <div class="overlay" role="presentation" on:click={handleOverlayClick}>
-    <form class="modal" on:submit={handleSubmit}>
-      <header class="modal-header">
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </header>
+<ModalSurface
+  {open}
+  width="min(560px, 100%)"
+  className="guided-modal"
+  on:close={close}
+>
+  <form class="guided-modal__form" on:submit={handleSubmit}>
+    <header class="guided-modal__header">
+      <h2>{title}</h2>
+      <p>{description}</p>
+    </header>
 
-      <section class="field-group">
-        <p class="field-label">{reasonLabel}</p>
-        <div class="reasons-list" role="radiogroup" aria-label={reasonLabel}>
-          {#each reasons as reason (reason.value)}
-            <label class="reason-option" class:reason-option-active={selectedReason === reason.value}>
-              <input
-                type="radio"
-                name="regenerate-reason"
-                value={reason.value}
-                bind:group={selectedReason}
-                disabled={busy}
-              />
-              <span>{reason.label}</span>
-            </label>
-          {/each}
-        </div>
-      </section>
+    <section class="field-group">
+      <p class="field-label">{reasonLabel}</p>
+      <div class="reasons-list" role="radiogroup" aria-label={reasonLabel}>
+        {#each reasons as reason (reason.value)}
+          <label class="reason-option" class:reason-option-active={selectedReason === reason.value}>
+            <input
+              type="radio"
+              name="regenerate-reason"
+              value={reason.value}
+              bind:group={selectedReason}
+              disabled={busy}
+            />
+            <span>{reason.label}</span>
+          </label>
+        {/each}
+      </div>
+    </section>
 
-      <section class="field-group">
-        <label class="field-label" for="regenerate-custom-instruction">{customLabel}</label>
-        <textarea
-          id="regenerate-custom-instruction"
-          rows="4"
-          maxlength="500"
-          bind:value={customInstruction}
-          placeholder={customPlaceholder}
-          disabled={busy}
-        ></textarea>
-      </section>
+    <FieldShell
+      className="field-group"
+      label={customLabel}
+      forId="regenerate-custom-instruction"
+      disabled={busy}
+    >
+      <textarea
+        id="regenerate-custom-instruction"
+        rows="4"
+        maxlength="500"
+        bind:value={customInstruction}
+        placeholder={customPlaceholder}
+        disabled={busy}
+      ></textarea>
+    </FieldShell>
 
-      <footer class="modal-actions">
-        <button type="button" class="secondary" on:click={close} disabled={busy}>
-          {cancelLabel}
-        </button>
-        <button type="submit" class="primary" disabled={busy}>
-          {busy ? `${confirmLabel}...` : confirmLabel}
-        </button>
-      </footer>
-    </form>
-  </div>
-{/if}
+    <footer class="modal-actions">
+      <Button type="button" variant="secondary" on:click={close} disabled={busy}>
+        {cancelLabel}
+      </Button>
+      <Button type="submit" variant="primary" loading={busy} disabled={busy}>
+        {confirmLabel}
+      </Button>
+    </footer>
+  </form>
+</ModalSurface>
 
 <style>
-  .overlay {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding: var(--space-4);
-    background: var(--color-backdrop-strong);
-    z-index: 999;
-  }
-
-  .modal {
-    width: min(560px, 100%);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    background: var(--color-surface-1);
-    padding: var(--space-5);
+  .guided-modal__form {
     display: grid;
     gap: var(--space-4);
-    box-shadow: var(--shadow-menu);
   }
 
-  .modal-header {
+  .guided-modal__header {
     display: grid;
     gap: var(--space-2);
   }
 
-  .modal-header h2 {
+  .guided-modal__header h2 {
     margin: 0;
     color: var(--color-text-primary);
     font-size: 1.2rem;
   }
 
-  .modal-header p {
+  .guided-modal__header p {
     margin: 0;
     color: var(--color-text-secondary);
     line-height: 1.6;
@@ -158,11 +146,12 @@
     align-items: center;
     gap: 0.6rem;
     padding: 0.65rem 0.8rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-1);
-    background: var(--color-surface-2);
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-raised);
     cursor: pointer;
-    transition: border-color var(--motion-fast) var(--ease-standard);
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard);
   }
 
   .reason-option input {
@@ -176,73 +165,27 @@
   }
 
   .reason-option-active {
-    border-color: color-mix(in srgb, var(--color-accent-primary) 70%, var(--color-border) 30%);
+    border-color: var(--ui-border-accent);
+    background: color-mix(in srgb, var(--color-accent-primary) 14%, transparent);
   }
 
   .reason-option-active span {
     color: var(--color-text-primary);
   }
 
-  textarea {
-    width: 100%;
-    resize: vertical;
-    min-height: 92px;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
-    padding: 0.75rem 0.85rem;
-    font: inherit;
-    line-height: 1.5;
-  }
-
-  textarea:focus {
-    outline: none;
-    border-color: var(--color-accent-primary);
-  }
-
   .modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: var(--space-2);
-  }
-
-  button {
-    min-height: 42px;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    padding: 0 1rem;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .secondary {
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
-  }
-
-  .primary {
-    background: var(--gradient-accent-strong);
-    color: var(--color-bg);
-    border-color: transparent;
+    margin-top: var(--space-1);
   }
 
   @media (max-width: 640px) {
-    .modal {
-      padding: var(--space-4);
-    }
-
     .modal-actions {
-      flex-direction: column;
+      flex-direction: column-reverse;
     }
 
-    .modal-actions button {
+    .modal-actions :global(.ui-button) {
       width: 100%;
     }
   }

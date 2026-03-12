@@ -1,6 +1,10 @@
 <script>
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
+  import Badge from '../ui/Badge.svelte';
+  import Button from '../ui/Button.svelte';
+  import MenuItem from '../ui/MenuItem.svelte';
+  import MenuSurface from '../ui/MenuSurface.svelte';
   import { ENABLE_ARABIC_UI } from '../../config/features.js';
   import { t } from '../../i18n/t.js';
 
@@ -11,7 +15,7 @@
 
   const dispatch = createEventDispatcher();
   let menuOpen = false;
-  let avatarButton;
+  let avatarWrapper;
 
   function toggleMenu() {
     menuOpen = !menuOpen;
@@ -23,7 +27,7 @@
 
   function handleOutsideClick(event) {
     if (!menuOpen) return;
-    if (avatarButton && !avatarButton.contains(event.target)) {
+    if (avatarWrapper && !avatarWrapper.contains(event.target)) {
       closeMenu();
     }
   }
@@ -62,46 +66,53 @@
 
   <div class="topbar-right">
     {#if planLabel}
-      <span class="plan-pill">{planLabel}</span>
+      <Badge className="plan-pill" tone="success" size="sm">{planLabel}</Badge>
     {/if}
     {#if ENABLE_ARABIC_UI}
       <LanguageToggle />
     {/if}
-    <button
-      class="icon-button"
+
+    <Button
+      className="icon-button"
+      variant="ghost"
+      size="icon"
       type="button"
       disabled
       aria-disabled="true"
       title={t('common.comingSoon')}
       aria-label={t('topbar.notificationsComingSoon')}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v2.88l-.95 2.86A1.75 1.75 0 0 0 6.69 17h10.62a1.75 1.75 0 0 0 1.64-2.26L18 11.88V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z" /></svg>
-    </button>
-    <div class="avatar-wrapper">
-      <button
-        class="avatar-button"
+      <span slot="icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v2.88l-.95 2.86A1.75 1.75 0 0 0 6.69 17h10.62a1.75 1.75 0 0 0 1.64-2.26L18 11.88V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z" /></svg>
+      </span>
+    </Button>
+
+    <div class="avatar-wrapper" bind:this={avatarWrapper}>
+      <Button
+        className="avatar-button"
+        variant="ghost"
+        size="icon"
         type="button"
         on:click={toggleMenu}
-        bind:this={avatarButton}
         aria-haspopup="menu"
         aria-expanded={menuOpen}
       >
         <span class="avatar-initials">{initials}</span>
-      </button>
+      </Button>
 
       {#if menuOpen}
-        <div class="menu" role="menu">
+        <MenuSurface className="menu" role="menu" minWidth="220px">
           <div class="menu-header">
             <span class="menu-name">{userName}</span>
             <span class="menu-email">{userEmail}</span>
           </div>
-          <button class="menu-item" role="menuitem" type="button" on:click={() => dispatch('openProfile')}>
+          <MenuItem on:click={() => dispatch('openProfile')}>
             {t('topbar.profile')}
-          </button>
-          <button class="menu-item" role="menuitem" type="button" on:click={handleSignOut}>
+          </MenuItem>
+          <MenuItem on:click={handleSignOut}>
             {t('topbar.logout')}
-          </button>
-        </div>
+          </MenuItem>
+        </MenuSurface>
       {/if}
     </div>
   </div>
@@ -140,43 +151,21 @@
     gap: var(--space-2);
   }
 
-  .plan-pill {
-    padding: 0.25rem 0.7rem;
-    border-radius: 999px;
-    background: var(--color-success-surface);
-    color: var(--color-success);
+  :global(.plan-pill) {
     font-size: 0.8rem;
-    font-weight: 600;
-    border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
   }
 
-  .icon-button {
+  :global(.icon-button) {
     width: 44px;
     height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-surface-1) 88%, transparent);
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
+    padding: 0;
   }
 
-  .icon-button:hover {
-    color: var(--color-text-primary);
-    border-color: var(--color-accent-primary);
-    background: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+  :global(.icon-button .ui-button__label) {
+    display: none;
   }
 
-  .icon-button:disabled {
-    opacity: 0.5;
-    border-color: var(--color-border);
-    cursor: not-allowed;
-  }
-
-  .icon-button svg {
+  :global(.icon-button svg) {
     width: 22px;
     height: 22px;
     fill: currentColor;
@@ -186,42 +175,48 @@
     position: relative;
   }
 
-  .avatar-button {
+  :global(.avatar-button) {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 36%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent-primary) 36%, transparent);
     background: var(--color-accent-surface);
     color: var(--color-accent-primary);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
   }
 
-  .avatar-button:hover,
-  .avatar-button[aria-expanded="true"] {
+  :global(.avatar-button:hover:not(:disabled)),
+  :global(.avatar-button[aria-expanded='true']) {
+    border-color: color-mix(in srgb, var(--color-accent-primary) 56%, transparent);
     box-shadow: 0 0 0 1px var(--color-accent-primary) inset;
+    background: color-mix(in srgb, var(--color-accent-primary) 20%, transparent);
   }
 
-  .menu {
+  :global(.avatar-button .ui-button__icon),
+  :global(.avatar-button .ui-button__spinner) {
+    display: none;
+  }
+
+  :global(.avatar-button .ui-button__label) {
+    line-height: 1;
+  }
+
+  .avatar-initials {
+    font-weight: 700;
+  }
+
+  :global(.menu) {
     position: absolute;
     inset-inline-end: 0;
     margin-top: var(--space-2);
-    background: var(--color-surface-1);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    box-shadow: var(--shadow-menu);
-    min-width: 220px;
-    padding: var(--space-2);
-    display: grid;
-    gap: var(--space-1);
+    z-index: 20;
   }
 
   .menu-header {
     padding: var(--space-2);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--ui-border-subtle);
     display: grid;
     gap: 0.25rem;
+    margin-bottom: var(--space-1);
   }
 
   .menu-name {
@@ -230,27 +225,8 @@
   }
 
   .menu-email {
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
-  }
-
-  .menu-item {
-    width: 100%;
-    min-height: 40px;
-    padding: 0.5rem var(--space-2);
-    border-radius: var(--radius-1);
-    border: none;
-    background: transparent;
-    text-align: start;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
-  }
-
-  .menu-item:hover {
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
   }
 
   @media (max-width: 768px) {

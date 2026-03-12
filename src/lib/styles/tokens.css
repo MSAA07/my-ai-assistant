@@ -9,10 +9,10 @@
   --color-border: #2a3147;
   --color-text-primary: #eef2ff;
   --color-text-muted: #b8c0d6;
-  --color-accent-primary: #6c63ff;
-  --color-accent-secondary: #00d4aa;
+  --color-accent-primary: #6366f1;
+  --color-accent-secondary: #14b8a6;
   --color-accent-surface: rgba(108, 99, 255, 0.16);
-  --color-success-surface: rgba(0, 212, 170, 0.16);
+  --color-success-surface: color-mix(in srgb, var(--color-success) 18%, transparent);
   --color-danger-surface: rgba(255, 77, 109, 0.14);
   --color-danger-border: rgba(255, 77, 109, 0.35);
   --color-surface-overlay: rgba(15, 17, 23, 0.82);
@@ -23,10 +23,10 @@
   --color-text-soft: #e6ebff;
 
   /* Semantic colors */
-  --color-success: #00d4aa;
+  --color-success: #22c55e;
   --color-warning: #f6c177;
   --color-danger: #ff4d6d;
-  --color-info: #6c63ff;
+  --color-info: #6366f1;
 
   /* Typography roles */
   --color-text: var(--color-text-primary);
@@ -50,7 +50,7 @@
   /* Accent roles */
   --color-accent: var(--color-accent-primary);
   --color-accent-light: color-mix(in srgb, var(--color-accent-primary) 60%, white 40%);
-  --color-accent-hover: #4a90e2;
+  --color-accent-hover: #4f56f0;
   --color-accent-bg: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
   --color-accent-bg-hover: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
 
@@ -62,6 +62,10 @@
   --font-family-en: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-family-ar: Cairo, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-family-base: var(--font-family-en);
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
 
   /* Sizing & spacing */
   --space-1: 4px;
@@ -77,6 +81,27 @@
   --size-sidebar: 248px;
   --size-drawer: 400px;
 
+  /* Primitive system */
+  --ui-radius-sm: var(--radius-1);
+  --ui-radius-md: var(--radius-2);
+  --ui-radius-lg: var(--radius-3);
+  --ui-radius-pill: 999px;
+  --ui-surface-base: var(--color-surface-1);
+  --ui-surface-raised: color-mix(in srgb, var(--color-surface-2) 80%, var(--color-surface-1) 20%);
+  --ui-surface-soft: color-mix(in srgb, var(--color-surface-1) 88%, transparent);
+  --ui-surface-overlay: var(--color-surface-panel-elevated);
+  --ui-border-subtle: color-mix(in srgb, var(--color-border) 72%, transparent);
+  --ui-border-strong: color-mix(in srgb, var(--color-border) 85%, white 15%);
+  --ui-border-accent: color-mix(in srgb, var(--color-accent-primary) 50%, var(--color-border) 50%);
+  --ui-shadow-sm: var(--shadow-panel);
+  --ui-shadow-md: var(--shadow-soft);
+  --ui-shadow-lg: var(--shadow-modal);
+  --ui-control-height-sm: 34px;
+  --ui-control-height-md: 42px;
+  --ui-control-height-lg: 48px;
+  --ui-focus-ring: 0 0 0 3px var(--color-focus-ring);
+  --ui-focus-ring-strong: 0 0 0 3px var(--color-focus-ring-strong);
+
   /* Motion */
   --motion-fast: 120ms;
   --motion-normal: 200ms;
@@ -90,7 +115,7 @@
   --color-focus-ring: color-mix(in srgb, var(--color-accent-primary) 36%, transparent);
   --color-focus-ring-strong: color-mix(in srgb, var(--color-accent-primary) 58%, transparent);
   --gradient-accent: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
-  --gradient-accent-strong: linear-gradient(135deg, #7a72ff 0%, #00d4aa 100%);
+  --gradient-accent-strong: linear-gradient(135deg, #7a72ff 0%, #14b8a6 100%);
   --gradient-hero: radial-gradient(circle at top, color-mix(in srgb, var(--color-accent-primary) 35%, transparent) 0%, transparent 70%);
   --gradient-card-border: linear-gradient(135deg, color-mix(in srgb, var(--color-border) 70%, transparent), color-mix(in srgb, var(--color-accent-primary) 15%, transparent));
   --gradient-bg-radial: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-accent-primary) 20%, transparent) 0%, transparent 60%);
@@ -113,16 +138,16 @@
   --color-text-primary: #131a2a;
   --color-text-muted: #5f6f8f;
   --color-accent-primary: #4a63f7;
-  --color-accent-secondary: #00b894;
+  --color-accent-secondary: #0d9488;
   --color-accent-surface: rgba(74, 99, 247, 0.12);
-  --color-success-surface: rgba(0, 184, 148, 0.14);
+  --color-success-surface: color-mix(in srgb, var(--color-success) 16%, transparent);
   --color-danger-surface: rgba(239, 68, 68, 0.12);
   --color-danger-border: rgba(239, 68, 68, 0.32);
   --color-surface-overlay: rgba(243, 246, 252, 0.88);
   --color-accent-outline: rgba(74, 99, 247, 0.34);
   --color-accent-outline-strong: rgba(74, 99, 247, 0.58);
   --color-text-soft: #273149;
-  --color-success: #00b894;
+  --color-success: #16a34a;
   --color-warning: #d88d2d;
   --color-danger: #ef4444;
   --color-info: #4a63f7;

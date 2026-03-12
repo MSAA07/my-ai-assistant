@@ -1,12 +1,21 @@
 <script>
   import { direction } from '../../stores/language.js';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
+  import Badge from '../ui/Badge.svelte';
   import { t } from '../../i18n/t.js';
   import { ENABLE_ARABIC_UI } from '../../config/features.js';
 
   export let items = [];
   export let secondaryItems = [];
   export let activeId = '';
+
+  const badgeToneMap = {
+    success: 'success',
+    info: 'info',
+    warning: 'warning',
+    danger: 'danger',
+    accent: 'accent',
+  };
 </script>
 
 <aside class={`sidebar ${$direction === 'rtl' ? 'rtl' : 'ltr'}`}>
@@ -42,7 +51,9 @@
           </span>
           <span class="nav-label">{item.label}</span>
           {#if item.badge}
-            <span class={`nav-badge ${item.badge.variant ?? ''}`}>{item.badge.label}</span>
+            <Badge className="nav-badge" size="xs" tone={badgeToneMap[item.badge.variant] ?? 'neutral'}>
+              {item.badge.label}
+            </Badge>
           {/if}
         </a>
       {/each}
@@ -62,7 +73,9 @@
         </span>
         <span class="nav-label">{item.label}</span>
         {#if item.badge}
-          <span class={`nav-badge ${item.badge.variant ?? ''}`}>{item.badge.label}</span>
+          <Badge className="nav-badge" size="xs" tone={badgeToneMap[item.badge.variant] ?? 'neutral'}>
+            {item.badge.label}
+          </Badge>
         {/if}
       </a>
     {/each}
@@ -184,17 +197,7 @@
   }
 
   .nav-badge {
-    padding: 0.15rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 700;
     letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .nav-badge.success {
-    background: var(--color-success-surface);
-    color: var(--color-success);
   }
 
   .secondary {

@@ -1,4 +1,6 @@
 <script>
+  import Badge from './Badge.svelte';
+
   export let refs = [];
   export let label = 'Sources';
   export let maxVisible = 6;
@@ -47,10 +49,10 @@
     <span class="source-refs-label">{label}</span>
     <div class="source-ref-list">
       {#each visibleRefs as ref, index}
-        <span class="source-ref-chip">{formatReference(ref, index)}</span>
+        <Badge size="sm" tone="neutral" className="source-ref-chip">{formatReference(ref, index)}</Badge>
       {/each}
       {#if hiddenCount > 0}
-        <span class="source-ref-chip source-ref-chip--muted">+{hiddenCount} more</span>
+        <Badge size="sm" tone="neutral" className="source-ref-chip source-ref-chip--muted">+{hiddenCount} more</Badge>
       {/if}
     </div>
   </div>
@@ -77,15 +79,6 @@
   }
 
   .source-ref-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    padding: 0.12rem 0.5rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
-    color: var(--color-text-secondary);
-    font-size: 0.78rem;
     white-space: nowrap;
   }
 

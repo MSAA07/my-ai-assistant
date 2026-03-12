@@ -3,6 +3,9 @@
   import { API_BASE } from '../config.js';
   import { routeParams } from '../stores/router.js';
   import { t } from '../lib/i18n/t.js';
+  import Button from '../lib/components/ui/Button.svelte';
+  import MenuItem from '../lib/components/ui/MenuItem.svelte';
+  import MenuSurface from '../lib/components/ui/MenuSurface.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
 
@@ -191,9 +194,9 @@
       <h1>{t('documentsPage.title')}</h1>
       <p class="subtitle">{t('documentsPage.description')}</p>
     </div>
-    <button type="button" class="upload-btn" on:click={goToHome}>
+    <Button type="button" className="upload-btn" variant="primary" on:click={goToHome}>
       {t('documentsPage.actions.uploadCta')}
-    </button>
+    </Button>
   </header>
 
   {#if loading}
@@ -212,9 +215,9 @@
       <section class="state-panel">
         <h2>{t('documentsPage.emptyTitle')}</h2>
         <p>{t('documentsPage.emptyDescription')}</p>
-        <button type="button" class="upload-btn" on:click={goToHome}>
+        <Button type="button" className="upload-btn" variant="primary" on:click={goToHome}>
           {t('documentsPage.actions.uploadCta')}
-        </button>
+        </Button>
       </section>
     {:else}
       <section class="documents-grid">
@@ -223,32 +226,30 @@
             <div class="card-top">
               <p class="file-type">{getFileType(doc)}</p>
               <div class="menu-wrap">
-                <button
+                <Button
                   type="button"
-                  class="menu-trigger"
+                  className="menu-trigger"
+                  variant="ghost"
+                  size="icon"
                   aria-label={t('documentsPage.actions.more')}
                   aria-expanded={openMenuId === doc.id}
                   on:click={(event) => toggleMenu(event, doc.id)}
                 >
                   ...
-                </button>
+                </Button>
                 {#if openMenuId === doc.id}
-                  <div class="menu">
-                    <button
-                      type="button"
-                      on:click={() => renameDocument(doc)}
-                      disabled={actionBusyId === doc.id}
-                    >
+                  <MenuSurface className="menu" minWidth="140px">
+                    <MenuItem on:click={() => renameDocument(doc)} disabled={actionBusyId === doc.id}>
                       {t('documentsPage.actions.rename')}
-                    </button>
-                    <button
-                      type="button"
+                    </MenuItem>
+                    <MenuItem
+                      tone="danger"
                       on:click={(event) => openDeleteModal(event, doc)}
                       disabled={actionBusyId === doc.id}
                     >
                       {t('documentsPage.actions.delete')}
-                    </button>
-                  </div>
+                    </MenuItem>
+                  </MenuSurface>
                 {/if}
               </div>
             </div>
@@ -372,48 +373,29 @@
   .menu-trigger {
     width: 32px;
     height: 32px;
+    min-height: 32px;
+    min-width: 32px;
     border-radius: 50%;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    padding: 0;
     color: var(--color-text-secondary);
-    cursor: pointer;
+  }
+
+  .menu-trigger :global(.ui-button__icon),
+  .menu-trigger :global(.ui-button__spinner) {
+    display: none;
+  }
+
+  .menu-trigger :global(.ui-button__label) {
     line-height: 1;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
   }
 
   .menu {
     position: absolute;
     top: 36px;
     inset-inline-end: 0;
-    min-width: 132px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-1);
-    background: var(--color-surface-1);
-    box-shadow: 0 12px 24px var(--color-shadow);
-    padding: 0.35rem;
-    display: grid;
-    gap: 0.25rem;
     z-index: 5;
-  }
-
-  .menu button {
-    min-height: 36px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-1);
-    background: transparent;
-    color: var(--color-text-primary);
-    text-align: start;
-    cursor: pointer;
-    font-size: 0.88rem;
-  }
-
-  .menu button:hover:not(:disabled) {
-    border-color: var(--color-border);
-    background: var(--color-surface-2);
-  }
-
-  .menu button:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
   }
 
   h2 {
@@ -439,13 +421,6 @@
 
   .upload-btn {
     min-height: 42px;
-    border-radius: var(--radius-1);
-    border: none;
-    padding: 0.65rem 1rem;
-    background: var(--gradient-accent-strong);
-    color: var(--color-bg);
-    font-weight: 600;
-    cursor: pointer;
   }
 
   .inline-error {

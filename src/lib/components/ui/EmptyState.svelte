@@ -1,46 +1,44 @@
 <script>
   import { t } from '../../i18n/t.js';
+  import Card from './Card.svelte';
 
   export let title = t('emptyState.title');
-  export let subtitle = t('emptyState.subtitle');
+  export let subtitle = '';
+  export let description = '';
   export let icon = '✨';
+
+  $: resolvedDescription = description || subtitle || t('emptyState.subtitle');
 </script>
 
-<section class="empty-state" role="status">
+<Card as="section" variant="soft" border="dashed" padding="lg" className="empty-state" role="status">
   <div class="empty-state__icon" aria-hidden="true">
     <slot name="icon">{icon}</slot>
   </div>
   <h2>{title}</h2>
-  <p>{subtitle}</p>
+  <p>{resolvedDescription}</p>
   <div class="empty-state__actions">
     <slot name="actions"></slot>
+    <slot></slot>
   </div>
-</section>
+</Card>
 
 <style>
   .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-items: center;
     text-align: center;
-    gap: var(--space-3);
-    padding: var(--space-6);
-    border-radius: var(--radius-2);
-    border: 1px dashed var(--color-border);
-    background: color-mix(in srgb, var(--color-surface-1) 90%, transparent);
     color: var(--color-text-muted);
   }
 
   .empty-state__icon {
     inline-size: 64px;
     block-size: 64px;
-    border-radius: 16px;
+    border-radius: var(--ui-radius-lg);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
+    background: var(--ui-surface-raised);
+    border: 1px solid var(--ui-border-subtle);
   }
 
   h2 {

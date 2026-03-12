@@ -1,9 +1,18 @@
 <script>
   import { direction } from '../../stores/language.js';
   import { t } from '../../i18n/t.js';
+  import Badge from '../ui/Badge.svelte';
 
   export let items = [];
   export let activeId = '';
+
+  const badgeToneMap = {
+    success: 'success',
+    info: 'info',
+    warning: 'warning',
+    danger: 'danger',
+    accent: 'accent',
+  };
 </script>
 
 <nav class={`bottom-nav ${$direction === 'rtl' ? 'rtl' : 'ltr'}`} aria-label={t('nav.mobileLabel')}>
@@ -28,7 +37,9 @@
       </span>
       <span class="label">{item.label}</span>
       {#if item.badge}
-        <span class={`badge ${item.badge.variant ?? ''}`}>{item.badge.label}</span>
+        <Badge className="badge" size="xs" tone={badgeToneMap[item.badge.variant] ?? 'neutral'}>
+          {item.badge.label}
+        </Badge>
       {/if}
     </a>
   {/each}
@@ -98,24 +109,7 @@
   }
 
   .badge {
-    padding: 0.1rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    line-height: 1;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
-    border: 1px solid var(--color-border);
-    color: var(--color-text-secondary);
-  }
-
-  .badge.info {
-    border-color: var(--color-info);
-    color: var(--color-info);
-  }
-
-  .badge.success {
-    border-color: var(--color-success);
-    color: var(--color-success);
   }
 
   @media (max-width: 768px) {
