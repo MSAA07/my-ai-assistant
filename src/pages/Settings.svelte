@@ -1,8 +1,10 @@
 <script>
   import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
+  import ThemeToggle from '../lib/components/ui/ThemeToggle.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import { ENABLE_ARABIC_UI } from '../lib/config/features.js';
   import { session, signOut } from '../stores/auth.js';
+  import { theme } from '../stores/theme.js';
   import { t } from '../lib/i18n/t.js';
 
   let loggingOut = false;
@@ -11,6 +13,7 @@
   $: userEmail = $session?.user?.email ?? t('settings.account.noEmail');
   $: plan = $session?.user?.plan ?? 'free';
   $: planLabel = plan === 'pro' || plan === 'premium' ? t('nav.proBadge') : t('nav.freeBadge');
+  $: currentThemeLabel = $theme === 'light' ? t('settings.theme.light') : t('settings.theme.dark');
 
   async function handleLogout() {
     loggingOut = true;
@@ -20,6 +23,10 @@
     } finally {
       loggingOut = false;
     }
+  }
+
+  function handleThemeChange(event) {
+    theme.setTheme(event.detail.theme);
   }
 </script>
 
@@ -51,10 +58,8 @@
       <h2>{t('settings.theme.title')}</h2>
       <p>{t('settings.theme.description')}</p>
     </div>
-    <div class="theme-pill">
-      <span>{t('settings.theme.current')}</span>
-      <StatusBadge status="info">{t('common.comingSoonBadge')}</StatusBadge>
-    </div>
+    <ThemeToggle value={$theme} on:change={handleThemeChange} />
+    <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
     <p class="helper">{t('settings.theme.helper')}</p>
   </section>
 
@@ -135,13 +140,8 @@
     color: var(--color-text-secondary);
   }
 
-  .theme-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    border-radius: 999px;
-    background: var(--color-surface-2);
+  .theme-current {
+    font-size: 0.95rem;
     color: var(--color-text-primary);
     font-weight: 600;
   }

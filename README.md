@@ -93,4 +93,12 @@ If `VITE_API_BASE_URL` is not set, the app derives API base from hostname in `sr
 - Feature or component class selectors must not be added to `global.css`.
 - `.svelte` component styles should use semantic tokens and keep concerns local (layout/structure/state), avoiding new raw palette/shadow constants.
 
+## Theme Behavior
+
+- Theme mode is global and supports exactly two values: `dark` and `light`.
+- Theme state lives in `src/stores/theme.js`.
+- The active theme is persisted in browser `localStorage` under `my-ai-assistant:theme`.
+- `index.html` applies persisted theme before app bootstrap to avoid first-paint flicker.
+- `src/main.js` calls `theme.initializeTheme()` so runtime state and document attributes stay in sync.
+
 Last Updated: March 12, 2026

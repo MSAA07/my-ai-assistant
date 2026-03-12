@@ -27,7 +27,15 @@ This document describes how the frontend is wired to backend APIs and how UI sta
 - Requests Better Auth endpoints with `credentials: include`
 - Bootstraps session on load
 
-4. API base resolution (`src/config.js`)
+4. Theme state (`src/stores/theme.js`)
+- Canonical theme values: `dark`, `light`
+- Applies theme globally via `document.documentElement[data-theme]`
+- Persists preference in localStorage key `my-ai-assistant:theme`
+- Startup sequence:
+  - `index.html` applies persisted theme before app scripts run
+  - `src/main.js` calls `theme.initializeTheme()` to sync store + DOM
+
+5. API base resolution (`src/config.js`)
 - Uses `VITE_API_BASE_URL` when set
 - Otherwise derives from hostname for local/stage/production
 
@@ -119,4 +127,4 @@ Update this file when:
 - lifecycle status contract changes
 - environment host mapping changes
 
-Last Updated: March 10, 2026
+Last Updated: March 12, 2026

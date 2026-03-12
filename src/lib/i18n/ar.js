@@ -452,9 +452,12 @@ export default {
     },
     theme: {
       title: 'Ø§Ù„Ø³Ù…Ø©',
-      description: 'Ø§Ù„ÙˆØ¶Ø¹ Ø§Ù„Ø¯Ø§ÙƒÙ† Ù…ØªØ§Ø­ Ø­Ø§Ù„ÙŠØ§Ù‹.',
-      current: 'Ø§Ù„ÙˆØ¶Ø¹ Ø§Ù„Ø¯Ø§ÙƒÙ†',
-      helper: 'Ø³ÙŠØªÙ… Ø¥Ø¶Ø§ÙØ© Ø³Ù…Ø§Øª Ø¬Ø¯ÙŠØ¯Ø© Ù‚Ø±ÙŠØ¨Ø§Ù‹.'
+      description: 'Choose between light and dark appearance.',
+      current: 'Current theme: {theme}',
+      helper: 'Theme changes apply instantly across the app and are saved on this browser.',
+      ariaLabel: 'Theme mode',
+      dark: 'Dark',
+      light: 'Light'
     },
     account: {
       title: 'Ø§Ù„Ø­Ø³Ø§Ø¨',

@@ -53,6 +53,7 @@ src/
 |   |       |-- DrawerShell.svelte
 |   |       |-- EmptyState.svelte
 |   |       |-- LanguageToggle.svelte
+|   |       |-- ThemeToggle.svelte
 |   |       `-- StatusBadge.svelte
 |   |-- config/features.js
 |   |-- i18n/
@@ -71,6 +72,7 @@ src/
 |   `-- Landing.svelte
 |-- stores/
 |   |-- auth.js
+|   |-- theme.js
 |   `-- router.js
 `-- styles/global.css
 ```
@@ -90,5 +92,6 @@ src/
 - Routing is hash-based and defined in `src/routes.js`.
 - API base resolution is in `src/config.js`.
 - Session bootstrapping and auth requests are in `src/stores/auth.js`.
+- Theme bootstrapping and persistence are in `src/stores/theme.js`.
 
-Last Updated: March 9, 2026
+Last Updated: March 12, 2026

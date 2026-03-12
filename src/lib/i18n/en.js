@@ -452,9 +452,12 @@ export default {
     },
     theme: {
       title: 'Theme',
-      description: 'Dark mode is available today.',
-      current: 'Dark mode',
-      helper: 'Additional themes are on the roadmap.'
+      description: 'Choose between light and dark appearance.',
+      current: 'Current theme: {theme}',
+      helper: 'Theme changes apply instantly across the app and are saved on this browser.',
+      ariaLabel: 'Theme mode',
+      dark: 'Dark',
+      light: 'Light'
     },
     account: {
       title: 'Account',
