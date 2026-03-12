@@ -65,6 +65,6 @@ Priority backlog after rollout:
 Chosen next track: **table/data-heavy UX polish + responsive admin polish**.
 
 Execution order:
-1. Build shared table shell primitives.
+1. Define and harden shared `DataSurface` primitives.
 2. Apply to admin `Users`, `Sessions`, `Storage`, and `Audit` screens.
 3. Complete responsive admin pass (mobile action layout and dense table ergonomics).
