@@ -361,9 +361,9 @@
 
   .page-header h1 {
     margin: 0;
-    font-size: clamp(1.15rem, 2.6vw, 1.45rem);
+    font-size: clamp(1.2rem, 2.6vw, 1.55rem);
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.03em;
   }
 
   .subtitle {
@@ -386,16 +386,16 @@
   }
 
   .home-page :global(.home-stat-card) {
-    min-height: 108px;
+    min-height: 112px;
     gap: var(--space-2);
   }
 
   .stat-value {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
     font-weight: 600;
     color: var(--color-text-primary);
     line-height: 1.2;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.03em;
   }
 
   .stat-value-admin {

@@ -75,9 +75,9 @@
 
   .ui-section__heading h2 {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
     color: var(--color-text-primary);
   }
 

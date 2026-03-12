@@ -31,14 +31,14 @@
   }
 
   .empty-state__icon {
-    inline-size: 44px;
-    block-size: 44px;
+    inline-size: 40px;
+    block-size: 40px;
     border-radius: var(--ui-radius-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    background: var(--ui-surface-base);
+    font-size: 1.1rem;
+    background: var(--ui-surface-raised);
     border: 1px solid var(--ui-border-subtle);
   }
 

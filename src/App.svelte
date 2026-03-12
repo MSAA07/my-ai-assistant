@@ -196,7 +196,7 @@
   .auth-wrapper,
   .legacy-layout {
     min-height: 100vh;
-    background: var(--gradient-bg-radial), var(--color-bg);
+    background: var(--color-bg);
     display: flex;
     flex-direction: column;
   }
@@ -204,7 +204,7 @@
   .auth-wrapper {
     align-items: center;
     justify-content: center;
-    padding: var(--space-6) var(--space-3);
+    padding: var(--space-7) var(--space-3);
   }
 
   .content {
@@ -224,12 +224,9 @@
 
   .access-denied h1,
   .not-found h1 {
-    font-size: 3rem;
+    font-size: 2.4rem;
     margin: 0;
-    background: var(--gradient-accent);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-text-primary);
   }
 
   .access-denied p,
@@ -245,18 +242,18 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    color: var(--color-accent-primary);
+    color: var(--color-text-primary);
     font-weight: 600;
     padding: 0.65rem 1.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-1);
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
     transition: all var(--motion-fast) var(--ease-standard);
   }
 
   .access-denied a:hover,
   .not-found a:hover {
-    border-color: var(--color-accent-primary);
-    background: var(--color-accent-surface);
+    border-color: var(--ui-border-strong);
+    background: rgba(255, 255, 255, 0.04);
   }
 
   @media (max-width: 640px) {

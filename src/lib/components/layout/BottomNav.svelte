@@ -53,8 +53,7 @@
     z-index: 95;
     display: none;
     pointer-events: none;
-    background: color-mix(in srgb, var(--color-surface-overlay) 96%, transparent);
-    backdrop-filter: blur(10px);
+    background: rgba(9, 9, 11, 0.96);
     border-top: 1px solid var(--ui-border-subtle);
     padding: var(--space-2) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
     justify-content: space-around;
@@ -90,14 +89,14 @@
 
   .bottom-nav-item:hover {
     border-color: var(--ui-border-subtle);
-    background: color-mix(in srgb, var(--ui-surface-raised) 72%, transparent);
+    background: rgba(255, 255, 255, 0.03);
     color: var(--color-text-primary);
   }
 
   .bottom-nav-item.active {
     border-color: var(--ui-border-accent);
     color: var(--color-text-primary);
-    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .bottom-nav-item:focus-visible {

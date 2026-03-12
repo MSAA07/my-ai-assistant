@@ -60,7 +60,7 @@
     padding: 0.25rem;
     border-radius: var(--ui-radius-md);
     border: 1px solid var(--ui-border-subtle);
-    background: color-mix(in srgb, var(--ui-surface-base) 96%, transparent);
+    background: rgba(255, 255, 255, 0.02);
   }
 
   .ui-tabs--full-width {
@@ -110,7 +110,7 @@
   .ui-tabs__tab[aria-selected='true'] {
     color: var(--color-text-primary);
     border-color: var(--ui-border-accent);
-    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .ui-tabs__tab:disabled {

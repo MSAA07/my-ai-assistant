@@ -1,65 +1,58 @@
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
-  /* Theme primitives (dark default) */
-  --color-bg: #0a0a0b;
-  --color-sidebar: #0d0e10;
-  --color-surface-1: #111215;
-  --color-surface-2: #17181c;
-  --color-border: #2a2c33;
-  --color-text-primary: #f5f5f7;
+  --color-bg: #09090b;
+  --color-sidebar: #0d0d10;
+  --color-surface-1: #111114;
+  --color-surface-2: #16161a;
+  --color-surface-3: #1b1c20;
+  --color-border: #27272c;
+  --color-border-strong-base: #34343a;
+  --color-text-primary: #f5f5f6;
   --color-text-muted: #a1a1aa;
-  --color-accent-primary: #8f9bb0;
-  --color-accent-secondary: #8f9bb0;
-  --color-accent-surface: rgba(143, 155, 176, 0.14);
-  --color-success-surface: color-mix(in srgb, var(--color-success) 16%, transparent);
-  --color-danger-surface: rgba(217, 79, 79, 0.14);
-  --color-danger-border: rgba(217, 79, 79, 0.32);
-  --color-surface-overlay: rgba(13, 14, 16, 0.9);
-  --color-accent-outline: rgba(143, 155, 176, 0.34);
-  --color-accent-outline-strong: rgba(143, 155, 176, 0.52);
+  --color-accent-primary: #d4d4d8;
+  --color-accent-secondary: #a1a1aa;
+  --color-accent-surface: rgba(212, 212, 216, 0.08);
+  --color-success-surface: rgba(46, 160, 67, 0.12);
+  --color-danger-surface: rgba(217, 79, 79, 0.12);
+  --color-danger-border: rgba(217, 79, 79, 0.28);
+  --color-surface-overlay: rgba(16, 16, 19, 0.96);
+  --color-accent-outline: rgba(212, 212, 216, 0.2);
+  --color-accent-outline-strong: rgba(212, 212, 216, 0.32);
 
-  /* Readable text on accent / gradient surfaces */
-  --color-text-soft: #eceef2;
+  --color-text-soft: #ececef;
 
-  /* Semantic colors */
   --color-success: #2ea043;
   --color-warning: #b9872b;
   --color-danger: #d94f4f;
-  --color-info: #4f7dc7;
+  --color-info: #6b7280;
 
-  /* Typography roles */
   --color-text: var(--color-text-primary);
-  --color-text-secondary: color-mix(in srgb, var(--color-text-primary) 76%, var(--color-text-muted) 24%);
-  --color-text-tertiary: color-mix(in srgb, var(--color-text-primary) 58%, var(--color-text-muted) 42%);
-  --color-text-faint: #71717a;
-  --color-text-on-dark: #0f1012;
+  --color-text-secondary: #c2c2c7;
+  --color-text-tertiary: #8c8c95;
+  --color-text-faint: #6b6b74;
+  --color-text-on-dark: #09090b;
 
-  /* Surface roles */
   --color-surface: var(--color-surface-1);
   --color-surface-hover: var(--color-surface-2);
-  --color-surface-panel: rgba(17, 18, 21, 0.82);
-  --color-surface-panel-strong: rgba(17, 18, 21, 0.9);
-  --color-surface-panel-elevated: rgba(17, 18, 21, 0.96);
+  --color-surface-panel: rgba(17, 17, 20, 0.9);
+  --color-surface-panel-strong: rgba(17, 17, 20, 0.94);
+  --color-surface-panel-elevated: rgba(19, 19, 23, 0.98);
 
-  /* Border roles */
-  --color-border-light: color-mix(in srgb, var(--color-border) 78%, transparent);
-  --color-border-panel: rgba(161, 161, 170, 0.24);
-  --color-border-panel-strong: rgba(161, 161, 170, 0.34);
+  --color-border-light: rgba(59, 59, 66, 0.8);
+  --color-border-panel: rgba(161, 161, 170, 0.18);
+  --color-border-panel-strong: rgba(161, 161, 170, 0.28);
 
-  /* Accent roles */
   --color-accent: var(--color-accent-primary);
-  --color-accent-light: color-mix(in srgb, var(--color-accent-primary) 72%, white 28%);
-  --color-accent-hover: color-mix(in srgb, var(--color-accent-primary) 90%, white 10%);
-  --color-accent-bg: color-mix(in srgb, var(--color-accent-primary) 11%, transparent);
-  --color-accent-bg-hover: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+  --color-accent-light: #ededf0;
+  --color-accent-hover: #ffffff;
+  --color-accent-bg: rgba(212, 212, 216, 0.08);
+  --color-accent-bg-hover: rgba(212, 212, 216, 0.12);
 
-  /* State roles */
-  --color-danger-soft: #f1a5a5;
-  --color-danger-soft-strong: #e68181;
+  --color-danger-soft: #f0b4b4;
+  --color-danger-soft-strong: #e58f8f;
 
-  /* Typography */
-  --font-family-en: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-family-en: Manrope, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-family-ar: Cairo, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-family-base: var(--font-family-en);
   --font-size-xs: 0.75rem;
@@ -67,42 +60,43 @@
   --font-size-md: 1rem;
   --font-size-lg: 1.125rem;
 
-  /* Sizing & spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
   --radius-1: 6px;
   --radius-2: 8px;
   --radius-3: 10px;
   --size-topbar: 56px;
-  --size-sidebar: 240px;
+  --size-sidebar: 248px;
   --size-drawer: 380px;
+  --size-content: 1180px;
+  --size-content-wide: 1240px;
 
-  /* Primitive system */
   --ui-radius-sm: var(--radius-1);
   --ui-radius-md: var(--radius-2);
   --ui-radius-lg: var(--radius-3);
   --ui-radius-pill: 999px;
   --ui-surface-base: var(--color-surface-1);
-  --ui-surface-raised: color-mix(in srgb, var(--color-surface-2) 78%, var(--color-surface-1) 22%);
-  --ui-surface-soft: color-mix(in srgb, var(--color-surface-1) 94%, transparent);
+  --ui-surface-raised: var(--color-surface-2);
+  --ui-surface-soft: rgba(17, 17, 20, 0.82);
   --ui-surface-overlay: var(--color-surface-panel-elevated);
-  --ui-border-subtle: color-mix(in srgb, var(--color-border) 86%, transparent);
-  --ui-border-strong: color-mix(in srgb, var(--color-border) 82%, white 18%);
-  --ui-border-accent: color-mix(in srgb, var(--color-accent-primary) 44%, var(--color-border) 56%);
-  --ui-shadow-sm: var(--shadow-panel);
-  --ui-shadow-md: var(--shadow-soft);
-  --ui-shadow-lg: var(--shadow-modal);
+  --ui-border-subtle: rgba(255, 255, 255, 0.095);
+  --ui-border-strong: rgba(255, 255, 255, 0.16);
+  --ui-border-accent: rgba(255, 255, 255, 0.2);
+  --ui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --ui-shadow-md: 0 12px 24px rgba(0, 0, 0, 0.26);
+  --ui-shadow-lg: 0 22px 44px rgba(0, 0, 0, 0.36);
   --ui-control-height-sm: 32px;
   --ui-control-height-md: 36px;
   --ui-control-height-lg: 40px;
-  --ui-focus-ring: 0 0 0 2px var(--color-focus-ring);
-  --ui-focus-ring-strong: 0 0 0 2px var(--color-focus-ring-strong);
+  --ui-focus-ring: 0 0 0 1px rgba(255, 255, 255, 0.18);
+  --ui-focus-ring-strong: 0 0 0 2px rgba(255, 255, 255, 0.12);
 
-  /* Upload UI */
   --upload-modal-width: min(920px, 100%);
   --upload-modal-bg: var(--ui-surface-base);
   --upload-modal-border: var(--ui-border-subtle);
@@ -110,50 +104,48 @@
   --upload-modal-title: var(--color-text-primary);
   --upload-modal-description: var(--color-text-muted);
   --upload-close-color: var(--color-text-primary);
-  --upload-close-hover-bg: color-mix(in srgb, var(--ui-surface-raised) 88%, white 12%);
-  --upload-dropzone-bg: color-mix(in srgb, var(--ui-surface-base) 94%, var(--color-accent-primary) 6%);
-  --upload-dropzone-border: var(--ui-border-subtle);
+  --upload-close-hover-bg: rgba(255, 255, 255, 0.06);
+  --upload-dropzone-bg: rgba(255, 255, 255, 0.015);
+  --upload-dropzone-border: rgba(255, 255, 255, 0.11);
   --upload-dropzone-text: var(--color-text-primary);
   --upload-dropzone-or: var(--color-text-muted);
-  --upload-dropzone-active-bg: color-mix(in srgb, var(--ui-surface-base) 90%, var(--color-accent-primary) 10%);
-  --upload-dropzone-active-border: var(--ui-border-accent);
+  --upload-dropzone-active-bg: rgba(255, 255, 255, 0.03);
+  --upload-dropzone-active-border: rgba(255, 255, 255, 0.18);
   --upload-dropzone-icon-bg: var(--ui-surface-raised);
   --upload-drag-chip-bg: var(--ui-surface-raised);
   --upload-drag-chip-text: var(--color-text-primary);
   --upload-support-text: var(--color-text-muted);
-  --upload-file-row-bg: color-mix(in srgb, var(--ui-surface-base) 93%, var(--ui-surface-raised) 7%);
+  --upload-file-row-bg: rgba(255, 255, 255, 0.02);
   --upload-file-row-border: var(--ui-border-subtle);
   --upload-file-name: var(--color-text-primary);
   --upload-file-size: var(--color-text-muted);
   --upload-file-remove: var(--color-text-muted);
-  --upload-file-remove-hover: color-mix(in srgb, var(--color-danger) 80%, var(--color-text-primary) 20%);
+  --upload-file-remove-hover: #f1b2b2;
   --upload-footer-border: var(--ui-border-subtle);
 
-  /* Motion */
   --motion-fast: 120ms;
-  --motion-normal: 200ms;
-  --ease-standard: cubic-bezier(.2, .0, .2, 1);
+  --motion-normal: 180ms;
+  --ease-standard: cubic-bezier(.2, 0, .2, 1);
 
-  /* Effects */
-  --color-shadow: rgba(0, 0, 0, 0.52);
+  --color-shadow: rgba(0, 0, 0, 0.5);
   --color-glow: rgba(0, 0, 0, 0);
-  --color-backdrop-strong: rgba(8, 9, 11, 0.72);
-  --color-code-bg: #15161a;
-  --color-focus-ring: color-mix(in srgb, var(--color-accent-primary) 42%, transparent);
-  --color-focus-ring-strong: color-mix(in srgb, var(--color-accent-primary) 64%, transparent);
-  --gradient-accent: linear-gradient(180deg, #f3f4f6 0%, #d4d4d8 100%);
-  --gradient-accent-strong: linear-gradient(180deg, #f5f5f7 0%, #d9dbe0 100%);
-  --gradient-hero: radial-gradient(circle at top, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
-  --gradient-card-border: linear-gradient(135deg, color-mix(in srgb, var(--color-border) 85%, transparent), color-mix(in srgb, var(--color-border) 65%, transparent));
-  --gradient-bg-radial: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 62%);
-  --gradient-footer: linear-gradient(180deg, var(--color-bg) 0%, #09090a 100%);
-  --gradient-admin-action: linear-gradient(180deg, #d4d4d8, #a1a1aa);
-  --gradient-admin-action-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
-  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.28);
-  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-menu: 0 10px 28px var(--color-shadow);
-  --shadow-modal: 0 14px 34px var(--color-shadow);
-  --shadow-modal-strong: 0 18px 42px var(--color-shadow);
+  --color-backdrop-strong: rgba(7, 7, 8, 0.72);
+  --color-code-bg: #151518;
+  --color-focus-ring: rgba(255, 255, 255, 0.1);
+  --color-focus-ring-strong: rgba(255, 255, 255, 0.16);
+  --gradient-accent: linear-gradient(180deg, #f5f5f6 0%, #dbdbe0 100%);
+  --gradient-accent-strong: linear-gradient(180deg, #ffffff 0%, #e4e4e7 100%);
+  --gradient-hero: none;
+  --gradient-card-border: none;
+  --gradient-bg-radial: radial-gradient(circle at top, rgba(255, 255, 255, 0.028) 0%, transparent 58%);
+  --gradient-footer: linear-gradient(180deg, #09090b 0%, #09090b 100%);
+  --gradient-admin-action: linear-gradient(180deg, #f4f4f5, #d4d4d8);
+  --gradient-admin-action-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.16);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.22);
+  --shadow-menu: 0 16px 36px rgba(0, 0, 0, 0.32);
+  --shadow-modal: 0 26px 54px rgba(0, 0, 0, 0.42);
+  --shadow-modal-strong: 0 28px 64px rgba(0, 0, 0, 0.48);
 }
 
 [data-theme="light"] {
@@ -161,47 +153,52 @@
   --color-sidebar: #efeff1;
   --color-surface-1: #ffffff;
   --color-surface-2: #f6f6f7;
+  --color-surface-3: #ededf0;
   --color-border: #d4d4d8;
-  --color-text-primary: #111215;
-  --color-text-muted: #52525b;
-  --color-accent-primary: #606977;
-  --color-accent-secondary: #606977;
-  --color-accent-surface: rgba(96, 105, 119, 0.12);
-  --color-success-surface: color-mix(in srgb, var(--color-success) 14%, transparent);
-  --color-danger-surface: rgba(197, 69, 69, 0.12);
-  --color-danger-border: rgba(197, 69, 69, 0.28);
-  --color-surface-overlay: rgba(255, 255, 255, 0.94);
-  --color-accent-outline: rgba(96, 105, 119, 0.28);
-  --color-accent-outline-strong: rgba(96, 105, 119, 0.46);
+  --color-border-strong-base: #c4c4cb;
+  --color-text-primary: #111114;
+  --color-text-muted: #61616b;
+  --color-accent-primary: #1f2937;
+  --color-accent-secondary: #4b5563;
+  --color-accent-surface: rgba(17, 24, 39, 0.06);
+  --color-success-surface: rgba(45, 141, 63, 0.1);
+  --color-danger-surface: rgba(197, 69, 69, 0.1);
+  --color-danger-border: rgba(197, 69, 69, 0.22);
+  --color-surface-overlay: rgba(255, 255, 255, 0.98);
+  --color-accent-outline: rgba(17, 24, 39, 0.16);
+  --color-accent-outline-strong: rgba(17, 24, 39, 0.24);
   --color-text-soft: #1f2328;
   --color-success: #2d8d3f;
   --color-warning: #996b17;
   --color-danger: #c54545;
-  --color-info: #406fbf;
-  --color-text-faint: #6b7280;
+  --color-info: #4b5563;
+  --color-text-secondary: #3f3f46;
+  --color-text-tertiary: #6b7280;
+  --color-text-faint: #8a8a96;
   --color-text-on-dark: #f8f8f9;
-  --color-surface-panel: rgba(255, 255, 255, 0.84);
-  --color-surface-panel-strong: rgba(255, 255, 255, 0.91);
-  --color-surface-panel-elevated: rgba(255, 255, 255, 0.97);
-  --color-border-panel: rgba(82, 82, 91, 0.22);
-  --color-border-panel-strong: rgba(82, 82, 91, 0.3);
-  --color-accent-hover: #4e5968;
+  --color-surface-panel: rgba(255, 255, 255, 0.92);
+  --color-surface-panel-strong: rgba(255, 255, 255, 0.96);
+  --color-surface-panel-elevated: rgba(255, 255, 255, 0.99);
+  --color-border-panel: rgba(63, 63, 70, 0.14);
+  --color-border-panel-strong: rgba(63, 63, 70, 0.2);
+  --color-accent-hover: #111114;
   --color-danger-soft: #ad3d3d;
   --color-danger-soft-strong: #8f3232;
-  --color-shadow: rgba(17, 18, 21, 0.2);
-  --color-glow: rgba(0, 0, 0, 0);
-  --color-backdrop-strong: rgba(17, 18, 21, 0.24);
+  --ui-surface-soft: rgba(255, 255, 255, 0.92);
+  --ui-border-subtle: rgba(17, 17, 20, 0.12);
+  --ui-border-strong: rgba(17, 17, 20, 0.2);
+  --ui-border-accent: rgba(17, 17, 20, 0.26);
+  --color-shadow: rgba(17, 18, 21, 0.16);
+  --color-backdrop-strong: rgba(17, 18, 21, 0.18);
   --color-code-bg: #eef0f3;
   --gradient-footer: linear-gradient(180deg, #f4f4f5 0%, #ececef 100%);
-  --gradient-admin-action-soft: linear-gradient(180deg, rgba(17, 18, 21, 0.08), rgba(17, 18, 21, 0.04));
-  --shadow-soft: 0 2px 8px rgba(17, 18, 21, 0.12);
-  --shadow-panel: 0 1px 2px rgba(17, 18, 21, 0.12);
-  --shadow-menu: 0 10px 28px rgba(17, 18, 21, 0.18);
-  --shadow-modal: 0 14px 34px rgba(17, 18, 21, 0.24);
-  --shadow-modal-strong: 0 18px 42px rgba(17, 18, 21, 0.26);
-
-  --upload-dropzone-bg: color-mix(in srgb, var(--ui-surface-base) 94%, var(--color-accent-primary) 6%);
-  --upload-dropzone-active-bg: color-mix(in srgb, var(--ui-surface-base) 89%, var(--color-accent-primary) 11%);
-  --upload-file-row-bg: color-mix(in srgb, var(--ui-surface-base) 94%, var(--ui-surface-raised) 6%);
-  --upload-modal-shadow: var(--shadow-modal);
+  --gradient-admin-action-soft: linear-gradient(180deg, rgba(17, 18, 21, 0.06), rgba(17, 18, 21, 0.03));
+  --shadow-soft: 0 4px 12px rgba(17, 18, 21, 0.08);
+  --shadow-panel: 0 1px 2px rgba(17, 18, 21, 0.08);
+  --shadow-menu: 0 16px 36px rgba(17, 18, 21, 0.14);
+  --shadow-modal: 0 26px 54px rgba(17, 18, 21, 0.18);
+  --shadow-modal-strong: 0 28px 64px rgba(17, 18, 21, 0.22);
+  --upload-dropzone-bg: rgba(17, 17, 20, 0.02);
+  --upload-dropzone-active-bg: rgba(17, 17, 20, 0.04);
+  --upload-file-row-bg: rgba(17, 17, 20, 0.025);
 }

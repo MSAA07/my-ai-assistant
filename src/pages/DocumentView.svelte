@@ -746,10 +746,10 @@
   }
 
   .activity-header h1 {
-    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-size: clamp(1.18rem, 2.5vw, 1.5rem);
     font-weight: 600;
     line-height: 1.3;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.03em;
   }
 
   .activity-header h2 {
@@ -833,7 +833,7 @@
   }
 
   :global(.flashcard-panel-answer) {
-    border-color: color-mix(in srgb, var(--color-accent-primary) 55%, var(--color-border) 45%);
+    border-color: var(--ui-border-strong);
   }
 
   .card-side {
@@ -887,7 +887,7 @@
 
   .option-selected {
     border-color: var(--ui-border-accent);
-    background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .option:focus-visible {

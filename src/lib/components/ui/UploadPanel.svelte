@@ -139,9 +139,9 @@
 
   .upload-panel__titles h2 {
     color: var(--upload-modal-title);
-    font-size: 1rem;
+    font-size: 0.98rem;
     font-weight: 600;
-    letter-spacing: 0;
+    letter-spacing: -0.01em;
   }
 
   .upload-panel__titles p {

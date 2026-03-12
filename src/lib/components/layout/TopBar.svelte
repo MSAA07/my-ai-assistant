@@ -129,16 +129,15 @@
     gap: var(--space-4);
     min-height: var(--size-topbar);
     padding: 0 var(--space-4);
-    background: color-mix(in srgb, var(--color-surface-overlay) 96%, transparent);
-    backdrop-filter: blur(10px);
+    background: rgba(9, 9, 11, 0.92);
     border-bottom: 1px solid var(--ui-border-subtle);
   }
 
   .topbar h1 {
     margin: 0;
-    font-size: 1.02rem;
+    font-size: 0.98rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     color: var(--color-text-primary);
   }
 
@@ -175,7 +174,7 @@
   :global(.avatar-button) {
     width: var(--ui-control-height-md);
     height: var(--ui-control-height-md);
-    border-radius: var(--ui-radius-pill);
+    border-radius: var(--ui-radius-md);
     border-color: var(--ui-border-subtle);
     background: var(--ui-surface-raised);
     color: var(--color-text-secondary);
@@ -184,8 +183,8 @@
   :global(.avatar-button:hover:not(:disabled)),
   :global(.avatar-button[aria-expanded='true']) {
     border-color: var(--ui-border-strong);
-    box-shadow: var(--ui-focus-ring);
-    background: color-mix(in srgb, var(--ui-surface-raised) 88%, white 12%);
+    box-shadow: none;
+    background: var(--color-surface-3);
     color: var(--color-text-primary);
   }
 

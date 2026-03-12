@@ -41,8 +41,8 @@
 <style>
   .ui-button {
     --ui-button-bg: var(--ui-surface-raised);
-    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 86%, white 14%);
-    --ui-button-bg-active: color-mix(in srgb, var(--ui-surface-raised) 80%, white 20%);
+    --ui-button-bg-hover: var(--color-surface-3);
+    --ui-button-bg-active: var(--color-surface-3);
     --ui-button-color: var(--color-text-primary);
     --ui-button-border: var(--ui-border-subtle);
     --ui-button-border-hover: var(--ui-border-strong);
@@ -51,13 +51,13 @@
     justify-content: center;
     gap: 0.45rem;
     min-height: var(--ui-control-height-md);
-    padding: 0 0.8rem;
+    padding: 0 0.78rem;
     border-radius: var(--ui-radius-md);
     border: 1px solid var(--ui-button-border);
     background: var(--ui-button-bg);
     color: var(--ui-button-color);
     font-size: var(--font-size-sm);
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.1;
     cursor: pointer;
     text-decoration: none;
@@ -93,18 +93,18 @@
   }
 
   .ui-button--primary {
-    --ui-button-bg: var(--gradient-accent);
-    --ui-button-bg-hover: var(--gradient-accent-strong);
-    --ui-button-bg-active: color-mix(in srgb, var(--color-text-primary) 92%, white 8%);
+    --ui-button-bg: var(--color-text-primary);
+    --ui-button-bg-hover: #ffffff;
+    --ui-button-bg-active: #e9e9ee;
     --ui-button-color: var(--color-text-on-dark);
-    --ui-button-border: color-mix(in srgb, var(--color-text-primary) 58%, transparent);
-    --ui-button-border-hover: color-mix(in srgb, var(--color-text-primary) 75%, transparent);
+    --ui-button-border: rgba(255, 255, 255, 0.18);
+    --ui-button-border-hover: rgba(255, 255, 255, 0.28);
   }
 
   .ui-button--secondary {
     --ui-button-bg: var(--ui-surface-raised);
-    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 88%, white 12%);
-    --ui-button-bg-active: color-mix(in srgb, var(--ui-surface-raised) 82%, white 18%);
+    --ui-button-bg-hover: var(--color-surface-3);
+    --ui-button-bg-active: var(--color-surface-3);
     --ui-button-color: var(--color-text-primary);
     --ui-button-border: var(--ui-border-subtle);
     --ui-button-border-hover: var(--ui-border-strong);
@@ -112,11 +112,11 @@
 
   .ui-button--ghost {
     --ui-button-bg: transparent;
-    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 70%, transparent);
-    --ui-button-bg-active: color-mix(in srgb, var(--ui-surface-raised) 78%, transparent);
+    --ui-button-bg-hover: rgba(255, 255, 255, 0.04);
+    --ui-button-bg-active: rgba(255, 255, 255, 0.06);
     --ui-button-color: var(--color-text-secondary);
-    --ui-button-border: transparent;
-    --ui-button-border-hover: var(--ui-border-subtle);
+    --ui-button-border: var(--ui-border-subtle);
+    --ui-button-border-hover: var(--ui-border-strong);
   }
 
   .ui-button--danger {
@@ -150,7 +150,7 @@
     min-height: var(--ui-control-height-sm);
     padding-inline: 0.65rem;
     border-radius: var(--ui-radius-sm);
-    font-size: var(--font-size-xs);
+    font-size: 0.73rem;
   }
 
   .ui-button--md {
@@ -167,7 +167,7 @@
     min-width: var(--ui-control-height-md);
     width: var(--ui-control-height-md);
     padding: 0;
-    border-radius: var(--ui-radius-pill);
+    border-radius: var(--ui-radius-sm);
   }
 
   .ui-button--block {

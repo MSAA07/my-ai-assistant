@@ -31,7 +31,8 @@
 
 <Card class="auth-card" variant="raised" padding="lg" border="subtle">
   <header class="auth-header">
-    <h2>Create Account</h2>
+    <p class="auth-eyebrow">Create account</p>
+    <h2>Create account</h2>
     <p>Set up your profile to start generating study materials.</p>
   </header>
 
@@ -73,13 +74,23 @@
   .auth-header {
     display: grid;
     gap: 0.45rem;
-    text-align: center;
+    text-align: left;
+  }
+
+  .auth-eyebrow {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .auth-header h2 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: 1.65rem;
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
   }
 
   .auth-header p {
@@ -106,7 +117,7 @@
   .toggle-text {
     margin: 0;
     color: var(--color-text-muted);
-    text-align: center;
+    text-align: left;
     font-size: var(--font-size-sm);
   }
 

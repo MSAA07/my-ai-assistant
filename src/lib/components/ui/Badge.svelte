@@ -21,8 +21,8 @@
 
 <style>
   .ui-badge {
-    --badge-bg: color-mix(in srgb, var(--ui-surface-raised) 82%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-border) 42%, transparent);
+    --badge-bg: rgba(255, 255, 255, 0.04);
+    --badge-border: rgba(255, 255, 255, 0.08);
     --badge-text: var(--color-text-secondary);
     display: inline-flex;
     align-items: center;
@@ -73,15 +73,15 @@
   }
 
   .ui-badge[data-tone='neutral'] {
-    --badge-bg: color-mix(in srgb, var(--ui-surface-raised) 78%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-border) 40%, transparent);
+    --badge-bg: rgba(255, 255, 255, 0.04);
+    --badge-border: rgba(255, 255, 255, 0.08);
     --badge-text: var(--color-text-secondary);
   }
 
   .ui-badge[data-tone='accent'] {
-    --badge-bg: color-mix(in srgb, var(--color-accent-primary) 12%, var(--ui-surface-base) 88%);
-    --badge-border: color-mix(in srgb, var(--color-accent-primary) 30%, var(--color-border) 70%);
-    --badge-text: color-mix(in srgb, var(--color-accent-primary) 68%, var(--color-text-primary) 32%);
+    --badge-bg: rgba(255, 255, 255, 0.06);
+    --badge-border: rgba(255, 255, 255, 0.12);
+    --badge-text: var(--color-text-primary);
   }
 
   .ui-badge[data-tone='info'] {

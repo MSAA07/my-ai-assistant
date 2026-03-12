@@ -218,7 +218,7 @@
   }
 
   .ui-data-surface__table-wrap :global(.ui-data-table tbody tr:hover) {
-    background: color-mix(in srgb, var(--ui-surface-raised) 44%, transparent);
+    background: rgba(255, 255, 255, 0.025);
   }
 
   .ui-data-surface__table-wrap :global(.ui-data-table tbody tr:last-child td) {

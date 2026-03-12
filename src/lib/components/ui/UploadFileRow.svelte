@@ -68,8 +68,8 @@
     width: 34px;
     height: 34px;
     border-radius: var(--ui-radius-sm);
-    background: color-mix(in srgb, var(--color-accent-primary) 18%, transparent);
-    color: var(--color-accent-light);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-secondary);
     font-size: 0.64rem;
     font-weight: 600;
     letter-spacing: 0.03em;

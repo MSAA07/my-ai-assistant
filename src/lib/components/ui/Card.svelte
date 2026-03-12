@@ -44,7 +44,7 @@
 
   .ui-card--raised {
     --ui-card-bg: var(--ui-surface-raised);
-    --ui-card-shadow: var(--ui-shadow-sm);
+    --ui-card-shadow: none;
   }
 
   .ui-card--soft {
@@ -54,7 +54,7 @@
 
   .ui-card--overlay {
     --ui-card-bg: var(--ui-surface-overlay);
-    --ui-card-shadow: var(--ui-shadow-md);
+    --ui-card-shadow: var(--ui-shadow-sm);
   }
 
   .ui-card--border-none {
@@ -90,7 +90,7 @@
   }
 
   .ui-card--padding-lg {
-    padding: var(--space-4);
+    padding: var(--space-5);
   }
 
   .ui-card--hoverable {
@@ -100,8 +100,8 @@
   }
 
   .ui-card--hoverable:hover {
-    border-color: var(--ui-border-accent);
-    background: color-mix(in srgb, var(--ui-card-bg) 90%, white 10%);
-    box-shadow: var(--ui-shadow-sm);
+    border-color: var(--ui-border-strong);
+    background: color-mix(in srgb, var(--ui-card-bg) 95%, white 5%);
+    box-shadow: none;
   }
 </style>

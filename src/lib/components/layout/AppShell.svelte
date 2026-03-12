@@ -75,7 +75,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--gradient-bg-radial), var(--color-bg);
+    background: var(--color-bg);
     min-width: 0;
   }
 
@@ -89,9 +89,9 @@
 
   .content-wrapper {
     width: 100%;
-    max-width: 1240px;
+    max-width: var(--size-content-wide);
     margin: 0 auto;
-    padding: var(--space-4);
+    padding: var(--space-4) var(--space-4) var(--space-6);
     box-sizing: border-box;
     display: grid;
     gap: var(--space-4);

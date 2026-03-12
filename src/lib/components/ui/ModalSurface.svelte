@@ -77,7 +77,6 @@
     display: grid;
     place-items: center;
     background: var(--color-backdrop-strong);
-    backdrop-filter: blur(6px);
   }
 
   .ui-modal {

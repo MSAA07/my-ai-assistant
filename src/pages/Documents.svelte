@@ -232,9 +232,9 @@
 
   h1 {
     margin: 0;
-    font-size: clamp(1.12rem, 2.4vw, 1.35rem);
+    font-size: clamp(1.16rem, 2.4vw, 1.5rem);
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.03em;
     color: var(--color-text-primary);
   }
 
@@ -266,7 +266,7 @@
     flex-direction: column;
     gap: var(--space-3);
     height: 100%;
-    min-height: 220px;
+    min-height: 228px;
   }
 
   .card-head {
@@ -320,7 +320,7 @@
 
   .stats dd {
     margin: 0.18rem 0 0;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--color-text-primary);
   }

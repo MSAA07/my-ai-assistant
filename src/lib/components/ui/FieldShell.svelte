@@ -52,10 +52,10 @@
     align-items: center;
     gap: 0.3rem;
     margin: 0;
-    color: var(--color-text-primary);
+    color: var(--color-text-secondary);
     font-weight: 500;
     font-size: var(--font-size-xs);
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
   }
 
   .ui-field__required {
@@ -74,7 +74,7 @@
   .ui-field__control:focus-within {
     border-color: var(--ui-border-accent);
     box-shadow: var(--ui-focus-ring-strong);
-    background: color-mix(in srgb, var(--ui-surface-base) 88%, white 12%);
+    background: var(--ui-surface-raised);
   }
 
   .ui-field[data-invalid='true'] .ui-field__control {
