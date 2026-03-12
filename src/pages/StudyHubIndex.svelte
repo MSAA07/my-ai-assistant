@@ -9,6 +9,8 @@
   import MenuSurface from '../lib/components/ui/MenuSurface.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
+  import DocumentListSkeleton from '../lib/components/ui/DocumentListSkeleton.svelte';
+  import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   const statusToneMap = {
     queued: 'processing',
@@ -17,9 +19,11 @@
     complete: 'ready',
     failed: 'failed'
   };
+  const STUDY_INDEX_CACHE_KEY = 'page:study-index';
 
   let documents = [];
   let loading = true;
+  let refreshing = false;
   let error = '';
   let actionError = '';
   let actionBusyId = '';
@@ -36,7 +40,13 @@
   $: cancelLabel = t('confirmModal.cancel');
 
   onMount(() => {
-    void loadDocuments();
+    const cached = readPageCache(STUDY_INDEX_CACHE_KEY);
+    if (cached?.loaded) {
+      documents = Array.isArray(cached.documents) ? cached.documents : [];
+      loading = false;
+    }
+
+    void loadDocuments({ background: Boolean(cached?.loaded) });
     window.addEventListener('click', closeMenu);
   });
 
@@ -44,10 +54,14 @@
     window.removeEventListener('click', closeMenu);
   });
 
-  async function loadDocuments() {
-    loading = true;
-    error = '';
+  async function loadDocuments({ background = false } = {}) {
     actionError = '';
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const response = await fetch(`${API_BASE}/api/user/me`, {
@@ -65,10 +79,15 @@
         const right = new Date(a?.uploadDate ?? 0).getTime();
         return left - right;
       });
+      writePageCache(STUDY_INDEX_CACHE_KEY, { loaded: true, documents });
     } catch (err) {
       error = err?.message || t('documentsPage.errors.load');
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
@@ -141,7 +160,7 @@
         throw new Error(data?.error || t('documentsPage.errors.rename'));
       }
 
-      await loadDocuments();
+      await loadDocuments({ background: true });
     } catch (err) {
       actionError = err?.message || t('documentsPage.errors.rename');
     } finally {
@@ -179,7 +198,7 @@
       }
 
       closeDeleteModal();
-      await loadDocuments();
+      await loadDocuments({ background: true });
     } catch (err) {
       actionError = err?.message || t('documentsPage.errors.delete');
     } finally {
@@ -199,11 +218,12 @@
       {t('documentsPage.actions.uploadCta')}
     </Button>
   </header>
+  {#if refreshing}
+    <p class="refreshing-state">{t('common.loading')}</p>
+  {/if}
 
   {#if loading}
-    <Card as="section" class="state-panel" variant="base" padding="md">
-      <p>{t('common.loading')}</p>
-    </Card>
+    <DocumentListSkeleton />
   {:else}
     {#if error}
       <p class="inline-error">{error}</p>
@@ -324,6 +344,12 @@
   .library-page :global(.state-panel) {
     display: grid;
     gap: var(--space-2);
+  }
+
+  .refreshing-state {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
   }
 
   .documents-grid {

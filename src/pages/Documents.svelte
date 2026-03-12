@@ -7,6 +7,8 @@
   import EmptyState from '../lib/components/ui/EmptyState.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
+  import DocumentListSkeleton from '../lib/components/ui/DocumentListSkeleton.svelte';
+  import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   const statusToneMap = {
     queued: 'processing',
@@ -15,19 +17,33 @@
     complete: 'ready',
     failed: 'failed'
   };
+  const DOCUMENTS_CACHE_KEY = 'page:documents-legacy';
 
   let documents = [];
   let loading = true;
+  let refreshing = false;
   let errorKey = '';
   let errorArgs = {};
   let confirmOpen = false;
   let deleting = false;
   let pendingDoc = null;
 
-  onMount(fetchDocuments);
+  onMount(() => {
+    const cached = readPageCache(DOCUMENTS_CACHE_KEY);
+    const cachedDocuments = Array.isArray(cached?.documents) ? cached.documents : [];
+    if (cached?.loaded) {
+      documents = cachedDocuments;
+      loading = false;
+    }
+    void fetchDocuments({ background: Boolean(cached?.loaded) });
+  });
 
-  async function fetchDocuments() {
-    loading = true;
+  async function fetchDocuments({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+    }
     errorKey = '';
     errorArgs = {};
 
@@ -42,11 +58,16 @@
 
       const data = await response.json();
       documents = data.documents ?? [];
+      writePageCache(DOCUMENTS_CACHE_KEY, { loaded: true, documents });
     } catch (error) {
       console.error('Failed to load documents', error);
       errorKey = 'documentsPage.errors.load';
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
@@ -78,8 +99,10 @@
         throw new Error('DELETE_ERROR');
       }
 
-      await fetchDocuments();
+      documents = documents.filter((doc) => doc.id !== pendingDoc.id);
+      writePageCache(DOCUMENTS_CACHE_KEY, { loaded: true, documents });
       closeDeleteModal();
+      await fetchDocuments({ background: true });
     } catch (error) {
       console.error('Failed to delete document', error);
       errorKey = 'documentsPage.errors.delete';
@@ -108,16 +131,13 @@
       <h1>{t('documentsPage.title')}</h1>
       <p class="subtitle">{t('documentsPage.description')}</p>
     </div>
-    <Button type="button" variant="secondary" on:click={fetchDocuments} disabled={loading}>
-      {t('documentsPage.actions.refresh')}
+    <Button type="button" variant="secondary" on:click={() => fetchDocuments({ background: documents.length > 0 })} disabled={loading || refreshing}>
+      {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
     </Button>
   </header>
 
   {#if loading}
-    <Card class="loading-state" variant="base" padding="lg">
-      <div class="spinner"></div>
-      <p>{t('common.loading')}</p>
-    </Card>
+    <DocumentListSkeleton />
   {:else if errorMessage}
     <Card class="alert alert-error" variant="soft" border="strong" padding="md">{errorMessage}</Card>
   {:else if documents.length === 0}
@@ -221,25 +241,8 @@
     color: var(--color-text-secondary);
   }
 
-  .documents-page :global(.loading-state),
   .documents-page :global(.alert) {
     text-align: center;
-  }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-accent-primary);
-    margin: 0 auto var(--space-3);
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   .documents-page :global(.alert-error) {

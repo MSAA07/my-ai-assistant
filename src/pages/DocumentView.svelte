@@ -6,6 +6,8 @@
   import FieldShell from '../lib/components/ui/FieldShell.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import GuidedRegenerateModal from '../lib/components/ui/GuidedRegenerateModal.svelte';
+  import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
+  import { readPageCache, writePageCache } from '../stores/pageCache.js';
   import {
     getDocument,
     requestGeneration,
@@ -14,6 +16,7 @@
   } from '../lib/api/studyHub.js';
 
   const POLL_INTERVAL_MS = 2500;
+  const DOCUMENT_CACHE_KEY = (id) => `page:document-view:${id}`;
   const FEATURES = ['summary', 'flashcards', 'exam'];
   const BASE_OPTIONS = {
     summary: { length: 'medium' },
@@ -79,7 +82,14 @@
   $: if (documentId && documentId !== currentDocumentId) {
     currentDocumentId = documentId;
     resetState();
-    void fetchDocumentState();
+    const cached = readPageCache(DOCUMENT_CACHE_KEY(documentId));
+    if (cached?.loaded && cached?.docData) {
+      docData = cached.docData;
+      pendingGeneration = cached.pendingGeneration ?? mapByFeature(false);
+      generationErrors = cached.generationErrors ?? mapByFeature('');
+      loading = false;
+    }
+    void fetchDocumentState({ background: Boolean(cached?.loaded && cached?.docData) });
   }
 
   onDestroy(() => {
@@ -267,6 +277,14 @@
 
       const nextDocument = response?.document ?? null;
       setDocument(nextDocument);
+      if (nextDocument) {
+        writePageCache(DOCUMENT_CACHE_KEY(requestedId), {
+          loaded: true,
+          docData: nextDocument,
+          pendingGeneration,
+          generationErrors,
+        });
+      }
 
       if (!nextDocument) {
         pageError = t('document.notFound');
@@ -500,9 +518,7 @@
 </script>
 
 {#if loading && !docData}
-  <Card as="section" class="activity-panel" variant="base" padding="md">
-    <p>{t('document.loading')}</p>
-  </Card>
+  <DocumentDetailSkeleton />
 {:else if !docData}
   <Card as="section" class="activity-panel activity-panel-error" variant="base" padding="md" border="strong">
     <h2>{t('document.processingFailedTitle')}</h2>

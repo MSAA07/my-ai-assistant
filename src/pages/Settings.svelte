@@ -1,5 +1,6 @@
 <script>
   import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
+  import SettingsPanelSkeleton from '../lib/components/ui/SettingsPanelSkeleton.svelte';
   import ThemeToggle from '../lib/components/ui/ThemeToggle.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import { ENABLE_ARABIC_UI } from '../lib/config/features.js';
@@ -30,65 +31,69 @@
   }
 </script>
 
-<div class="settings-page">
-  <header class="page-header">
-    <p class="eyebrow">{t('settings.eyebrow')}</p>
-    <h1>{t('settings.title')}</h1>
-    <p class="subtitle">{t('settings.subtitle')}</p>
-  </header>
+{#if !$session}
+  <SettingsPanelSkeleton />
+{:else}
+  <div class="settings-page">
+    <header class="page-header">
+      <p class="eyebrow">{t('settings.eyebrow')}</p>
+      <h1>{t('settings.title')}</h1>
+      <p class="subtitle">{t('settings.subtitle')}</p>
+    </header>
 
-  <section class="settings-section" id="language">
-    <div>
-      <h2>{t('settings.language.title')}</h2>
-      <p>
-        {#if ENABLE_ARABIC_UI}
-          {t('settings.language.description')}
-        {:else}
-          {t('settings.language.disabled')}
-        {/if}
-      </p>
-    </div>
-    {#if ENABLE_ARABIC_UI}
-      <LanguageToggle />
-    {/if}
-  </section>
-
-  <section class="settings-section">
-    <div>
-      <h2>{t('settings.theme.title')}</h2>
-      <p>{t('settings.theme.description')}</p>
-    </div>
-    <ThemeToggle value={$theme} on:change={handleThemeChange} />
-    <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
-    <p class="helper">{t('settings.theme.helper')}</p>
-  </section>
-
-  <section class="settings-section" id="plan">
-    <div class="account-header">
+    <section class="settings-section" id="language">
       <div>
-        <h2>{t('settings.account.title')}</h2>
-        <p>{t('settings.account.description')}</p>
+        <h2>{t('settings.language.title')}</h2>
+        <p>
+          {#if ENABLE_ARABIC_UI}
+            {t('settings.language.description')}
+          {:else}
+            {t('settings.language.disabled')}
+          {/if}
+        </p>
       </div>
-      <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
-    </div>
+      {#if ENABLE_ARABIC_UI}
+        <LanguageToggle />
+      {/if}
+    </section>
 
-    <div class="account-card">
+    <section class="settings-section">
       <div>
-        <h3>{userName}</h3>
-        <p>{userEmail}</p>
+        <h2>{t('settings.theme.title')}</h2>
+        <p>{t('settings.theme.description')}</p>
+      </div>
+      <ThemeToggle value={$theme} on:change={handleThemeChange} />
+      <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
+      <p class="helper">{t('settings.theme.helper')}</p>
+    </section>
+
+    <section class="settings-section" id="plan">
+      <div class="account-header">
+        <div>
+          <h2>{t('settings.account.title')}</h2>
+          <p>{t('settings.account.description')}</p>
+        </div>
+        <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
       </div>
 
-      <div class="actions">
-        <button type="button" class="ghost" disabled title={t('common.comingSoon')}>
-          {t('settings.account.actions.profile')}
-        </button>
-        <button type="button" class="danger" on:click={handleLogout} disabled={loggingOut}>
-          {loggingOut ? t('settings.account.actions.loggingOut') : t('settings.account.actions.logout')}
-        </button>
+      <div class="account-card">
+        <div>
+          <h3>{userName}</h3>
+          <p>{userEmail}</p>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="ghost" disabled title={t('common.comingSoon')}>
+            {t('settings.account.actions.profile')}
+          </button>
+          <button type="button" class="danger" on:click={handleLogout} disabled={loggingOut}>
+            {loggingOut ? t('settings.account.actions.loggingOut') : t('settings.account.actions.logout')}
+          </button>
+        </div>
       </div>
-    </div>
-  </section>
-</div>
+    </section>
+  </div>
+{/if}
 
 <style>
   .settings-page {

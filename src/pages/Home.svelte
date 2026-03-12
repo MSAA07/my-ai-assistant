@@ -6,6 +6,8 @@
   import Button from "../lib/components/ui/Button.svelte";
   import Card from "../lib/components/ui/Card.svelte";
   import Tabs from "../lib/components/ui/Tabs.svelte";
+  import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
+  import { readPageCache, writePageCache } from "../stores/pageCache.js";
 
   const UPLOAD_ERROR_KEYS = new Set([
     "home.uploadSection.errors.selectFile",
@@ -15,6 +17,7 @@
     "home.uploadSection.errors.uploadFailed",
     "home.uploadSection.errors.network",
   ]);
+  const HOME_CACHE_KEY = "page:home";
 
   let user = null;
   let documents = [];
@@ -24,6 +27,7 @@
   let errorArgs = {};
   let uploading = false;
   let isLoadingDashboard = true;
+  let isRefreshingDashboard = false;
   let isDragActive = false;
   let error = "";
   $: _lang = $languageStore;
@@ -56,12 +60,25 @@
     }
   }
 
-  onMount(async () => {
-    await fetchUserData();
+  onMount(() => {
+    const cached = readPageCache(HOME_CACHE_KEY);
+    const hasCachedData = Boolean(cached?.user);
+    if (hasCachedData) {
+      user = cached.user;
+      documents = Array.isArray(cached.documents) ? cached.documents : [];
+      isLoadingDashboard = false;
+    }
+
+    void fetchUserData({ background: hasCachedData });
   });
 
-  async function fetchUserData() {
-    isLoadingDashboard = true;
+  async function fetchUserData({ background = false } = {}) {
+    if (background) {
+      isRefreshingDashboard = true;
+    } else {
+      isLoadingDashboard = true;
+    }
+
     try {
       // Use the new /api/user/me endpoint with credentials
       const response = await fetch(
@@ -76,6 +93,7 @@
       const payload = data?.data ?? data;
       user = payload?.user ?? null;
       documents = Array.isArray(payload?.documents) ? payload.documents : [];
+      writePageCache(HOME_CACHE_KEY, { user, documents });
       errorKey = "";
       errorArgs = {};
     } catch (err) {
@@ -83,7 +101,11 @@
       errorKey = "home.alerts.error";
       errorArgs = {};
     } finally {
-      isLoadingDashboard = false;
+      if (background) {
+        isRefreshingDashboard = false;
+      } else {
+        isLoadingDashboard = false;
+      }
     }
   }
 
@@ -238,22 +260,16 @@
   <header class="study-header">
     <h1>{t('home.heroTitle')}</h1>
     <p>{t('home.heroSubtitle')}</p>
+    {#if isRefreshingDashboard}
+      <p class="refresh-indicator">{t('common.loading')}</p>
+    {/if}
   </header>
 
   {#if isLoadingDashboard}
     <div class="usage-stats">
-      <Card class="home-stat-card home-skeleton-card skeleton" variant="raised" padding="md">
-        <div class="stat-value skeleton-text"></div>
-        <div class="stat-label skeleton-text-sm"></div>
-      </Card>
-      <Card class="home-stat-card home-skeleton-card skeleton" variant="raised" padding="md">
-        <div class="stat-value skeleton-text"></div>
-        <div class="stat-label skeleton-text-sm"></div>
-      </Card>
-      <Card class="home-stat-card home-skeleton-card skeleton" variant="raised" padding="md">
-        <div class="stat-value skeleton-text"></div>
-        <div class="stat-label skeleton-text-sm"></div>
-      </Card>
+      <DashboardCardSkeleton />
+      <DashboardCardSkeleton />
+      <DashboardCardSkeleton />
     </div>
   {:else if user}
     <div class="usage-stats">
@@ -375,29 +391,6 @@
 </div>
 
 <style>
-  /* Skeletons */
-  :global(.skeleton) {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  .skeleton-text {
-    height: 2.5rem;
-    width: 60%;
-    background: var(--color-surface-2);
-    border-radius: 4px;
-    margin: 0 auto 0.5rem;
-  }
-  .skeleton-text-sm {
-    height: 1rem;
-    width: 80%;
-    background: var(--color-surface-2);
-    border-radius: 4px;
-    margin: 0 auto;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .5; }
-  }
-
   .study-assistant-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -424,6 +417,12 @@
   .study-header p {
     color: var(--color-text-secondary);
     font-size: 1.1rem;
+  }
+
+  .refresh-indicator {
+    font-size: 0.9rem;
+    margin: 0.35rem 0 0;
+    color: var(--color-text-muted);
   }
 
   .usage-stats {

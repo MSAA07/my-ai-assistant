@@ -5,12 +5,15 @@
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
+  import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
   import { getDocument, requestGeneration } from '../lib/api/studyHub.js';
+  import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   export let documentId = '';
   export let studyTab = 'summary';
 
   const POLL_INTERVAL_MS = 2500;
+  const DOCUMENT_CACHE_KEY = (id) => `page:study-document:${id}`;
   const FEATURE_CONFIG = {
     summary: {
       titleKey: 'document.hub.features.summary',
@@ -60,7 +63,14 @@
   $: if (documentId && documentId !== currentDocumentId) {
     currentDocumentId = documentId;
     resetState();
-    void fetchDocumentState();
+    const cached = readPageCache(DOCUMENT_CACHE_KEY(documentId));
+    if (cached?.loaded && cached?.documentData) {
+      documentData = cached.documentData;
+      pendingGeneration = cached.pendingGeneration ?? createFeatureMap(false);
+      generationErrors = cached.generationErrors ?? createFeatureMap('');
+      loading = false;
+    }
+    void fetchDocumentState({ background: Boolean(cached?.loaded && cached?.documentData) });
   }
 
   onDestroy(() => {
@@ -363,6 +373,14 @@
 
       documentData = data?.document ?? null;
       syncPendingGeneration(documentData);
+      if (documentData) {
+        writePageCache(DOCUMENT_CACHE_KEY(requestedId), {
+          loaded: true,
+          documentData,
+          pendingGeneration,
+          generationErrors
+        });
+      }
 
       if (!documentData) {
         error = t('document.notFound');
@@ -463,9 +481,7 @@
   </header>
 
   {#if loading && !documentData}
-    <Card as="section" class="state-panel" variant="base" padding="md">
-      <p>{t('document.loading')}</p>
-    </Card>
+    <DocumentDetailSkeleton />
   {:else if !documentData}
     <Card as="section" class="state-panel state-panel-error" variant="base" padding="md" border="strong">
       <h2>{t('document.processingFailedTitle')}</h2>
