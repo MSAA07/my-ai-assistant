@@ -16,6 +16,12 @@ This folder defines the shared visual primitives for dark-first SaaS styling. Us
   - Border styles: `subtle`, `strong`, `accent`, `dashed`, `none`.
   - Padding: `none`, `sm`, `md`, `lg`.
 
+- `DataSurface.svelte`
+  - Use for dense admin/data-heavy shells (tables, filter bars, bulk actions, and state rows).
+  - Named slots: `header`, `actions`, `filters`, `bulk`, `state`, `table`.
+  - Table contract: apply class `.ui-data-table` to the table element for shared cell/header styling.
+  - Handles horizontal table overflow at the surface level, not page level.
+
 - `FieldShell.svelte`
   - Use for labeled form controls.
   - Handles label/meta/error and focus/border consistency.
@@ -43,6 +49,28 @@ This folder defines the shared visual primitives for dark-first SaaS styling. Us
 
 - `Section.svelte`
   - Use for page section wrappers with optional heading/actions layout.
+
+## Dense data-surface pattern
+
+Use `DataSurface.svelte` as the shared structure for data-heavy admin screens.
+
+Expected section order (top to bottom):
+
+1. Header (`title/description` or `slot="header"`) + `slot="actions"`
+2. `slot="filters"` for query controls and filter fields
+3. `slot="bulk"` for selection-aware action rows
+4. `slot="state"` for loading/error/empty messaging
+5. `slot="table"` containing `<table class="ui-data-table">...</table>` for tabular data
+6. default slot for dense non-table content (optional)
+
+Spacing and behavior rules:
+
+- Keep row spacing tokenized through the primitive (`--space-*`); avoid one-off panel spacing classes.
+- Keep table overflow scoped to `DataSurface` wrapper (`overflow-x:auto`) so pages do not horizontally scroll.
+- Keep filter rows responsive via auto-fit layout; stack to a single column on narrow widths.
+- Keep action rows (`actions`, `bulk`) wrap-capable and avoid hard-coded fixed widths.
+
+Detailed reference: `DATA_SURFACE_PATTERN.md` in this folder.
 
 ## Patterns to retire
 
@@ -74,9 +102,9 @@ These areas are intentionally left for future structural redesign, not primitive
 
 ## Recommended next UI tasks
 
-1. Build a reusable data-table primitive layer (`TableShell`, row actions, empty/loading rows).
-2. Consolidate page-level empty/loading/error states with a shared state surface API.
-3. Run a focused responsive polish pass on small-screen admin workflows.
+1. Adopt `DataSurface` across admin `Users`, `Sessions`, `Storage`, and `Audit` screens.
+2. Consolidate table empty/loading/error markup into shared state fragments.
+3. Run a focused responsive polish pass on small-screen admin workflows after adoption.
 
 Post-rollout execution notes and backlog are tracked in `UI_POST_ROLLOUT.md` at the frontend root.
 

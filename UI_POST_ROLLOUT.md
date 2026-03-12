@@ -40,19 +40,19 @@ Artifacts saved locally under `qa/staging-qa-2026-03-12-phase3/`.
 
 ## Remaining UI polish issues
 
-1. Admin tabs overflow horizontally on small mobile widths (`390px`): the segmented tabs row extends beyond viewport (`scrollWidth 438`), causing horizontal page scroll.
+1. Validate broad adoption of the shared data-surface pattern on all admin data tabs.
 
 ## Deferred improvements backlog
 
 Priority backlog after rollout:
 
 1. Table/data-heavy UX polish
-   - Create a shared `TableShell` primitive and table toolbar pattern.
-   - Normalize sticky header, row density, action cell behavior, and mobile overflow handling.
-   - Standardize empty/loading/error table states.
+   - Shared `DataSurface` primitive + pattern contract defined (`src/lib/components/ui/DataSurface.svelte` and `DATA_SURFACE_PATTERN.md`).
+   - Next: adopt the pattern on `Users`, `Sessions`, `Storage`, and `Audit`.
+   - Next: normalize sticky header, row density, action cell behavior, and state rows as part of adoption.
 
 2. Responsive admin polish
-   - Fix tab-row overflow in admin.
+   - Tab-row overflow fix shipped (March 12, 2026 commit `e7b8a45`).
    - Improve mobile stacking and spacing for admin filters/actions/cards.
    - Ensure admin tables remain usable without introducing full-page horizontal scrolling.
 
@@ -67,4 +67,4 @@ Chosen next track: **table/data-heavy UX polish + responsive admin polish**.
 Execution order:
 1. Build shared table shell primitives.
 2. Apply to admin `Users`, `Sessions`, `Storage`, and `Audit` screens.
-3. Complete responsive admin pass (including tab overflow fix and mobile action layout).
+3. Complete responsive admin pass (mobile action layout and dense table ergonomics).
