@@ -33,10 +33,11 @@ Use sections in this order:
 
 1. Header
 2. Filters
-3. Bulk actions
-4. State row
-5. Table
-6. Optional dense non-table content
+3. Panels (optional dense supporting cards/forms)
+4. Bulk actions
+5. State row
+6. Table
+7. Optional dense non-table content
 
 Canonical scaffold:
 
@@ -48,6 +49,10 @@ Canonical scaffold:
 
   <svelte:fragment slot="filters">
     <!-- FieldShell controls -->
+  </svelte:fragment>
+
+  <svelte:fragment slot="panels">
+    <!-- Optional dense supporting cards/forms -->
   </svelte:fragment>
 
   <svelte:fragment slot="bulk">

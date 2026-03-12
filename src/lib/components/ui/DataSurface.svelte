@@ -51,6 +51,12 @@
     </div>
   {/if}
 
+  {#if $$slots.panels}
+    <div class="ui-data-surface__panels">
+      <slot name="panels" />
+    </div>
+  {/if}
+
   {#if $$slots.bulk}
     <div class="ui-data-surface__bulk">
       <slot name="bulk" />
@@ -77,12 +83,12 @@
 </Card>
 
 <style>
-  .ui-data-surface {
+  :global(.ui-data-surface) {
     min-width: 0;
     gap: var(--space-4);
   }
 
-  .ui-data-surface--compact {
+  :global(.ui-data-surface--compact) {
     gap: var(--space-3);
   }
 
@@ -132,9 +138,25 @@
     flex-wrap: wrap;
   }
 
+  .ui-data-surface__panels {
+    display: grid;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
   .ui-data-surface__state {
     display: grid;
     gap: var(--space-2);
+  }
+
+  .ui-data-surface__state :global(.ui-data-state-note) {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .ui-data-surface__state :global(.ui-data-state-error) {
+    color: var(--color-danger-soft);
+    border-color: color-mix(in srgb, var(--color-danger) 34%, var(--color-border) 66%);
   }
 
   .ui-data-surface__table-wrap {
@@ -172,6 +194,13 @@
 
   .ui-data-surface__content {
     min-width: 0;
+  }
+
+  .ui-data-surface__panels:empty,
+  .ui-data-surface__bulk:empty,
+  .ui-data-surface__state:empty,
+  .ui-data-surface__table-wrap:empty {
+    display: none;
   }
 
   @media (max-width: 640px) {

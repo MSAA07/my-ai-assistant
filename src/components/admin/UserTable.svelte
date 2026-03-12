@@ -3,6 +3,7 @@
   import Badge from '../../lib/components/ui/Badge.svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
+  import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import UserDetail from './UserDetail.svelte';
   import { API_BASE } from '../../config.js';
@@ -194,16 +195,10 @@
   });
 </script>
 
-<Card class="user-panel" variant="base" padding="md">
-  <header class="panel-header">
-    <div>
-      <h2>Users</h2>
-      <p class="muted">Search, filter, and manage accounts.</p>
-    </div>
-    <Button type="button" variant="secondary" size="sm" on:click={fetchUsers}>Refresh</Button>
-  </header>
+<DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="980px">
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchUsers}>Refresh</Button>
 
-  <div class="filters">
+  <svelte:fragment slot="filters">
     <FieldShell className="filter-field" label="Search">
       <input
         type="search"
@@ -236,9 +231,9 @@
         <option value="premium">Premium</option>
       </select>
     </FieldShell>
-  </div>
+  </svelte:fragment>
 
-  <Card class="create-user" variant="soft" padding="md" border="subtle">
+  <Card slot="panels" class="create-user" variant="soft" padding="md" border="subtle">
     <header class="create-header">
       <h3>Create User</h3>
       <p class="muted">Add an account with role and plan defaults.</p>
@@ -276,101 +271,105 @@
     </div>
   </Card>
 
-  {#if error}
-    <Card class="alert-error" variant="soft" border="strong" padding="sm">{error}</Card>
-  {/if}
-
-  {#if loading}
-    <p class="muted">Loading users...</p>
-  {:else}
-    <div class="bulk-actions">
-      <Badge tone="neutral" size="sm">{selectedUserIds.length} selected</Badge>
-      <Button
-        type="button"
-        variant="secondary"
-        size="sm"
-        disabled={!selectedUserIds.length}
-        on:click={bulkSuspend}
-      >
-        Suspend Selected
-      </Button>
-      <Button
-        type="button"
-        variant="danger"
-        size="sm"
-        disabled={!selectedUserIds.length}
-        on:click={bulkDelete}
-      >
-        Delete Selected
-      </Button>
-    </div>
-
-    {#if users.length === 0}
-      <p class="muted">No users match your filters.</p>
-    {:else}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  on:change={toggleSelectAll}
-                />
-              </th>
-              <th>User</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Plan</th>
-              <th>Docs</th>
-              <th>Storage</th>
-              <th>Last Active</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each users as user}
-              <tr>
-                <td>
-                  <input type="checkbox" value={user.id} bind:group={selectedUserIds} />
-                </td>
-                <td>
-                  <strong>{user.name}</strong>
-                  <span class="muted">{user.email}</span>
-                </td>
-                <td>{user.role || 'user'}</td>
-                <td>
-                  <Badge tone={user.banned ? 'danger' : 'success'} size="xs">
-                    {user.banned ? 'Banned' : 'Active'}
-                  </Badge>
-                </td>
-                <td>{user.plan || 'free'}</td>
-                <td>{user.documentCount}</td>
-                <td>{formatBytes(user.storageUsed)}</td>
-                <td>{user.lastActive ? new Date(user.lastActive).toLocaleString() : '-'}</td>
-                <td class="actions">
-                  <Button type="button" variant="ghost" size="sm" on:click={() => (selectedUserId = user.id)}>
-                    View
-                  </Button>
-                  <Button type="button" variant={user.banned ? 'success' : 'secondary'} size="sm" on:click={() => toggleBan(user)}>
-                    {user.banned ? 'Unban' : 'Ban'}
-                  </Button>
-                  <Button type="button" variant="secondary" size="sm" on:click={() => toggleRole(user)}>
-                    {user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
-                  </Button>
-                  <Button type="button" variant="danger" size="sm" on:click={() => deleteUser(user)}>
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
+  <svelte:fragment slot="bulk">
+    {#if !loading}
+      <div class="bulk-actions">
+        <Badge tone="neutral" size="sm">{selectedUserIds.length} selected</Badge>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={!selectedUserIds.length}
+          on:click={bulkSuspend}
+        >
+          Suspend Selected
+        </Button>
+        <Button
+          type="button"
+          variant="danger"
+          size="sm"
+          disabled={!selectedUserIds.length}
+          on:click={bulkDelete}
+        >
+          Delete Selected
+        </Button>
       </div>
     {/if}
-  {/if}
-</Card>
+  </svelte:fragment>
+
+  <svelte:fragment slot="state">
+    {#if error}
+      <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
+    {:else if loading}
+      <p class="ui-data-state-note">Loading users...</p>
+    {:else if users.length === 0}
+      <p class="ui-data-state-note">No users match your filters.</p>
+    {/if}
+  </svelte:fragment>
+
+  <svelte:fragment slot="table">
+    {#if !loading && users.length > 0}
+      <table class="ui-data-table">
+        <thead>
+          <tr>
+            <th>
+              <input
+                type="checkbox"
+                checked={allSelected}
+                on:change={toggleSelectAll}
+              />
+            </th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Plan</th>
+            <th>Docs</th>
+            <th>Storage</th>
+            <th>Last Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each users as user}
+            <tr>
+              <td>
+                <input type="checkbox" value={user.id} bind:group={selectedUserIds} />
+              </td>
+              <td>
+                <strong>{user.name}</strong>
+                <span class="muted">{user.email}</span>
+              </td>
+              <td>{user.role || 'user'}</td>
+              <td>
+                <Badge tone={user.banned ? 'danger' : 'success'} size="xs">
+                  {user.banned ? 'Banned' : 'Active'}
+                </Badge>
+              </td>
+              <td>{user.plan || 'free'}</td>
+              <td>{user.documentCount}</td>
+              <td>{formatBytes(user.storageUsed)}</td>
+              <td>{user.lastActive ? new Date(user.lastActive).toLocaleString() : '-'}</td>
+              <td class="actions">
+                <Button type="button" variant="ghost" size="sm" on:click={() => (selectedUserId = user.id)}>
+                  View
+                </Button>
+                <Button type="button" variant={user.banned ? 'success' : 'secondary'} size="sm" on:click={() => toggleBan(user)}>
+                  {user.banned ? 'Unban' : 'Ban'}
+                </Button>
+                <Button type="button" variant="secondary" size="sm" on:click={() => toggleRole(user)}>
+                  {user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                </Button>
+                <Button type="button" variant="danger" size="sm" on:click={() => deleteUser(user)}>
+                  Delete
+                </Button>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {/if}
+  </svelte:fragment>
+</DataSurface>
 
 {#if selectedUserId}
   <UserDetail
@@ -381,19 +380,6 @@
 {/if}
 
 <style>
-  :global(.user-panel) {
-    gap: var(--space-4);
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-  }
-
-  h2,
   h3 {
     margin: 0;
     color: var(--color-text-primary);
@@ -403,12 +389,6 @@
     color: var(--color-text-secondary);
     margin: 0.28rem 0 0;
     display: block;
-  }
-
-  .filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: var(--space-3);
   }
 
   :global(.create-user) {
@@ -431,41 +411,11 @@
     justify-content: flex-end;
   }
 
-  :global(.alert-error) {
-    color: var(--color-danger-soft);
-    border-color: color-mix(in srgb, var(--color-danger) 34%, var(--color-border) 66%);
-  }
-
   .bulk-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-2);
-  }
-
-  .table-wrap {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 900px;
-  }
-
-  th,
-  td {
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--ui-border-subtle);
-    text-align: start;
-    vertical-align: top;
-  }
-
-  th {
-    font-size: var(--font-size-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-secondary);
   }
 
   td input[type='checkbox'],

@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
+  import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import { API_BASE } from '../../config.js';
 
   let users = [];
@@ -42,99 +43,52 @@
   onMount(fetchStorage);
 </script>
 
-<div class="storage-overview">
-  <Card class="admin-panel" variant="base" padding="md">
-    <header class="panel-header">
-      <div>
-        <h2>Storage Breakdown</h2>
-        <p class="muted">Storage distribution by user account.</p>
-      </div>
-      <Button type="button" variant="secondary" size="sm" on:click={fetchStorage}>Refresh</Button>
-    </header>
+<DataSurface title="Storage Breakdown" description="Storage distribution by user account." tableMinWidth="700px">
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchStorage}>Refresh</Button>
 
+  <svelte:fragment slot="state">
     {#if loading}
-      <p class="muted">Loading storage data...</p>
+      <p class="ui-data-state-note">Loading storage data...</p>
     {:else if error}
-      <p class="error">{error}</p>
-    {:else}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Documents</th>
-              <th>Monthly Used</th>
-              <th>Total Storage</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each users as user}
-              <tr>
-                <td>
-                  <strong>{user.name}</strong>
-                  <span class="muted">{user.email}</span>
-                </td>
-                <td>{user.documentCount}</td>
-                <td>{user.documentsUsed}</td>
-                <td>{formatBytes(user.storageUsed)}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
+    {:else if users.length === 0}
+      <p class="ui-data-state-note">No storage data available.</p>
     {/if}
-  </Card>
-</div>
+  </svelte:fragment>
+
+  <svelte:fragment slot="table">
+    {#if !loading && !error && users.length > 0}
+      <table class="ui-data-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Documents</th>
+            <th>Monthly Used</th>
+            <th>Total Storage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each users as user}
+            <tr>
+              <td>
+                <strong>{user.name}</strong>
+                <span class="muted">{user.email}</span>
+              </td>
+              <td>{user.documentCount}</td>
+              <td>{user.documentsUsed}</td>
+              <td>{formatBytes(user.storageUsed)}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {/if}
+  </svelte:fragment>
+</DataSurface>
 
 <style>
-  .storage-overview :global(.admin-panel) {
-    gap: var(--space-4);
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-  }
-
-  h2 {
-    margin: 0;
-    color: var(--color-text-primary);
-  }
-
   .muted {
     color: var(--color-text-secondary);
     margin: 0.3rem 0 0;
     display: block;
-  }
-
-  .error {
-    margin: 0;
-    color: var(--color-danger-soft);
-  }
-
-  .table-wrap {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--ui-border-subtle);
-    text-align: start;
-  }
-
-  th {
-    font-size: var(--font-size-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-secondary);
   }
 </style>

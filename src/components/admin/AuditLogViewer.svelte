@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
+  import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import { API_BASE } from '../../config.js';
 
@@ -60,122 +61,63 @@
   onMount(fetchLogs);
 </script>
 
-<div class="audit-log-viewer">
-  <Card class="admin-panel" variant="base" padding="md">
-    <header class="panel-header">
-      <div>
-        <h2>Audit Logs</h2>
-        <p class="muted">Track sensitive admin activity and security events.</p>
-      </div>
-      <Button type="button" variant="secondary" size="sm" on:click={fetchLogs}>Refresh</Button>
-    </header>
+<DataSurface title="Audit Logs" description="Track sensitive admin activity and security events." tableMinWidth="920px">
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchLogs}>Refresh</Button>
 
-    <div class="filters">
-      <FieldShell label="Action">
-        <select bind:value={actionFilter} on:change={fetchLogs}>
-          <option value="all">All actions</option>
-          {#each actions as action}
-            <option value={action}>{action.replaceAll('_', ' ')}</option>
-          {/each}
-        </select>
-      </FieldShell>
+  <svelte:fragment slot="filters">
+    <FieldShell label="Action">
+      <select bind:value={actionFilter} on:change={fetchLogs}>
+        <option value="all">All actions</option>
+        {#each actions as action}
+          <option value={action}>{action.replaceAll('_', ' ')}</option>
+        {/each}
+      </select>
+    </FieldShell>
 
-      <FieldShell label="Admin ID">
-        <input placeholder="Admin ID" bind:value={adminFilter} on:change={fetchLogs} />
-      </FieldShell>
-    </div>
+    <FieldShell label="Admin ID">
+      <input placeholder="Admin ID" bind:value={adminFilter} on:change={fetchLogs} />
+    </FieldShell>
+  </svelte:fragment>
 
+  <svelte:fragment slot="state">
     {#if loading}
-      <p class="muted">Loading logs...</p>
+      <p class="ui-data-state-note">Loading logs...</p>
     {:else if error}
-      <p class="error">{error}</p>
-    {:else}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Admin</th>
-              <th>Action</th>
-              <th>Target</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each logs as log}
-              <tr>
-                <td>{new Date(log.createdAt).toLocaleString()}</td>
-                <td>{log.adminId}</td>
-                <td>{log.action}</td>
-                <td>{log.targetId || '-'}</td>
-                <td class="details">{log.details ? JSON.stringify(log.details) : '-'}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
+    {:else if logs.length === 0}
+      <p class="ui-data-state-note">No logs match the current filters.</p>
     {/if}
-  </Card>
-</div>
+  </svelte:fragment>
+
+  <svelte:fragment slot="table">
+    {#if !loading && !error && logs.length > 0}
+      <table class="ui-data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Admin</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each logs as log}
+            <tr>
+              <td>{new Date(log.createdAt).toLocaleString()}</td>
+              <td>{log.adminId}</td>
+              <td>{log.action}</td>
+              <td>{log.targetId || '-'}</td>
+              <td class="details">{log.details ? JSON.stringify(log.details) : '-'}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {/if}
+  </svelte:fragment>
+</DataSurface>
 
 <style>
-  .audit-log-viewer :global(.admin-panel) {
-    gap: var(--space-4);
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-  }
-
-  h2 {
-    margin: 0;
-    color: var(--color-text-primary);
-  }
-
-  .muted {
-    color: var(--color-text-secondary);
-    margin: 0.3rem 0 0;
-  }
-
-  .error {
-    margin: 0;
-    color: var(--color-danger-soft);
-  }
-
-  .filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-3);
-  }
-
-  .table-wrap {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--ui-border-subtle);
-    text-align: start;
-    vertical-align: top;
-  }
-
-  th {
-    font-size: var(--font-size-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-secondary);
-  }
-
   .details {
     max-width: 320px;
     word-break: break-word;

@@ -18,7 +18,7 @@ This folder defines the shared visual primitives for dark-first SaaS styling. Us
 
 - `DataSurface.svelte`
   - Use for dense admin/data-heavy shells (tables, filter bars, bulk actions, and state rows).
-  - Named slots: `header`, `actions`, `filters`, `bulk`, `state`, `table`.
+  - Named slots: `header`, `actions`, `filters`, `panels`, `bulk`, `state`, `table`.
   - Table contract: apply class `.ui-data-table` to the table element for shared cell/header styling.
   - Handles horizontal table overflow at the surface level, not page level.
 
@@ -58,10 +58,11 @@ Expected section order (top to bottom):
 
 1. Header (`title/description` or `slot="header"`) + `slot="actions"`
 2. `slot="filters"` for query controls and filter fields
-3. `slot="bulk"` for selection-aware action rows
-4. `slot="state"` for loading/error/empty messaging
-5. `slot="table"` containing `<table class="ui-data-table">...</table>` for tabular data
-6. default slot for dense non-table content (optional)
+3. `slot="panels"` for dense supporting cards/forms that belong to the dataset
+4. `slot="bulk"` for selection-aware action rows
+5. `slot="state"` for loading/error/empty messaging
+6. `slot="table"` containing `<table class="ui-data-table">...</table>` for tabular data
+7. default slot for dense non-table content (optional)
 
 Spacing and behavior rules:
 

@@ -40,16 +40,17 @@ Artifacts saved locally under `qa/staging-qa-2026-03-12-phase3/`.
 
 ## Remaining UI polish issues
 
-1. Validate broad adoption of the shared data-surface pattern on all admin data tabs.
+1. Fine-tune extra-narrow action-cell wrapping in admin users table (`<360px`) if needed.
+2. Optional sticky-header ergonomics for long admin tables remain deferred.
 
 ## Deferred improvements backlog
 
 Priority backlog after rollout:
 
 1. Table/data-heavy UX polish
-   - Shared `DataSurface` primitive + pattern contract defined (`src/lib/components/ui/DataSurface.svelte` and `DATA_SURFACE_PATTERN.md`).
-   - Next: adopt the pattern on `Users`, `Sessions`, `Storage`, and `Audit`.
-   - Next: normalize sticky header, row density, action cell behavior, and state rows as part of adoption.
+   - Shared `DataSurface` primitive + pattern contract defined and adopted on `Users`, `Sessions`, `Storage`, `Audit`, and admin overview stats.
+   - Next: normalize sticky header ergonomics and ultra-dense action-cell behavior.
+   - Next: consolidate reusable state fragments for loading/error/empty messaging.
 
 2. Responsive admin polish
    - Tab-row overflow fix shipped (March 12, 2026 commit `e7b8a45`).
