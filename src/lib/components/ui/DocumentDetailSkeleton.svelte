@@ -15,7 +15,7 @@
 
   <section class="grid">
     {#each Array.from({ length: 3 }) as _, index}
-      <Card as="article" class="card" variant="raised" padding="md">
+      <Card as="article" class="card" variant="base" padding="md">
         <div class="line line-card-title"></div>
         <div class="line line-card-body"></div>
         <div class="line line-card-body short"></div>
@@ -37,9 +37,9 @@
     border-radius: 999px;
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--color-surface-2) 82%, transparent) 25%,
-      color-mix(in srgb, var(--color-surface-2) 46%, white 54%) 50%,
-      color-mix(in srgb, var(--color-surface-2) 82%, transparent) 75%
+      color-mix(in srgb, var(--ui-surface-raised) 84%, transparent) 25%,
+      color-mix(in srgb, var(--ui-surface-raised) 68%, white 32%) 50%,
+      color-mix(in srgb, var(--ui-surface-raised) 84%, transparent) 75%
     );
     background-size: 220% 100%;
     animation: skeleton-shimmer 1.8s ease-in-out infinite;

@@ -110,12 +110,12 @@
 <style>
   .upload-panel {
     display: grid;
-    gap: var(--space-4);
-    padding: var(--space-5);
-    border-radius: var(--ui-radius-lg);
-    border: 1px solid var(--upload-modal-border);
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--ui-radius-md);
+    border: 1px solid var(--ui-border-subtle);
     background: var(--upload-modal-bg);
-    box-shadow: var(--ui-shadow-md);
+    box-shadow: none;
   }
 
   .upload-panel__header {
@@ -139,26 +139,26 @@
 
   .upload-panel__titles h2 {
     color: var(--upload-modal-title);
-    font-size: clamp(1.4rem, 2vw, 1.9rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   .upload-panel__titles p {
     color: var(--upload-modal-description);
-    font-size: clamp(0.95rem, 1.3vw, 1.08rem);
-    line-height: 1.4;
+    font-size: var(--font-size-sm);
+    line-height: 1.45;
   }
 
   .upload-panel__support {
     color: var(--upload-support-text);
-    font-size: 1.05rem;
+    font-size: var(--font-size-xs);
   }
 
   .upload-panel__error {
     margin: 0;
-    color: var(--color-danger-soft);
-    font-size: 0.94rem;
+    color: color-mix(in srgb, var(--color-danger) 72%, var(--color-text-primary) 28%);
+    font-size: var(--font-size-xs);
   }
 
   .upload-panel__files {
@@ -178,7 +178,7 @@
 
   .upload-panel__counter {
     color: var(--upload-support-text);
-    font-size: 0.9rem;
+    font-size: var(--font-size-xs);
   }
 
   .upload-panel__actions {
@@ -187,17 +187,11 @@
   }
 
   :global(.upload-panel__cancel.ui-button) {
-    min-width: 160px;
-    min-height: 56px;
-    border-width: 2px;
-    font-size: 1.1rem;
+    min-width: 120px;
   }
 
   :global(.upload-panel__submit.ui-button) {
-    min-width: 128px;
-    min-height: 56px;
-    border-width: 2px;
-    font-size: 1.15rem;
+    min-width: 120px;
   }
 
   @media (max-width: 720px) {

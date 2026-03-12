@@ -29,14 +29,14 @@
     border: 1px solid var(--ui-border-subtle);
     border-radius: var(--ui-radius-md);
     background: var(--ui-surface-overlay);
-    box-shadow: var(--shadow-menu);
-    padding: var(--space-2);
+    box-shadow: var(--ui-shadow-md);
+    padding: 0.35rem;
     display: grid;
-    gap: var(--space-1);
+    gap: 0.2rem;
   }
 
   .ui-menu-surface--compact {
-    padding: 0.35rem;
-    gap: 0.25rem;
+    padding: 0.25rem;
+    gap: 0.12rem;
   }
 </style>

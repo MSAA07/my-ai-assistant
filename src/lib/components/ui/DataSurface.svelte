@@ -85,7 +85,7 @@
 <style>
   :global(.ui-data-surface) {
     min-width: 0;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   :global(.ui-data-surface--compact) {
@@ -98,6 +98,8 @@
     justify-content: space-between;
     gap: var(--space-3);
     flex-wrap: wrap;
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--ui-border-subtle);
   }
 
   .ui-data-surface__heading {
@@ -109,13 +111,15 @@
   .ui-data-surface__heading h2 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 
   .ui-data-surface__heading p {
     margin: 0;
     color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
   }
 
   .ui-data-surface__actions {
@@ -126,9 +130,10 @@
   }
 
   .ui-data-surface__filters {
-    display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+    flex-wrap: wrap;
   }
 
   .ui-data-surface__bulk {
@@ -174,14 +179,14 @@
 
   .ui-data-surface__table-wrap :global(.ui-data-table th),
   .ui-data-surface__table-wrap :global(.ui-data-table td) {
-    padding: 0.75rem;
+    padding: 0.6rem 0.5rem;
     border-bottom: 1px solid var(--ui-border-subtle);
     text-align: start;
     vertical-align: top;
   }
 
   .ui-data-surface__table-wrap :global(.ui-data-table th) {
-    font-size: var(--font-size-xs);
+    font-size: 0.67rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-text-secondary);

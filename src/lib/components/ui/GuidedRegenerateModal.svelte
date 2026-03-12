@@ -104,7 +104,7 @@
 <style>
   .guided-modal__form {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .guided-modal__header {
@@ -115,13 +115,15 @@
   .guided-modal__header h2 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
   }
 
   .guided-modal__header p {
     margin: 0;
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: 1.45;
+    font-size: var(--font-size-sm);
   }
 
   .field-group {
@@ -132,23 +134,23 @@
   .field-label {
     margin: 0;
     color: var(--color-text-primary);
-    font-weight: 600;
-    font-size: 0.92rem;
+    font-weight: 500;
+    font-size: var(--font-size-xs);
   }
 
   .reasons-list {
     display: grid;
-    gap: 0.55rem;
+    gap: 0.4rem;
   }
 
   .reason-option {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.65rem 0.8rem;
+    gap: 0.5rem;
+    padding: 0.5rem 0.62rem;
     border: 1px solid var(--ui-border-subtle);
-    border-radius: var(--ui-radius-md);
-    background: var(--ui-surface-raised);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-surface-base);
     cursor: pointer;
     transition: border-color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard);
@@ -161,7 +163,7 @@
 
   .reason-option span {
     color: var(--color-text-secondary);
-    font-size: 0.95rem;
+    font-size: var(--font-size-sm);
   }
 
   .reason-option-active {

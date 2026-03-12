@@ -67,7 +67,7 @@
   .drawer-overlay {
     position: fixed;
     inset: 0;
-    background: color-mix(in srgb, black 40%, transparent);
+    background: var(--color-backdrop-strong);
     opacity: 0;
     transition: opacity var(--motion-normal) var(--ease-standard);
     pointer-events: none;
@@ -78,9 +78,9 @@
     inset-block: 0;
     inline-size: var(--drawer-width);
     max-inline-size: min(var(--drawer-width), 100%);
-    background: var(--color-surface-1);
-    border-inline-start: 1px solid var(--color-border);
-    box-shadow: 0 0 40px color-mix(in srgb, var(--color-bg) 70%, transparent);
+    background: var(--ui-surface-overlay);
+    border-inline-start: 1px solid var(--ui-border-subtle);
+    box-shadow: var(--ui-shadow-lg);
     transform: translateX(var(--drawer-hidden-offset, 100%));
     transition: transform var(--motion-normal) var(--ease-standard);
     display: flex;
@@ -91,7 +91,7 @@
     inset-inline-start: 0;
     inset-inline-end: auto;
     border-inline-start: none;
-    border-inline-end: 1px solid var(--color-border);
+    border-inline-end: 1px solid var(--ui-border-subtle);
     --drawer-hidden-offset: -100%;
   }
 
@@ -110,13 +110,14 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-5);
-    border-block-end: 1px solid var(--color-border);
+    padding: var(--space-4);
+    border-block-end: 1px solid var(--ui-border-subtle);
   }
 
   h2 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 0.98rem;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
@@ -128,7 +129,7 @@
   .drawer__scroll {
     flex: 1;
     overflow-y: auto;
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-3) var(--space-4);
   }
 
   .drawer__content {
@@ -138,15 +139,15 @@
   }
 
   .drawer__footer {
-    padding: var(--space-4) var(--space-5);
-    border-block-start: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-4);
+    border-block-start: 1px solid var(--ui-border-subtle);
     display: flex;
     justify-content: flex-end;
     gap: var(--space-2);
   }
 
   :global(html[dir='rtl']) .drawer {
-    border-inline-start: 1px solid var(--color-border);
+    border-inline-start: 1px solid var(--ui-border-subtle);
     border-inline-end: none;
   }
 

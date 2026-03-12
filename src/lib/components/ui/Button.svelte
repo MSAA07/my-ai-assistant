@@ -41,26 +41,27 @@
 <style>
   .ui-button {
     --ui-button-bg: var(--ui-surface-raised);
-    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 90%, white 10%);
+    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 86%, white 14%);
+    --ui-button-bg-active: color-mix(in srgb, var(--ui-surface-raised) 80%, white 20%);
     --ui-button-color: var(--color-text-primary);
     --ui-button-border: var(--ui-border-subtle);
+    --ui-button-border-hover: var(--ui-border-strong);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
     min-height: var(--ui-control-height-md);
-    padding: 0 1rem;
+    padding: 0 0.8rem;
     border-radius: var(--ui-radius-md);
     border: 1px solid var(--ui-button-border);
     background: var(--ui-button-bg);
     color: var(--ui-button-color);
     font-size: var(--font-size-sm);
-    font-weight: 600;
-    line-height: 1;
+    font-weight: 500;
+    line-height: 1.1;
     cursor: pointer;
     text-decoration: none;
-    transition: transform var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard),
+    transition: border-color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard),
       color var(--motion-fast) var(--ease-standard),
       box-shadow var(--motion-fast) var(--ease-standard);
@@ -68,65 +69,86 @@
 
   .ui-button:hover:not(:disabled) {
     background: var(--ui-button-bg-hover);
-    border-color: var(--ui-border-strong);
-    transform: translateY(-1px);
+    border-color: var(--ui-button-border-hover);
+  }
+
+  .ui-button:active:not(:disabled) {
+    background: var(--ui-button-bg-active);
+    border-color: var(--ui-button-border-hover);
   }
 
   .ui-button:focus-visible {
     outline: none;
-    box-shadow: var(--ui-focus-ring);
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
   .ui-button:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
-    transform: none;
+    opacity: 0.46;
     box-shadow: none;
   }
 
+  .ui-button--loading {
+    pointer-events: none;
+  }
+
   .ui-button--primary {
-    --ui-button-bg: var(--gradient-accent-strong);
-    --ui-button-bg-hover: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-accent-primary) 85%, white 15%) 0%,
-      color-mix(in srgb, var(--color-accent-secondary) 85%, white 15%) 100%
-    );
+    --ui-button-bg: var(--gradient-accent);
+    --ui-button-bg-hover: var(--gradient-accent-strong);
+    --ui-button-bg-active: color-mix(in srgb, var(--color-text-primary) 92%, white 8%);
     --ui-button-color: var(--color-text-on-dark);
-    --ui-button-border: color-mix(in srgb, var(--color-accent-primary) 55%, transparent);
-    box-shadow: 0 10px 26px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+    --ui-button-border: color-mix(in srgb, var(--color-text-primary) 58%, transparent);
+    --ui-button-border-hover: color-mix(in srgb, var(--color-text-primary) 75%, transparent);
   }
 
   .ui-button--secondary {
-    --ui-button-bg: color-mix(in srgb, var(--ui-surface-raised) 90%, transparent);
-    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 82%, white 18%);
+    --ui-button-bg: var(--ui-surface-raised);
+    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 88%, white 12%);
+    --ui-button-bg-active: color-mix(in srgb, var(--ui-surface-raised) 82%, white 18%);
     --ui-button-color: var(--color-text-primary);
     --ui-button-border: var(--ui-border-subtle);
+    --ui-button-border-hover: var(--ui-border-strong);
   }
 
   .ui-button--ghost {
     --ui-button-bg: transparent;
-    --ui-button-bg-hover: color-mix(in srgb, var(--color-accent-primary) 14%, transparent);
+    --ui-button-bg-hover: color-mix(in srgb, var(--ui-surface-raised) 70%, transparent);
+    --ui-button-bg-active: color-mix(in srgb, var(--ui-surface-raised) 78%, transparent);
     --ui-button-color: var(--color-text-secondary);
-    --ui-button-border: color-mix(in srgb, var(--color-border) 70%, transparent);
+    --ui-button-border: transparent;
+    --ui-button-border-hover: var(--ui-border-subtle);
   }
 
   .ui-button--danger {
-    --ui-button-bg: color-mix(in srgb, var(--color-danger) 88%, black 12%);
-    --ui-button-bg-hover: color-mix(in srgb, var(--color-danger) 80%, black 20%);
-    --ui-button-color: var(--color-text-on-dark);
-    --ui-button-border: color-mix(in srgb, var(--color-danger) 45%, transparent);
+    --ui-button-bg: color-mix(in srgb, var(--color-danger) 12%, var(--ui-surface-raised) 88%);
+    --ui-button-bg-hover: color-mix(in srgb, var(--color-danger) 18%, var(--ui-surface-raised) 82%);
+    --ui-button-bg-active: color-mix(in srgb, var(--color-danger) 24%, var(--ui-surface-raised) 76%);
+    --ui-button-color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-primary) 30%);
+    --ui-button-border: color-mix(in srgb, var(--color-danger) 38%, var(--ui-border-subtle) 62%);
+    --ui-button-border-hover: color-mix(in srgb, var(--color-danger) 48%, var(--ui-border-subtle) 52%);
   }
 
   .ui-button--success {
-    --ui-button-bg: color-mix(in srgb, var(--color-success) 88%, black 12%);
-    --ui-button-bg-hover: color-mix(in srgb, var(--color-success) 80%, black 20%);
-    --ui-button-color: var(--color-text-on-dark);
-    --ui-button-border: color-mix(in srgb, var(--color-success) 45%, transparent);
+    --ui-button-bg: color-mix(in srgb, var(--color-success) 12%, var(--ui-surface-raised) 88%);
+    --ui-button-bg-hover: color-mix(in srgb, var(--color-success) 18%, var(--ui-surface-raised) 82%);
+    --ui-button-bg-active: color-mix(in srgb, var(--color-success) 24%, var(--ui-surface-raised) 76%);
+    --ui-button-color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-primary) 30%);
+    --ui-button-border: color-mix(in srgb, var(--color-success) 34%, var(--ui-border-subtle) 66%);
+    --ui-button-border-hover: color-mix(in srgb, var(--color-success) 44%, var(--ui-border-subtle) 56%);
+  }
+
+  .ui-button--warning {
+    --ui-button-bg: color-mix(in srgb, var(--color-warning) 12%, var(--ui-surface-raised) 88%);
+    --ui-button-bg-hover: color-mix(in srgb, var(--color-warning) 20%, var(--ui-surface-raised) 80%);
+    --ui-button-bg-active: color-mix(in srgb, var(--color-warning) 26%, var(--ui-surface-raised) 74%);
+    --ui-button-color: color-mix(in srgb, var(--color-warning) 74%, var(--color-text-primary) 26%);
+    --ui-button-border: color-mix(in srgb, var(--color-warning) 34%, var(--ui-border-subtle) 66%);
+    --ui-button-border-hover: color-mix(in srgb, var(--color-warning) 46%, var(--ui-border-subtle) 54%);
   }
 
   .ui-button--sm {
     min-height: var(--ui-control-height-sm);
-    padding-inline: 0.8rem;
+    padding-inline: 0.65rem;
     border-radius: var(--ui-radius-sm);
     font-size: var(--font-size-xs);
   }
@@ -137,7 +159,7 @@
 
   .ui-button--lg {
     min-height: var(--ui-control-height-lg);
-    padding-inline: 1.15rem;
+    padding-inline: 1rem;
     font-size: var(--font-size-md);
   }
 
@@ -160,8 +182,8 @@
   }
 
   .ui-button__icon :global(svg) {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     fill: currentColor;
   }
 
@@ -172,8 +194,8 @@
   }
 
   .ui-button__spinner {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     border: 2px solid color-mix(in srgb, currentColor 35%, transparent);
     border-top-color: currentColor;

@@ -76,6 +76,7 @@
     display: flex;
     flex-direction: column;
     background: var(--gradient-bg-radial), var(--color-bg);
+    min-width: 0;
   }
 
   .shell-content {
@@ -83,16 +84,18 @@
     display: flex;
     justify-content: center;
     width: 100%;
+    min-width: 0;
   }
 
   .content-wrapper {
     width: 100%;
-    max-width: 1160px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: var(--space-5);
+    padding: var(--space-4);
     box-sizing: border-box;
     display: grid;
     gap: var(--space-4);
+    min-width: 0;
   }
 
   @media (max-width: 1024px) {
@@ -108,7 +111,7 @@
     }
 
     .content-wrapper {
-      padding-bottom: calc(var(--space-5) + 72px);
+      padding: var(--space-3) var(--space-3) calc(var(--space-4) + 72px);
       gap: var(--space-3);
     }
   }

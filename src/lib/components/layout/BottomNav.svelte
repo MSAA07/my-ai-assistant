@@ -53,10 +53,10 @@
     z-index: 95;
     display: none;
     pointer-events: none;
-    background: var(--color-surface-overlay);
-    backdrop-filter: blur(16px);
-    border-top: 1px solid var(--color-border);
-    padding: var(--space-2);
+    background: color-mix(in srgb, var(--color-surface-overlay) 96%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--ui-border-subtle);
+    padding: var(--space-2) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
     justify-content: space-around;
   }
 
@@ -74,38 +74,54 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    min-height: 56px;
-    padding: var(--space-1);
+    gap: 0.2rem;
+    min-height: 52px;
+    padding: 0.35rem var(--space-1);
     color: var(--color-text-secondary);
     text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border-radius: var(--radius-1);
-    transition: all var(--motion-fast) var(--ease-standard);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-radius: var(--ui-radius-md);
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .bottom-nav-item:hover {
+    border-color: var(--ui-border-subtle);
+    background: color-mix(in srgb, var(--ui-surface-raised) 72%, transparent);
+    color: var(--color-text-primary);
   }
 
   .bottom-nav-item.active {
+    border-color: var(--ui-border-accent);
     color: var(--color-text-primary);
-    background: var(--color-accent-surface);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+  }
+
+  .bottom-nav-item:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring);
   }
 
   .icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
   .icon svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     fill: currentColor;
   }
 
   .label {
-    font-size: 0.75rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.01em;
   }
 
   .badge {

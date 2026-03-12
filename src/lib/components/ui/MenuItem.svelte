@@ -27,14 +27,15 @@
 <style>
   .ui-menu-item {
     width: 100%;
-    min-height: 38px;
+    min-height: 34px;
     border: 1px solid transparent;
     border-radius: var(--ui-radius-sm);
     background: transparent;
     color: var(--color-text-secondary);
     font: inherit;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: 500;
+    padding: 0.3rem 0.5rem;
     text-align: start;
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard),
@@ -43,9 +44,13 @@
   }
 
   .ui-menu-item:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--ui-surface-raised) 88%, transparent);
+    background: color-mix(in srgb, var(--ui-surface-raised) 82%, transparent);
     border-color: var(--ui-border-subtle);
     color: var(--color-text-primary);
+  }
+
+  .ui-menu-item:active:not(:disabled) {
+    background: color-mix(in srgb, var(--ui-surface-raised) 74%, transparent);
   }
 
   .ui-menu-item:focus-visible {
@@ -59,6 +64,6 @@
   }
 
   .ui-menu-item--danger {
-    color: color-mix(in srgb, var(--color-danger) 78%, var(--color-text-primary) 22%);
+    color: color-mix(in srgb, var(--color-danger) 72%, var(--color-text-primary) 28%);
   }
 </style>

@@ -172,17 +172,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     background: var(--color-bg);
     color: var(--color-text-primary);
   }
 
   .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--color-border);
+    width: 26px;
+    height: 26px;
+    border: 2px solid var(--ui-border-subtle);
     border-radius: 50%;
-    border-top-color: var(--color-accent-primary);
+    border-top-color: var(--color-text-secondary);
     animation: spin 1s ease-in-out infinite;
   }
 

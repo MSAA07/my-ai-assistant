@@ -47,11 +47,11 @@
 <style>
   .ui-section {
     border: 1px solid var(--ui-border-subtle);
-    border-radius: var(--ui-radius-lg);
+    border-radius: var(--ui-radius-md);
     background: var(--ui-surface-base);
-    box-shadow: var(--ui-shadow-sm);
+    box-shadow: none;
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .ui-section--padded {
@@ -64,6 +64,8 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--ui-border-subtle);
   }
 
   .ui-section__heading {
@@ -73,13 +75,15 @@
 
   .ui-section__heading h2 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: var(--color-text-primary);
   }
 
   .ui-section__heading p {
     margin: 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
   }
 

@@ -54,24 +54,24 @@
   .upload-file-row {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     border: 1px solid var(--upload-file-row-border);
-    border-radius: var(--ui-radius-lg);
+    border-radius: var(--ui-radius-md);
     background: var(--upload-file-row-bg);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-3);
   }
 
   .upload-file-row__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     border-radius: var(--ui-radius-sm);
     background: color-mix(in srgb, var(--color-accent-primary) 18%, transparent);
     color: var(--color-accent-light);
-    font-size: 0.78rem;
-    font-weight: 700;
+    font-size: 0.64rem;
+    font-weight: 600;
     letter-spacing: 0.03em;
   }
 
@@ -89,8 +89,8 @@
 
   .upload-file-row__name {
     color: var(--upload-file-name);
-    font-size: 1.02rem;
-    font-weight: 700;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -98,14 +98,14 @@
 
   .upload-file-row__size {
     color: var(--upload-file-size);
-    font-size: 0.92rem;
+    font-size: var(--font-size-xs);
   }
 
   .upload-file-row__remove {
     border: 0;
-    width: 38px;
-    height: 38px;
-    border-radius: var(--ui-radius-pill);
+    width: 30px;
+    height: 30px;
+    border-radius: var(--ui-radius-sm);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -132,7 +132,7 @@
   }
 
   .upload-file-row__remove svg {
-    width: 18px;
-    height: 18px;
+    width: 13px;
+    height: 13px;
   }
 </style>

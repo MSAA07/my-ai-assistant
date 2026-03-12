@@ -62,23 +62,26 @@
   .theme-toggle {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-1);
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    background: var(--color-surface-2);
+    gap: 0.25rem;
+    padding: 0.22rem;
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-base);
   }
 
   .option {
-    min-height: 40px;
-    min-width: 96px;
+    min-height: var(--ui-control-height-md);
+    min-width: 88px;
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: var(--ui-radius-sm);
     background: transparent;
     color: var(--color-text-secondary);
-    font-weight: 600;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
     cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
+    transition: background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
   }
 
   .option:hover {
@@ -87,9 +90,8 @@
 
   .option.active {
     color: var(--color-text-primary);
-    background: var(--color-accent-surface);
-    border-color: color-mix(in srgb, var(--color-accent-primary) 55%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-primary) 42%, transparent);
+    background: color-mix(in srgb, var(--color-accent-primary) 11%, transparent);
+    border-color: var(--ui-border-accent);
   }
 
   .option:focus-visible {

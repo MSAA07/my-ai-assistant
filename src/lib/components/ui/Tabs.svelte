@@ -55,12 +55,12 @@
   .ui-tabs {
     display: inline-grid;
     grid-auto-flow: column;
-    gap: var(--space-1);
+    gap: 0.3rem;
     align-items: center;
-    padding: var(--space-1);
-    border-radius: calc(var(--ui-radius-md) + 2px);
+    padding: 0.25rem;
+    border-radius: var(--ui-radius-md);
     border: 1px solid var(--ui-border-subtle);
-    background: var(--ui-surface-base);
+    background: color-mix(in srgb, var(--ui-surface-base) 96%, transparent);
   }
 
   .ui-tabs--full-width {
@@ -72,19 +72,19 @@
   }
 
   .ui-tabs__tab {
-    min-height: var(--ui-control-height-md);
+    min-height: 32px;
     border: 1px solid transparent;
-    border-radius: var(--ui-radius-md);
-    padding: 0.45rem 0.75rem;
+    border-radius: var(--ui-radius-sm);
+    padding: 0.35rem 0.62rem;
     background: transparent;
     color: var(--color-text-muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
+    gap: 0.28rem;
     font: inherit;
-    font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard),
       border-color var(--motion-fast) var(--ease-standard),
@@ -94,7 +94,12 @@
 
   .ui-tabs__tab:hover:not(:disabled) {
     color: var(--color-text-primary);
-    background: color-mix(in srgb, var(--ui-surface-raised) 78%, transparent);
+    border-color: var(--ui-border-subtle);
+    background: color-mix(in srgb, var(--ui-surface-raised) 82%, transparent);
+  }
+
+  .ui-tabs__tab:active:not(:disabled) {
+    background: color-mix(in srgb, var(--ui-surface-raised) 74%, transparent);
   }
 
   .ui-tabs__tab:focus-visible {
@@ -104,8 +109,8 @@
 
   .ui-tabs__tab[aria-selected='true'] {
     color: var(--color-text-primary);
-    border-color: color-mix(in srgb, var(--color-accent-primary) 52%, transparent);
-    background: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+    border-color: var(--ui-border-accent);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
   }
 
   .ui-tabs__tab:disabled {
@@ -114,16 +119,16 @@
   }
 
   .ui-tabs--sm .ui-tabs__tab {
-    min-height: var(--ui-control-height-sm);
+    min-height: 28px;
     border-radius: var(--ui-radius-sm);
-    font-size: var(--font-size-xs);
-    padding: 0.32rem 0.6rem;
+    font-size: 0.69rem;
+    padding: 0.25rem 0.52rem;
   }
 
   .ui-tabs--lg .ui-tabs__tab {
-    min-height: var(--ui-control-height-lg);
-    padding: 0.6rem 0.95rem;
-    font-size: var(--font-size-md);
+    min-height: var(--ui-control-height-md);
+    padding: 0.42rem 0.72rem;
+    font-size: var(--font-size-sm);
   }
 
   .ui-tabs__meta {

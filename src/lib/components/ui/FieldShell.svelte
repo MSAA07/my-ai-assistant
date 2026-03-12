@@ -40,7 +40,7 @@
 <style>
   .ui-field {
     display: grid;
-    gap: 0.45rem;
+    gap: 0.38rem;
   }
 
   .ui-field[data-disabled='true'] {
@@ -53,8 +53,9 @@
     gap: 0.3rem;
     margin: 0;
     color: var(--color-text-primary);
-    font-weight: 600;
-    font-size: var(--font-size-sm);
+    font-weight: 500;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.02em;
   }
 
   .ui-field__required {
@@ -62,9 +63,9 @@
   }
 
   .ui-field__control {
-    border-radius: var(--ui-radius-md);
+    border-radius: var(--ui-radius-sm);
     border: 1px solid var(--ui-border-subtle);
-    background: var(--ui-surface-raised);
+    background: var(--ui-surface-base);
     transition: border-color var(--motion-fast) var(--ease-standard),
       box-shadow var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard);
@@ -72,12 +73,13 @@
 
   .ui-field__control:focus-within {
     border-color: var(--ui-border-accent);
-    box-shadow: var(--ui-focus-ring);
-    background: color-mix(in srgb, var(--ui-surface-raised) 88%, white 12%);
+    box-shadow: var(--ui-focus-ring-strong);
+    background: color-mix(in srgb, var(--ui-surface-base) 88%, white 12%);
   }
 
   .ui-field[data-invalid='true'] .ui-field__control {
-    border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border) 60%);
+    border-color: color-mix(in srgb, var(--color-danger) 42%, var(--color-border) 58%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-danger) 26%, transparent);
   }
 
   .ui-field__control :global(input),
@@ -85,13 +87,14 @@
   .ui-field__control :global(select) {
     width: 100%;
     min-height: var(--ui-control-height-md);
-    padding: 0.65rem 0.85rem;
+    padding: 0.5rem 0.68rem;
     border: none;
     border-radius: inherit;
     background: transparent;
     color: var(--color-text-primary);
     font: inherit;
-    line-height: 1.45;
+    line-height: 1.35;
+    font-size: var(--font-size-sm);
   }
 
   .ui-field__control :global(textarea) {
@@ -117,6 +120,6 @@
   }
 
   .ui-field__meta--error {
-    color: var(--color-danger-soft);
+    color: color-mix(in srgb, var(--color-danger) 72%, var(--color-text-secondary) 28%);
   }
 </style>

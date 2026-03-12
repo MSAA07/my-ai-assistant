@@ -66,7 +66,7 @@
 
   <div class="topbar-right">
     {#if planLabel}
-      <Badge className="plan-pill" tone="success" size="sm">{planLabel}</Badge>
+      <Badge className="plan-pill" tone="neutral" size="sm">{planLabel}</Badge>
     {/if}
     {#if ENABLE_ARABIC_UI}
       <LanguageToggle />
@@ -129,19 +129,16 @@
     gap: var(--space-4);
     min-height: var(--size-topbar);
     padding: 0 var(--space-4);
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--color-surface-overlay) 92%, white 8%) 0%,
-      var(--color-surface-overlay) 100%
-    );
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--color-border);
-    box-shadow: var(--shadow-panel);
+    background: color-mix(in srgb, var(--color-surface-overlay) 96%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--ui-border-subtle);
   }
 
   .topbar h1 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--color-text-primary);
   }
 
@@ -152,12 +149,12 @@
   }
 
   :global(.plan-pill) {
-    font-size: 0.8rem;
+    letter-spacing: 0.02em;
   }
 
   :global(.icon-button) {
-    width: 44px;
-    height: 44px;
+    width: var(--ui-control-height-md);
+    height: var(--ui-control-height-md);
     padding: 0;
   }
 
@@ -166,8 +163,8 @@
   }
 
   :global(.icon-button svg) {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
     fill: currentColor;
   }
 
@@ -176,19 +173,20 @@
   }
 
   :global(.avatar-button) {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border-color: color-mix(in srgb, var(--color-accent-primary) 36%, transparent);
-    background: var(--color-accent-surface);
-    color: var(--color-accent-primary);
+    width: var(--ui-control-height-md);
+    height: var(--ui-control-height-md);
+    border-radius: var(--ui-radius-pill);
+    border-color: var(--ui-border-subtle);
+    background: var(--ui-surface-raised);
+    color: var(--color-text-secondary);
   }
 
   :global(.avatar-button:hover:not(:disabled)),
   :global(.avatar-button[aria-expanded='true']) {
-    border-color: color-mix(in srgb, var(--color-accent-primary) 56%, transparent);
-    box-shadow: 0 0 0 1px var(--color-accent-primary) inset;
-    background: color-mix(in srgb, var(--color-accent-primary) 20%, transparent);
+    border-color: var(--ui-border-strong);
+    box-shadow: var(--ui-focus-ring);
+    background: color-mix(in srgb, var(--ui-surface-raised) 88%, white 12%);
+    color: var(--color-text-primary);
   }
 
   :global(.avatar-button .ui-button__icon),
@@ -201,7 +199,10 @@
   }
 
   .avatar-initials {
+    font-size: var(--font-size-xs);
     font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   :global(.menu) {
@@ -231,11 +232,12 @@
 
   @media (max-width: 768px) {
     .topbar {
+      min-height: 52px;
       padding: 0 var(--space-3);
     }
 
     .topbar h1 {
-      font-size: 1.05rem;
+      font-size: 0.95rem;
     }
   }
 </style>

@@ -10,7 +10,7 @@
   $: resolvedDescription = description || subtitle || t('emptyState.subtitle');
 </script>
 
-<Card as="section" variant="soft" border="dashed" padding="lg" className="empty-state" role="status">
+<Card as="section" variant="soft" border="subtle" padding="lg" className="empty-state" role="status">
   <div class="empty-state__icon" aria-hidden="true">
     <slot name="icon">{icon}</slot>
   </div>
@@ -24,32 +24,35 @@
 
 <style>
   .empty-state {
+    gap: var(--space-2);
     justify-items: center;
     text-align: center;
     color: var(--color-text-muted);
   }
 
   .empty-state__icon {
-    inline-size: 64px;
-    block-size: 64px;
-    border-radius: var(--ui-radius-lg);
+    inline-size: 44px;
+    block-size: 44px;
+    border-radius: var(--ui-radius-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    background: var(--ui-surface-raised);
+    font-size: 1.25rem;
+    background: var(--ui-surface-base);
     border: 1px solid var(--ui-border-subtle);
   }
 
   h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
   p {
     margin: 0;
-    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
     max-inline-size: 420px;
   }
 

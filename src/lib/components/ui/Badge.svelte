@@ -21,8 +21,8 @@
 
 <style>
   .ui-badge {
-    --badge-bg: color-mix(in srgb, var(--color-border) 14%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-border) 36%, transparent);
+    --badge-bg: color-mix(in srgb, var(--ui-surface-raised) 82%, transparent);
+    --badge-border: color-mix(in srgb, var(--color-border) 42%, transparent);
     --badge-text: var(--color-text-secondary);
     display: inline-flex;
     align-items: center;
@@ -32,28 +32,28 @@
     border: 1px solid var(--badge-border);
     background: var(--badge-bg);
     color: var(--badge-text);
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1;
     white-space: nowrap;
   }
 
   .ui-badge[data-size='xs'] {
-    min-height: 20px;
-    padding: 0.08rem 0.44rem;
-    font-size: 0.67rem;
+    min-height: 18px;
+    padding: 0.06rem 0.4rem;
+    font-size: 0.64rem;
     letter-spacing: 0.04em;
   }
 
   .ui-badge[data-size='sm'] {
-    min-height: 24px;
-    padding: 0.16rem 0.55rem;
-    font-size: 0.75rem;
+    min-height: 22px;
+    padding: 0.12rem 0.52rem;
+    font-size: 0.72rem;
     letter-spacing: 0.03em;
   }
 
   .ui-badge[data-size='md'] {
-    min-height: 28px;
-    padding: 0.2rem 0.65rem;
+    min-height: 26px;
+    padding: 0.16rem 0.62rem;
     font-size: var(--font-size-sm);
   }
 
@@ -73,38 +73,38 @@
   }
 
   .ui-badge[data-tone='neutral'] {
-    --badge-bg: color-mix(in srgb, var(--color-border) 14%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-border) 34%, transparent);
+    --badge-bg: color-mix(in srgb, var(--ui-surface-raised) 78%, transparent);
+    --badge-border: color-mix(in srgb, var(--color-border) 40%, transparent);
     --badge-text: var(--color-text-secondary);
   }
 
   .ui-badge[data-tone='accent'] {
-    --badge-bg: color-mix(in srgb, var(--color-accent-primary) 14%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
-    --badge-text: color-mix(in srgb, var(--color-accent-primary) 80%, var(--color-text-soft) 20%);
+    --badge-bg: color-mix(in srgb, var(--color-accent-primary) 12%, var(--ui-surface-base) 88%);
+    --badge-border: color-mix(in srgb, var(--color-accent-primary) 30%, var(--color-border) 70%);
+    --badge-text: color-mix(in srgb, var(--color-accent-primary) 68%, var(--color-text-primary) 32%);
   }
 
   .ui-badge[data-tone='info'] {
-    --badge-bg: color-mix(in srgb, var(--color-info) 14%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-info) 30%, transparent);
-    --badge-text: color-mix(in srgb, var(--color-info) 80%, var(--color-text-soft) 20%);
+    --badge-bg: color-mix(in srgb, var(--color-info) 12%, var(--ui-surface-base) 88%);
+    --badge-border: color-mix(in srgb, var(--color-info) 30%, var(--color-border) 70%);
+    --badge-text: color-mix(in srgb, var(--color-info) 66%, var(--color-text-primary) 34%);
   }
 
   .ui-badge[data-tone='success'] {
-    --badge-bg: color-mix(in srgb, var(--color-success) 14%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-success) 30%, transparent);
-    --badge-text: color-mix(in srgb, var(--color-success) 78%, var(--color-text-soft) 22%);
+    --badge-bg: color-mix(in srgb, var(--color-success) 12%, var(--ui-surface-base) 88%);
+    --badge-border: color-mix(in srgb, var(--color-success) 28%, var(--color-border) 72%);
+    --badge-text: color-mix(in srgb, var(--color-success) 68%, var(--color-text-primary) 32%);
   }
 
   .ui-badge[data-tone='warning'] {
-    --badge-bg: color-mix(in srgb, var(--color-warning) 18%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-warning) 36%, transparent);
-    --badge-text: color-mix(in srgb, var(--color-warning) 82%, var(--color-text-soft) 18%);
+    --badge-bg: color-mix(in srgb, var(--color-warning) 14%, var(--ui-surface-base) 86%);
+    --badge-border: color-mix(in srgb, var(--color-warning) 32%, var(--color-border) 68%);
+    --badge-text: color-mix(in srgb, var(--color-warning) 72%, var(--color-text-primary) 28%);
   }
 
   .ui-badge[data-tone='danger'] {
-    --badge-bg: color-mix(in srgb, var(--color-danger) 14%, transparent);
-    --badge-border: color-mix(in srgb, var(--color-danger) 30%, transparent);
-    --badge-text: color-mix(in srgb, var(--color-danger) 82%, var(--color-text-soft) 18%);
+    --badge-bg: color-mix(in srgb, var(--color-danger) 12%, var(--ui-surface-base) 88%);
+    --badge-border: color-mix(in srgb, var(--color-danger) 30%, var(--color-border) 70%);
+    --badge-text: color-mix(in srgb, var(--color-danger) 68%, var(--color-text-primary) 32%);
   }
 </style>

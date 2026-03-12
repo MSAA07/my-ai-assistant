@@ -46,26 +46,28 @@
 <style>
   .confirm-modal-content {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   .confirm-modal-content h2 {
     margin: 0;
-    font-size: 1.28rem;
+    font-size: 1.02rem;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
   .confirm-modal-content p {
     margin: 0;
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: 1.45;
+    font-size: var(--font-size-sm);
   }
 
   .modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: var(--space-2);
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
   }
 
   @media (max-width: 520px) {

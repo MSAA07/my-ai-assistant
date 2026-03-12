@@ -77,14 +77,16 @@
     display: grid;
     place-items: center;
     background: var(--color-backdrop-strong);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
   }
 
   .ui-modal {
     width: var(--ui-modal-width);
     max-width: 100%;
-    border-radius: var(--ui-radius-lg);
-    border: 1px solid var(--ui-border-subtle);
+    max-height: min(92vh, 960px);
+    overflow: auto;
+    border-radius: var(--ui-radius-md);
+    border: 1px solid var(--ui-border-strong);
     background: var(--ui-surface-overlay);
     box-shadow: var(--ui-shadow-lg);
     display: grid;
@@ -100,7 +102,7 @@
   }
 
   .ui-modal--padding-lg {
-    padding: var(--space-5);
+    padding: var(--space-4);
   }
 
   @media (max-width: 640px) {

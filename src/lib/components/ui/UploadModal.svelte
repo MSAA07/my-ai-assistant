@@ -134,9 +134,9 @@
 <style>
   :global(.upload-modal.ui-modal) {
     background: var(--upload-modal-bg);
-    border-color: var(--upload-modal-border);
+    border-color: var(--ui-border-strong);
     box-shadow: var(--upload-modal-shadow);
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .upload-modal__header {
@@ -160,24 +160,24 @@
 
   .upload-modal__titles h2 {
     color: var(--upload-modal-title);
-    font-size: clamp(1.7rem, 2.4vw, 2.2rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
   .upload-modal__titles p {
     color: var(--upload-modal-description);
-    font-size: clamp(1rem, 1.6vw, 1.15rem);
-    line-height: 1.4;
+    font-size: var(--font-size-sm);
+    line-height: 1.45;
   }
 
   .upload-modal__close {
-    border: 0;
-    background: transparent;
+    border: 1px solid var(--ui-border-subtle);
+    background: var(--ui-surface-base);
     color: var(--upload-close-color);
-    width: 42px;
-    height: 42px;
-    border-radius: var(--ui-radius-pill);
+    width: var(--ui-control-height-md);
+    height: var(--ui-control-height-md);
+    border-radius: var(--ui-radius-sm);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -187,7 +187,8 @@
   }
 
   .upload-modal__close:hover:not(:disabled) {
-    background: var(--upload-close-hover-bg);
+    background: color-mix(in srgb, var(--ui-surface-base) 88%, white 12%);
+    border-color: var(--ui-border-strong);
   }
 
   .upload-modal__close:focus-visible {
@@ -201,19 +202,19 @@
   }
 
   .upload-modal__close svg {
-    width: 28px;
-    height: 28px;
+    width: 14px;
+    height: 14px;
   }
 
   .upload-modal__support {
     color: var(--upload-support-text);
-    font-size: 1.05rem;
+    font-size: var(--font-size-xs);
   }
 
   .upload-modal__error {
     margin: 0;
-    color: var(--color-danger-soft);
-    font-size: 0.94rem;
+    color: color-mix(in srgb, var(--color-danger) 72%, var(--color-text-primary) 28%);
+    font-size: var(--font-size-xs);
   }
 
   .upload-modal__files {
@@ -233,7 +234,7 @@
 
   .upload-modal__counter {
     color: var(--upload-support-text);
-    font-size: 0.9rem;
+    font-size: var(--font-size-xs);
   }
 
   .upload-modal__actions {
@@ -242,17 +243,11 @@
   }
 
   :global(.upload-modal__cancel.ui-button) {
-    min-width: 160px;
-    min-height: 56px;
-    border-width: 2px;
-    font-size: 1.1rem;
+    min-width: 120px;
   }
 
   :global(.upload-modal__submit.ui-button) {
-    min-width: 128px;
-    min-height: 56px;
-    border-width: 2px;
-    font-size: 1.15rem;
+    min-width: 120px;
   }
 
   @media (max-width: 720px) {

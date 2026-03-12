@@ -1,4 +1,4 @@
-<Card class="dashboard-skeleton-card" variant="raised" padding="md" aria-hidden="true">
+<Card class="dashboard-skeleton-card" variant="base" padding="md" aria-hidden="true">
   <div class="value"></div>
   <div class="label"></div>
 </Card>
@@ -9,7 +9,7 @@
 
 <style>
   :global(.dashboard-skeleton-card) {
-    min-height: 128px;
+    min-height: 112px;
     text-align: center;
   }
 
@@ -18,9 +18,9 @@
     border-radius: 999px;
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--color-surface-2) 80%, transparent) 25%,
-      color-mix(in srgb, var(--color-surface-2) 40%, white 60%) 50%,
-      color-mix(in srgb, var(--color-surface-2) 80%, transparent) 75%
+      color-mix(in srgb, var(--ui-surface-raised) 84%, transparent) 25%,
+      color-mix(in srgb, var(--ui-surface-raised) 68%, white 32%) 50%,
+      color-mix(in srgb, var(--ui-surface-raised) 84%, transparent) 75%
     );
     background-size: 220% 100%;
     animation: skeleton-shimmer 1.8s ease-in-out infinite;
@@ -28,7 +28,7 @@
   }
 
   .value {
-    height: 2.5rem;
+    height: 2rem;
     width: 62%;
     margin-bottom: 0.65rem;
   }
