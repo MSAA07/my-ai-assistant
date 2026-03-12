@@ -27,6 +27,7 @@
   class={resolvedClass}
   disabled={isDisabled}
   aria-busy={loading}
+  on:click
 >
   {#if $$slots.icon}
     <span class="ui-button__icon"><slot name="icon" /></span>
