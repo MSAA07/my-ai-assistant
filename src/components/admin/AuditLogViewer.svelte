@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import Badge from '../../lib/components/ui/Badge.svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
@@ -88,13 +89,13 @@
   });
 </script>
 
-<DataSurface title="Audit Logs" description="Track sensitive admin activity and security events." tableMinWidth="920px">
+<DataSurface title="Audit Logs" description="Track sensitive admin activity and security events." tableMinWidth="1040px">
   <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchLogs({ background: logs.length > 0 })} disabled={loading || refreshing}>
     {refreshing ? 'Refreshing...' : 'Refresh'}
   </Button>
 
   <svelte:fragment slot="filters">
-    <FieldShell label="Action">
+    <FieldShell className="filter-field" label="Action">
       <select bind:value={actionFilter} on:change={() => fetchLogs({ background: logs.length > 0 })}>
         <option value="all">All actions</option>
         {#each actions as action}
@@ -103,7 +104,7 @@
       </select>
     </FieldShell>
 
-    <FieldShell label="Admin ID">
+    <FieldShell className="filter-field" label="Admin ID">
       <input placeholder="Admin ID" bind:value={adminFilter} on:change={() => fetchLogs({ background: logs.length > 0 })} />
     </FieldShell>
   </svelte:fragment>
@@ -134,8 +135,10 @@
           {#each logs as log}
             <tr>
               <td>{new Date(log.createdAt).toLocaleString()}</td>
-              <td>{log.adminId}</td>
-              <td>{log.action}</td>
+              <td class="admin-id">{log.adminId}</td>
+              <td>
+                <Badge tone="neutral" size="xs" uppercase>{log.action.replaceAll('_', ' ')}</Badge>
+              </td>
               <td>{log.targetId || '-'}</td>
               <td class="details">{log.details ? JSON.stringify(log.details) : '-'}</td>
             </tr>
@@ -147,10 +150,16 @@
 </DataSurface>
 
 <style>
+  .admin-id {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+  }
+
   .details {
-    max-width: 320px;
+    max-width: 420px;
     word-break: break-word;
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     color: var(--color-text-secondary);
   }
 </style>

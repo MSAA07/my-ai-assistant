@@ -63,7 +63,7 @@
   });
 </script>
 
-<DataSurface title="Storage Breakdown" description="Storage distribution by user account." tableMinWidth="700px">
+<DataSurface title="Storage Breakdown" description="Storage distribution by user account." tableMinWidth="760px">
   <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchStorage({ background: users.length > 0 })} disabled={loading || refreshing}>
     {refreshing ? 'Refreshing...' : 'Refresh'}
   </Button>
@@ -110,7 +110,12 @@
 <style>
   .muted {
     color: var(--color-text-secondary);
-    margin: 0.3rem 0 0;
+    margin: 0.2rem 0 0;
+    font-size: var(--font-size-xs);
     display: block;
+  }
+
+  :global(.ui-data-table td:first-child) {
+    min-width: 210px;
   }
 </style>

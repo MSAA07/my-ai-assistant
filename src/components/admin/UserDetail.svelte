@@ -170,15 +170,16 @@
       <h2 id="user-detail-heading">User Detail</h2>
       <p class="muted">Manage account, files, and sessions.</p>
     </div>
-    <Button type="button" variant="ghost" size="sm" on:click={() => dispatch('close')}>Close</Button>
+    <Button type="button" variant="secondary" size="sm" on:click={() => dispatch('close')}>Close</Button>
   </header>
 
   {#if loading}
-    <p class="muted">Loading...</p>
+    <p class="muted state-note">Loading...</p>
   {:else if error}
     <Card class="error-card" variant="soft" border="strong" padding="sm">{error}</Card>
   {:else}
     <Tabs
+      className="user-detail-tabs"
       items={tabItems}
       value={activeTab}
       ariaLabel="User detail sections"
@@ -188,7 +189,7 @@
 
     {#if activeTab === 'profile'}
       <div class="profile-grid">
-        <Card class="detail-card" variant="soft" padding="md">
+        <Card class="detail-card" variant="base" padding="md">
           <h3>Account</h3>
           <div class="field-grid">
             <FieldShell label="Name" forId="account-name">
@@ -219,7 +220,7 @@
           </div>
         </Card>
 
-        <Card class="detail-card" variant="soft" padding="md">
+        <Card class="detail-card" variant="base" padding="md">
           <header class="stats-header">
             <h3>Stats</h3>
             <Badge tone={user.banned ? 'danger' : 'success'} size="sm">
@@ -241,7 +242,7 @@
         </Card>
       </div>
     {:else if activeTab === 'files'}
-      <Card class="detail-card" variant="soft" padding="md">
+      <Card class="detail-card" variant="base" padding="md">
         <header class="card-header">
           <h3>User Files</h3>
           <Badge tone="neutral" size="sm">{documents.length} total</Badge>
@@ -266,7 +267,7 @@
         {/if}
       </Card>
     {:else}
-      <Card class="detail-card" variant="soft" padding="md">
+      <Card class="detail-card" variant="base" padding="md">
         <header class="card-header">
           <h3>Sessions</h3>
           <Button type="button" variant="danger" size="sm" disabled={sessions.length === 0} on:click={revokeAllSessions}>
@@ -314,10 +315,34 @@
     color: var(--color-text-primary);
   }
 
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+  }
+
   .muted {
-    margin: 0.28rem 0 0;
+    margin: 0.22rem 0 0;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
     display: block;
+  }
+
+  .state-note {
+    margin: 0;
+    padding: 0.48rem 0.6rem;
+    border: 1px dashed var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-base) 94%, transparent);
+  }
+
+  :global(.user-detail-tabs) {
+    width: 100%;
   }
 
   .profile-grid {
@@ -327,7 +352,7 @@
   }
 
   :global(.detail-card) {
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   .field-grid {
@@ -370,6 +395,7 @@
   .stats-list dd {
     margin: 0;
     color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
   }
 
   .card-header {
@@ -394,17 +420,29 @@
     justify-content: space-between;
     gap: var(--space-3);
     border: 1px solid var(--ui-border-subtle);
-    border-radius: var(--ui-radius-md);
-    background: color-mix(in srgb, var(--ui-surface-raised) 84%, transparent);
-    padding: 0.65rem 0.75rem;
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-base) 92%, transparent);
+    padding: 0.54rem 0.62rem;
+  }
+
+  .item-list li .muted {
+    word-break: break-word;
   }
 
   :global(.error-card) {
-    color: var(--color-danger-soft);
+    color: color-mix(in srgb, var(--color-danger) 74%, var(--color-text-primary) 26%);
     border-color: color-mix(in srgb, var(--color-danger) 34%, var(--color-border) 66%);
   }
 
   @media (max-width: 640px) {
+    .actions {
+      width: 100%;
+    }
+
+    .actions :global(.ui-button) {
+      width: 100%;
+    }
+
     .item-list li {
       align-items: flex-start;
       flex-direction: column;

@@ -62,7 +62,7 @@
   });
 </script>
 
-<DataSurface title="Active Sessions" description="Current active login sessions across users." tableMinWidth="760px">
+<DataSurface title="Active Sessions" description="Current active login sessions across users." tableMinWidth="860px">
   <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchSessions({ background: sessions.length > 0 })} disabled={loading || refreshing}>
     {refreshing ? 'Refreshing...' : 'Refresh'}
   </Button>
@@ -99,7 +99,7 @@
               <td>{session.ipAddress || '-'}</td>
               <td class="agent">{session.userAgent || '-'}</td>
               <td>{new Date(session.expiresAt).toLocaleString()}</td>
-              <td>
+              <td class="actions-cell">
                 <Button type="button" size="sm" variant="danger" on:click={() => revokeSession(session.id)}>
                   Revoke
                 </Button>
@@ -115,12 +115,18 @@
 <style>
   .muted {
     color: var(--color-text-secondary);
-    margin: 0.3rem 0 0;
+    margin: 0.2rem 0 0;
+    font-size: var(--font-size-xs);
     display: block;
   }
 
   .agent {
-    max-width: 260px;
+    max-width: 320px;
     word-break: break-word;
+    font-size: var(--font-size-xs);
+  }
+
+  .actions-cell {
+    min-width: 120px;
   }
 </style>

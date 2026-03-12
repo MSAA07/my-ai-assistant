@@ -1,35 +1,32 @@
-# UI Post-Rollout Notes (Phase 3)
+# UI Post-Rollout Notes (Phase 5)
 
 Date: March 12, 2026
 Branch: `stage`
-Deployment commit: `c4b544e`
+Deployment commit: `cc0a81c457a25033c98588405af37015c6925dc7`
 
-## Deployment status
+## Rollout scope
 
-- `stage` pushed successfully.
-- Vercel status for `c4b544e`: `success` (`context: Vercel`, "Deployment has completed").
-- Stage URL validated: `https://my-ai-assistant-git-stage-mohammed-abushayiqahs-projects.vercel.app`.
+- Phase 2 foundations + tokens
+- Phase 3 shared shell and primitive alignment
+- Phase 4 core user-facing page composition cleanup
+- Phase 5 admin parity pass + dense view consistency + responsive QA cleanup
 
 ## Visual QA coverage
 
-Desktop (1440x900):
-- auth sign-in
-- auth sign-up
-- dashboard / home shell
-- study hub
-- admin overview
-- admin users tab
-- admin sessions tab
-- document view (`#/study/b8738280-ebcc-462e-896b-b942049321d0`)
+Desktop:
+- shell + home + study index + study detail + legacy activity detail + settings
+- admin overview/users/sessions/storage/audit
 
-Mobile (390x844):
-- auth sign-in
-- authenticated shell on home
-- study hub
-- admin
-- document view (`#/study/b8738280-ebcc-462e-896b-b942049321d0`)
+Tablet:
+- admin filters/actions and table wrappers
+- document/study action rows and state panels
 
-Artifacts saved locally under `qa/staging-qa-2026-03-12-phase3/`.
+Mobile:
+- bottom navigation + shell content spacing
+- admin tabs/filters/actions (stack/wrap behavior)
+- home upload workflow, document list cards, detail action controls
+
+Artifacts are tracked under the local `qa/` workspace directory.
 
 ## Final design system usage expectations
 
@@ -38,34 +35,13 @@ Artifacts saved locally under `qa/staging-qa-2026-03-12-phase3/`.
 - Keep `global.css` foundation-only; component visuals stay local to `.svelte` files.
 - For new work, do not introduce one-off local button/card/modal styles when `Button`, `Card`, `ModalSurface`, `FieldShell`, `Tabs`, and `Badge` already cover the use case.
 
-## Remaining UI polish issues
+## Known remaining issues
 
-1. Fine-tune extra-narrow action-cell wrapping in admin users table (`<360px`) if needed.
-2. Optional sticky-header ergonomics for long admin tables remain deferred.
+1. Extremely narrow admin widths (`<360px`) can still produce dense action wrapping in users table rows.
+2. Sticky table headers are not implemented (intentionally deferred).
 
 ## Deferred improvements backlog
 
-Priority backlog after rollout:
-
-1. Table/data-heavy UX polish
-   - Shared `DataSurface` primitive + pattern contract defined and adopted on `Users`, `Sessions`, `Storage`, `Audit`, and admin overview stats.
-   - Next: normalize sticky header ergonomics and ultra-dense action-cell behavior.
-   - Next: consolidate reusable state fragments for loading/error/empty messaging.
-
-2. Responsive admin polish
-   - Tab-row overflow fix shipped (March 12, 2026 commit `e7b8a45`).
-   - Improve mobile stacking and spacing for admin filters/actions/cards.
-   - Ensure admin tables remain usable without introducing full-page horizontal scrolling.
-
-3. Secondary follow-up
-   - Harmonize state-surface language for non-table screens (empty/loading/error wrappers).
-   - Optional: add lightweight visual regression snapshots for shared primitives + shell routes.
-
-## Selected next enhancement track
-
-Chosen next track: **table/data-heavy UX polish + responsive admin polish**.
-
-Execution order:
-1. Define and harden shared `DataSurface` primitives.
-2. Apply to admin `Users`, `Sessions`, `Storage`, and `Audit` screens.
-3. Complete responsive admin pass (mobile action layout and dense table ergonomics).
+1. Optional sticky headers for long dense tables.
+2. Optional visual regression screenshot automation for key shell/user/admin states.
+3. Optional table-level interaction enhancements (sorting/pinning/configurable columns) as separate product work.

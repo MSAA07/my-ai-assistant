@@ -63,7 +63,7 @@
   });
 </script>
 
-<DataSurface title="Platform Overview" description="Key activity and usage indicators.">
+<DataSurface title="Platform Overview" description="Key activity and usage indicators." tableMinWidth="640px">
   <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchStats({ background: Boolean(stats) })} disabled={loading || refreshing}>
     {refreshing ? 'Refreshing...' : 'Refresh'}
   </Button>
@@ -78,22 +78,22 @@
 
   {#if !loading && !error && stats}
     <div class="stats-grid">
-      <Card class="admin-stat-card" variant="soft" padding="md" border="subtle">
+      <Card class="admin-stat-card" variant="base" padding="md" border="subtle">
         <p class="label">Total Users</p>
         <h3>{stats.totals.users}</h3>
         <span class="meta">Active 24h: {stats.activeUsers.last24h}</span>
       </Card>
-      <Card class="admin-stat-card" variant="soft" padding="md" border="subtle">
+      <Card class="admin-stat-card" variant="base" padding="md" border="subtle">
         <p class="label">Documents</p>
         <h3>{stats.totals.documents}</h3>
         <span class="meta">Active 7d: {stats.activeUsers.last7d}</span>
       </Card>
-      <Card class="admin-stat-card" variant="soft" padding="md" border="subtle">
+      <Card class="admin-stat-card" variant="base" padding="md" border="subtle">
         <p class="label">Storage Processed</p>
         <h3>{formatBytes(stats.totals.storageBytes)}</h3>
         <span class="meta">Active 30d: {stats.activeUsers.last30d}</span>
       </Card>
-      <Card class="admin-stat-card" variant="soft" padding="md" border="subtle">
+      <Card class="admin-stat-card" variant="base" padding="md" border="subtle">
         <p class="label">Active Sessions</p>
         <h3>{stats.totals.activeSessions}</h3>
         <span class="meta">Across all devices</span>
@@ -105,12 +105,13 @@
 <style>
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-3);
   }
 
   .stats-grid :global(.admin-stat-card) {
-    gap: 0.35rem;
+    gap: 0.25rem;
+    min-height: 94px;
   }
 
   .label {
@@ -123,12 +124,26 @@
 
   h3 {
     margin: 0;
-    font-size: 1.55rem;
+    font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+    font-weight: 600;
+    line-height: 1.2;
     color: var(--color-text-primary);
   }
 
   .meta {
     font-size: var(--font-size-xs);
     color: var(--color-text-faint);
+  }
+
+  @media (max-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

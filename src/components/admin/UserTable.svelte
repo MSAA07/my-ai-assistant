@@ -226,7 +226,7 @@
   });
 </script>
 
-<DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="980px">
+<DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="1020px">
   <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchUsers({ background: users.length > 0 })} disabled={loading || refreshing}>
     {refreshing ? 'Refreshing...' : 'Refresh'}
   </Button>
@@ -266,7 +266,7 @@
     </FieldShell>
   </svelte:fragment>
 
-  <Card slot="panels" class="create-user" variant="soft" padding="md" border="subtle">
+  <Card slot="panels" class="create-user" variant="base" padding="md" border="subtle">
     <header class="create-header">
       <h3>Create User</h3>
       <p class="muted">Add an account with role and plan defaults.</p>
@@ -369,20 +369,28 @@
                 <input type="checkbox" value={user.id} bind:group={selectedUserIds} />
               </td>
               <td>
-                <strong>{user.name}</strong>
+                <strong>{user.name || 'Unnamed user'}</strong>
                 <span class="muted">{user.email}</span>
               </td>
-              <td>{user.role || 'user'}</td>
+              <td>
+                <Badge tone={(user.role || 'user') === 'admin' ? 'accent' : 'neutral'} size="xs" uppercase>
+                  {user.role || 'user'}
+                </Badge>
+              </td>
               <td>
                 <Badge tone={user.banned ? 'danger' : 'success'} size="xs">
                   {user.banned ? 'Banned' : 'Active'}
                 </Badge>
               </td>
-              <td>{user.plan || 'free'}</td>
-              <td>{user.documentCount}</td>
+              <td>
+                <Badge tone={(user.plan || 'free') === 'premium' ? 'accent' : 'neutral'} size="xs">
+                  {user.plan || 'free'}
+                </Badge>
+              </td>
+              <td>{user.documentCount ?? 0}</td>
               <td>{formatBytes(user.storageUsed)}</td>
               <td>{user.lastActive ? new Date(user.lastActive).toLocaleString() : '-'}</td>
-              <td class="actions">
+              <td class="actions-cell">
                 <Button type="button" variant="ghost" size="sm" on:click={() => (selectedUserId = user.id)}>
                   View
                 </Button>
@@ -416,11 +424,14 @@
   h3 {
     margin: 0;
     color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
   }
 
   .muted {
     color: var(--color-text-secondary);
-    margin: 0.28rem 0 0;
+    margin: 0.2rem 0 0;
+    font-size: var(--font-size-xs);
     display: block;
   }
 
@@ -435,8 +446,8 @@
 
   .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: var(--space-2);
   }
 
   .create-actions {
@@ -449,6 +460,10 @@
     align-items: center;
     flex-wrap: wrap;
     gap: var(--space-2);
+    padding: 0.45rem 0.55rem;
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-base) 94%, transparent);
   }
 
   td input[type='checkbox'],
@@ -459,13 +474,35 @@
     accent-color: var(--color-accent-primary);
   }
 
-  .actions {
+  .actions-cell {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
+    min-width: 230px;
+  }
+
+  :global(.ui-data-table td:first-child) {
+    width: 34px;
+  }
+
+  :global(.ui-data-table td:nth-child(2)) {
+    min-width: 190px;
+  }
+
+  :global(.ui-data-table td:nth-child(8)) {
+    min-width: 168px;
   }
 
   @media (max-width: 768px) {
+    .bulk-actions {
+      align-items: stretch;
+    }
+
+    .bulk-actions :global(.ui-button) {
+      flex: 1;
+      min-width: 0;
+    }
+
     .create-actions {
       justify-content: stretch;
     }

@@ -1,7 +1,7 @@
 # Data Surface Pattern
 
 Date: March 12, 2026  
-Status: Pattern defined, incremental adoption pending
+Status: Adopted across admin dense views (`overview`, `users`, `sessions`, `storage`, `audit`)
 
 ## Why this exists
 
@@ -80,14 +80,14 @@ Canonical scaffold:
 
 ## Spacing rules
 
-- Surface-level vertical rhythm is controlled by `DataSurface` (`gap: var(--space-4)` by default).
-- Filters use a responsive grid with `minmax(180px, 1fr)`.
-- Action rows (`actions`, `bulk`) use wrap-capable flex rows with `var(--space-2)` gaps.
+- Surface-level vertical rhythm is controlled by `DataSurface`.
+- Filters use wrap-capable flex rows and `FieldShell` controls with responsive growth.
+- Action rows (`actions`, `bulk`) wrap naturally and collapse to full-width actions on mobile.
 
 ## Responsive expectations
 
 - Horizontal overflow must be contained to the table wrapper, never at page level.
-- Filters collapse to one column on small widths (`<= 640px`).
+- Filters collapse into stacked full-width controls on small widths (`<= 640px`).
 - Action rows wrap naturally; no fixed-width button groups that force horizontal overflow.
 - Use `tableMinWidth` when table density demands minimum readable columns.
 
@@ -97,10 +97,15 @@ Canonical scaffold:
 - One of loading/error/empty/data should be prominent at a time.
 - Error states should use primitive visual language (`Card` soft + strong border or equivalent).
 
-## Adoption plan
+## Adoption state
 
-Pattern-first phase only:
+Completed:
 
-1. Establish shared primitive (`DataSurface`) and contract docs.
-2. Migrate admin tables incrementally (`Users`, `Sessions`, `Storage`, `Audit`).
-3. Normalize remaining dense data surfaces after admin convergence.
+1. Established `DataSurface` primitive and contract docs.
+2. Migrated admin dense surfaces (`Users`, `Sessions`, `Storage`, `Audit`, overview stats wrapper).
+3. Standardized dense state handling (`loading`, `error`, `empty`) within surface slots.
+
+Remaining follow-up (non-blocking):
+
+1. Optional sticky headers for very large tables.
+2. Optional visual regression snapshots for dense admin routes.

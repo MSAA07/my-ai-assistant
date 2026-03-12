@@ -136,6 +136,11 @@
     flex-wrap: wrap;
   }
 
+  .ui-data-surface__filters :global(.filter-field) {
+    min-width: 180px;
+    flex: 1 1 220px;
+  }
+
   .ui-data-surface__bulk {
     display: flex;
     align-items: center;
@@ -157,10 +162,15 @@
   .ui-data-surface__state :global(.ui-data-state-note) {
     margin: 0;
     color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    border: 1px dashed var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-base) 94%, transparent);
+    padding: 0.5rem 0.62rem;
   }
 
   .ui-data-surface__state :global(.ui-data-state-error) {
-    color: var(--color-danger-soft);
+    color: color-mix(in srgb, var(--color-danger) 76%, var(--color-text-primary) 24%);
     border-color: color-mix(in srgb, var(--color-danger) 34%, var(--color-border) 66%);
   }
 
@@ -193,6 +203,24 @@
     font-weight: 600;
   }
 
+  .ui-data-surface__table-wrap :global(.ui-data-table td) {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .ui-data-surface__table-wrap :global(.ui-data-table td strong) {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  .ui-data-surface__table-wrap :global(.ui-data-table tbody tr) {
+    transition: background var(--motion-fast) var(--ease-standard);
+  }
+
+  .ui-data-surface__table-wrap :global(.ui-data-table tbody tr:hover) {
+    background: color-mix(in srgb, var(--ui-surface-raised) 44%, transparent);
+  }
+
   .ui-data-surface__table-wrap :global(.ui-data-table tbody tr:last-child td) {
     border-bottom: 0;
   }
@@ -210,7 +238,24 @@
 
   @media (max-width: 640px) {
     .ui-data-surface__filters {
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ui-data-surface__filters :global(.filter-field) {
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .ui-data-surface__actions,
+    .ui-data-surface__bulk {
+      width: 100%;
+    }
+
+    .ui-data-surface__actions :global(.ui-button),
+    .ui-data-surface__bulk :global(.ui-button) {
+      flex: 1;
     }
   }
 </style>

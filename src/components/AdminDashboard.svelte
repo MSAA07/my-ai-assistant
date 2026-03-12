@@ -23,10 +23,10 @@
   }
 </script>
 
-<Section className="admin-shell">
+<Section className="admin-shell" title="Admin Console" description="Manage users, sessions, storage, and security logs.">
   <div slot="header" class="header-copy">
     <p class="eyebrow">Admin Console</p>
-    <h1>User Management & Security</h1>
+    <h1>Operations and Security</h1>
     <p class="subtitle">Monitor platform activity, manage users, and audit actions.</p>
   </div>
 
@@ -39,7 +39,7 @@
     on:change={handleTabChange}
   />
 
-  <Card class="admin-content" variant="soft" border="none" padding="none">
+  <Card class="admin-content" variant="base" border="none" padding="none">
     {#if activeTab === 'overview'}
       <AdminStats />
     {:else if activeTab === 'users'}
@@ -61,32 +61,35 @@
 
   .header-copy {
     display: grid;
-    gap: 0.25rem;
+    gap: 0.15rem;
   }
 
   .eyebrow {
     margin: 0;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: var(--font-size-xs);
+    letter-spacing: 0.08em;
+    font-size: 0.67rem;
     color: var(--color-text-secondary);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   h1 {
     margin: 0;
-    font-size: 1.7rem;
+    font-size: clamp(1.08rem, 2vw, 1.26rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
     color: var(--color-text-primary);
   }
 
   .subtitle {
     margin: 0;
     color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
+    max-width: 72ch;
   }
 
   :global(.admin-tabs) {
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
   }
 
@@ -98,10 +101,6 @@
   @media (max-width: 640px) {
     :global(.admin-tabs) {
       width: 100%;
-    }
-
-    h1 {
-      font-size: 1.4rem;
     }
   }
 </style>

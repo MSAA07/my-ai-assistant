@@ -5,28 +5,28 @@ Primary spec: `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`
 
 ## Phase 2: Foundations
 
-- [ ] Normalize tokens to dark-neutral, border-led contract
-- [ ] Deprecate gradient/glow tokens from shell and primary controls
-- [ ] Update shell surfaces (`App`, `AppShell`, `Sidebar`, `TopBar`, `BottomNav`)
-- [ ] Refit core primitives (`Button`, `Card`, `FieldShell`, `Tabs`, `ModalSurface`, `MenuSurface`)
-- [ ] Keep behavior and routing unchanged
+- [x] Normalize tokens to dark-neutral, border-led contract
+- [x] Deprecate gradient/glow tokens from shell and primary controls
+- [x] Update shell surfaces (`App`, `AppShell`, `Sidebar`, `TopBar`, `BottomNav`)
+- [x] Refit core primitives (`Button`, `Card`, `FieldShell`, `Tabs`, `ModalSurface`, `MenuSurface`)
+- [x] Keep behavior and routing unchanged
 
-## Phase 3: Data and settings surfaces
+## Phase 3: Shared shell and primitives
 
-- [ ] Apply primitive-first styling to document/admin/settings surfaces
-- [ ] Replace local button/input/card styles with shared primitives
-- [ ] Normalize table/filter density via `DataSurface`
-- [ ] Keep table overflow scoped to component wrappers
+- [x] Apply primitive-first styling to shell + reusable components
+- [x] Replace local button/input/card/menu/modal patterns with shared primitives
+- [x] Standardize interaction states (`hover`, `active`, `selected`, `disabled`, `loading`, `focus-visible`)
+- [x] Keep table/list overflow scoped to component wrappers
 
-## Phase 4: Local override cleanup
+## Phase 4: Core user-facing pages
 
-- [ ] Remove decorative page-specific styling in `Landing`, `Home`, and detail pages
-- [ ] Reduce page-level `:global()` hooks where shared primitives can own style
-- [ ] Standardize empty/loading/error state visuals
+- [x] Reskin `Home`, `Study`, `Document`, and `Settings` page composition
+- [x] Reduce page-level overrides where primitives own the style contract
+- [x] Standardize empty/loading/error/state surfaces in primary user workflows
 
-## Phase 5: QA and lock
+## Phase 5: Admin parity and QA lock
 
-- [ ] Run responsive QA on shell, study, document, and admin routes
-- [ ] Verify keyboard/focus behavior and contrast
-- [ ] Remove leftover visual inconsistencies
-- [ ] Document final visual contract and enforce primitive usage for new UI work
+- [x] Reskin admin overview/users/sessions/storage/audit to match the same visual language
+- [x] Standardize dense table/filter/bulk/action rows through `DataSurface` + primitive controls
+- [x] Run final responsive and overflow QA pass on user + admin routes
+- [x] Document final visual contract for post-migration work

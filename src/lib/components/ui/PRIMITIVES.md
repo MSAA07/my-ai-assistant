@@ -89,7 +89,8 @@ Stop introducing local one-off classes that duplicate primitives:
 
 Primitive-driven styling now covers:
 
-- shared app shell and main study surfaces (Phase 2 scope)
+- shared app shell and reusable UI primitives
+- core user-facing pages (`Home`, `Study`, document detail/activity, `Settings`)
 - auth screens (`SignIn`, `SignUp`)
 - admin overview, users, sessions, storage, audit, and user detail modal
 
@@ -103,9 +104,9 @@ These areas are intentionally left for future structural redesign, not primitive
 
 ## Recommended next UI tasks
 
-1. Adopt `DataSurface` across admin `Users`, `Sessions`, `Storage`, and `Audit` screens.
-2. Consolidate table empty/loading/error markup into shared state fragments.
-3. Run a focused responsive polish pass on small-screen admin workflows after adoption.
+1. Keep new dense views aligned to `DataSurface` slot contract before introducing local wrappers.
+2. Add optional visual regression snapshots for shell + dense data routes.
+3. Revisit sticky table headers only if future data density justifies it.
 
 Post-rollout execution notes and backlog are tracked in `UI_POST_ROLLOUT.md` at the frontend root.
 
