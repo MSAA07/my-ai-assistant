@@ -35,6 +35,7 @@
     ariaLabel="Admin sections"
     items={tabs}
     value={activeTab}
+    mobileScrollable
     on:change={handleTabChange}
   />
 
@@ -95,6 +96,10 @@
   }
 
   @media (max-width: 640px) {
+    :global(.admin-tabs) {
+      width: 100%;
+    }
+
     h1 {
       font-size: 1.4rem;
     }

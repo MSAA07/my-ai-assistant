@@ -8,6 +8,7 @@
   export let ariaLabel = 'Tabs';
   export let fullWidth = false;
   export let stacked = false;
+  export let mobileScrollable = false;
   export let size = 'md';
   export let className = '';
 
@@ -18,6 +19,7 @@
     `ui-tabs--${size}`,
     fullWidth ? 'ui-tabs--full-width' : '',
     stacked ? 'ui-tabs--stacked' : '',
+    mobileScrollable ? 'ui-tabs--mobile-scrollable' : '',
     className,
     $$props.class ?? ''
   ]
@@ -141,6 +143,29 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  @media (max-width: 640px) {
+    .ui-tabs--mobile-scrollable {
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .ui-tabs--mobile-scrollable::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ui-tabs--mobile-scrollable .ui-tabs__tab {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
   }
 
   @media (max-width: 520px) {

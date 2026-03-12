@@ -178,7 +178,13 @@
   {:else if error}
     <Card class="error-card" variant="soft" border="strong" padding="sm">{error}</Card>
   {:else}
-    <Tabs items={tabItems} value={activeTab} ariaLabel="User detail sections" on:change={handleTabChange} />
+    <Tabs
+      items={tabItems}
+      value={activeTab}
+      ariaLabel="User detail sections"
+      mobileScrollable
+      on:change={handleTabChange}
+    />
 
     {#if activeTab === 'profile'}
       <div class="profile-grid">
