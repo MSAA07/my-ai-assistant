@@ -78,6 +78,8 @@ These areas are intentionally left for future structural redesign, not primitive
 2. Consolidate page-level empty/loading/error states with a shared state surface API.
 3. Run a focused responsive polish pass on small-screen admin workflows.
 
+Post-rollout execution notes and backlog are tracked in `UI_POST_ROLLOUT.md` at the frontend root.
+
 ## Token contract
 
 Primitives consume semantic tokens from `src/lib/styles/tokens.css` (`--ui-*`, `--color-*`, `--space-*`).
