@@ -102,6 +102,33 @@
   --ui-focus-ring: 0 0 0 3px var(--color-focus-ring);
   --ui-focus-ring-strong: 0 0 0 3px var(--color-focus-ring-strong);
 
+  /* Upload UI */
+  --upload-modal-width: min(980px, 100%);
+  --upload-modal-bg: var(--ui-surface-overlay);
+  --upload-modal-border: var(--ui-border-subtle);
+  --upload-modal-shadow: var(--shadow-modal-strong);
+  --upload-modal-title: var(--color-text-primary);
+  --upload-modal-description: var(--color-text-muted);
+  --upload-close-color: var(--color-text-primary);
+  --upload-close-hover-bg: color-mix(in srgb, var(--ui-surface-raised) 72%, transparent);
+  --upload-dropzone-bg: color-mix(in srgb, var(--color-accent-primary) 13%, var(--ui-surface-base) 87%);
+  --upload-dropzone-border: color-mix(in srgb, var(--color-accent-primary) 82%, transparent);
+  --upload-dropzone-text: var(--color-text-primary);
+  --upload-dropzone-or: var(--color-text-muted);
+  --upload-dropzone-active-bg: color-mix(in srgb, var(--color-accent-primary) 19%, var(--ui-surface-base) 81%);
+  --upload-dropzone-active-border: color-mix(in srgb, var(--color-accent-primary) 95%, white 5%);
+  --upload-dropzone-icon-bg: var(--gradient-accent-strong);
+  --upload-drag-chip-bg: var(--color-accent-primary);
+  --upload-drag-chip-text: var(--color-text-on-dark);
+  --upload-support-text: var(--color-text-muted);
+  --upload-file-row-bg: color-mix(in srgb, var(--ui-surface-base) 90%, var(--ui-surface-raised) 10%);
+  --upload-file-row-border: var(--ui-border-subtle);
+  --upload-file-name: var(--color-text-primary);
+  --upload-file-size: var(--color-text-muted);
+  --upload-file-remove: var(--color-text-muted);
+  --upload-file-remove-hover: var(--color-danger-soft);
+  --upload-footer-border: var(--ui-border-subtle);
+
   /* Motion */
   --motion-fast: 120ms;
   --motion-normal: 200ms;
@@ -169,4 +196,9 @@
   --gradient-admin-action-soft: linear-gradient(135deg, rgba(74, 99, 247, 0.2), rgba(59, 130, 246, 0.16));
   --shadow-soft: 0 14px 34px rgba(22, 34, 60, 0.14);
   --shadow-panel: 0 8px 24px rgba(22, 34, 60, 0.14);
+
+  --upload-dropzone-bg: color-mix(in srgb, var(--color-accent-primary) 10%, var(--ui-surface-base) 90%);
+  --upload-dropzone-active-bg: color-mix(in srgb, var(--color-accent-primary) 16%, var(--ui-surface-base) 84%);
+  --upload-file-row-bg: color-mix(in srgb, var(--ui-surface-base) 94%, var(--ui-surface-raised) 6%);
+  --upload-modal-shadow: 0 34px 76px rgba(22, 34, 60, 0.25);
 }

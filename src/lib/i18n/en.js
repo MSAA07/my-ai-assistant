@@ -23,6 +23,7 @@ export default {
   },
   common: {
     loading: 'Loading...',
+    close: 'Close',
     comingSoon: 'Coming soon',
     comingSoonBadge: 'Soon',
     comingSoonDetail: 'We are putting the finishing touches on this experience.'
@@ -105,6 +106,16 @@ export default {
     },
     uploadSection: {
       title: 'Upload New Document',
+      modalTitle: 'Media Upload',
+      modalDescription: 'Add your documents here, and you can upload up to 5 files max',
+      dropzoneTitle: 'Drag your file(s) to start uploading',
+      dropzoneOr: 'OR',
+      browse: 'Browse files',
+      supportedFiles: 'Only support .pdf, .docx and .pptx files',
+      openModalCta: 'Upload Documents',
+      cancel: 'Cancel',
+      next: 'Next',
+      removeFile: 'Remove file',
       languageLabel: 'AI Response Language',
       englishOption: 'English',
       arabicOption: 'Arabic',
@@ -120,6 +131,7 @@ export default {
         selectFile: 'Please select a file first',
         invalidType: 'Invalid file type. Please upload PDF, DOCX, or PPTX.',
         fileTooLarge: 'File is too large. Maximum size is 25MB.',
+        maxFiles: 'You can upload up to {max} files at once.',
         limitReached: 'You have reached your monthly upload limit',
         uploadFailed: 'Failed to upload document. Please try again.',
         network: 'Network error. Please try again.'
