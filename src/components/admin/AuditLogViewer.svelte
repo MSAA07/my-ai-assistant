@@ -1,7 +1,9 @@
 <script>
   import { onMount } from 'svelte';
-  import { API_BASE } from "../../config.js";
-
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import { API_BASE } from '../../config.js';
 
   let logs = [];
   let loading = true;
@@ -58,100 +60,96 @@
   onMount(fetchLogs);
 </script>
 
-<section class="audit-panel">
-  <header>
-    <div>
-      <h2>Audit Logs</h2>
-      <p class="muted">Track sensitive admin activity and security events.</p>
-    </div>
-    <button on:click={fetchLogs}>Refresh</button>
-  </header>
+<div class="audit-log-viewer">
+  <Card class="admin-panel" variant="base" padding="md">
+    <header class="panel-header">
+      <div>
+        <h2>Audit Logs</h2>
+        <p class="muted">Track sensitive admin activity and security events.</p>
+      </div>
+      <Button type="button" variant="secondary" size="sm" on:click={fetchLogs}>Refresh</Button>
+    </header>
 
-  <div class="filters">
-    <select bind:value={actionFilter} on:change={fetchLogs}>
-      <option value="all">All actions</option>
-      {#each actions as action}
-        <option value={action}>{action.replaceAll('_', ' ')}</option>
-      {/each}
-    </select>
-    <input
-      placeholder="Admin ID"
-      bind:value={adminFilter}
-      on:change={fetchLogs}
-    />
-  </div>
-
-  {#if loading}
-    <p class="muted">Loading logs...</p>
-  {:else if error}
-    <p class="error">{error}</p>
-  {:else}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Admin</th>
-            <th>Action</th>
-            <th>Target</th>
-            <th>Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each logs as log}
-            <tr>
-              <td>{new Date(log.createdAt).toLocaleString()}</td>
-              <td>{log.adminId}</td>
-              <td>{log.action}</td>
-              <td>{log.targetId || '-'}</td>
-              <td class="details">{log.details ? JSON.stringify(log.details) : '-'}</td>
-            </tr>
+    <div class="filters">
+      <FieldShell label="Action">
+        <select bind:value={actionFilter} on:change={fetchLogs}>
+          <option value="all">All actions</option>
+          {#each actions as action}
+            <option value={action}>{action.replaceAll('_', ' ')}</option>
           {/each}
-        </tbody>
-      </table>
+        </select>
+      </FieldShell>
+
+      <FieldShell label="Admin ID">
+        <input placeholder="Admin ID" bind:value={adminFilter} on:change={fetchLogs} />
+      </FieldShell>
     </div>
-  {/if}
-</section>
+
+    {#if loading}
+      <p class="muted">Loading logs...</p>
+    {:else if error}
+      <p class="error">{error}</p>
+    {:else}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Admin</th>
+              <th>Action</th>
+              <th>Target</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each logs as log}
+              <tr>
+                <td>{new Date(log.createdAt).toLocaleString()}</td>
+                <td>{log.adminId}</td>
+                <td>{log.action}</td>
+                <td>{log.targetId || '-'}</td>
+                <td class="details">{log.details ? JSON.stringify(log.details) : '-'}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {/if}
+  </Card>
+</div>
 
 <style>
-  .audit-panel {
-    background: var(--color-surface-panel);
-    border-radius: 1rem;
-    border: 1px solid var(--color-border-panel);
-    padding: 1.5rem;
+  .audit-log-viewer :global(.admin-panel) {
+    gap: var(--space-4);
   }
 
-  header {
+  .panel-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-3);
+    flex-wrap: wrap;
   }
 
-  button {
-    padding: 0.4rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-accent-outline);
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
+  h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+
+  .muted {
+    color: var(--color-text-secondary);
+    margin: 0.3rem 0 0;
+  }
+
+  .error {
+    margin: 0;
+    color: var(--color-danger-soft);
   }
 
   .filters {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .filters input,
-  .filters select {
-    background: var(--color-surface-panel-elevated);
-    border: 1px solid var(--color-border-panel-strong);
-    border-radius: 0.6rem;
-    padding: 0.6rem 0.8rem;
-    color: var(--color-text);
+    gap: var(--space-3);
   }
 
   .table-wrap {
@@ -166,13 +164,13 @@
   th,
   td {
     padding: 0.75rem;
-    border-bottom: 1px solid var(--color-border-panel);
+    border-bottom: 1px solid var(--ui-border-subtle);
     text-align: start;
     vertical-align: top;
   }
 
   th {
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-text-secondary);
@@ -183,13 +181,5 @@
     word-break: break-word;
     font-size: 0.85rem;
     color: var(--color-text-secondary);
-  }
-
-  .muted {
-    color: var(--color-text-secondary);
-  }
-
-  .error {
-    color: var(--color-danger-soft);
   }
 </style>

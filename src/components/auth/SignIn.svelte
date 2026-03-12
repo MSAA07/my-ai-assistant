@@ -1,9 +1,12 @@
 <script>
-  import { signIn } from '../../stores/auth';
   import { createEventDispatcher } from 'svelte';
-  
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import { signIn } from '../../stores/auth';
+
   const dispatch = createEventDispatcher();
-  
+
   let email = '';
   let password = '';
   let error = '';
@@ -12,128 +15,101 @@
   async function handleSubmit() {
     loading = true;
     error = '';
+
     const res = await signIn(email, password);
     loading = false;
-    
+
     if (res.error) {
       error = res.error.message || 'Login failed';
-    } else {
-        // Success handled by store, but we can emit event to switch view
-        dispatch('success');
+      return;
     }
+
+    dispatch('success');
   }
 </script>
 
-<div class="auth-container">
-  <h2>Welcome Back</h2>
-  <form on:submit|preventDefault={handleSubmit}>
-    <div class="form-group">
-      <label for="email">Email</label>
+<Card class="auth-card" variant="raised" padding="lg" border="subtle">
+  <header class="auth-header">
+    <h2>Welcome Back</h2>
+    <p>Sign in to continue your study workflow.</p>
+  </header>
+
+  <form class="auth-form" on:submit|preventDefault={handleSubmit}>
+    <FieldShell label="Email" forId="email">
       <input id="email" type="email" bind:value={email} required placeholder="Enter your email" />
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
+    </FieldShell>
+
+    <FieldShell label="Password" forId="password">
       <input id="password" type="password" bind:value={password} required placeholder="Enter your password" />
-    </div>
+    </FieldShell>
+
     {#if error}
-      <p class="error">{error}</p>
+      <p class="auth-error">{error}</p>
     {/if}
-    <button type="submit" disabled={loading} class="btn-primary">
+
+    <Button type="submit" variant="primary" loading={loading} block>
       {loading ? 'Logging in...' : 'Login'}
-    </button>
+    </Button>
   </form>
+
   <p class="toggle-text">
-    Don't have an account? <button class="link-btn" on:click={() => dispatch('toggle')}>Sign Up</button>
+    Don't have an account?
+    <Button type="button" variant="ghost" size="sm" className="link-btn" on:click={() => dispatch('toggle')}>
+      Sign Up
+    </Button>
   </p>
-</div>
+</Card>
 
 <style>
-  .auth-container {
-    max-width: 400px;
-    margin: 4rem auto;
-    padding: 2.5rem;
-    background: var(--color-surface);
-    border-radius: var(--radius-2);
-    box-shadow: var(--shadow-panel);
-    border: 1px solid var(--color-border-light);
+  :global(.auth-card) {
+    width: min(440px, 100%);
   }
-  
-  h2 {
-    margin-bottom: 2rem;
+
+  .auth-header {
+    display: grid;
+    gap: 0.45rem;
     text-align: center;
-    color: var(--color-text);
   }
-  
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-secondary);
-  }
-  
-  input {
-    width: 100%;
-    padding: 0.8rem;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border-light);
-    background: var(--color-surface-2);
+
+  .auth-header h2 {
+    margin: 0;
     color: var(--color-text-primary);
-    font-size: 1rem;
+    font-size: 1.65rem;
   }
-  
-  input:focus {
-    outline: none;
-    border-color: var(--color-accent);
+
+  .auth-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
   }
-  
-  .btn-primary {
-    width: 100%;
-    padding: 0.8rem;
-    background: var(--color-accent);
-    color: var(--color-text-soft);
-    border: none;
-    border-radius: var(--radius-1);
-    font-size: 1rem;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background var(--motion-fast) var(--ease-standard);
+
+  .auth-form {
+    display: grid;
+    gap: var(--space-3);
   }
-  
-  .btn-primary:hover:not(:disabled) {
-    background: var(--color-accent-hover);
-  }
-  
-  .btn-primary:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-  
-  .error {
-    color: var(--color-danger);
+
+  .auth-error {
+    margin: 0;
+    border: 1px solid var(--color-danger-border);
+    border-radius: var(--ui-radius-md);
     background: var(--color-danger-surface);
-    padding: 0.75rem;
-    border-radius: var(--radius-1);
-    margin-bottom: 1rem;
-    text-align: center;
+    color: var(--color-danger-soft);
+    padding: 0.65rem 0.8rem;
+    font-size: var(--font-size-sm);
   }
-  
+
   .toggle-text {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.9rem;
+    margin: 0;
     color: var(--color-text-muted);
+    text-align: center;
+    font-size: var(--font-size-sm);
   }
-  
-  .link-btn {
-    background: none;
-    border: none;
-    color: var(--color-accent);
-    cursor: pointer;
+
+  :global(.link-btn) {
+    margin-inline-start: 0.25rem;
+    min-height: auto;
+    padding-inline: 0.35rem;
     text-decoration: underline;
-    font-size: 0.9rem;
-    padding: 0;
+    text-underline-offset: 2px;
   }
 </style>

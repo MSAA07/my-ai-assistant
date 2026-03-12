@@ -53,6 +53,30 @@ Stop introducing local one-off classes that duplicate primitives:
 - ad-hoc card panel shells (`border + radius + background + shadow`) when `Card` or `Section` fits.
 - custom status chip implementations when `Badge`/`StatusBadge` fits.
 - modal overlays/surfaces implemented directly in pages.
+- auth form wrappers that do not use `Card + FieldShell + Button`.
+- admin action rows that use raw `<button>` styling when `Button` variants already match.
+
+## Coverage snapshot
+
+Primitive-driven styling now covers:
+
+- shared app shell and main study surfaces (Phase 2 scope)
+- auth screens (`SignIn`, `SignUp`)
+- admin overview, users, sessions, storage, audit, and user detail modal
+
+## Deferred redesign work
+
+These areas are intentionally left for future structural redesign, not primitive normalization:
+
+- dense data-table UX beyond visual shell normalization (sorting, pinning, column configuration)
+- upload-zone interaction ergonomics in `Home.svelte` (behavior and IA decisions)
+- legacy `AppHeader` fallback path when `VITE_FEATURE_APPSHELL` is disabled
+
+## Recommended next UI tasks
+
+1. Build a reusable data-table primitive layer (`TableShell`, row actions, empty/loading rows).
+2. Consolidate page-level empty/loading/error states with a shared state surface API.
+3. Run a focused responsive polish pass on small-screen admin workflows.
 
 ## Token contract
 

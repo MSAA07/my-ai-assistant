@@ -1,7 +1,8 @@
 <script>
   import { onMount } from 'svelte';
-  import { API_BASE } from "../../config.js";
-
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import { API_BASE } from '../../config.js';
 
   let users = [];
   let loading = true;
@@ -41,67 +42,77 @@
   onMount(fetchStorage);
 </script>
 
-<section class="storage-panel">
-  <header>
-    <h2>Storage Breakdown</h2>
-    <button on:click={fetchStorage}>Refresh</button>
-  </header>
+<div class="storage-overview">
+  <Card class="admin-panel" variant="base" padding="md">
+    <header class="panel-header">
+      <div>
+        <h2>Storage Breakdown</h2>
+        <p class="muted">Storage distribution by user account.</p>
+      </div>
+      <Button type="button" variant="secondary" size="sm" on:click={fetchStorage}>Refresh</Button>
+    </header>
 
-  {#if loading}
-    <p class="muted">Loading storage data...</p>
-  {:else if error}
-    <p class="error">{error}</p>
-  {:else}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Documents</th>
-            <th>Monthly Used</th>
-            <th>Total Storage</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each users as user}
+    {#if loading}
+      <p class="muted">Loading storage data...</p>
+    {:else if error}
+      <p class="error">{error}</p>
+    {:else}
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <td>
-                <strong>{user.name}</strong>
-                <span class="muted">{user.email}</span>
-              </td>
-              <td>{user.documentCount}</td>
-              <td>{user.documentsUsed}</td>
-              <td>{formatBytes(user.storageUsed)}</td>
+              <th>User</th>
+              <th>Documents</th>
+              <th>Monthly Used</th>
+              <th>Total Storage</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
-  {/if}
-</section>
+          </thead>
+          <tbody>
+            {#each users as user}
+              <tr>
+                <td>
+                  <strong>{user.name}</strong>
+                  <span class="muted">{user.email}</span>
+                </td>
+                <td>{user.documentCount}</td>
+                <td>{user.documentsUsed}</td>
+                <td>{formatBytes(user.storageUsed)}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {/if}
+  </Card>
+</div>
 
 <style>
-  .storage-panel {
-    background: var(--color-surface-panel);
-    border-radius: 1rem;
-    border: 1px solid var(--color-border-panel);
-    padding: 1.5rem;
+  .storage-overview :global(.admin-panel) {
+    gap: var(--space-4);
   }
 
-  header {
+  .panel-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    gap: var(--space-3);
+    flex-wrap: wrap;
   }
 
-  button {
-    padding: 0.4rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-accent-outline);
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
+  h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+
+  .muted {
+    color: var(--color-text-secondary);
+    margin: 0.3rem 0 0;
+    display: block;
+  }
+
+  .error {
+    margin: 0;
+    color: var(--color-danger-soft);
   }
 
   .table-wrap {
@@ -116,23 +127,14 @@
   th,
   td {
     padding: 0.75rem;
-    border-bottom: 1px solid var(--color-border-panel);
+    border-bottom: 1px solid var(--ui-border-subtle);
     text-align: start;
   }
 
   th {
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-text-secondary);
-  }
-
-  .muted {
-    color: var(--color-text-secondary);
-    display: block;
-  }
-
-  .error {
-    color: var(--color-danger-soft);
   }
 </style>

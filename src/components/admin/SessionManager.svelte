@@ -1,7 +1,8 @@
 <script>
   import { onMount } from 'svelte';
-  import { API_BASE } from "../../config.js";
-
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import { API_BASE } from '../../config.js';
 
   let sessions = [];
   let loading = true;
@@ -40,71 +41,83 @@
   onMount(fetchSessions);
 </script>
 
-<section class="session-panel">
-  <header>
-    <h2>Active Sessions</h2>
-    <button on:click={fetchSessions}>Refresh</button>
-  </header>
+<div class="session-manager">
+  <Card class="admin-panel" variant="base" padding="md">
+    <header class="panel-header">
+      <div>
+        <h2>Active Sessions</h2>
+        <p class="muted">Current active login sessions across users.</p>
+      </div>
+      <Button type="button" variant="secondary" size="sm" on:click={fetchSessions}>Refresh</Button>
+    </header>
 
-  {#if loading}
-    <p class="muted">Loading sessions...</p>
-  {:else if error}
-    <p class="error">{error}</p>
-  {:else}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>IP Address</th>
-            <th>User Agent</th>
-            <th>Expires</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each sessions as session}
+    {#if loading}
+      <p class="muted">Loading sessions...</p>
+    {:else if error}
+      <p class="error">{error}</p>
+    {:else}
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <td>
-                <strong>{session.user?.name || 'Unknown'}</strong>
-                <span class="muted">{session.user?.email || ''}</span>
-              </td>
-              <td>{session.ipAddress || '-'}</td>
-              <td class="agent">{session.userAgent || '-'}</td>
-              <td>{new Date(session.expiresAt).toLocaleString()}</td>
-              <td>
-                <button class="danger" on:click={() => revokeSession(session.id)}>Revoke</button>
-              </td>
+              <th>User</th>
+              <th>IP Address</th>
+              <th>User Agent</th>
+              <th>Expires</th>
+              <th>Actions</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
-  {/if}
-</section>
+          </thead>
+          <tbody>
+            {#each sessions as session}
+              <tr>
+                <td>
+                  <strong>{session.user?.name || 'Unknown'}</strong>
+                  <span class="muted">{session.user?.email || ''}</span>
+                </td>
+                <td>{session.ipAddress || '-'}</td>
+                <td class="agent">{session.userAgent || '-'}</td>
+                <td>{new Date(session.expiresAt).toLocaleString()}</td>
+                <td>
+                  <Button type="button" size="sm" variant="danger" on:click={() => revokeSession(session.id)}>
+                    Revoke
+                  </Button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {/if}
+  </Card>
+</div>
 
 <style>
-  .session-panel {
-    background: var(--color-surface-panel);
-    border-radius: 1rem;
-    border: 1px solid var(--color-border-panel);
-    padding: 1.5rem;
+  .session-manager :global(.admin-panel) {
+    gap: var(--space-4);
   }
 
-  header {
+  .panel-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    gap: var(--space-3);
+    flex-wrap: wrap;
   }
 
-  button {
-    padding: 0.4rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-accent-outline);
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
+  h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+
+  .muted {
+    color: var(--color-text-secondary);
+    margin: 0.3rem 0 0;
+    display: block;
+  }
+
+  .error {
+    color: var(--color-danger-soft);
+    margin: 0;
   }
 
   .table-wrap {
@@ -119,13 +132,13 @@
   th,
   td {
     padding: 0.75rem;
-    border-bottom: 1px solid var(--color-border-panel);
+    border-bottom: 1px solid var(--ui-border-subtle);
     text-align: start;
     vertical-align: top;
   }
 
   th {
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-text-secondary);
@@ -134,22 +147,5 @@
   .agent {
     max-width: 260px;
     word-break: break-word;
-  }
-
-  .danger {
-    border: 1px solid var(--color-danger-border);
-    color: var(--color-danger-soft);
-    background: transparent;
-    border-radius: 999px;
-    padding: 0.3rem 0.8rem;
-  }
-
-  .muted {
-    color: var(--color-text-secondary);
-    display: block;
-  }
-
-  .error {
-    color: var(--color-danger-soft);
   }
 </style>
