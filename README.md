@@ -93,6 +93,11 @@ If `VITE_API_BASE_URL` is not set, the app derives API base from hostname in `sr
 - Feature or component class selectors must not be added to `global.css`.
 - `.svelte` component styles should use semantic tokens and keep concerns local (layout/structure/state), avoiding new raw palette/shadow constants.
 
+## Visual Refactor Docs
+
+- Phase 1 audit + Vercel-style target spec: `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`
+- Phases 2-5 concise checklist: `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`
+
 ## Theme Behavior
 
 - Theme mode is global and supports exactly two values: `dark` and `light`.
