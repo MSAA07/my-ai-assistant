@@ -18,7 +18,7 @@
   $: resolvedClass = [
     'ui-tabs',
     variant === 'underline'
-      ? 'flex items-end gap-1 border-b border-border bg-transparent p-0'
+      ? 'flex items-end gap-5 border-b border-border bg-transparent p-0'
       : 'inline-flex items-center gap-1 rounded-lg border border-border bg-muted/70 p-[3px] text-muted-foreground shadow-inline-control',
     fullWidth ? 'w-full' : 'w-fit',
     mobileScrollable ? 'max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none]' : '',
@@ -48,7 +48,7 @@
     <button
       type="button"
       class={`ui-tabs__tab ${fullWidth ? 'flex-1' : ''} ${variant === 'underline'
-        ? 'relative inline-flex min-h-10 items-center justify-center gap-1.5 border-b-2 border-transparent px-4 py-2.5 text-sm'
+        ? 'relative inline-flex min-h-0 items-center justify-center gap-1.5 border-0 bg-transparent px-0 pb-3 pt-0 text-sm shadow-none appearance-none'
         : 'inline-flex h-[calc(100%-1px)] min-h-9 items-center justify-center gap-1.5 rounded-md border border-transparent px-3.5 py-1.5 text-sm shadow-none'}`}
       role="tab"
       aria-selected={selectedValue === item.value}
@@ -96,16 +96,23 @@
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab:hover:not(:disabled) {
     color: var(--foreground);
+    background: transparent;
   }
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab {
     color: color-mix(in srgb, var(--foreground) 72%, var(--muted-foreground) 28%);
+    background: transparent;
+    border: 0;
     border-radius: 0;
+    box-shadow: none;
   }
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab[aria-selected='true'] {
     color: var(--foreground);
     font-weight: 600;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
   }
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab[aria-selected='true']::after {
@@ -120,6 +127,10 @@
   .ui-tabs__tab:focus-visible {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 32%, transparent);
     border-radius: calc(var(--radius) - 2px);
+  }
+
+  .ui-tabs[data-variant='underline'] .ui-tabs__tab:focus-visible {
+    border-radius: 0;
   }
 
   .ui-tabs__tab:disabled {
