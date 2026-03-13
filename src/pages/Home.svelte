@@ -3,9 +3,7 @@
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
-  import Badge from "../lib/components/ui/Badge.svelte";
   import Card from "../lib/components/ui/Card.svelte";
-  import StatCard from "../lib/components/ui/StatCard.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
   import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
   import { readPageCache, writePageCache } from "../stores/pageCache.js";
@@ -54,6 +52,29 @@
   $: usedThisMonthValue = user?.documentsUsed ?? user?.usedThisMonth ?? 0;
   $: monthlyLimitValue = user?.monthlyLimit ?? 0;
   $: totalDocumentsValue = Array.isArray(documents) ? documents.length : 0;
+  $: homeStats = [
+    {
+      key: "remaining",
+      label: t("home.stats.documentsRemaining"),
+      value: normalizedRole === "admin" ? t("home.stats.unlimited") : remainingDocumentsValue,
+      icon: "infinity",
+      compact: normalizedRole === "admin",
+    },
+    {
+      key: "used",
+      label: t("home.stats.usedThisMonth"),
+      value: `${usedThisMonthValue}/${monthlyLimitValue}`,
+      icon: "file",
+      compact: false,
+    },
+    {
+      key: "total",
+      label: t("home.stats.totalDocuments"),
+      value: totalDocumentsValue,
+      icon: "folder",
+      compact: false,
+    },
+  ];
 
   $: if (!canUploadDocuments) {
     selectedFiles = [];
@@ -268,21 +289,11 @@
 </script>
 
 <div class="home-page">
-  <Card as="section" class="page-hero" variant="base" padding="lg" border="strong" aria-labelledby="home-title">
-    <div class="page-hero__copy">
-      <div class="page-hero__badges">
-        <Badge tone="neutral" variant="outline" size="sm" className="home-eyebrow">{t('nav.home')}</Badge>
-        {#if isRefreshingDashboard}
-          <Badge tone="neutral" size="sm" className="refresh-indicator">{t('common.loading')}</Badge>
-        {/if}
-      </div>
-
-      <div class="page-hero__heading">
-        <h1 id="home-title">{t('home.heroTitle')}</h1>
-        <p class="subtitle">{t('home.heroSubtitle')}</p>
-      </div>
-    </div>
-  </Card>
+  <section class="home-header" aria-labelledby="home-title" aria-busy={isRefreshingDashboard}>
+    <p class="home-eyebrow">{t("nav.home")}</p>
+    <h1 id="home-title">{t("home.heroTitle")}</h1>
+    <p class="subtitle">{t("home.heroSubtitle")}</p>
+  </section>
 
   {#if isLoadingDashboard}
     <section class="stats-grid" aria-label={t('nav.home')}>
@@ -292,22 +303,34 @@
     </section>
   {:else if user}
     <section class="stats-grid" aria-label={t('nav.home')}>
-      <StatCard
-        className="home-stat-card"
-        label={t('home.stats.documentsRemaining')}
-        value={normalizedRole === 'admin' ? t('home.stats.unlimited') : remainingDocumentsValue}
-        valueClassName={normalizedRole === 'admin' ? 'stat-value-admin' : ''}
-      />
-      <StatCard
-        className="home-stat-card"
-        label={t('home.stats.usedThisMonth')}
-        value={`${usedThisMonthValue}/${monthlyLimitValue}`}
-      />
-      <StatCard
-        className="home-stat-card"
-        label={t('home.stats.totalDocuments')}
-        value={totalDocumentsValue}
-      />
+      {#each homeStats as stat (stat.key)}
+        <Card as="article" class="home-stat-card" variant="base" padding="md" border="subtle">
+          <div class="home-stat-card__header">
+            <p class={`home-stat-card__value ${stat.compact ? 'home-stat-card__value--compact' : ''}`.trim()}>
+              {stat.value}
+            </p>
+
+            <div class="home-stat-card__icon" aria-hidden="true">
+              {#if stat.icon === 'infinity'}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M18.5 15.5c-1.88 0-2.86-1.2-4.25-3-1.39 1.8-2.37 3-4.25 3a3.5 3.5 0 1 1 0-7c1.88 0 2.86 1.2 4.25 3 1.39-1.8 2.37-3 4.25-3a3.5 3.5 0 1 1 0 7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {:else if stat.icon === 'file'}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M8 3.75h5.5L18 8.25V19a1.75 1.75 0 0 1-1.75 1.75h-8.5A1.75 1.75 0 0 1 6 19V5.5A1.75 1.75 0 0 1 7.75 3.75Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13 3.75V8.5h4.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {:else}
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M3.75 7.75A1.75 1.75 0 0 1 5.5 6h4l1.7 1.75h7.3a1.75 1.75 0 0 1 1.75 1.75v7.75A1.75 1.75 0 0 1 18.5 19h-13A1.75 1.75 0 0 1 3.75 17.25V7.75Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {/if}
+            </div>
+          </div>
+
+          <p class="home-stat-card__label">{stat.label}</p>
+        </Card>
+      {/each}
     </section>
   {/if}
 
@@ -356,67 +379,40 @@
     width: min(100%, 64rem);
     margin: 0 auto;
     display: grid;
-    gap: 1.5rem;
-    min-width: 0;
-  }
-
-  :global(.page-hero) {
-    display: grid;
     gap: 1rem;
     min-width: 0;
-    background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
   }
 
-  .page-hero__copy {
+  .home-header {
     display: grid;
-    gap: 0.875rem;
+    gap: 0.5rem;
     min-width: 0;
   }
 
-  .page-hero__badges {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  :global(.home-eyebrow) {
-    min-height: 22px;
-    border-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+  .home-eyebrow {
+    margin: 0;
     color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
-  :global(.refresh-indicator) {
-    min-height: 22px;
-    background: color-mix(in srgb, var(--muted) 82%, transparent);
-    color: var(--muted-foreground);
-  }
-
-  .page-hero__heading {
-    display: grid;
-    gap: 0.5rem;
-    min-width: 0;
-  }
-
-  .page-hero__heading h1 {
+  .home-header h1 {
     margin: 0;
     color: var(--foreground);
-    font-size: clamp(1.7rem, 4vw, 2.1rem);
+    font-size: clamp(1.95rem, 4vw, 2.2rem);
     font-weight: 600;
     letter-spacing: -0.03em;
-    line-height: 1.05;
+    line-height: 1.08;
   }
 
   .subtitle {
     margin: 0;
-    max-width: 44rem;
+    max-width: 40rem;
     color: var(--muted-foreground);
-    font-size: 0.98rem;
-    line-height: 1.6;
+    font-size: 0.95rem;
+    line-height: 1.55;
   }
 
   .stats-grid {
@@ -427,12 +423,62 @@
   }
 
   .home-page :global(.home-stat-card) {
-    min-height: 118px;
+    gap: 1.75rem;
+    min-height: 148px;
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    background: color-mix(in srgb, var(--card) 94%, transparent);
+    box-shadow: none;
   }
 
-  .home-page :global(.home-stat-card .stat-value-admin),
-  .home-page :global(.home-stat-card .ui-stat-card__value.stat-value-admin) {
-    font-size: 1.2rem;
+  .home-stat-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .home-stat-card__value,
+  .home-stat-card__label {
+    margin: 0;
+  }
+
+  .home-stat-card__value {
+    color: var(--foreground);
+    font-size: clamp(1.85rem, 3vw, 2.1rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    word-break: break-word;
+  }
+
+  .home-stat-card__value--compact {
+    font-size: clamp(1.55rem, 2.6vw, 1.8rem);
+  }
+
+  .home-stat-card__label {
+    color: var(--muted-foreground);
+    font-size: 0.77rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .home-stat-card__icon {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--radius) - 2px);
+    background: color-mix(in srgb, var(--muted) 76%, transparent);
+    color: var(--muted-foreground);
+  }
+
+  .home-stat-card__icon svg {
+    width: 1.1rem;
+    height: 1.1rem;
   }
 
   :global(.home-alert) {
@@ -475,16 +521,16 @@
   }
 
   .upload-section :global(.upload-panel) {
-    gap: 1.5rem;
+    gap: 1rem;
     padding: 1.5rem;
-    border-color: var(--border);
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     border-radius: 1rem;
-    background: var(--card);
-    box-shadow: var(--shadow-card);
+    background: color-mix(in srgb, var(--card) 96%, transparent);
+    box-shadow: none;
   }
 
   .upload-section :global(.upload-panel__titles) {
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   .upload-section :global(.upload-panel__titles h2) {
@@ -495,41 +541,44 @@
   }
 
   .upload-section :global(.upload-panel__titles p) {
-    max-width: 44rem;
+    max-width: 32rem;
     color: var(--muted-foreground);
-    line-height: 1.55;
+    line-height: 1.5;
   }
 
   .upload-section :global(.upload-panel__support) {
-    margin-top: -0.5rem;
+    margin-top: -0.125rem;
+    color: var(--muted-foreground);
   }
 
   .upload-section :global(.upload-dropzone) {
     gap: 0.875rem;
-    padding: clamp(1.75rem, 5vw, 3rem) 1.25rem;
-    border-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+    padding: clamp(2rem, 5vw, 3rem) 1.25rem;
+    border-width: 1px;
+    border-color: color-mix(in srgb, var(--foreground) 9%, transparent);
     border-radius: 0.875rem;
-    background: color-mix(in srgb, var(--card) 74%, var(--muted) 26%);
+    background: color-mix(in srgb, var(--secondary) 65%, transparent);
+    box-shadow: none;
   }
 
   .upload-section :global(.upload-dropzone:hover:not(.upload-dropzone--disabled)),
   .upload-section :global(.upload-dropzone--active) {
     border-color: color-mix(in srgb, var(--foreground) 16%, transparent);
-    background: color-mix(in srgb, var(--card) 60%, var(--muted) 40%);
+    background: color-mix(in srgb, var(--secondary) 84%, transparent);
   }
 
   .upload-section :global(.upload-dropzone__icon) {
     width: 48px;
     height: 48px;
-    border-radius: 0.875rem;
-    border-color: var(--border);
-    background: var(--muted);
+    border-radius: 999px;
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    background: color-mix(in srgb, var(--card) 92%, transparent);
     color: var(--foreground);
   }
 
   .upload-section :global(.upload-dropzone__icon svg) {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
   }
 
   .upload-section :global(.upload-dropzone__title) {
@@ -548,15 +597,15 @@
   }
 
   .upload-section :global(.upload-dropzone__browse.ui-button) {
-    --button-bg: var(--background);
+    --button-bg: color-mix(in srgb, var(--card) 95%, transparent);
     --button-bg-hover: color-mix(in srgb, var(--accent) 72%, transparent);
-    --button-bg-active: color-mix(in srgb, var(--accent) 90%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--accent) 86%, transparent);
     --button-fg: var(--foreground);
     --button-fg-hover: var(--foreground);
-    --button-border: var(--border);
-    --button-border-hover: var(--border);
-    --button-shadow: var(--shadow-inline-control);
-    min-width: 148px;
+    --button-border: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    --button-border-hover: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
+    --button-shadow: none;
+    min-width: 122px;
   }
 
   .upload-section :global(.upload-panel__files) {
@@ -566,11 +615,32 @@
   .upload-section :global(.upload-panel__footer) {
     padding-top: 1rem;
     margin-top: 0;
-    border-top-color: var(--border);
+    border-top-color: color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
   }
 
   .upload-section :global(.upload-panel__counter) {
     color: var(--muted-foreground);
+  }
+
+  .upload-section :global(.upload-panel__actions) {
+    gap: 0.75rem;
+  }
+
+  .upload-section :global(.upload-panel__cancel.ui-button) {
+    --button-bg: color-mix(in srgb, var(--card) 94%, transparent);
+    --button-bg-hover: color-mix(in srgb, var(--accent) 68%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--accent) 82%, transparent);
+    --button-fg: var(--foreground);
+    --button-fg-hover: var(--foreground);
+    --button-border: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    --button-border-hover: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
+    --button-shadow: none;
+    min-width: 100px;
+  }
+
+  .upload-section :global(.upload-panel__submit.ui-button) {
+    --button-shadow: none;
+    min-width: 100px;
   }
 
   @media (max-width: 1024px) {
@@ -580,14 +650,45 @@
   }
 
   @media (max-width: 720px) {
-    .page-hero__heading h1 {
-      font-size: clamp(1.5rem, 7vw, 1.9rem);
+    .home-page {
+      gap: 0.875rem;
+    }
+
+    .home-header h1 {
+      font-size: clamp(1.7rem, 8vw, 2rem);
+    }
+
+    .upload-section :global(.upload-panel) {
+      padding: 1rem;
+    }
+
+    .upload-section :global(.upload-panel__footer) {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .upload-section :global(.upload-panel__counter) {
+      text-align: left;
+    }
+
+    .upload-section :global(.upload-panel__actions) {
+      width: min(100%, 228px);
+      margin-left: auto;
+    }
+
+    .upload-section :global(.upload-panel__actions .ui-button) {
+      flex: 1 1 0;
+      min-width: 0;
     }
   }
 
   @media (max-width: 680px) {
     .stats-grid {
       grid-template-columns: 1fr;
+    }
+
+    .home-page :global(.home-stat-card) {
+      min-height: 128px;
     }
   }
 </style>
