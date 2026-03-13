@@ -15,7 +15,6 @@
   ];
 
   let activeTab = 'overview';
-  $: activeTabLabel = tabs.find((tab) => tab.value === activeTab)?.label ?? 'Overview';
 
   function handleTabChange(event) {
     activeTab = event.detail.value;
@@ -25,7 +24,7 @@
 <div class="admin-page">
   <header class="admin-header">
     <p class="eyebrow">Admin Console</p>
-    <h1>Operations and Security</h1>
+    <h1>User Management &amp; Security</h1>
     <p class="subtitle">Monitor platform activity, manage users, and audit actions.</p>
   </header>
 
@@ -57,7 +56,7 @@
 <style>
   .admin-page {
     display: grid;
-    gap: 1rem;
+    gap: 1.5rem;
     min-width: 0;
   }
 
@@ -88,40 +87,40 @@
   .subtitle {
     margin: 0;
     color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    font-size: 0.95rem;
+    font-weight: 500;
     line-height: 1.6;
     max-width: 58ch;
   }
 
   .admin-page :global(.admin-tabs) {
-    width: 100%;
+    width: fit-content;
     max-width: 100%;
+    gap: 1.5rem;
     border-bottom-color: color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
   }
 
   .admin-page :global(.admin-tabs .ui-tabs__tab) {
-    min-width: 112px;
-    padding: 0.75rem 1rem;
+    min-width: 0;
+    justify-content: flex-start;
+    padding: 0 0 0.875rem;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
 
   .admin-content {
     min-width: 0;
   }
 
-  @media (min-width: 720px) {
-    .admin-page :global(.admin-tabs .ui-tabs__tab) {
-      flex: 1 1 0;
-    }
-  }
-
   @media (max-width: 640px) {
     .admin-page {
-      gap: 0.875rem;
+      gap: 1.25rem;
     }
 
     .admin-page :global(.admin-tabs .ui-tabs__tab) {
       min-width: max-content;
-      padding-inline: 0.9rem;
+      padding-bottom: 0.8rem;
+      font-size: 0.9rem;
     }
   }
 </style>
