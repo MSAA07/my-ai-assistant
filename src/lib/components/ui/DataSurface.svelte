@@ -85,21 +85,21 @@
 <style>
   :global(.ui-data-surface) {
     min-width: 0;
-    gap: var(--space-3);
+    gap: 1rem;
   }
 
   :global(.ui-data-surface--compact) {
-    gap: var(--space-3);
+    gap: 1rem;
   }
 
   .ui-data-surface__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: 1rem;
     flex-wrap: wrap;
-    padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--ui-border-subtle);
+    padding-bottom: 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
   }
 
   .ui-data-surface__heading {
@@ -111,15 +111,16 @@
   .ui-data-surface__heading h2 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.02em;
   }
 
   .ui-data-surface__heading p {
     margin: 0;
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-xs);
+    color: var(--muted-foreground);
+    font-size: var(--font-size-sm);
+    line-height: 1.55;
   }
 
   .ui-data-surface__actions {
@@ -132,7 +133,7 @@
   .ui-data-surface__filters {
     display: flex;
     align-items: flex-end;
-    gap: var(--space-2);
+    gap: 0.75rem;
     flex-wrap: wrap;
   }
 
@@ -144,13 +145,13 @@
   .ui-data-surface__bulk {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 0.75rem;
     flex-wrap: wrap;
   }
 
   .ui-data-surface__panels {
     display: grid;
-    gap: var(--space-3);
+    gap: 1rem;
     min-width: 0;
   }
 
@@ -161,12 +162,13 @@
 
   .ui-data-surface__state :global(.ui-data-state-note) {
     margin: 0;
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     font-size: var(--font-size-sm);
-    border: 1px dashed var(--ui-border-subtle);
-    border-radius: var(--ui-radius-sm);
-    background: color-mix(in srgb, var(--ui-surface-base) 94%, transparent);
-    padding: 0.5rem 0.62rem;
+    line-height: 1.55;
+    border: 1px dashed color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    border-radius: calc(var(--radius) + 2px);
+    background: color-mix(in srgb, var(--muted) 62%, transparent);
+    padding: 0.75rem 0.9rem;
   }
 
   .ui-data-surface__state :global(.ui-data-state-error) {
@@ -189,7 +191,7 @@
 
   .ui-data-surface__table-wrap :global(.ui-data-table th),
   .ui-data-surface__table-wrap :global(.ui-data-table td) {
-    padding: 0.6rem 0.5rem;
+    padding: 0.8rem 0.65rem;
     border-bottom: 1px solid var(--ui-border-subtle);
     text-align: start;
     vertical-align: top;
@@ -205,7 +207,7 @@
 
   .ui-data-surface__table-wrap :global(.ui-data-table td) {
     font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
   }
 
   .ui-data-surface__table-wrap :global(.ui-data-table td strong) {
@@ -218,7 +220,7 @@
   }
 
   .ui-data-surface__table-wrap :global(.ui-data-table tbody tr:hover) {
-    background: rgba(255, 255, 255, 0.025);
+    background: color-mix(in srgb, var(--muted) 52%, transparent);
   }
 
   .ui-data-surface__table-wrap :global(.ui-data-table tbody tr:last-child td) {

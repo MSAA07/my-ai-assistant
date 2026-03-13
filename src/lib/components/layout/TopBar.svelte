@@ -2,7 +2,6 @@
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
   import Badge from '../ui/Badge.svelte';
-  import Button from '../ui/Button.svelte';
   import MenuItem from '../ui/MenuItem.svelte';
   import MenuSurface from '../ui/MenuSurface.svelte';
   import { ENABLE_ARABIC_UI } from '../../config/features.js';
@@ -15,7 +14,7 @@
 
   const dispatch = createEventDispatcher();
   let menuOpen = false;
-  let avatarWrapper;
+  let accountWrapper;
 
   function toggleMenu() {
     menuOpen = !menuOpen;
@@ -27,9 +26,14 @@
 
   function handleOutsideClick(event) {
     if (!menuOpen) return;
-    if (avatarWrapper && !avatarWrapper.contains(event.target)) {
+    if (accountWrapper && !accountWrapper.contains(event.target)) {
       closeMenu();
     }
+  }
+
+  function handleProfile() {
+    dispatch('openProfile');
+    closeMenu();
   }
 
   function handleSignOut() {
@@ -60,53 +64,48 @@
 </script>
 
 <header class="topbar">
-  <div class="topbar-left">
-    <h1>{pageTitle || t('topbar.defaultTitle')}</h1>
-  </div>
+  <h1 class="page-title">{pageTitle || t('topbar.defaultTitle')}</h1>
 
-  <div class="topbar-right">
+  <div class="utility-area">
     {#if planLabel}
       <Badge className="plan-pill" tone="neutral" size="sm">{planLabel}</Badge>
     {/if}
+
     {#if ENABLE_ARABIC_UI}
       <LanguageToggle />
     {/if}
 
-    <Button
-      className="icon-button"
-      variant="ghost"
-      size="icon"
+    <button
+      class="utility-button"
       type="button"
       disabled
       aria-disabled="true"
-      title={t('common.comingSoon')}
       aria-label={t('topbar.notificationsComingSoon')}
+      title={t('common.comingSoon')}
     >
-      <span slot="icon">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v2.88l-.95 2.86A1.75 1.75 0 0 0 6.69 17h10.62a1.75 1.75 0 0 0 1.64-2.26L18 11.88V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z" /></svg>
-      </span>
-    </Button>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v2.88l-.95 2.86A1.75 1.75 0 0 0 6.69 17h10.62a1.75 1.75 0 0 0 1.64-2.26L18 11.88V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z" /></svg>
+    </button>
 
-    <div class="avatar-wrapper" bind:this={avatarWrapper}>
-      <Button
-        className="avatar-button"
-        variant="ghost"
-        size="icon"
+    <div class="account-wrapper" bind:this={accountWrapper}>
+      <button
+        class="account-trigger"
         type="button"
-        on:click={toggleMenu}
+        on:click|stopPropagation={toggleMenu}
         aria-haspopup="menu"
         aria-expanded={menuOpen}
+        aria-label={t('topbar.profile')}
       >
-        <span class="avatar-initials">{initials}</span>
-      </Button>
+        <span class="account-avatar">{initials}</span>
+      </button>
 
       {#if menuOpen}
-        <MenuSurface className="menu" role="menu" minWidth="220px">
+        <MenuSurface className="account-menu" role="menu" minWidth="220px">
           <div class="menu-header">
-            <span class="menu-name">{userName}</span>
-            <span class="menu-email">{userEmail}</span>
+            <span class="menu-name">{userName || t('settings.account.anonymous')}</span>
+            <span class="menu-email">{userEmail || t('settings.account.noEmail')}</span>
           </div>
-          <MenuItem on:click={() => dispatch('openProfile')}>
+
+          <MenuItem on:click={handleProfile}>
             {t('topbar.profile')}
           </MenuItem>
           <MenuItem on:click={handleSignOut}>
@@ -120,123 +119,155 @@
 
 <style>
   .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 90;
     display: flex;
+    min-height: 56px;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
-    min-height: var(--size-topbar);
-    padding: 0 var(--space-4);
-    background: rgba(9, 9, 11, 0.92);
-    border-bottom: 1px solid var(--ui-border-subtle);
+    gap: 1rem;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--card) 94%, transparent);
+    backdrop-filter: blur(10px);
   }
 
-  .topbar h1 {
+  .page-title {
     margin: 0;
-    font-size: 0.98rem;
+    min-width: 0;
+    color: var(--foreground);
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: -0.02em;
-    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .topbar-right {
+  .utility-area {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 0.75rem;
+    flex: 0 0 auto;
   }
 
   :global(.plan-pill) {
-    letter-spacing: 0.02em;
+    min-height: 24px;
+    padding-inline: 0.625rem;
+    border-radius: 999px;
+    border-color: transparent;
+    background: var(--muted);
+    color: var(--foreground);
+    letter-spacing: 0;
+    font-weight: 500;
   }
 
-  :global(.icon-button) {
-    width: var(--ui-control-height-md);
-    height: var(--ui-control-height-md);
-    padding: 0;
+  .utility-button,
+  .account-trigger {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--muted) 66%, transparent);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard);
   }
 
-  :global(.icon-button .ui-button__label) {
-    display: none;
+  .utility-button:hover:enabled,
+  .account-trigger:hover,
+  .account-trigger[aria-expanded='true'] {
+    background: color-mix(in srgb, var(--accent) 58%, transparent);
+    color: var(--foreground);
   }
 
-  :global(.icon-button svg) {
-    width: 18px;
-    height: 18px;
+  .utility-button:disabled {
+    cursor: default;
+    opacity: 1;
+  }
+
+  .utility-button:focus-visible,
+  .account-trigger:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
+  }
+
+  .utility-button svg {
+    width: 16px;
+    height: 16px;
     fill: currentColor;
   }
 
-  .avatar-wrapper {
+  .account-wrapper {
     position: relative;
   }
 
-  :global(.avatar-button) {
-    width: var(--ui-control-height-md);
-    height: var(--ui-control-height-md);
-    border-radius: var(--ui-radius-md);
-    border-color: var(--ui-border-subtle);
-    background: var(--ui-surface-raised);
-    color: var(--color-text-secondary);
+  .account-trigger {
+    width: 34px;
+    height: 34px;
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    background: color-mix(in srgb, var(--card) 70%, var(--muted) 30%);
+    color: var(--foreground);
+    box-shadow: var(--shadow-inline-control);
   }
 
-  :global(.avatar-button:hover:not(:disabled)),
-  :global(.avatar-button[aria-expanded='true']) {
-    border-color: var(--ui-border-strong);
-    box-shadow: none;
-    background: var(--color-surface-3);
-    color: var(--color-text-primary);
-  }
-
-  :global(.avatar-button .ui-button__icon),
-  :global(.avatar-button .ui-button__spinner) {
-    display: none;
-  }
-
-  :global(.avatar-button .ui-button__label) {
-    line-height: 1;
-  }
-
-  .avatar-initials {
-    font-size: var(--font-size-xs);
-    font-weight: 700;
-    letter-spacing: 0.04em;
+  .account-avatar {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     text-transform: uppercase;
   }
 
-  :global(.menu) {
+  :global(.account-menu) {
     position: absolute;
     inset-inline-end: 0;
-    margin-top: var(--space-2);
-    z-index: 20;
+    top: calc(100% + 0.5rem);
+    z-index: 40;
   }
 
   .menu-header {
-    padding: var(--space-2);
-    border-bottom: 1px solid var(--ui-border-subtle);
     display: grid;
     gap: 0.25rem;
-    margin-bottom: var(--space-1);
+    margin-bottom: 0.25rem;
+    padding: 0.5rem 0.625rem 0.625rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .menu-name,
+  .menu-email {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .menu-name {
-    font-weight: 600;
-    color: var(--color-text-primary);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
   }
 
   .menu-email {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .topbar {
-      min-height: 52px;
-      padding: 0 var(--space-3);
+      padding: 0 1rem;
+      gap: 0.75rem;
     }
 
-    .topbar h1 {
-      font-size: 0.95rem;
+    .utility-area {
+      gap: 0.5rem;
+    }
+
+    :global(.plan-pill) {
+      display: none;
     }
   }
 </style>

@@ -5,106 +5,118 @@
   export let uppercase = false;
   export let className = '';
 
-  $: resolvedClass = ['ui-badge', className, $$props.class ?? ''].filter(Boolean).join(' ');
+  const toneAliases = {
+    danger: 'destructive',
+  };
+
+  const sizeClasses = {
+    xs: 'min-h-[18px] px-2 py-0.5 text-[11px]',
+    sm: 'min-h-[22px] px-2 py-0.5 text-xs',
+    md: 'min-h-[26px] px-2.5 py-1 text-sm',
+  };
+
+  $: normalizedTone = toneAliases[tone] ?? tone;
+  $: normalizedSize = sizeClasses[size] ? size : 'sm';
+  $: resolvedClass = [
+    'ui-badge inline-flex w-fit shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-md border border-[color:var(--badge-border)] bg-[color:var(--badge-bg)] text-[color:var(--badge-fg)] font-medium leading-none transition-[background-color,border-color,color,box-shadow] transition-fast',
+    sizeClasses[normalizedSize],
+    uppercase ? 'uppercase tracking-[0.08em]' : '',
+    className,
+    $$props.class ?? '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 </script>
 
 <span
   {...$$restProps}
   class={resolvedClass}
-  data-tone={tone}
+  data-tone={normalizedTone}
   data-variant={variant}
-  data-size={size}
-  data-uppercase={uppercase}
+  data-size={normalizedSize}
 >
   <slot />
 </span>
 
 <style>
   .ui-badge {
-    --badge-bg: rgba(255, 255, 255, 0.04);
-    --badge-border: rgba(255, 255, 255, 0.08);
-    --badge-text: var(--color-text-secondary);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    border-radius: var(--ui-radius-pill);
-    border: 1px solid var(--badge-border);
-    background: var(--badge-bg);
-    color: var(--badge-text);
-    font-weight: 500;
-    line-height: 1;
-    white-space: nowrap;
-  }
-
-  .ui-badge[data-size='xs'] {
-    min-height: 18px;
-    padding: 0.06rem 0.4rem;
-    font-size: 0.64rem;
-    letter-spacing: 0.04em;
-  }
-
-  .ui-badge[data-size='sm'] {
-    min-height: 22px;
-    padding: 0.12rem 0.52rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.03em;
-  }
-
-  .ui-badge[data-size='md'] {
-    min-height: 26px;
-    padding: 0.16rem 0.62rem;
-    font-size: var(--font-size-sm);
-  }
-
-  .ui-badge[data-uppercase='true'] {
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
+    --badge-bg: color-mix(in srgb, var(--muted) 78%, transparent);
+    --badge-border: transparent;
+    --badge-fg: var(--foreground);
   }
 
   .ui-badge[data-variant='outline'] {
     --badge-bg: transparent;
+    --badge-border: var(--border);
   }
 
   .ui-badge[data-variant='solid'] {
-    --badge-bg: var(--badge-text);
     --badge-border: transparent;
-    color: var(--color-text-on-dark);
   }
 
   .ui-badge[data-tone='neutral'] {
-    --badge-bg: rgba(255, 255, 255, 0.04);
-    --badge-border: rgba(255, 255, 255, 0.08);
-    --badge-text: var(--color-text-secondary);
+    --badge-bg: var(--muted);
+    --badge-border: transparent;
+    --badge-fg: var(--foreground);
   }
 
   .ui-badge[data-tone='accent'] {
-    --badge-bg: rgba(255, 255, 255, 0.06);
-    --badge-border: rgba(255, 255, 255, 0.12);
-    --badge-text: var(--color-text-primary);
+    --badge-bg: color-mix(in srgb, var(--foreground) 8%, transparent);
+    --badge-border: color-mix(in srgb, var(--foreground) 12%, transparent);
+    --badge-fg: var(--foreground);
   }
 
   .ui-badge[data-tone='info'] {
-    --badge-bg: color-mix(in srgb, var(--color-info) 12%, var(--ui-surface-base) 88%);
-    --badge-border: color-mix(in srgb, var(--color-info) 30%, var(--color-border) 70%);
-    --badge-text: color-mix(in srgb, var(--color-info) 66%, var(--color-text-primary) 34%);
+    --badge-bg: color-mix(in srgb, var(--info) 10%, transparent);
+    --badge-border: color-mix(in srgb, var(--info) 20%, transparent);
+    --badge-fg: color-mix(in srgb, var(--info) 74%, var(--foreground) 26%);
   }
 
   .ui-badge[data-tone='success'] {
-    --badge-bg: color-mix(in srgb, var(--color-success) 12%, var(--ui-surface-base) 88%);
-    --badge-border: color-mix(in srgb, var(--color-success) 28%, var(--color-border) 72%);
-    --badge-text: color-mix(in srgb, var(--color-success) 68%, var(--color-text-primary) 32%);
+    --badge-bg: color-mix(in srgb, var(--success) 10%, transparent);
+    --badge-border: color-mix(in srgb, var(--success) 20%, transparent);
+    --badge-fg: color-mix(in srgb, var(--success) 74%, var(--foreground) 26%);
   }
 
   .ui-badge[data-tone='warning'] {
-    --badge-bg: color-mix(in srgb, var(--color-warning) 14%, var(--ui-surface-base) 86%);
-    --badge-border: color-mix(in srgb, var(--color-warning) 32%, var(--color-border) 68%);
-    --badge-text: color-mix(in srgb, var(--color-warning) 72%, var(--color-text-primary) 28%);
+    --badge-bg: color-mix(in srgb, var(--warning) 10%, transparent);
+    --badge-border: color-mix(in srgb, var(--warning) 20%, transparent);
+    --badge-fg: color-mix(in srgb, var(--warning) 74%, var(--foreground) 26%);
   }
 
-  .ui-badge[data-tone='danger'] {
-    --badge-bg: color-mix(in srgb, var(--color-danger) 12%, var(--ui-surface-base) 88%);
-    --badge-border: color-mix(in srgb, var(--color-danger) 30%, var(--color-border) 70%);
-    --badge-text: color-mix(in srgb, var(--color-danger) 68%, var(--color-text-primary) 32%);
+  .ui-badge[data-tone='destructive'] {
+    --badge-bg: color-mix(in srgb, var(--destructive) 10%, transparent);
+    --badge-border: color-mix(in srgb, var(--destructive) 20%, transparent);
+    --badge-fg: color-mix(in srgb, var(--destructive) 78%, var(--foreground) 22%);
+  }
+
+  .ui-badge[data-variant='solid'][data-tone='neutral'] {
+    --badge-bg: var(--primary);
+    --badge-fg: var(--primary-foreground);
+  }
+
+  .ui-badge[data-variant='solid'][data-tone='accent'] {
+    --badge-bg: var(--foreground);
+    --badge-fg: var(--background);
+  }
+
+  .ui-badge[data-variant='solid'][data-tone='info'] {
+    --badge-bg: var(--info);
+    --badge-fg: var(--info-foreground);
+  }
+
+  .ui-badge[data-variant='solid'][data-tone='success'] {
+    --badge-bg: var(--success);
+    --badge-fg: var(--success-foreground);
+  }
+
+  .ui-badge[data-variant='solid'][data-tone='warning'] {
+    --badge-bg: var(--warning);
+    --badge-fg: var(--warning-foreground);
+  }
+
+  .ui-badge[data-variant='solid'][data-tone='destructive'] {
+    --badge-bg: var(--destructive);
+    --badge-fg: var(--destructive-foreground);
   }
 </style>

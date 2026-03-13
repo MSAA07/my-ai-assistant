@@ -64,16 +64,17 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.22rem;
-    border: 1px solid var(--ui-border-subtle);
-    border-radius: var(--ui-radius-md);
-    background: var(--ui-surface-base);
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    border-radius: 0.9rem;
+    background: color-mix(in srgb, var(--muted) 70%, transparent);
+    box-shadow: var(--shadow-inline-control);
   }
 
   .option {
     min-height: var(--ui-control-height-md);
     min-width: 88px;
     border: 1px solid transparent;
-    border-radius: var(--ui-radius-sm);
+    border-radius: calc(var(--radius) - 2px);
     background: transparent;
     color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
@@ -90,8 +91,9 @@
 
   .option.active {
     color: var(--color-text-primary);
-    background: color-mix(in srgb, var(--color-accent-primary) 11%, transparent);
-    border-color: var(--ui-border-accent);
+    background: var(--background);
+    border-color: color-mix(in srgb, var(--foreground) 8%, transparent);
+    box-shadow: var(--shadow-inline-control);
   }
 
   .option:focus-visible {

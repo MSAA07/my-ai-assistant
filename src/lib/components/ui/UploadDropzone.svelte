@@ -122,10 +122,10 @@
     position: relative;
     display: grid;
     justify-items: center;
-    gap: var(--space-2);
-    border: 1px dashed var(--upload-dropzone-border);
-    border-radius: var(--ui-radius-md);
-    background: var(--upload-dropzone-bg);
+    gap: 0.875rem;
+    border: 1px dashed color-mix(in srgb, var(--foreground) 10%, transparent);
+    border-radius: 0.95rem;
+    background: color-mix(in srgb, var(--card) 74%, var(--muted) 26%);
     padding: clamp(1.25rem, 4vw, 1.8rem) var(--space-3);
     text-align: center;
     transition: border-color var(--motion-fast) var(--ease-standard),
@@ -136,9 +136,9 @@
 
   .upload-dropzone:hover:not(.upload-dropzone--disabled),
   .upload-dropzone--active {
-    border-color: var(--upload-dropzone-active-border);
-    background: var(--upload-dropzone-active-bg);
-    box-shadow: none;
+    border-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+    background: color-mix(in srgb, var(--card) 60%, var(--muted) 40%);
+    box-shadow: var(--shadow-inline-control);
   }
 
   .upload-dropzone--disabled {
@@ -151,20 +151,20 @@
   }
 
   .upload-dropzone__icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--ui-radius-sm);
-    background: var(--upload-dropzone-icon-bg);
-    border: 1px solid var(--ui-border-subtle);
-    color: var(--color-text-secondary);
+    width: 48px;
+    height: 48px;
+    border-radius: 0.875rem;
+    background: var(--muted);
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    color: var(--foreground);
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
   .upload-dropzone__icon svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 
   .upload-dropzone__drag-chip {
@@ -186,8 +186,10 @@
   .upload-dropzone__title {
     margin: 0;
     color: var(--upload-dropzone-text);
-    font-size: var(--font-size-sm);
+    font-size: 0.95rem;
     font-weight: 600;
+    line-height: 1.45;
+    max-width: 36rem;
   }
 
   .upload-dropzone__divider {

@@ -6,7 +6,8 @@ This folder defines the shared visual primitives for dark-first SaaS styling. Us
 
 - `Button.svelte`
   - Use for all interactive actions.
-  - Variants: `primary`, `secondary`, `ghost`, `danger`, `success`.
+  - Variants: `primary`, `secondary`, `outline`, `ghost`, `destructive`.
+  - Backward-compatible aliases: `danger -> destructive`, plus semantic `success` and `warning`.
   - Sizes: `sm`, `md`, `lg`, `icon`.
   - Supports: `loading`, `disabled`, `block`, `slot="icon"`.
 
@@ -29,14 +30,29 @@ This folder defines the shared visual primitives for dark-first SaaS styling. Us
 
 - `Badge.svelte`
   - Use for status, metadata chips, and compact labels.
-  - Tones: `neutral`, `accent`, `info`, `success`, `warning`, `danger`.
+  - Tones: `neutral`, `accent`, `info`, `success`, `warning`, `destructive`.
+  - Backward-compatible alias: `danger -> destructive`.
   - Variants: `soft`, `outline`, `solid`.
   - Sizes: `xs`, `sm`, `md`.
 
 - `Tabs.svelte`
   - Use for segmented controls and simple tab selectors.
   - Controlled by `value`; emits `change` with `{ value }`.
+  - Variants: `pill`, `underline`.
   - Supports stacked labels via `meta` + `stacked`.
+
+- `Toggle.svelte`
+  - Use for compact switch-style binary controls.
+  - Controlled by `checked`; emits `change` with `{ checked }`.
+
+- `StatCard.svelte`
+  - Use for dashboard and analytics metrics.
+  - Props: `label`, `value`, `meta`, optional icon slot, and `valueClassName`.
+
+- `MetaPill.svelte`
+  - Use for compact label/value metadata chips in page heroes and document headers.
+  - Default contract: uppercase muted label + strong value/content.
+  - Prefer this over page-local metadata chip markup.
 
 - `ModalSurface.svelte`
   - Use as the base shell for dialogs.
@@ -93,6 +109,14 @@ Primitive-driven styling now covers:
 - core user-facing pages (`Home`, `Study`, document detail/activity, `Settings`)
 - auth screens (`SignIn`, `SignUp`)
 - admin overview, users, sessions, storage, audit, and user detail modal
+
+## Common reusable page patterns now in use
+
+- dashboard/page hero card with eyebrow, title, subtitle, and optional action row
+- metadata pill rows (`MetaPill`) for document/settings/admin hero metadata
+- centered study-stage surfaces for flashcards/exam states
+- panel header with status badge for study and admin summaries
+- dense data-table surfaces via `DataSurface`
 
 ## Deferred redesign work
 

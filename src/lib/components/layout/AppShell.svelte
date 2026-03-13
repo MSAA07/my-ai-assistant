@@ -34,6 +34,7 @@
     items={navItems}
     secondaryItems={secondaryItems}
     activeId={activeNav}
+    planLabel={planLabel}
   />
 
   <div class="shell-main">
@@ -59,60 +60,68 @@
 
 <style>
   .app-shell {
+    --shell-sidebar-width: 16rem;
     min-height: 100vh;
-    display: grid;
-    grid-template-columns: var(--size-sidebar) 1fr;
-    background: var(--color-bg);
-    color: var(--color-text-primary);
+    display: flex;
+    background: var(--background);
+    color: var(--foreground);
+    overflow: hidden;
   }
 
   .app-shell.rtl {
     direction: rtl;
-    grid-template-columns: 1fr var(--size-sidebar);
+    flex-direction: row-reverse;
   }
 
   .shell-main {
+    flex: 1;
     min-height: 100vh;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    background: var(--color-bg);
-    min-width: 0;
+    overflow: hidden;
+    background: var(--background);
   }
 
   .shell-content {
     flex: 1;
-    display: flex;
-    justify-content: center;
-    width: 100%;
     min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .content-wrapper {
     width: 100%;
-    max-width: var(--size-content-wide);
+    max-width: min(100%, var(--size-content-wide));
     margin: 0 auto;
-    padding: var(--space-4) var(--space-4) var(--space-6);
+    padding: 1.75rem 1.5rem;
     box-sizing: border-box;
     display: grid;
-    gap: var(--space-4);
+    gap: 1.5rem;
+    min-width: 0;
+  }
+
+  .content-wrapper > :global(*) {
     min-width: 0;
   }
 
   @media (max-width: 1024px) {
     .content-wrapper {
-      padding: var(--space-4);
+      padding: 1.5rem 1.25rem;
+      gap: 1.25rem;
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .app-shell,
     .app-shell.rtl {
-      grid-template-columns: 1fr;
+      display: block;
     }
 
     .content-wrapper {
-      padding: var(--space-3) var(--space-3) calc(var(--space-4) + 72px);
-      gap: var(--space-3);
+      padding: 1rem 1rem calc(1rem + 72px);
+      gap: 1rem;
     }
   }
 </style>

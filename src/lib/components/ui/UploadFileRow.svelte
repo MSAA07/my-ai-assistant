@@ -55,10 +55,11 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    border: 1px solid var(--upload-file-row-border);
-    border-radius: var(--ui-radius-md);
-    background: var(--upload-file-row-bg);
-    padding: var(--space-2) var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
+    border-radius: 0.9rem;
+    background: color-mix(in srgb, var(--card) 76%, var(--muted) 24%);
+    box-shadow: var(--shadow-inline-control);
+    padding: 0.8rem 1rem;
   }
 
   .upload-file-row__icon {
@@ -67,9 +68,9 @@
     justify-content: center;
     width: 34px;
     height: 34px;
-    border-radius: var(--ui-radius-sm);
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--color-text-secondary);
+    border-radius: calc(var(--radius) - 2px);
+    background: color-mix(in srgb, var(--background) 78%, var(--muted) 22%);
+    color: var(--muted-foreground);
     font-size: 0.64rem;
     font-weight: 600;
     letter-spacing: 0.03em;

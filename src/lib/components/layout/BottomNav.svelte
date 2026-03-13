@@ -53,8 +53,9 @@
     z-index: 95;
     display: none;
     pointer-events: none;
-    background: rgba(9, 9, 11, 0.96);
-    border-top: 1px solid var(--ui-border-subtle);
+    background: color-mix(in srgb, var(--card) 94%, transparent);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     padding: var(--space-2) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
     justify-content: space-around;
   }
@@ -94,9 +95,10 @@
   }
 
   .bottom-nav-item.active {
-    border-color: var(--ui-border-accent);
+    border-color: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
     color: var(--color-text-primary);
-    background: rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--foreground) 6%, transparent);
+    box-shadow: var(--shadow-inline-control);
   }
 
   .bottom-nav-item:focus-visible {

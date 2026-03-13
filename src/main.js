@@ -1,4 +1,3 @@
-import './lib/styles/tokens.css';
 import App from './App.svelte';
 import { theme } from './stores/theme.js';
 

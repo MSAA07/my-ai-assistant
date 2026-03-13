@@ -30,10 +30,18 @@ This document describes how the frontend is wired to backend APIs and how UI sta
 4. Theme state (`src/stores/theme.js`)
 - Canonical theme values: `dark`, `light`
 - Applies theme globally via `document.documentElement[data-theme]`
+- Mirrors theme mode to a `.dark` class so Tailwind dark-mode utilities stay aligned with runtime theme
 - Persists preference in localStorage key `my-ai-assistant:theme`
 - Startup sequence:
   - `index.html` applies persisted theme before app scripts run
   - `src/main.js` calls `theme.initializeTheme()` to sync store + DOM
+
+5. Styling/runtime UI layer
+- Shared tokens live in `src/lib/styles/tokens.css`
+- Foundation-only global CSS lives in `src/styles/global.css`
+- Shared authenticated app chrome lives in `src/lib/components/layout/*`
+- Reusable primitives live in `src/lib/components/ui/*`
+- TailwindCSS 3 is configured for utility use, but design values should still come from tokens/primitives
 
 5. API base resolution (`src/config.js`)
 - Uses `VITE_API_BASE_URL` when set
@@ -56,6 +64,7 @@ All calls include credentials so browser session cookies are sent.
 - Upload sends `POST /api/upload` with `multipart/form-data`
 - After upload, UI navigates to `/study?highlight=:id`
 - Study Hub Library requests `GET /api/user/me` and is the canonical browse/select surface for documents
+- Document Hub (`StudyHubDocument.svelte`) is the canonical per-document launch surface for summary, flashcards, and exam tools
 
 ### Document view lifecycle behavior
 
@@ -83,6 +92,15 @@ Study activity modes:
 - Flashcards mode: one card at a time, reveal answer, mark correct/incorrect, prev/next
 - Exam mode: intro/start, question flow, submit/complete, results/review
 
+Important route ownership:
+- `/study` -> `StudyHubIndex.svelte`
+- `/study/:id/:section?` -> `StudyHubDocument.svelte`
+- `/legacy/documents/:id/:section?` -> `DocumentView.svelte`
+
+This split is intentional:
+- Study Hub routes are the primary user-facing browse/launch surfaces
+- `DocumentView.svelte` preserves the legacy activity route contract without changing business logic
+
 ### Progress tracking
 
 - Flashcards progress: `POST /api/flashcard/progress`
@@ -108,6 +126,7 @@ Compatibility mirrors still consumed by UI:
 - Route/page errors are surfaced as user-facing messages
 - Upload/network errors are normalized to translated keys
 - Failed processing state shows recovery navigation back to home/library
+- Empty/loading/error surfaces are standardized through shared `Card`, `EmptyState`, `DataSurface`, and `StatusBadge` usage where applicable
 
 ## Deployment Mapping
 
@@ -127,4 +146,4 @@ Update this file when:
 - lifecycle status contract changes
 - environment host mapping changes
 
-Last Updated: March 12, 2026
+Last Updated: March 13, 2026

@@ -46,16 +46,18 @@
 
 <style>
   .ui-section {
-    border: 1px solid var(--ui-border-subtle);
-    border-radius: var(--ui-radius-md);
-    background: var(--ui-surface-base);
-    box-shadow: none;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    border-radius: 1rem;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, transparent) 0%, var(--card) 100%);
+    box-shadow: var(--shadow-card);
     display: grid;
-    gap: var(--space-3);
+    gap: 1rem;
+    min-width: 0;
   }
 
   .ui-section--padded {
-    padding: var(--space-4);
+    padding: 1.5rem;
   }
 
   .ui-section__header {
@@ -63,9 +65,9 @@
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-3);
-    padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--ui-border-subtle);
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
   }
 
   .ui-section__heading {
@@ -75,16 +77,17 @@
 
   .ui-section__heading h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     color: var(--color-text-primary);
   }
 
   .ui-section__heading p {
     margin: 0;
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.55;
+    color: var(--muted-foreground);
   }
 
   .ui-section__actions {

@@ -1,3 +1,9 @@
+@import "../lib/styles/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 *,
 *::before,
 *::after {

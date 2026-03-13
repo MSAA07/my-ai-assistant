@@ -7,15 +7,31 @@
   export let disabled = false;
   export let className = '';
 
+  const variantAliases = {
+    danger: 'destructive',
+  };
+
+  const sizeClasses = {
+    sm: 'h-8 rounded-md px-3 text-sm',
+    md: 'h-9 rounded-md px-4 py-2 text-sm',
+    lg: 'h-10 rounded-md px-6 text-sm',
+    icon: 'size-9 rounded-md p-0',
+    'icon-sm': 'size-8 rounded-md p-0',
+    'icon-lg': 'size-10 rounded-md p-0',
+  };
+
+  $: normalizedVariant = variantAliases[variant] ?? variant;
+  $: normalizedSize = sizeClasses[size] ? size : 'md';
   $: isDisabled = disabled || loading;
   $: resolvedClass = [
-    'ui-button',
-    `ui-button--${variant}`,
-    `ui-button--${size}`,
-    block ? 'ui-button--block' : '',
+    'ui-button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap border border-[color:var(--button-border)] bg-[color:var(--button-bg)] text-[color:var(--button-fg)] shadow-[var(--button-shadow)] outline-none transition-[background-color,border-color,color,box-shadow,opacity] transition-default focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50',
+    'hover:border-[color:var(--button-border-hover)] hover:bg-[color:var(--button-bg-hover)] hover:text-[color:var(--button-fg-hover)]',
+    'active:bg-[color:var(--button-bg-active)] active:border-[color:var(--button-border-hover)]',
+    sizeClasses[normalizedSize],
+    block ? 'w-full' : '',
     loading ? 'ui-button--loading' : '',
     className,
-    $$props.class ?? ''
+    $$props.class ?? '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -25,180 +41,113 @@
   {...$$restProps}
   {type}
   class={resolvedClass}
+  data-variant={normalizedVariant}
+  data-size={normalizedSize}
   disabled={isDisabled}
   aria-busy={loading}
   on:click
 >
   {#if $$slots.icon}
-    <span class="ui-button__icon"><slot name="icon" /></span>
+    <span class="ui-button__icon pointer-events-none inline-flex items-center justify-center [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:fill-current">
+      <slot name="icon" />
+    </span>
   {/if}
-  <span class="ui-button__label"><slot /></span>
+
+  {#if $$slots.default}
+    <span class="ui-button__label inline-flex items-center justify-center">
+      <slot />
+    </span>
+  {/if}
+
   {#if loading}
-    <span class="ui-button__spinner" aria-hidden="true"></span>
+    <span class="ui-button__spinner inline-block size-3 rounded-full border-2 border-[color:color-mix(in_srgb,currentColor_35%,transparent)] border-t-current" aria-hidden="true"></span>
   {/if}
 </button>
 
 <style>
   .ui-button {
-    --ui-button-bg: var(--ui-surface-raised);
-    --ui-button-bg-hover: var(--color-surface-3);
-    --ui-button-bg-active: var(--color-surface-3);
-    --ui-button-color: var(--color-text-primary);
-    --ui-button-border: var(--ui-border-subtle);
-    --ui-button-border-hover: var(--ui-border-strong);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    min-height: var(--ui-control-height-md);
-    padding: 0 0.78rem;
-    border-radius: var(--ui-radius-md);
-    border: 1px solid var(--ui-button-border);
-    background: var(--ui-button-bg);
-    color: var(--ui-button-color);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    line-height: 1.1;
-    cursor: pointer;
-    text-decoration: none;
-    transition: border-color var(--motion-fast) var(--ease-standard),
-      background var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard),
-      box-shadow var(--motion-fast) var(--ease-standard);
+    --button-bg: var(--muted);
+    --button-bg-hover: color-mix(in srgb, var(--muted) 78%, var(--foreground) 22%);
+    --button-bg-active: color-mix(in srgb, var(--muted) 70%, var(--foreground) 30%);
+    --button-fg: var(--foreground);
+    --button-fg-hover: var(--foreground);
+    --button-border: transparent;
+    --button-border-hover: transparent;
+    --button-shadow: none;
   }
 
-  .ui-button:hover:not(:disabled) {
-    background: var(--ui-button-bg-hover);
-    border-color: var(--ui-button-border-hover);
+  .ui-button[data-variant='primary'] {
+    --button-bg: var(--primary);
+    --button-bg-hover: color-mix(in srgb, var(--primary) 90%, var(--background) 10%);
+    --button-bg-active: color-mix(in srgb, var(--primary) 82%, var(--background) 18%);
+    --button-fg: var(--primary-foreground);
+    --button-fg-hover: var(--primary-foreground);
+    --button-border: transparent;
+    --button-border-hover: transparent;
   }
 
-  .ui-button:active:not(:disabled) {
-    background: var(--ui-button-bg-active);
-    border-color: var(--ui-button-border-hover);
+  .ui-button[data-variant='secondary'] {
+    --button-bg: var(--muted);
+    --button-bg-hover: color-mix(in srgb, var(--muted) 82%, var(--foreground) 18%);
+    --button-bg-active: color-mix(in srgb, var(--muted) 72%, var(--foreground) 28%);
+    --button-fg: var(--foreground);
+    --button-fg-hover: var(--foreground);
+    --button-border: transparent;
+    --button-border-hover: transparent;
   }
 
-  .ui-button:focus-visible {
-    outline: none;
-    box-shadow: var(--ui-focus-ring-strong);
+  .ui-button[data-variant='outline'] {
+    --button-bg: var(--background);
+    --button-bg-hover: color-mix(in srgb, var(--accent) 70%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--accent) 88%, transparent);
+    --button-fg: var(--foreground);
+    --button-fg-hover: var(--accent-foreground);
+    --button-border: var(--border);
+    --button-border-hover: var(--border);
+    --button-shadow: var(--shadow-inline-control);
   }
 
-  .ui-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.46;
-    box-shadow: none;
+  .ui-button[data-variant='ghost'] {
+    --button-bg: transparent;
+    --button-bg-hover: color-mix(in srgb, var(--accent) 70%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--accent) 88%, transparent);
+    --button-fg: var(--muted-foreground);
+    --button-fg-hover: var(--accent-foreground);
+    --button-border: transparent;
+    --button-border-hover: transparent;
   }
 
-  .ui-button--loading {
-    pointer-events: none;
+  .ui-button[data-variant='destructive'] {
+    --button-bg: var(--destructive);
+    --button-bg-hover: color-mix(in srgb, var(--destructive) 90%, var(--background) 10%);
+    --button-bg-active: color-mix(in srgb, var(--destructive) 82%, var(--background) 18%);
+    --button-fg: var(--destructive-foreground);
+    --button-fg-hover: var(--destructive-foreground);
+    --button-border: transparent;
+    --button-border-hover: transparent;
   }
 
-  .ui-button--primary {
-    --ui-button-bg: var(--color-text-primary);
-    --ui-button-bg-hover: #ffffff;
-    --ui-button-bg-active: #e9e9ee;
-    --ui-button-color: var(--color-text-on-dark);
-    --ui-button-border: rgba(255, 255, 255, 0.18);
-    --ui-button-border-hover: rgba(255, 255, 255, 0.28);
+  .ui-button[data-variant='success'] {
+    --button-bg: color-mix(in srgb, var(--success) 14%, var(--card) 86%);
+    --button-bg-hover: color-mix(in srgb, var(--success) 20%, var(--card) 80%);
+    --button-bg-active: color-mix(in srgb, var(--success) 26%, var(--card) 74%);
+    --button-fg: color-mix(in srgb, var(--success) 78%, var(--foreground) 22%);
+    --button-fg-hover: color-mix(in srgb, var(--success) 84%, var(--foreground) 16%);
+    --button-border: color-mix(in srgb, var(--success) 24%, var(--border) 76%);
+    --button-border-hover: color-mix(in srgb, var(--success) 32%, var(--border) 68%);
   }
 
-  .ui-button--secondary {
-    --ui-button-bg: var(--ui-surface-raised);
-    --ui-button-bg-hover: var(--color-surface-3);
-    --ui-button-bg-active: var(--color-surface-3);
-    --ui-button-color: var(--color-text-primary);
-    --ui-button-border: var(--ui-border-subtle);
-    --ui-button-border-hover: var(--ui-border-strong);
-  }
-
-  .ui-button--ghost {
-    --ui-button-bg: transparent;
-    --ui-button-bg-hover: rgba(255, 255, 255, 0.04);
-    --ui-button-bg-active: rgba(255, 255, 255, 0.06);
-    --ui-button-color: var(--color-text-secondary);
-    --ui-button-border: var(--ui-border-subtle);
-    --ui-button-border-hover: var(--ui-border-strong);
-  }
-
-  .ui-button--danger {
-    --ui-button-bg: color-mix(in srgb, var(--color-danger) 12%, var(--ui-surface-raised) 88%);
-    --ui-button-bg-hover: color-mix(in srgb, var(--color-danger) 18%, var(--ui-surface-raised) 82%);
-    --ui-button-bg-active: color-mix(in srgb, var(--color-danger) 24%, var(--ui-surface-raised) 76%);
-    --ui-button-color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text-primary) 30%);
-    --ui-button-border: color-mix(in srgb, var(--color-danger) 38%, var(--ui-border-subtle) 62%);
-    --ui-button-border-hover: color-mix(in srgb, var(--color-danger) 48%, var(--ui-border-subtle) 52%);
-  }
-
-  .ui-button--success {
-    --ui-button-bg: color-mix(in srgb, var(--color-success) 12%, var(--ui-surface-raised) 88%);
-    --ui-button-bg-hover: color-mix(in srgb, var(--color-success) 18%, var(--ui-surface-raised) 82%);
-    --ui-button-bg-active: color-mix(in srgb, var(--color-success) 24%, var(--ui-surface-raised) 76%);
-    --ui-button-color: color-mix(in srgb, var(--color-success) 70%, var(--color-text-primary) 30%);
-    --ui-button-border: color-mix(in srgb, var(--color-success) 34%, var(--ui-border-subtle) 66%);
-    --ui-button-border-hover: color-mix(in srgb, var(--color-success) 44%, var(--ui-border-subtle) 56%);
-  }
-
-  .ui-button--warning {
-    --ui-button-bg: color-mix(in srgb, var(--color-warning) 12%, var(--ui-surface-raised) 88%);
-    --ui-button-bg-hover: color-mix(in srgb, var(--color-warning) 20%, var(--ui-surface-raised) 80%);
-    --ui-button-bg-active: color-mix(in srgb, var(--color-warning) 26%, var(--ui-surface-raised) 74%);
-    --ui-button-color: color-mix(in srgb, var(--color-warning) 74%, var(--color-text-primary) 26%);
-    --ui-button-border: color-mix(in srgb, var(--color-warning) 34%, var(--ui-border-subtle) 66%);
-    --ui-button-border-hover: color-mix(in srgb, var(--color-warning) 46%, var(--ui-border-subtle) 54%);
-  }
-
-  .ui-button--sm {
-    min-height: var(--ui-control-height-sm);
-    padding-inline: 0.65rem;
-    border-radius: var(--ui-radius-sm);
-    font-size: 0.73rem;
-  }
-
-  .ui-button--md {
-    min-height: var(--ui-control-height-md);
-  }
-
-  .ui-button--lg {
-    min-height: var(--ui-control-height-lg);
-    padding-inline: 1rem;
-    font-size: var(--font-size-md);
-  }
-
-  .ui-button--icon {
-    min-width: var(--ui-control-height-md);
-    width: var(--ui-control-height-md);
-    padding: 0;
-    border-radius: var(--ui-radius-sm);
-  }
-
-  .ui-button--block {
-    width: 100%;
-  }
-
-  .ui-button__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-
-  .ui-button__icon :global(svg) {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-  }
-
-  .ui-button__label {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  .ui-button[data-variant='warning'] {
+    --button-bg: color-mix(in srgb, var(--warning) 16%, var(--card) 84%);
+    --button-bg-hover: color-mix(in srgb, var(--warning) 22%, var(--card) 78%);
+    --button-bg-active: color-mix(in srgb, var(--warning) 28%, var(--card) 72%);
+    --button-fg: color-mix(in srgb, var(--warning) 78%, var(--foreground) 22%);
+    --button-fg-hover: color-mix(in srgb, var(--warning) 84%, var(--foreground) 16%);
+    --button-border: color-mix(in srgb, var(--warning) 24%, var(--border) 76%);
+    --button-border-hover: color-mix(in srgb, var(--warning) 32%, var(--border) 68%);
   }
 
   .ui-button__spinner {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid color-mix(in srgb, currentColor 35%, transparent);
-    border-top-color: currentColor;
     animation: ui-button-spin 700ms linear infinite;
   }
 

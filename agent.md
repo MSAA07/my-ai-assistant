@@ -6,6 +6,7 @@ Practical contributor guide for `my-ai-assistant`.
 
 - Svelte 5.53.7
 - Vite 7.3.1
+- TailwindCSS 3.4 + PostCSS
 - Better Auth client calls over cookie sessions
 
 ## Key Runtime Behavior
@@ -13,7 +14,9 @@ Practical contributor guide for `my-ai-assistant`.
 - Hash routes are normalized and resolved in `src/routes.js`
 - Session is bootstrapped in `src/stores/auth.js`
 - `src/config.js` selects backend base URL from env or hostname
-- `DocumentView.svelte` drives extraction/generation UX and polling
+- `AppShell.svelte` is the shared authenticated dashboard frame
+- `DocumentView.svelte` drives consolidated summary/flashcards/exam UX and polling for legacy activity routes
+- `StudyHubDocument.svelte` is the canonical document hub for `/study/:id/:section?`
 
 ## Important flows
 
@@ -23,7 +26,7 @@ Practical contributor guide for `my-ai-assistant`.
 
 2. Upload
 - `Home.svelte` posts multipart form to `/api/upload`
-- On success, navigate to `/documents/:id`
+- On success, navigate to `/study?highlight=:id`
 
 3. Document processing and generation
 - Poll `GET /api/document/:id` while extraction or generation is active
@@ -38,9 +41,19 @@ Practical contributor guide for `my-ai-assistant`.
 
 - `src/pages`: page containers and route-level behavior
 - `src/components`: auth/admin feature components
-- `src/lib/components`: reusable shell and UI building blocks
+- `src/lib/components/layout`: shared dashboard shell pieces
+- `src/lib/components/ui`: reusable design-system primitives and dense data surfaces
 - `src/stores`: global auth/router stores
 - `src/lib/i18n`: dictionaries and translator helper
+
+## Current page ownership
+
+- `Home.svelte`: dashboard landing, stats, upload surface
+- `StudyHubIndex.svelte`: library grid of uploaded documents
+- `StudyHubDocument.svelte`: document hub with Summary / Flashcards / Mock Exam action cards
+- `DocumentView.svelte`: consolidated study states for summary, flashcards, and exam
+- `Settings.svelte`: grouped account/theme/language settings
+- `AdminDashboard.svelte`: premium admin shell + tabs
 
 ## Commands
 
@@ -62,4 +75,4 @@ Host-derived defaults in code:
 - staging preview hosts: staging Railway backend
 - production host: production Railway backend
 
-Last Updated: March 9, 2026
+Last Updated: March 13, 2026

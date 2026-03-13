@@ -13,9 +13,12 @@ my-ai-assistant/
 |-- PROJECT_STRUCTURE.md
 |-- package.json
 |-- package-lock.json
+|-- tailwind.config.js
+|-- postcss.config.cjs
 |-- vite.config.js
 |-- svelte.config.js
 |-- index.html
+|-- docs/
 `-- src/
 ```
 
@@ -49,11 +52,25 @@ src/
 |   |   |   |-- Sidebar.svelte
 |   |   |   `-- TopBar.svelte
 |   |   `-- ui/
+|   |       |-- Badge.svelte
+|   |       |-- Button.svelte
+|   |       |-- Card.svelte
 |   |       |-- ConfirmModal.svelte
+|   |       |-- DataSurface.svelte
 |   |       |-- DrawerShell.svelte
 |   |       |-- EmptyState.svelte
+|   |       |-- FieldShell.svelte
 |   |       |-- LanguageToggle.svelte
+|   |       |-- MetaPill.svelte
+|   |       |-- ModalSurface.svelte
+|   |       |-- Section.svelte
+|   |       |-- StatCard.svelte
+|   |       |-- Tabs.svelte
 |   |       |-- ThemeToggle.svelte
+|   |       |-- Toggle.svelte
+|   |       |-- UploadDropzone.svelte
+|   |       |-- UploadFileRow.svelte
+|   |       |-- UploadPanel.svelte
 |   |       `-- StatusBadge.svelte
 |   |-- config/features.js
 |   |-- i18n/
@@ -66,9 +83,11 @@ src/
 |   |-- Home.svelte
 |   |-- Documents.svelte
 |   |-- DocumentView.svelte
-|   |-- Settings.svelte
 |   |-- Exams.svelte
 |   |-- Flashcards.svelte
+|   |-- Settings.svelte
+|   |-- StudyHubDocument.svelte
+|   |-- StudyHubIndex.svelte
 |   `-- Landing.svelte
 |-- stores/
 |   |-- auth.js
@@ -90,8 +109,13 @@ src/
 ## Notes
 
 - Routing is hash-based and defined in `src/routes.js`.
+- The authenticated app now uses a shared dashboard shell (`AppShell + Sidebar + TopBar + BottomNav`).
+- `StudyHubIndex.svelte` is the canonical library route for `/study`.
+- `StudyHubDocument.svelte` owns the document hub surface for `/study/:id/:section?`.
+- `DocumentView.svelte` consolidates summary, flashcards, and exam study states for legacy activity routes.
 - API base resolution is in `src/config.js`.
 - Session bootstrapping and auth requests are in `src/stores/auth.js`.
 - Theme bootstrapping and persistence are in `src/stores/theme.js`.
+- Tailwind utilities are available, but visual source of truth remains `src/lib/styles/tokens.css` plus shared UI primitives.
 
-Last Updated: March 12, 2026
+Last Updated: March 13, 2026

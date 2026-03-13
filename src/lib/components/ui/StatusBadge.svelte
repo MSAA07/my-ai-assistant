@@ -17,7 +17,7 @@
     },
     failed: {
       key: 'status.failed',
-      tone: 'danger',
+      tone: 'destructive',
     },
   };
 

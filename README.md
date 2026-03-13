@@ -2,12 +2,17 @@
 
 Svelte 5 + Vite frontend for the AI Study Assistant.
 
+The current frontend has completed the v0-style visual migration on top of the existing product flows. Routing, API usage, generation behavior, and admin/settings logic were preserved; the work focused on shell/layout, shared UI primitives, tokens, and page composition.
+
 ## What the UI does
 
 - Authenticates users through Better Auth cookie sessions
 - Uploads PDF/DOCX/PPTX documents
+- Provides a shared dashboard shell with sidebar, top bar, and mobile bottom navigation
 - Tracks extraction status from `Document.processingStatus`
 - Triggers on-demand generation for summary, flashcards, and exam content
+- Presents a Study Hub library and per-document study workspace
+- Renders legacy study activity modes through a single consolidated `DocumentView.svelte`
 - Displays source excerpts from `/api/document/:id/excerpts`
 
 ## Lifecycle model used by the UI
@@ -88,10 +93,44 @@ If `VITE_API_BASE_URL` is not set, the app derives API base from hostname in `sr
 
 ## Styling Layer Conventions
 
+- TailwindCSS 3 is installed for utility usage, but semantic design tokens remain the source of truth.
 - `src/lib/styles/tokens.css` is the single source of truth for raw color values, semantic aliases, effect tokens, and theme branching (`[data-theme="light"]`).
 - `src/styles/global.css` contains foundation-only rules (reset/base/typography/app chrome/form baseline/focus-visible/selection/scrollbar).
 - Feature or component class selectors must not be added to `global.css`.
 - `.svelte` component styles should use semantic tokens and keep concerns local (layout/structure/state), avoiding new raw palette/shadow constants.
+
+## Current frontend structure
+
+Shared shell:
+- `src/lib/components/layout/AppShell.svelte`
+- `src/lib/components/layout/Sidebar.svelte`
+- `src/lib/components/layout/TopBar.svelte`
+- `src/lib/components/layout/BottomNav.svelte`
+
+Shared UI primitives:
+- `src/lib/components/ui/Button.svelte`
+- `src/lib/components/ui/Card.svelte`
+- `src/lib/components/ui/Badge.svelte`
+- `src/lib/components/ui/StatusBadge.svelte`
+- `src/lib/components/ui/Tabs.svelte`
+- `src/lib/components/ui/Toggle.svelte`
+- `src/lib/components/ui/StatCard.svelte`
+- `src/lib/components/ui/MetaPill.svelte`
+- `src/lib/components/ui/Section.svelte`
+- `src/lib/components/ui/DataSurface.svelte`
+
+Primary page ownership:
+- `src/pages/Home.svelte`: dashboard landing + upload workflow
+- `src/pages/StudyHubIndex.svelte`: Study Hub library
+- `src/pages/StudyHubDocument.svelte`: document hub and study tool launch surface
+- `src/pages/DocumentView.svelte`: consolidated summary/flashcards/exam study states for legacy activity routes
+- `src/pages/Settings.svelte`: settings/account/theme/language
+- `src/components/AdminDashboard.svelte`: admin shell and tabbed admin console
+
+Important route note:
+- Existing business logic and route normalization are intentionally preserved in `src/routes.js`.
+- Canonical document browsing is `/study` and `/study/:id/:section?`.
+- Legacy activity detail remains `/legacy/documents/:id/:section?` and is rendered by `DocumentView.svelte`.
 
 ## Visual Refactor Docs
 
@@ -104,6 +143,6 @@ If `VITE_API_BASE_URL` is not set, the app derives API base from hostname in `sr
 - Theme state lives in `src/stores/theme.js`.
 - The active theme is persisted in browser `localStorage` under `my-ai-assistant:theme`.
 - `index.html` applies persisted theme before app bootstrap to avoid first-paint flicker.
-- `src/main.js` calls `theme.initializeTheme()` so runtime state and document attributes stay in sync.
+- `src/main.js` calls `theme.initializeTheme()` so runtime state, `data-theme`, and the `.dark` class stay in sync.
 
-Last Updated: March 12, 2026
+Last Updated: March 13, 2026

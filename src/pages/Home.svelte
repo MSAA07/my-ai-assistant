@@ -3,7 +3,9 @@
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
+  import Badge from "../lib/components/ui/Badge.svelte";
   import Card from "../lib/components/ui/Card.svelte";
+  import StatCard from "../lib/components/ui/StatCard.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
   import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
   import { readPageCache, writePageCache } from "../stores/pageCache.js";
@@ -266,37 +268,46 @@
 </script>
 
 <div class="home-page">
-  <header class="page-header">
-    <p class="eyebrow">{t('nav.home')}</p>
-    <h1>{t('home.heroTitle')}</h1>
-    <p class="subtitle">{t('home.heroSubtitle')}</p>
-    {#if isRefreshingDashboard}
-      <p class="refresh-indicator">{t('common.loading')}</p>
-    {/if}
-  </header>
+  <Card as="section" class="page-hero" variant="base" padding="lg" border="strong" aria-labelledby="home-title">
+    <div class="page-hero__copy">
+      <div class="page-hero__badges">
+        <Badge tone="neutral" variant="outline" size="sm" className="home-eyebrow">{t('nav.home')}</Badge>
+        {#if isRefreshingDashboard}
+          <Badge tone="neutral" size="sm" className="refresh-indicator">{t('common.loading')}</Badge>
+        {/if}
+      </div>
+
+      <div class="page-hero__heading">
+        <h1 id="home-title">{t('home.heroTitle')}</h1>
+        <p class="subtitle">{t('home.heroSubtitle')}</p>
+      </div>
+    </div>
+  </Card>
 
   {#if isLoadingDashboard}
-    <section class="stats-grid">
+    <section class="stats-grid" aria-label={t('nav.home')}>
       <DashboardCardSkeleton />
       <DashboardCardSkeleton />
       <DashboardCardSkeleton />
     </section>
   {:else if user}
-    <section class="stats-grid">
-      <Card class="home-stat-card" variant="base" padding="md">
-        <div class={`stat-value ${normalizedRole === 'admin' ? 'stat-value-admin' : ''}`}>
-          {normalizedRole === 'admin' ? t('home.stats.unlimited') : remainingDocumentsValue}
-        </div>
-        <div class="stat-label">{t('home.stats.documentsRemaining')}</div>
-      </Card>
-      <Card class="home-stat-card" variant="base" padding="md">
-        <div class="stat-value">{usedThisMonthValue}/{monthlyLimitValue}</div>
-        <div class="stat-label">{t('home.stats.usedThisMonth')}</div>
-      </Card>
-      <Card class="home-stat-card" variant="base" padding="md">
-        <div class="stat-value">{totalDocumentsValue}</div>
-        <div class="stat-label">{t('home.stats.totalDocuments')}</div>
-      </Card>
+    <section class="stats-grid" aria-label={t('nav.home')}>
+      <StatCard
+        className="home-stat-card"
+        label={t('home.stats.documentsRemaining')}
+        value={normalizedRole === 'admin' ? t('home.stats.unlimited') : remainingDocumentsValue}
+        valueClassName={normalizedRole === 'admin' ? 'stat-value-admin' : ''}
+      />
+      <StatCard
+        className="home-stat-card"
+        label={t('home.stats.usedThisMonth')}
+        value={`${usedThisMonthValue}/${monthlyLimitValue}`}
+      />
+      <StatCard
+        className="home-stat-card"
+        label={t('home.stats.totalDocuments')}
+        value={totalDocumentsValue}
+      />
     </section>
   {/if}
 
@@ -342,78 +353,93 @@
 
 <style>
   .home-page {
+    width: min(100%, 64rem);
+    margin: 0 auto;
     display: grid;
-    gap: var(--space-4);
+    gap: 1.5rem;
+    min-width: 0;
   }
 
-  .page-header {
+  :global(.page-hero) {
     display: grid;
-    gap: var(--space-1);
+    gap: 1rem;
+    min-width: 0;
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
   }
 
-  .eyebrow {
-    margin: 0;
+  .page-hero__copy {
+    display: grid;
+    gap: 0.875rem;
+    min-width: 0;
+  }
+
+  .page-hero__badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  :global(.home-eyebrow) {
+    min-height: 22px;
+    border-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+    color: var(--muted-foreground);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.7rem;
-    color: var(--color-text-muted);
   }
 
-  .page-header h1 {
+  :global(.refresh-indicator) {
+    min-height: 22px;
+    background: color-mix(in srgb, var(--muted) 82%, transparent);
+    color: var(--muted-foreground);
+  }
+
+  .page-hero__heading {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .page-hero__heading h1 {
     margin: 0;
-    font-size: clamp(1.2rem, 2.6vw, 1.55rem);
+    color: var(--foreground);
+    font-size: clamp(1.7rem, 4vw, 2.1rem);
     font-weight: 600;
     letter-spacing: -0.03em;
+    line-height: 1.05;
   }
 
   .subtitle {
     margin: 0;
-    color: var(--color-text-secondary);
-    max-width: 70ch;
-    font-size: var(--font-size-sm);
-  }
-
-  .refresh-indicator {
-    font-size: var(--font-size-xs);
-    margin: 0;
-    color: var(--color-text-muted);
+    max-width: 44rem;
+    color: var(--muted-foreground);
+    font-size: 0.98rem;
+    line-height: 1.6;
   }
 
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-3);
+    gap: 1rem;
+    min-width: 0;
   }
 
   .home-page :global(.home-stat-card) {
-    min-height: 112px;
-    gap: var(--space-2);
+    min-height: 118px;
   }
 
-  .stat-value {
-    font-size: 1.45rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    line-height: 1.2;
-    letter-spacing: -0.03em;
-  }
-
-  .stat-value-admin {
+  .home-page :global(.home-stat-card .stat-value-admin),
+  .home-page :global(.home-stat-card .ui-stat-card__value.stat-value-admin) {
     font-size: 1.2rem;
   }
 
-  .stat-label {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  .home-alert {
+  :global(.home-alert) {
     font-weight: 500;
   }
 
-  .home-alert-error {
+  :global(.home-alert-error) {
     color: var(--color-danger);
     border-color: var(--color-danger-border);
     background: var(--color-danger-surface);
@@ -448,9 +474,114 @@
     min-width: 0;
   }
 
+  .upload-section :global(.upload-panel) {
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-color: var(--border);
+    border-radius: 1rem;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .upload-section :global(.upload-panel__titles) {
+    gap: 0.35rem;
+  }
+
+  .upload-section :global(.upload-panel__titles h2) {
+    color: var(--foreground);
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .upload-section :global(.upload-panel__titles p) {
+    max-width: 44rem;
+    color: var(--muted-foreground);
+    line-height: 1.55;
+  }
+
+  .upload-section :global(.upload-panel__support) {
+    margin-top: -0.5rem;
+  }
+
+  .upload-section :global(.upload-dropzone) {
+    gap: 0.875rem;
+    padding: clamp(1.75rem, 5vw, 3rem) 1.25rem;
+    border-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+    border-radius: 0.875rem;
+    background: color-mix(in srgb, var(--card) 74%, var(--muted) 26%);
+  }
+
+  .upload-section :global(.upload-dropzone:hover:not(.upload-dropzone--disabled)),
+  .upload-section :global(.upload-dropzone--active) {
+    border-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+    background: color-mix(in srgb, var(--card) 60%, var(--muted) 40%);
+  }
+
+  .upload-section :global(.upload-dropzone__icon) {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.875rem;
+    border-color: var(--border);
+    background: var(--muted);
+    color: var(--foreground);
+  }
+
+  .upload-section :global(.upload-dropzone__icon svg) {
+    width: 22px;
+    height: 22px;
+  }
+
+  .upload-section :global(.upload-dropzone__title) {
+    max-width: 36rem;
+    color: var(--foreground);
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .upload-section :global(.upload-dropzone__divider) {
+    width: min(520px, 100%);
+  }
+
+  .upload-section :global(.upload-dropzone__divider strong) {
+    color: var(--muted-foreground);
+  }
+
+  .upload-section :global(.upload-dropzone__browse.ui-button) {
+    --button-bg: var(--background);
+    --button-bg-hover: color-mix(in srgb, var(--accent) 72%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--accent) 90%, transparent);
+    --button-fg: var(--foreground);
+    --button-fg-hover: var(--foreground);
+    --button-border: var(--border);
+    --button-border-hover: var(--border);
+    --button-shadow: var(--shadow-inline-control);
+    min-width: 148px;
+  }
+
+  .upload-section :global(.upload-panel__files) {
+    gap: 0.75rem;
+  }
+
+  .upload-section :global(.upload-panel__footer) {
+    padding-top: 1rem;
+    margin-top: 0;
+    border-top-color: var(--border);
+  }
+
+  .upload-section :global(.upload-panel__counter) {
+    color: var(--muted-foreground);
+  }
+
   @media (max-width: 1024px) {
     .stats-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .page-hero__heading h1 {
+      font-size: clamp(1.5rem, 7vw, 1.9rem);
     }
   }
 

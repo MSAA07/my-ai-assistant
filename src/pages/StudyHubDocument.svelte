@@ -4,6 +4,7 @@
   import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
+  import MetaPill from '../lib/components/ui/MetaPill.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
   import { getDocument, requestGeneration } from '../lib/api/studyHub.js';
@@ -147,7 +148,8 @@
   function getStateTone(state) {
     if (state === 'ready') return 'ready';
     if (state === 'failed') return 'failed';
-    return 'processing';
+    if (state === 'generating') return 'processing';
+    return 'info';
   }
 
   function getPrimaryActionLabel(state) {
@@ -213,6 +215,7 @@
     return {
       key: featureKey,
       title: t(FEATURE_CONFIG[featureKey].titleKey),
+      description: t(FEATURE_CONFIG[featureKey].descriptionKey),
       state,
       stateLabel: getStateLabel(state),
       stateTone: getStateTone(state),
@@ -461,24 +464,30 @@
 </script>
 
 <div class="document-hub">
-  <header class="hub-header">
-    <Button type="button" class="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
+  <Card as="section" class="hub-hero" variant="base" padding="lg" border="strong">
+    <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
+      <span slot="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
+      </span>
       {t('document.hub.backToStudyHub')}
     </Button>
 
-    <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
-
-    {#if metaItems.length > 0}
-      <div class="meta-row">
-        {#each metaItems as item (item.key)}
-          <Badge tone="neutral" size="sm" class="meta-chip">
-            <span>{item.label}:</span>
-            <strong>{item.value}</strong>
-          </Badge>
-        {/each}
+    <div class="hero-copy">
+      <Badge tone="neutral" variant="outline" size="sm" className="hub-eyebrow">{t('documentsPage.eyebrow')}</Badge>
+      <div class="hero-heading">
+        <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
+        <p class="hero-subtitle">{t('document.hub.readyHint')}</p>
       </div>
-    {/if}
-  </header>
+
+      {#if metaItems.length > 0}
+        <div class="meta-row">
+          {#each metaItems as item (item.key)}
+            <MetaPill label={item.label} value={item.value} />
+          {/each}
+        </div>
+      {/if}
+    </div>
+  </Card>
 
   {#if loading && !documentData}
     <DocumentDetailSkeleton />
@@ -519,11 +528,16 @@
       {#each featureCards as card (card.key)}
         <Card as="article" class="feature-card" variant="base" padding="md" hoverable border={card.showHintAsError ? 'strong' : 'subtle'}>
           <div class="feature-card-header">
-            <h2>{card.title}</h2>
+            <div class="feature-heading">
+              <h2>{card.title}</h2>
+              <p class="feature-description">{card.description}</p>
+            </div>
             <StatusBadge status={card.stateTone} label={card.stateLabel} />
           </div>
 
-          <p class:feature-hint-error={card.showHintAsError} class="feature-hint">{card.hint}</p>
+          <div class={`feature-note ${card.showHintAsError ? 'feature-note-error' : ''}`}>
+            <p class:feature-hint-error={card.showHintAsError} class="feature-hint">{card.hint}</p>
+          </div>
 
           <div class="feature-actions">
             <Button
@@ -553,57 +567,89 @@
 
 <style>
   .document-hub {
+    width: min(100%, 64rem);
+    margin: 0 auto;
     display: grid;
-    gap: var(--space-4);
+    gap: 1.5rem;
   }
 
-  .hub-header {
+  .hub-hero {
     display: grid;
-    gap: var(--space-2);
+    gap: 1rem;
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
   }
 
   .document-hub :global(.back-link) {
-    color: var(--color-text-secondary);
     min-height: 0;
     justify-self: start;
-    font-weight: 500;
     padding-inline: 0;
+    color: var(--muted-foreground);
   }
 
   .document-hub :global(.back-link:hover) {
-    color: var(--color-text-primary);
+    color: var(--foreground);
+  }
+
+  .document-hub :global(.back-link svg) {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hero-copy {
+    display: grid;
+    gap: 0.875rem;
+  }
+
+  :global(.hub-eyebrow) {
+    width: fit-content;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .hero-heading {
+    display: grid;
+    gap: 0.5rem;
   }
 
   h1 {
     margin: 0;
-    color: var(--color-text-primary);
-    font-size: clamp(1.1rem, 2.6vw, 1.35rem);
+    color: var(--foreground);
+    font-size: clamp(1.55rem, 3vw, 1.95rem);
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
     word-break: break-word;
   }
 
   h2 {
     margin: 0;
-    color: var(--color-text-primary);
-    font-size: 0.95rem;
+    color: var(--foreground);
+    font-size: 1rem;
     font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-subtitle {
+    margin: 0;
+    max-width: 44rem;
+    color: var(--muted-foreground);
+    font-size: 0.95rem;
+    line-height: 1.55;
   }
 
   .meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-
-  .document-hub :global(.meta-chip) {
-    gap: 0.3rem;
-    font-size: 0.68rem;
-  }
-
-  .document-hub :global(.meta-chip strong) {
-    color: var(--color-text-primary);
-    font-weight: 600;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 
   .document-hub :global(.state-panel) {
@@ -617,54 +663,80 @@
   }
 
   .document-hub :global(.state-panel p) {
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     line-height: 1.45;
     font-size: var(--font-size-sm);
   }
 
   .document-hub :global(.state-panel-error) {
-    border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border) 65%);
+    border-color: color-mix(in srgb, var(--destructive) 35%, var(--border) 65%);
   }
 
   .document-hub :global(.processing-panel) {
-    border-color: color-mix(in srgb, var(--color-info) 24%, var(--color-border) 76%);
-    background: color-mix(in srgb, var(--color-info) 8%, var(--ui-surface-base) 92%);
+    border-color: color-mix(in srgb, var(--info) 24%, var(--border) 76%);
+    background: color-mix(in srgb, var(--info) 8%, var(--card) 92%);
   }
 
   .features-grid {
     display: grid;
-    gap: var(--space-3);
+    gap: 1rem;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .document-hub :global(.feature-card) {
     display: grid;
-    gap: var(--space-2);
+    gap: 1rem;
+    min-height: 240px;
   }
 
   .feature-card-header {
-    display: flex;
+    display: grid;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.6rem;
+    gap: 0.75rem;
+  }
+
+  .feature-heading {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .feature-description {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .feature-note {
+    padding: 0.875rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 2px);
+    background: color-mix(in srgb, var(--muted) 62%, transparent);
+  }
+
+  .feature-note-error {
+    border-color: color-mix(in srgb, var(--destructive) 24%, var(--border) 76%);
+    background: color-mix(in srgb, var(--destructive) 8%, var(--card) 92%);
   }
 
   .feature-hint {
     margin: 0;
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
     line-height: 1.45;
     min-height: 0;
     font-size: var(--font-size-sm);
   }
 
   .feature-hint-error {
-    color: var(--color-danger);
+    color: var(--destructive);
   }
 
   .feature-actions {
     display: flex;
     gap: var(--space-2);
     flex-wrap: wrap;
+    margin-top: auto;
   }
 
   .row {
@@ -676,7 +748,7 @@
   }
 
   :global(.inline-error) {
-    color: var(--color-danger);
+    color: var(--destructive);
   }
 
   @media (max-width: 1024px) {
@@ -687,6 +759,10 @@
 
   @media (max-width: 640px) {
     .features-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .feature-card-header {
       grid-template-columns: 1fr;
     }
 

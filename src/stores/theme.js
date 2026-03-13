@@ -13,6 +13,7 @@ function applyTheme(theme) {
 
   const nextTheme = normalizeTheme(theme);
   document.documentElement.setAttribute('data-theme', nextTheme);
+  document.documentElement.classList.toggle('dark', nextTheme === 'dark');
   document.documentElement.style.colorScheme = nextTheme;
 }
 
