@@ -1,10 +1,8 @@
 <script>
   import { onMount } from 'svelte';
-  import Badge from '../../lib/components/ui/Badge.svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
-  import StatCard from '../../lib/components/ui/StatCard.svelte';
   import { API_BASE } from '../../config.js';
   import { readPageCache, writePageCache } from '../../stores/pageCache.js';
 
@@ -65,16 +63,13 @@
   });
 </script>
 
-<DataSurface className="admin-overview" title="Platform Overview" description="Key activity and usage indicators across usage, storage, and sessions." tableMinWidth="640px">
-  <div slot="header" class="overview-header">
-    <div class="overview-copy">
-      <p class="eyebrow">Overview</p>
-      <h2>Platform Overview</h2>
-      <p>Key activity and usage indicators across users, document volume, storage, and active sessions.</p>
-    </div>
-    <Badge tone="accent" variant="soft" size="sm">Analytics</Badge>
-  </div>
-
+<DataSurface
+  className="admin-overview"
+  title="Platform Overview"
+  description="Key activity and usage indicators."
+  tableMinWidth="640px"
+  compact
+>
   <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchStats({ background: Boolean(stats) })} disabled={loading || refreshing}>
     {refreshing ? 'Refreshing...' : 'Refresh'}
   </Button>
@@ -89,62 +84,79 @@
 
   {#if !loading && !error && stats}
     <div class="stats-grid">
-      <StatCard className="admin-stat-card" tone="info" label="Total Users" value={stats.totals.users} meta={`Active 24h: ${stats.activeUsers.last24h}`} />
-      <StatCard className="admin-stat-card" tone="neutral" label="Documents" value={stats.totals.documents} meta={`Active 7d: ${stats.activeUsers.last7d}`} />
-      <StatCard className="admin-stat-card" tone="warning" label="Storage Processed" value={formatBytes(stats.totals.storageBytes)} meta={`Active 30d: ${stats.activeUsers.last30d}`} />
-      <StatCard className="admin-stat-card" tone="success" label="Active Sessions" value={stats.totals.activeSessions} meta="Across all devices" />
+      <Card class="metric-card" variant="base" padding="sm" border="subtle">
+        <p class="metric-label">Total Users</p>
+        <p class="metric-value">{stats.totals.users}</p>
+        <p class="metric-meta">Active 24h: {stats.activeUsers.last24h}</p>
+      </Card>
+      <Card class="metric-card" variant="base" padding="sm" border="subtle">
+        <p class="metric-label">Documents</p>
+        <p class="metric-value">{stats.totals.documents}</p>
+        <p class="metric-meta">Active 7d: {stats.activeUsers.last7d}</p>
+      </Card>
+      <Card class="metric-card" variant="base" padding="sm" border="subtle">
+        <p class="metric-label">Storage Processed</p>
+        <p class="metric-value">{formatBytes(stats.totals.storageBytes)}</p>
+        <p class="metric-meta">Active 30d: {stats.activeUsers.last30d}</p>
+      </Card>
+      <Card class="metric-card" variant="base" padding="sm" border="subtle">
+        <p class="metric-label">Active Sessions</p>
+        <p class="metric-value">{stats.totals.activeSessions}</p>
+        <p class="metric-meta">Across all devices</p>
+      </Card>
     </div>
   {/if}
 </DataSurface>
 
 <style>
-  .overview-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .overview-copy {
-    display: grid;
-    gap: 0.35rem;
-    min-width: 0;
-  }
-
-  .eyebrow {
-    margin: 0;
-    color: var(--muted-foreground);
-    font-size: 0.67rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-  }
-
-  .overview-copy h2 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--foreground);
-  }
-
-  .overview-copy p:last-child {
-    margin: 0;
-    color: var(--muted-foreground);
-    font-size: var(--font-size-sm);
-    line-height: 1.55;
-    max-width: 52rem;
+  :global(.admin-overview) {
+    gap: 0.875rem;
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    box-shadow: none;
+    background: color-mix(in srgb, var(--card) 96%, transparent);
   }
 
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
-  .stats-grid :global(.admin-stat-card) {
-    min-height: 128px;
+  :global(.metric-card) {
+    gap: 0.35rem;
+    min-height: 104px;
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    box-shadow: none;
+    background: color-mix(in srgb, var(--card) 98%, transparent);
+  }
+
+  .metric-label,
+  .metric-value,
+  .metric-meta {
+    margin: 0;
+  }
+
+  .metric-label {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .metric-value {
+    color: var(--foreground);
+    font-size: clamp(1.8rem, 2vw, 2rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .metric-meta {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    line-height: 1.35;
   }
 
   @media (max-width: 1024px) {

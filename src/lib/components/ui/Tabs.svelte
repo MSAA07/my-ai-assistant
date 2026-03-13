@@ -98,8 +98,14 @@
     color: var(--foreground);
   }
 
+  .ui-tabs[data-variant='underline'] .ui-tabs__tab {
+    color: color-mix(in srgb, var(--foreground) 72%, var(--muted-foreground) 28%);
+    border-radius: 0;
+  }
+
   .ui-tabs[data-variant='underline'] .ui-tabs__tab[aria-selected='true'] {
     color: var(--foreground);
+    font-weight: 600;
   }
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab[aria-selected='true']::after {
