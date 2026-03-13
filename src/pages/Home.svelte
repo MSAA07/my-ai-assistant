@@ -360,6 +360,7 @@
         dropzoneOr={t('home.uploadSection.dropzoneOr')}
         browseLabel={t('home.uploadSection.browse')}
         supportLabel={t('home.uploadSection.supportedFiles')}
+        showCounter={false}
         cancelLabel={t('home.uploadSection.cancel')}
         submitLabel={t('home.uploadSection.next')}
         submitBusyLabel={t('home.uploadSection.submitProcessing')}
@@ -425,7 +426,7 @@
   .home-page :global(.home-stat-card) {
     gap: 1.75rem;
     min-height: 148px;
-    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     background: color-mix(in srgb, var(--card) 94%, transparent);
     box-shadow: none;
   }
@@ -605,6 +606,7 @@
     --button-border: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     --button-border-hover: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
     --button-shadow: none;
+    border-style: solid;
     min-width: 122px;
   }
 
@@ -635,6 +637,7 @@
     --button-border: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     --button-border-hover: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
     --button-shadow: none;
+    border-style: solid;
     min-width: 100px;
   }
 

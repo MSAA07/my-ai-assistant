@@ -409,6 +409,12 @@
     display: grid;
     gap: 1rem;
     min-height: 216px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    box-shadow: none;
+  }
+
+  .library-page :global(.document-card[data-border='accent']) {
+    border-color: color-mix(in srgb, var(--foreground) 18%, var(--border) 82%);
   }
 
   .card-top {

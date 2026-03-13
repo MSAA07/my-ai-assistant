@@ -108,7 +108,7 @@
 
   <Button
     type="button"
-    variant="secondary"
+    variant="outline"
     class="upload-dropzone__browse"
     disabled={disabled || isBusy}
     on:click={handleBrowseClick}

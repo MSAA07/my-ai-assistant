@@ -18,6 +18,7 @@
   export let dropzoneOr = 'OR';
   export let browseLabel = '';
   export let supportLabel = '';
+  export let showCounter = true;
   export let cancelLabel = '';
   export let submitLabel = '';
   export let submitBusyLabel = '';
@@ -88,9 +89,11 @@
   {/if}
 
   <footer class="upload-panel__footer">
-    <p class="upload-panel__counter">{files.length}/{maxFiles}</p>
+    {#if showCounter}
+      <p class="upload-panel__counter">{files.length}/{maxFiles}</p>
+    {/if}
     <div class="upload-panel__actions">
-      <Button type="button" variant="secondary" class="upload-panel__cancel" on:click={handleCancel} disabled={busy}>
+      <Button type="button" variant="outline" class="upload-panel__cancel" on:click={handleCancel} disabled={busy}>
         {cancelLabel}
       </Button>
       <Button
