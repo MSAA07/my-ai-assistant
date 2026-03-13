@@ -3,6 +3,7 @@
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
+  import Badge from "../lib/components/ui/Badge.svelte";
   import Card from "../lib/components/ui/Card.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
   import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
@@ -289,11 +290,15 @@
 </script>
 
 <div class="home-page">
-  <section class="home-header" aria-labelledby="home-title" aria-busy={isRefreshingDashboard}>
-    <p class="home-eyebrow">{t("nav.home")}</p>
-    <h1 id="home-title">{t("home.heroTitle")}</h1>
-    <p class="subtitle">{t("home.heroSubtitle")}</p>
-  </section>
+  <Card as="section" class="page-hero" variant="base" padding="lg" border="strong" aria-labelledby="home-title" aria-busy={isRefreshingDashboard}>
+    <div class="heading">
+      <Badge tone="neutral" variant="outline" size="sm" className="page-eyebrow">{t("nav.home")}</Badge>
+      <div class="heading-copy">
+        <h1 id="home-title">{t("home.heroTitle")}</h1>
+        <p class="subtitle">{t("home.heroSubtitle")}</p>
+      </div>
+    </div>
+  </Card>
 
   {#if isLoadingDashboard}
     <section class="stats-grid" aria-label={t('nav.home')}>
@@ -384,33 +389,48 @@
     min-width: 0;
   }
 
-  .home-header {
+  :global(.page-hero) {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
+  }
+
+  .heading {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.75rem;
     min-width: 0;
   }
 
-  .home-eyebrow {
-    margin: 0;
-    color: var(--muted-foreground);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  .heading-copy {
+    display: grid;
+    gap: 0.4rem;
   }
 
-  .home-header h1 {
+  :global(.page-eyebrow) {
+    min-height: 22px;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted-foreground);
+  }
+
+  h1 {
     margin: 0;
     color: var(--foreground);
-    font-size: clamp(1.95rem, 4vw, 2.2rem);
+    font-size: clamp(1.55rem, 3vw, 1.95rem);
     font-weight: 600;
     letter-spacing: -0.03em;
-    line-height: 1.08;
+    line-height: 1.05;
   }
 
   .subtitle {
     margin: 0;
-    max-width: 40rem;
+    max-width: 42rem;
     color: var(--muted-foreground);
     font-size: 0.95rem;
     line-height: 1.55;
@@ -657,7 +677,7 @@
       gap: 0.875rem;
     }
 
-    .home-header h1 {
+    h1 {
       font-size: clamp(1.7rem, 8vw, 2rem);
     }
 

@@ -40,11 +40,13 @@
   <SettingsPanelSkeleton />
 {:else}
   <div class="settings-page">
-    <Card as="header" class="settings-hero" variant="base" padding="lg" border="strong">
-      <div class="hero-copy">
-        <p class="eyebrow">{t('settings.eyebrow')}</p>
-        <h1>{t('settings.title')}</h1>
-        <p class="subtitle">{t('settings.subtitle')}</p>
+    <Card as="header" class="page-hero" variant="base" padding="lg" border="strong">
+      <div class="heading">
+        <Badge tone="neutral" variant="outline" size="sm" className="page-eyebrow">{t('settings.eyebrow')}</Badge>
+        <div class="heading-copy">
+          <h1>{t('settings.title')}</h1>
+          <p class="subtitle">{t('settings.subtitle')}</p>
+        </div>
       </div>
 
       <div class="hero-meta">
@@ -152,33 +154,41 @@
     min-width: 0;
   }
 
-  :global(.settings-hero) {
-    display: grid;
+  :global(.page-hero) {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: 1.5rem;
+    flex-wrap: wrap;
     background:
       radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
       linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
   }
 
-  .hero-copy {
+  .heading {
     display: grid;
-    gap: 0.5rem;
-    max-width: 42rem;
+    gap: 0.75rem;
+    min-width: 0;
   }
 
-  .eyebrow {
-    margin: 0;
+  .heading-copy {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  :global(.page-eyebrow) {
+    min-height: 22px;
+    width: fit-content;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-muted);
-    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--muted-foreground);
   }
 
   h1 {
     margin: 0;
-    font-size: clamp(1.6rem, 3vw, 2.3rem);
+    font-size: clamp(1.55rem, 3vw, 1.95rem);
     font-weight: 600;
-    line-height: 1.08;
+    line-height: 1.05;
     letter-spacing: -0.03em;
     color: var(--color-text-primary);
   }
@@ -353,6 +363,10 @@
   }
 
   @media (max-width: 640px) {
+    .hero-meta {
+      grid-template-columns: 1fr;
+    }
+
     .actions {
       width: 100%;
     }
