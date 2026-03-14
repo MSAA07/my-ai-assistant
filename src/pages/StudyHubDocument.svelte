@@ -8,6 +8,7 @@
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
   import { getDocument, requestGeneration } from '../lib/api/studyHub.js';
+  import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   export let documentId = '';
@@ -204,24 +205,7 @@
   }
 
   function getFileType(document) {
-    const fileName = normalizeString(document?.originalName || document?.title);
-    if (fileName.includes('.')) {
-      const extension = normalizeString(fileName.split('.').pop());
-      if (extension) {
-        return extension.slice(0, 5).toUpperCase();
-      }
-    }
-
-    const explicitType = normalizeString(document?.fileType || document?.mimeType);
-    if (!explicitType) {
-      return '';
-    }
-
-    const normalizedType = explicitType.includes('/')
-      ? explicitType.split('/').pop()
-      : explicitType;
-
-    return normalizedType.slice(0, 5).toUpperCase();
+    return getDocumentFileTypeLabel(document);
   }
 
   function formatDate(value) {

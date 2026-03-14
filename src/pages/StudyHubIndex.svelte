@@ -13,6 +13,7 @@
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
   import PromptModal from '../lib/components/ui/PromptModal.svelte';
   import DocumentListSkeleton from '../lib/components/ui/DocumentListSkeleton.svelte';
+  import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   const statusToneMap = {
@@ -145,12 +146,7 @@
   }
 
   function getFileType(doc) {
-    const originalName = typeof doc?.originalName === 'string' ? doc.originalName : '';
-    const extension = originalName.includes('.') ? originalName.split('.').pop() : '';
-    if (!extension) {
-      return 'FILE';
-    }
-    return extension.slice(0, 5).toUpperCase();
+    return getDocumentFileTypeLabel(doc, { fallback: 'FILE' });
   }
 
   function getFileBadgeTone(doc) {

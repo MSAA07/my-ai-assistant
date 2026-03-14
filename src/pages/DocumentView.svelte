@@ -9,6 +9,7 @@
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import GuidedRegenerateModal from '../lib/components/ui/GuidedRegenerateModal.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
+  import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
   import {
     getDocument,
@@ -528,14 +529,7 @@
   }
 
   function getFileType(document) {
-    const explicitType = text(document?.fileType || document?.mimeType);
-    if (explicitType) return explicitType.toUpperCase();
-
-    const fileName = text(document?.originalName || document?.title);
-    if (!fileName.includes('.')) return '';
-
-    const ext = text(fileName.split('.').pop());
-    return ext ? ext.toUpperCase() : '';
+    return getDocumentFileTypeLabel(document);
   }
 
   function formatDate(value) {
