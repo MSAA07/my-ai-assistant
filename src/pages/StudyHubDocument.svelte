@@ -1,11 +1,11 @@
 <script>
   import { onDestroy } from 'svelte';
+  import { ArrowLeft, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
   import { t } from '../lib/i18n/t.js';
   import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import MetaPill from '../lib/components/ui/MetaPill.svelte';
-  import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import StudyActionCard from '../lib/components/ui/StudyActionCard.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
@@ -59,6 +59,7 @@
     : t('document.hub.processing.generatingBody');
 
   $: fileTypeBadge = getFileType(documentData);
+  $: languageMeta = getLanguageMeta(documentData);
   $: uploadedMeta = getUploadedMeta(documentData);
   $: featureCards = FEATURE_KEYS.map((featureKey) => createFeatureCard(featureKey, documentData, extractionStatus, pendingGeneration, generationErrors));
 
@@ -155,9 +156,20 @@
 
   function getPrimaryActionLabel(state) {
     if (state === 'ready') return t('document.hub.actions.open');
-    if (state === 'failed') return t('document.actions.retry');
     if (state === 'generating') return t('document.actions.generating');
     return t('document.actions.generate');
+  }
+
+  function getFeatureDescription(featureKey) {
+    if (featureKey === 'summary') {
+      return 'Get a comprehensive AI-generated summary of the key concepts and main points from your document.';
+    }
+
+    if (featureKey === 'flashcards') {
+      return 'Study with AI-generated flashcards that help you memorize important terms and concepts.';
+    }
+
+    return 'Test your knowledge with a practice exam featuring multiple-choice questions based on the content.';
   }
 
   function getGenerationOptions(featureKey) {
@@ -199,8 +211,8 @@
       stateLabel: getStateLabel(state),
       stateTone: getStateTone(state),
       primaryLabel: getPrimaryActionLabel(state),
+      description: getFeatureDescription(featureKey),
       canPrimaryAction,
-      canRegenerate,
       shouldRegenerate: hasContent || generationStatus === 'complete',
       errorMessage
     };
@@ -229,6 +241,20 @@
     if (!uploadDate) return null;
 
     return { label: t('document.uploaded'), value: uploadDate };
+  }
+
+  function getLanguageMeta(document) {
+    const language = normalizeString(document?.language).toLowerCase();
+    if (!language) return null;
+
+    const label = language === 'arabic' ? 'Arabic' : 'English';
+    return { label: t('documentsPage.labels.language'), value: label };
+  }
+
+  function featureIcon(featureKey) {
+    if (featureKey === 'summary') return FileText;
+    if (featureKey === 'flashcards') return Layers3;
+    return ClipboardCheck;
   }
 
   function clearPollTimer() {
@@ -404,46 +430,35 @@
     }
   }
 
-  async function regenerateFeature(card) {
-    if (!card?.canRegenerate) {
-      return;
-    }
-
-    await generateFeature(card.key, { regenerate: true });
-  }
-
   function goBackToLibrary() {
     window.location.hash = '/study';
   }
 </script>
 
 <div class="document-hub">
-  <PageHeader
-    eyebrow={t('documentsPage.eyebrow')}
-    title={normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}
-    subtitle={t('document.hub.readyHint')}
-    className="hub-page-header"
-  >
-    <div slot="actions" class="header-actions">
-      <Button type="button" className="back-link" variant="outline" size="sm" on:click={goBackToLibrary}>
-        <span slot="icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
-        </span>
-        {t('document.hub.backToStudyHub')}
-      </Button>
-    </div>
+  <header class="document-header">
+    <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
+      <span slot="icon" aria-hidden="true">
+        <ArrowLeft />
+      </span>
+      {t('document.hub.backToStudyHub')}
+    </Button>
 
-    <div slot="meta" class="hero-meta">
-      {#if fileTypeBadge}
-        <MetaPill label={t('document.hub.meta.fileType')}>
-          <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
-        </MetaPill>
-      {/if}
-      {#if uploadedMeta}
-        <MetaPill label={uploadedMeta.label} value={uploadedMeta.value} />
-      {/if}
+    <div class="document-title-block">
+      <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
+      <div class="document-meta">
+        {#if fileTypeBadge}
+          <Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge document-file-badge">{fileTypeBadge}</Badge>
+        {/if}
+        {#if languageMeta}
+          <MetaPill className="document-meta-pill" label="" value={languageMeta.value} />
+        {/if}
+        {#if uploadedMeta}
+          <MetaPill className="document-meta-pill" label="" value={`${uploadedMeta.label} ${uploadedMeta.value}`} />
+        {/if}
+      </div>
     </div>
-  </PageHeader>
+  </header>
 
   {#if loading && !documentData}
     <DocumentDetailSkeleton />
@@ -482,8 +497,14 @@
 
     <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
       {#each featureCards as card (card.key)}
-        <StudyActionCard class="feature-card" title={card.title} status={card.stateTone} statusLabel={card.stateLabel}>
+        {@const Icon = featureIcon(card.key)}
+        <StudyActionCard class="feature-card" title={card.title} description={card.description} status={card.stateTone} statusLabel={card.stateLabel}>
+          <div slot="icon">
+            <Icon />
+          </div>
+
           <svelte:fragment slot="description">
+            <p>{card.description}</p>
             {#if card.errorMessage}
               <p class="feature-inline-error">{card.errorMessage}</p>
             {/if}
@@ -492,22 +513,12 @@
           <div slot="actions" class="feature-actions">
             <Button
               type="button"
-              variant="primary"
+              variant={card.state === 'ready' ? 'primary' : 'secondary'}
               on:click={() => runPrimaryAction(card)}
               disabled={!card.canPrimaryAction}
             >
               {card.primaryLabel}
             </Button>
-
-            {#if card.canRegenerate}
-              <Button
-                type="button"
-                variant="secondary"
-                on:click={() => regenerateFeature(card)}
-              >
-                {t('document.actions.regenerate')}
-              </Button>
-            {/if}
           </div>
         </StudyActionCard>
       {/each}
@@ -517,36 +528,93 @@
 
 <style>
   .document-hub {
-    width: min(100%, 64rem);
+    width: min(100%, 96rem);
     margin: 0 auto;
     display: grid;
-    gap: var(--ui-space-5);
+    gap: clamp(2rem, 3vw, 3.5rem);
   }
 
-  .header-actions {
-    display: inline-flex;
-    gap: var(--ui-space-3);
-    flex-wrap: wrap;
+  .document-header {
+    display: grid;
+    gap: clamp(1.5rem, 2vw, 2rem);
   }
 
   .document-hub :global(.back-link) {
     justify-self: start;
     width: fit-content;
+    padding-inline: 0;
+    min-height: auto;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ui-text-secondary);
+    font-size: 0.95rem;
   }
 
   .document-hub :global(.back-link svg) {
-    width: 16px;
-    height: 16px;
+    width: 1.15rem;
+    height: 1.15rem;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.9;
+    stroke-width: 2.1;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 
+  .document-hub :global(.back-link:hover) {
+    color: var(--ui-text-primary);
+    transform: none;
+  }
+
+  .document-title-block {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .document-title-block h1 {
+    margin: 0;
+    font-size: clamp(2.55rem, 2rem + 1.7vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.05em;
+    color: var(--ui-text-primary);
+    max-width: 18ch;
+  }
+
+  .document-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    align-items: center;
+  }
+
+  :global(.document-meta-badge) {
+    min-height: 2.75rem;
+    padding-inline: 1.05rem;
+    border-radius: var(--ui-radius-md);
+    font-size: 0.82rem;
+    letter-spacing: 0;
+  }
+
+  :global(.document-meta-pill) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.05rem;
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-surface-card) 84%, var(--ui-surface-secondary) 16%);
+    box-shadow: none;
+  }
+
+  :global(.document-meta-pill .ui-meta-pill__value) {
+    font-size: 0.82rem;
+    color: var(--ui-text-secondary);
+    font-weight: 500;
+  }
+
   :global(.document-file-badge) {
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    color: #ff6b6b;
+    border-color: color-mix(in srgb, #ff6b6b 26%, var(--ui-border-default) 74%);
+    background: color-mix(in srgb, #ff6b6b 10%, transparent);
   }
 
   h2 {
@@ -556,10 +624,6 @@
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.02em;
-  }
-
-  .hero-meta {
-    display: contents;
   }
 
   .document-hub :global(.state-panel) {
@@ -589,26 +653,26 @@
 
   .features-grid {
     display: grid;
-    gap: var(--ui-space-4);
+    gap: 1.7rem;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .document-hub :global(.feature-card) {
-    min-height: 190px;
+    min-height: 28rem;
   }
 
   .feature-inline-error {
-    margin: 0;
+    margin-top: 0.9rem;
     color: var(--destructive);
-    line-height: 1.45;
-    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    font-size: 0.9rem;
   }
 
-  .feature-actions {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-    margin-top: auto;
+  :global(.feature-card .ui-study-action-card__actions .ui-button[data-variant='secondary']) {
+    background: color-mix(in srgb, var(--ui-surface-secondary) 46%, var(--ui-surface-card) 54%);
+    color: var(--ui-text-primary);
+    border-color: transparent;
+    box-shadow: none;
   }
 
   .row {
@@ -627,6 +691,10 @@
     .features-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .document-title-block h1 {
+      max-width: 100%;
+    }
   }
 
   @media (max-width: 640px) {
@@ -634,12 +702,12 @@
       grid-template-columns: 1fr;
     }
 
-    .feature-actions {
-      flex-direction: column;
+    .document-title-block {
+      gap: 1rem;
     }
 
-    .feature-actions :global(.ui-button) {
-      width: 100%;
+    .document-title-block h1 {
+      font-size: clamp(2.1rem, 11vw, 2.8rem);
     }
   }
 </style>
