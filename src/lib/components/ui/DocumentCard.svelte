@@ -21,6 +21,8 @@
   hoverable
   border={highlighted ? 'strong' : 'default'}
   className={['ui-document-card', className, $$props.class ?? ''].filter(Boolean).join(' ')}
+  on:click
+  on:keydown
 >
   <div class="ui-document-card__top">
     {#if badgeLabel}
