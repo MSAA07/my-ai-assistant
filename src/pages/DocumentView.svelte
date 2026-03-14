@@ -5,7 +5,6 @@
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import FieldShell from '../lib/components/ui/FieldShell.svelte';
-  import MetaPill from '../lib/components/ui/MetaPill.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import GuidedRegenerateModal from '../lib/components/ui/GuidedRegenerateModal.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
@@ -67,7 +66,7 @@
   $: activeFeature = activeFeatureKey === 'summary' ? summaryFeature : activeFeatureKey === 'flashcards' ? flashcardsFeature : examFeature;
   $: modeLabel = mode === 'summary' ? t('document.activity.section.summary') : mode === 'flashcards' ? t('document.activity.section.flashcards') : t('document.activity.section.exam');
   $: modeSubtitle = mode === 'summary' ? t('document.activity.subtitle.summary') : mode === 'flashcards' ? t('document.activity.subtitle.flashcards') : t('document.activity.subtitle.exam');
-  $: metaItems = getMetaItems(docData);
+  $: fileTypeBadge = getFileType(docData);
 
   $: flashcards = Array.isArray(docData?.flashcards) ? docData.flashcards : [];
   $: currentFlashcard = flashcards[flashcardIndex] ?? null;
@@ -532,29 +531,6 @@
     return getDocumentFileTypeLabel(document);
   }
 
-  function formatDate(value) {
-    if (!value) return '';
-
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return '';
-
-    return parsed.toLocaleDateString();
-  }
-
-  function getMetaItems(document) {
-    if (!document) return [];
-
-    const items = [];
-    const fileType = getFileType(document);
-    const language = text(document?.language);
-    const uploadDate = formatDate(document?.uploadDate || document?.createdAt);
-
-    if (fileType) items.push({ key: 'fileType', label: t('document.hub.meta.fileType'), value: fileType });
-    if (language) items.push({ key: 'language', label: t('document.language'), value: language });
-    if (uploadDate) items.push({ key: 'uploaded', label: t('document.uploaded'), value: uploadDate });
-
-    return items;
-  }
 </script>
 
 {#if loading && !docData}
@@ -584,18 +560,15 @@
 
       <div class="hero-main">
         <div class="hero-copy">
-          <Badge tone="accent" variant="soft" size="sm" uppercase>{modeLabel}</Badge>
+          <div class="hero-badges">
+            <Badge tone="accent" variant="soft" size="sm" uppercase>{modeLabel}</Badge>
+            {#if fileTypeBadge}
+              <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
+            {/if}
+          </div>
           <h1>{title}</h1>
           <p class="sub">{modeSubtitle}</p>
         </div>
-
-        {#if metaItems.length}
-          <div class="meta-grid">
-            {#each metaItems as item}
-              <MetaPill label={item.label} value={item.value} />
-            {/each}
-          </div>
-        {/if}
       </div>
     </Card>
 
@@ -870,6 +843,13 @@
     min-width: 0;
   }
 
+  .hero-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
   .activity :global(.activity-back-link) {
     width: fit-content;
   }
@@ -923,10 +903,9 @@
     line-height: 1.6;
   }
 
-  .meta-grid {
-    display: grid;
-    gap: 0.75rem;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  :global(.document-file-badge) {
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .activity-body {
@@ -936,7 +915,7 @@
   }
 
   .summary-body {
-    max-width: 50rem;
+    max-width: 100%;
   }
 
   .study-body,
