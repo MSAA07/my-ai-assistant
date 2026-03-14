@@ -20,6 +20,7 @@
   class={resolvedClass}
   role="menuitem"
   {disabled}
+  on:click|stopPropagation
 >
   <slot />
 </button>

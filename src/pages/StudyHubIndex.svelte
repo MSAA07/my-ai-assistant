@@ -11,6 +11,7 @@
   import MenuSurface from '../lib/components/ui/MenuSurface.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
+  import PromptModal from '../lib/components/ui/PromptModal.svelte';
   import DocumentListSkeleton from '../lib/components/ui/DocumentListSkeleton.svelte';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
@@ -32,12 +33,18 @@
   let openMenuId = '';
   let confirmOpen = false;
   let pendingDeleteDoc = null;
+  let renameOpen = false;
+  let pendingRenameDoc = null;
+  let renameValue = '';
 
   $: highlightDocumentId = typeof $routeParams?.highlight === 'string' ? $routeParams.highlight : '';
   $: deleteTitle = t('documentsPage.deleteConfirmTitle');
   $: deleteDescription = t('documentsPage.deleteConfirmDescription', {
     name: pendingDeleteDoc?.originalName ?? t('documentsPage.deleteUnknown')
   });
+  $: renameTitle = t('documentsPage.actions.renamePrompt');
+  $: renameDescription = pendingRenameDoc?.originalName ?? '';
+  $: renameDisabled = !pendingRenameDoc?.id || !renameValue.trim() || renameValue.trim() === (pendingRenameDoc?.originalName ?? '').trim();
   $: deleteLabel = t('documentsPage.actions.delete');
   $: cancelLabel = t('confirmModal.cancel');
 
@@ -101,6 +108,20 @@
     window.location.hash = '/home';
   }
 
+  function openDocument(documentId) {
+    openMenuId = '';
+    window.location.hash = `/study/${documentId}`;
+  }
+
+  function handleDocumentCardKeydown(event, documentId) {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    openDocument(documentId);
+  }
+
   function toggleMenu(event, docId) {
     event.stopPropagation();
     openMenuId = openMenuId === docId ? '' : docId;
@@ -140,25 +161,33 @@
     return 'accent';
   }
 
-  async function renameDocument(doc) {
+  function openRenameModal(doc) {
     openMenuId = '';
     const currentName = typeof doc?.originalName === 'string' ? doc.originalName.trim() : '';
     if (!currentName) return;
 
-    const nextNameInput = window.prompt(t('documentsPage.actions.renamePrompt'), currentName);
-    if (nextNameInput === null) {
+    pendingRenameDoc = doc;
+    renameValue = currentName;
+    renameOpen = true;
+  }
+
+  function closeRenameModal() {
+    renameOpen = false;
+    pendingRenameDoc = null;
+    renameValue = '';
+  }
+
+  async function renameDocument() {
+    const currentName = typeof pendingRenameDoc?.originalName === 'string' ? pendingRenameDoc.originalName.trim() : '';
+    const nextName = renameValue.trim();
+    if (!pendingRenameDoc?.id || !nextName || nextName === currentName) {
       return;
     }
 
-    const nextName = nextNameInput.trim();
-    if (!nextName || nextName === currentName) {
-      return;
-    }
-
-    actionBusyId = doc.id;
+    actionBusyId = pendingRenameDoc.id;
     actionError = '';
     try {
-      const response = await fetch(`${API_BASE}/api/document/${doc.id}`, {
+      const response = await fetch(`${API_BASE}/api/document/${pendingRenameDoc.id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -170,6 +199,7 @@
         throw new Error(data?.error || t('documentsPage.errors.rename'));
       }
 
+      closeRenameModal();
       await loadDocuments({ background: true });
     } catch (err) {
       actionError = err?.message || t('documentsPage.errors.rename');
@@ -178,8 +208,7 @@
     }
   }
 
-  function openDeleteModal(event, doc) {
-    event.stopPropagation();
+  function openDeleteModal(doc) {
     pendingDeleteDoc = doc;
     confirmOpen = true;
     openMenuId = '';
@@ -207,6 +236,8 @@
         throw new Error(data?.error || t('documentsPage.errors.delete'));
       }
 
+      documents = documents.filter((doc) => doc.id !== pendingDeleteDoc.id);
+      writePageCache(STUDY_INDEX_CACHE_KEY, { loaded: true, documents });
       closeDeleteModal();
       await loadDocuments({ background: true });
     } catch (err) {
@@ -266,12 +297,17 @@
             padding="sm"
             hoverable
             border={highlightDocumentId === doc.id ? 'accent' : 'subtle'}
+            role="link"
+            tabindex="0"
+            aria-label={doc.originalName}
+            on:click={() => openDocument(doc.id)}
+            on:keydown={(event) => handleDocumentCardKeydown(event, doc.id)}
           >
             <div class="card-top">
               <Badge tone={getFileBadgeTone(doc)} variant="outline" size="sm" className="file-badge">
                 {getFileType(doc)}
               </Badge>
-              <div class="menu-wrap">
+              <div class="menu-wrap" role="presentation" on:click|stopPropagation>
                 <Button
                   type="button"
                   variant="ghost"
@@ -285,12 +321,12 @@
                 </Button>
                 {#if openMenuId === doc.id}
                   <MenuSurface class="library-menu" minWidth="140px">
-                    <MenuItem on:click={() => renameDocument(doc)} disabled={actionBusyId === doc.id}>
+                    <MenuItem on:click={() => openRenameModal(doc)} disabled={actionBusyId === doc.id}>
                       {t('documentsPage.actions.rename')}
                     </MenuItem>
                     <MenuItem
                       tone="danger"
-                      on:click={(event) => openDeleteModal(event, doc)}
+                      on:click={() => openDeleteModal(doc)}
                       disabled={actionBusyId === doc.id}
                     >
                       {t('documentsPage.actions.delete')}
@@ -300,7 +336,7 @@
               </div>
             </div>
 
-            <a class="card-link" href={`#/study/${doc.id}`}>
+            <div class="card-link">
               <div class="card-main">
                 <h2>{doc.originalName}</h2>
                 <p class="meta">
@@ -313,7 +349,7 @@
                   label={t(`documentsPage.statuses.${getStatusKey(doc)}`)}
                 />
               </div>
-            </a>
+            </div>
           </Card>
         {/each}
       </section>
@@ -328,6 +364,22 @@
     cancelLabel={cancelLabel}
     on:confirm={handleDelete}
     on:cancel={closeDeleteModal}
+  />
+
+  <PromptModal
+    open={renameOpen}
+    title={renameTitle}
+    description={renameDescription}
+    label={t('documentsPage.actions.rename')}
+    value={renameValue}
+    placeholder={pendingRenameDoc?.originalName ?? ''}
+    confirmLabel={t('documentsPage.actions.rename')}
+    cancelLabel={cancelLabel}
+    confirmDisabled={renameDisabled}
+    confirmLoading={actionBusyId === pendingRenameDoc?.id}
+    on:change={(event) => (renameValue = event.detail)}
+    on:confirm={renameDocument}
+    on:cancel={closeRenameModal}
   />
 </div>
 
@@ -411,10 +463,16 @@
     min-height: 216px;
     border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     box-shadow: none;
+    cursor: pointer;
   }
 
   .library-page :global(.document-card[data-border='accent']) {
     border-color: color-mix(in srgb, var(--foreground) 18%, var(--border) 82%);
+  }
+
+  .library-page :global(.document-card:focus-visible) {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
   .card-top {
@@ -467,7 +525,6 @@
 
   .card-link {
     color: inherit;
-    text-decoration: none;
     display: grid;
     gap: 1rem;
     min-height: 0;
@@ -486,8 +543,8 @@
     justify-content: flex-start;
   }
 
-  .card-link:hover h2,
-  .card-link:focus-visible h2 {
+  .library-page :global(.document-card:hover h2),
+  .library-page :global(.document-card:focus-visible h2) {
     text-decoration: underline;
     text-decoration-color: color-mix(in srgb, var(--foreground) 45%, transparent);
     text-underline-offset: 0.16em;

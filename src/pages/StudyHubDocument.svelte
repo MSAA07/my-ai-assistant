@@ -18,17 +18,14 @@
   const FEATURE_CONFIG = {
     summary: {
       titleKey: 'document.hub.features.summary',
-      descriptionKey: 'document.summary.generatePrompt',
       openSection: 'summary'
     },
     flashcards: {
       titleKey: 'document.hub.features.flashcards',
-      descriptionKey: 'document.flashcards.generatePrompt',
       openSection: 'flashcards'
     },
     exam: {
       titleKey: 'document.hub.features.exam',
-      descriptionKey: 'document.exam.generatePrompt',
       openSection: 'exam'
     }
   };
@@ -58,6 +55,7 @@
     ? t('document.hub.processing.extractingBody')
     : t('document.hub.processing.generatingBody');
 
+  $: fileTypeBadge = getFileType(documentData);
   $: metaItems = getMetaItems(documentData);
   $: featureCards = FEATURE_KEYS.map((featureKey) => createFeatureCard(featureKey, documentData, extractionStatus, pendingGeneration, generationErrors));
 
@@ -171,30 +169,6 @@
     return { questionCount: 10 };
   }
 
-  function getFeatureHint(featureKey, state, generationStatus, localError, serverError) {
-    if (state === 'generating') {
-      if (extractionStatus === 'queued' || extractionStatus === 'processing') {
-        return t('document.hub.states.waitingForExtraction');
-      }
-
-      if (generationStatus === 'queued') {
-        return t('document.generation.queuedNoContent');
-      }
-
-      return t('document.generation.runningNoContent');
-    }
-
-    if (state === 'failed') {
-      return localError || serverError || t('document.generation.failedNoContent');
-    }
-
-    if (state === 'not_generated') {
-      return t(FEATURE_CONFIG[featureKey].descriptionKey);
-    }
-
-    return t('document.hub.readyHint');
-  }
-
   function createFeatureCard(featureKey, document, extraction, pendingByFeature, errorByFeature) {
     const generation = document?.generationState?.[featureKey] ?? {};
     const generationStatus = normalizeGenerationStatus(generation?.status);
@@ -211,11 +185,13 @@
     const canRegenerate = extraction === 'complete' && state === 'ready' && !pendingByFeature?.[featureKey];
     const serverError = normalizeString(generation?.errorMessage);
     const localError = normalizeString(errorByFeature?.[featureKey]);
+    const errorMessage = state === 'failed'
+      ? localError || serverError || t('document.generation.failedNoContent')
+      : '';
 
     return {
       key: featureKey,
       title: t(FEATURE_CONFIG[featureKey].titleKey),
-      description: t(FEATURE_CONFIG[featureKey].descriptionKey),
       state,
       stateLabel: getStateLabel(state),
       stateTone: getStateTone(state),
@@ -223,24 +199,29 @@
       canPrimaryAction,
       canRegenerate,
       shouldRegenerate: hasContent || generationStatus === 'complete',
-      hint: getFeatureHint(featureKey, state, generationStatus, localError, serverError),
-      showHintAsError: state === 'failed'
+      errorMessage
     };
   }
 
   function getFileType(document) {
-    const explicitType = normalizeString(document?.fileType || document?.mimeType);
-    if (explicitType) {
-      return explicitType.toUpperCase();
+    const fileName = normalizeString(document?.originalName || document?.title);
+    if (fileName.includes('.')) {
+      const extension = normalizeString(fileName.split('.').pop());
+      if (extension) {
+        return extension.slice(0, 5).toUpperCase();
+      }
     }
 
-    const fileName = normalizeString(document?.originalName || document?.title);
-    if (!fileName.includes('.')) {
+    const explicitType = normalizeString(document?.fileType || document?.mimeType);
+    if (!explicitType) {
       return '';
     }
 
-    const ext = normalizeString(fileName.split('.').pop());
-    return ext ? ext.toUpperCase() : '';
+    const normalizedType = explicitType.includes('/')
+      ? explicitType.split('/').pop()
+      : explicitType;
+
+    return normalizedType.slice(0, 5).toUpperCase();
   }
 
   function formatDate(value) {
@@ -258,13 +239,8 @@
     if (!document) return [];
 
     const items = [];
-    const fileType = getFileType(document);
     const language = normalizeString(document?.language);
     const uploadDate = formatDate(document?.uploadDate || document?.createdAt);
-
-    if (fileType) {
-      items.push({ key: 'fileType', label: t('document.hub.meta.fileType'), value: fileType });
-    }
 
     if (language) {
       items.push({ key: 'language', label: t('document.language'), value: language });
@@ -465,27 +441,35 @@
 
 <div class="document-hub">
   <Card as="section" class="hub-hero" variant="base" padding="lg" border="strong">
-    <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
-      <span slot="icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
-      </span>
-      {t('document.hub.backToStudyHub')}
-    </Button>
+    <div class="hero-header">
+      <Button type="button" className="back-link" variant="back" size="sm" on:click={goBackToLibrary}>
+        <span slot="icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
+        </span>
+        {t('document.hub.backToStudyHub')}
+      </Button>
 
-    <div class="hero-copy">
-      <Badge tone="neutral" variant="outline" size="sm" className="hub-eyebrow">{t('documentsPage.eyebrow')}</Badge>
-      <div class="hero-heading">
-        <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
-        <p class="hero-subtitle">{t('document.hub.readyHint')}</p>
-      </div>
-
-      {#if metaItems.length > 0}
-        <div class="meta-row">
-          {#each metaItems as item (item.key)}
-            <MetaPill label={item.label} value={item.value} />
-          {/each}
+      <div class="hero-copy">
+        <div class="hero-badges">
+          <Badge tone="neutral" variant="outline" size="sm" className="hub-eyebrow">{t('documentsPage.eyebrow')}</Badge>
+          {#if fileTypeBadge}
+            <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
+          {/if}
         </div>
-      {/if}
+
+        <div class="hero-heading">
+          <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
+          <p class="hero-subtitle">{t('document.hub.readyHint')}</p>
+        </div>
+
+        {#if metaItems.length > 0}
+          <div class="meta-row">
+            {#each metaItems as item (item.key)}
+              <MetaPill label={item.label} value={item.value} />
+            {/each}
+          </div>
+        {/if}
+      </div>
     </div>
   </Card>
 
@@ -496,7 +480,7 @@
       <h2>{t('document.processingFailedTitle')}</h2>
       <p>{error || t('document.notFound')}</p>
       <div class="row">
-        <Button type="button" variant="secondary" on:click={goBackToLibrary}>{t('document.hub.backToStudyHub')}</Button>
+        <Button type="button" variant="back" on:click={goBackToLibrary}>{t('document.hub.backToStudyHub')}</Button>
       </div>
     </Card>
   {:else}
@@ -526,18 +510,17 @@
 
     <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
       {#each featureCards as card (card.key)}
-        <Card as="article" class="feature-card" variant="base" padding="md" hoverable border={card.showHintAsError ? 'strong' : 'subtle'}>
+        <Card as="article" class="feature-card" variant="base" padding="md" hoverable border={card.errorMessage ? 'strong' : 'subtle'}>
           <div class="feature-card-header">
             <div class="feature-heading">
               <h2>{card.title}</h2>
-              <p class="feature-description">{card.description}</p>
             </div>
             <StatusBadge status={card.stateTone} label={card.stateLabel} />
           </div>
 
-          <div class={`feature-note ${card.showHintAsError ? 'feature-note-error' : ''}`}>
-            <p class:feature-hint-error={card.showHintAsError} class="feature-hint">{card.hint}</p>
-          </div>
+          {#if card.errorMessage}
+            <p class="feature-inline-error">{card.errorMessage}</p>
+          {/if}
 
           <div class="feature-actions">
             <Button
@@ -573,7 +556,7 @@
     gap: 1.5rem;
   }
 
-  .hub-hero {
+  :global(.hub-hero) {
     display: grid;
     gap: 1rem;
     background:
@@ -581,15 +564,15 @@
       linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
   }
 
-  .document-hub :global(.back-link) {
-    min-height: 0;
-    justify-self: start;
-    padding-inline: 0;
-    color: var(--muted-foreground);
+  .hero-header {
+    display: grid;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
-  .document-hub :global(.back-link:hover) {
-    color: var(--foreground);
+  .document-hub :global(.back-link) {
+    justify-self: start;
+    width: fit-content;
   }
 
   .document-hub :global(.back-link svg) {
@@ -605,6 +588,14 @@
   .hero-copy {
     display: grid;
     gap: 0.875rem;
+    min-width: 0;
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   :global(.hub-eyebrow) {
@@ -612,6 +603,11 @@
     color: var(--muted-foreground);
     text-transform: uppercase;
     letter-spacing: 0.06em;
+  }
+
+  :global(.document-file-badge) {
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .hero-heading {
@@ -686,7 +682,7 @@
   .document-hub :global(.feature-card) {
     display: grid;
     gap: 1rem;
-    min-height: 240px;
+    min-height: 190px;
   }
 
   .feature-card-header {
@@ -698,38 +694,14 @@
 
   .feature-heading {
     display: grid;
-    gap: 0.4rem;
+    gap: 0.25rem;
   }
 
-  .feature-description {
+  .feature-inline-error {
     margin: 0;
-    color: var(--muted-foreground);
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
-  .feature-note {
-    padding: 0.875rem 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) + 2px);
-    background: color-mix(in srgb, var(--muted) 62%, transparent);
-  }
-
-  .feature-note-error {
-    border-color: color-mix(in srgb, var(--destructive) 24%, var(--border) 76%);
-    background: color-mix(in srgb, var(--destructive) 8%, var(--card) 92%);
-  }
-
-  .feature-hint {
-    margin: 0;
-    color: var(--muted-foreground);
-    line-height: 1.45;
-    min-height: 0;
-    font-size: var(--font-size-sm);
-  }
-
-  .feature-hint-error {
     color: var(--destructive);
+    line-height: 1.45;
+    font-size: var(--font-size-sm);
   }
 
   .feature-actions {

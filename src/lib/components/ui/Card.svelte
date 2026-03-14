@@ -37,6 +37,8 @@
   data-border={border}
   data-padding={normalizedPadding}
   data-hoverable={hoverable}
+  on:click
+  on:keydown
 >
   <slot />
 </svelte:element>

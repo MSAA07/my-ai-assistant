@@ -569,13 +569,18 @@
   <Card as="section" class="activity-panel activity-panel-error" variant="base" padding="md" border="strong">
     <h2>{t('document.processingFailedTitle')}</h2>
     <p>{pageError || t('document.notFound')}</p>
-    <Button type="button" variant="secondary" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
+    <Button type="button" variant="back" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
   </Card>
 {:else}
   <div class="activity mode-{mode}">
     <Card as="header" class="activity-hero" variant="base" padding="lg" border="strong">
       <div class="hero-toolbar">
-        <Button type="button" class="activity-back-link" variant="ghost" size="sm" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
+        <Button type="button" class="activity-back-link" variant="back" size="sm" on:click={goBackToHub}>
+          <span slot="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
+          </span>
+          {t('document.activity.backToHub')}
+        </Button>
         {#if activeFeature.hasContent}
           <Button type="button" variant="secondary" on:click={() => openRegenerateModal(activeFeature)} disabled={!activeFeature.canRegenerate}>
             {activeFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
@@ -872,14 +877,17 @@
   }
 
   .activity :global(.activity-back-link) {
-    color: var(--color-text-secondary);
-    min-height: 0;
-    padding-inline: 0;
-    text-decoration: none;
+    width: fit-content;
   }
 
-  .activity :global(.activity-back-link:hover) {
-    color: var(--color-text-primary);
+  .activity :global(.activity-back-link svg) {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .eyebrow {

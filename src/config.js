@@ -12,7 +12,7 @@ function getHostDerivedApiBaseUrl() {
   const hostname = window.location.hostname.toLowerCase();
 
   if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return DEPLOYMENT_API_BASES.local;
+    return DEPLOYMENT_API_BASES.staging;
   }
 
   if (hostname === "my-ai-assistant.vercel.app" || hostname.includes("git-production")) {

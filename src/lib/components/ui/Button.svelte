@@ -107,6 +107,17 @@
     --button-shadow: var(--shadow-inline-control);
   }
 
+  .ui-button[data-variant='back'] {
+    --button-bg: color-mix(in srgb, var(--card) 82%, var(--muted) 18%);
+    --button-bg-hover: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
+    --button-bg-active: color-mix(in srgb, var(--card) 64%, var(--muted) 36%);
+    --button-fg: var(--foreground);
+    --button-fg-hover: var(--foreground);
+    --button-border: color-mix(in srgb, var(--foreground) 72%, transparent);
+    --button-border-hover: color-mix(in srgb, var(--foreground) 88%, transparent);
+    --button-shadow: none;
+  }
+
   .ui-button[data-variant='ghost'] {
     --button-bg: transparent;
     --button-bg-hover: color-mix(in srgb, var(--accent) 70%, transparent);
