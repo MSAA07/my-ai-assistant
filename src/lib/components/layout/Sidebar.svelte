@@ -9,6 +9,7 @@
   export let secondaryItems = [];
   export let activeId = '';
   export let planLabel = '';
+  export let collapsed = false;
 
   const badgeToneMap = {
     success: 'success',
@@ -22,7 +23,10 @@
   $: footerItems = secondaryItems.filter((item) => item !== planItem);
 </script>
 
-<aside class={`sidebar ${$direction === 'rtl' ? 'rtl' : 'ltr'}`} aria-label={t('nav.mobileLabel')}>
+<aside
+  class={`sidebar ${$direction === 'rtl' ? 'rtl' : 'ltr'} ${collapsed ? 'collapsed' : ''}`}
+  aria-label={t('nav.mobileLabel')}
+>
   <div class="sidebar-header">
     <a class="brand" href="#/home" aria-label={t('app.wordmark')}>
       <span class="brand-mark">{t('app.shortName').slice(0, 1)}</span>
@@ -36,6 +40,8 @@
         class={`nav-item ${activeId === item.id ? 'active' : ''}`}
         href={item.href}
         aria-current={activeId === item.id ? 'page' : undefined}
+        aria-label={collapsed ? item.label : undefined}
+        title={collapsed ? item.label : undefined}
       >
         <span class="nav-icon" aria-hidden="true">
           {#if item.icon === 'dashboard'}
@@ -98,16 +104,20 @@
 
 <style>
   .sidebar {
-    position: sticky;
-    top: 0;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 20;
+    box-sizing: border-box;
     display: flex;
     height: 100vh;
     width: var(--shell-sidebar-width, 16rem);
-    min-width: var(--shell-sidebar-width, 16rem);
     flex-direction: column;
-    background: var(--card);
+    overflow: hidden auto;
+    background: var(--sidebar, var(--card));
     border-inline-end: 1px solid var(--border);
     box-shadow: inset -1px 0 0 color-mix(in srgb, var(--foreground) 4%, transparent);
+    transition: width var(--motion-default) var(--ease-standard);
   }
 
   .sidebar.rtl {
@@ -128,6 +138,7 @@
     align-items: center;
     gap: 0.625rem;
     min-width: 0;
+    width: 100%;
     color: var(--foreground);
     text-decoration: none;
   }
@@ -231,6 +242,39 @@
     gap: 0.75rem;
     padding: 1rem;
     border-top: 1px solid var(--border);
+  }
+
+  .sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0 0.75rem;
+  }
+
+  .sidebar.collapsed .brand {
+    justify-content: center;
+  }
+
+  .sidebar.collapsed .brand-wordmark,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed :global(.nav-badge),
+  .sidebar.collapsed .footer-links,
+  .sidebar.collapsed .plan-card,
+  .sidebar.collapsed .language-card {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-nav {
+    padding-inline: 0.625rem;
+  }
+
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0.75rem;
+  }
+
+  .sidebar.collapsed .sidebar-footer {
+    padding: 0.75rem;
+    min-height: 0;
   }
 
   .footer-links {

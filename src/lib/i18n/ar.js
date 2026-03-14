@@ -46,6 +46,8 @@ export default {
     defaultTitle: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©',
     notifications: 'Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª',
     notificationsComingSoon: 'Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª (Ù‚Ø±ÙŠØ¨Ø§Ù‹)',
+    collapseSidebar: 'Ø·ÙŠ Ø§Ù„Ø´Ø±ÙŠØ· Ø§Ù„Ø¬Ø§Ù†Ø¨ÙŠ',
+    expandSidebar: 'ØªÙˆØ³ÙŠØ¹ Ø§Ù„Ø´Ø±ÙŠØ· Ø§Ù„Ø¬Ø§Ù†Ø¨ÙŠ',
     profile: 'Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ',
     logout: 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬'
   },

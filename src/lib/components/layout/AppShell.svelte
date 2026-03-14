@@ -4,6 +4,7 @@
   import TopBar from './TopBar.svelte';
   import BottomNav from './BottomNav.svelte';
   import { direction } from '../../stores/language.js';
+  import { sidebarCollapsed, toggleSidebarCollapsed } from '../../stores/sidebar.js';
 
   const dispatch = createEventDispatcher();
 
@@ -27,14 +28,21 @@
   function onProfile() {
     dispatch('openProfile');
   }
+
+  function onToggleSidebar() {
+    toggleSidebarCollapsed();
+  }
 </script>
 
-<div class={`app-shell ${$direction === 'rtl' ? 'rtl' : 'ltr'}`}>
+<div
+  class={`app-shell ${$direction === 'rtl' ? 'rtl' : 'ltr'} ${$sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
+>
   <Sidebar
     items={navItems}
     secondaryItems={secondaryItems}
     activeId={activeNav}
     planLabel={planLabel}
+    collapsed={$sidebarCollapsed}
   />
 
   <div class="shell-main">
@@ -43,9 +51,11 @@
       userName={userName}
       userEmail={userEmail}
       planLabel={planLabel}
+      sidebarCollapsed={$sidebarCollapsed}
       on:signOut={onSignOut}
       on:openNotifications={onNotifications}
       on:openProfile={onProfile}
+      on:toggleSidebar={onToggleSidebar}
     />
 
     <main class="shell-content">
@@ -60,27 +70,37 @@
 
 <style>
   .app-shell {
-    --shell-sidebar-width: 16rem;
+    --shell-sidebar-width-expanded: var(--size-sidebar, 16rem);
+    --shell-sidebar-width-collapsed: var(--size-sidebar-collapsed, 5rem);
+    --shell-sidebar-width: var(--shell-sidebar-width-expanded);
     min-height: 100vh;
-    display: flex;
     background: var(--background);
     color: var(--foreground);
     overflow: hidden;
   }
 
+  .app-shell.sidebar-collapsed {
+    --shell-sidebar-width: var(--shell-sidebar-width-collapsed);
+  }
+
   .app-shell.rtl {
     direction: rtl;
-    flex-direction: row-reverse;
   }
 
   .shell-main {
-    flex: 1;
+    height: 100vh;
+    width: calc(100% - var(--shell-sidebar-width));
+    max-width: calc(100% - var(--shell-sidebar-width));
     min-height: 100vh;
     min-width: 0;
+    margin-inline-start: var(--shell-sidebar-width);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: var(--background);
+    transition: margin-inline-start var(--motion-default) var(--ease-standard),
+      width var(--motion-default) var(--ease-standard),
+      max-width var(--motion-default) var(--ease-standard);
   }
 
   .shell-content {
@@ -89,6 +109,7 @@
     min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .content-wrapper {
@@ -117,6 +138,15 @@
     .app-shell,
     .app-shell.rtl {
       display: block;
+      overflow: visible;
+    }
+
+    .shell-main {
+      height: auto;
+      width: 100%;
+      max-width: 100%;
+      min-height: 100vh;
+      margin-inline-start: 0;
     }
 
     .content-wrapper {

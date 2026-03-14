@@ -11,6 +11,7 @@
   export let userName = '';
   export let userEmail = '';
   export let planLabel = '';
+  export let sidebarCollapsed = false;
 
   const dispatch = createEventDispatcher();
   let menuOpen = false;
@@ -41,6 +42,10 @@
     closeMenu();
   }
 
+  function handleSidebarToggle() {
+    dispatch('toggleSidebar');
+  }
+
   onMount(() => {
     if (typeof window !== 'undefined') {
       window.addEventListener('click', handleOutsideClick);
@@ -64,7 +69,24 @@
 </script>
 
 <header class="topbar">
-  <h1 class="page-title">{pageTitle || t('topbar.defaultTitle')}</h1>
+  <div class="title-area">
+    <button
+      class="sidebar-toggle"
+      type="button"
+      on:click={handleSidebarToggle}
+      aria-label={sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
+      title={sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4.75 4A1.75 1.75 0 0 0 3 5.75v12.5A1.75 1.75 0 0 0 4.75 20h14.5A1.75 1.75 0 0 0 21 18.25V5.75A1.75 1.75 0 0 0 19.25 4H4.75Zm4.5 1.5v13h10a.25.25 0 0 0 .25-.25V5.75a.25.25 0 0 0-.25-.25h-10ZM4.75 5.5h3v13h-3a.25.25 0 0 1-.25-.25V5.75c0-.14.11-.25.25-.25Z" />
+      </svg>
+      <span class="toggle-label">
+        {sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
+      </span>
+    </button>
+
+    <h1 class="page-title">{pageTitle || t('topbar.defaultTitle')}</h1>
+  </div>
 
   <div class="utility-area">
     {#if planLabel}
@@ -131,6 +153,13 @@
     backdrop-filter: blur(10px);
   }
 
+  .title-area {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   .page-title {
     margin: 0;
     min-width: 0;
@@ -141,6 +170,44 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .sidebar-toggle {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
+    box-shadow: var(--shadow-inline-control);
+    color: var(--foreground);
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard);
+  }
+
+  .sidebar-toggle:hover {
+    background: color-mix(in srgb, var(--accent) 58%, transparent);
+  }
+
+  .sidebar-toggle:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
+  }
+
+  .sidebar-toggle svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    fill: currentColor;
+  }
+
+  .toggle-label {
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    font-weight: 500;
   }
 
   .utility-area {
@@ -262,12 +329,26 @@
       gap: 0.75rem;
     }
 
+    .sidebar-toggle {
+      display: none;
+    }
+
     .utility-area {
       gap: 0.5rem;
     }
 
     :global(.plan-pill) {
       display: none;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .toggle-label {
+      display: none;
+    }
+
+    .sidebar-toggle {
+      padding-inline: 0.625rem;
     }
   }
 </style>

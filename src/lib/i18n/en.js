@@ -46,6 +46,8 @@ export default {
     defaultTitle: 'Home',
     notifications: 'Notifications',
     notificationsComingSoon: 'Notifications (coming soon)',
+    collapseSidebar: 'Collapse sidebar',
+    expandSidebar: 'Expand sidebar',
     profile: 'Profile',
     logout: 'Log out'
   },
