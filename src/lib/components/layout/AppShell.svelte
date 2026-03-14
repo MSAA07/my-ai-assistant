@@ -74,8 +74,8 @@
     --shell-sidebar-width-collapsed: var(--size-sidebar-collapsed, 5rem);
     --shell-sidebar-width: var(--shell-sidebar-width-expanded);
     min-height: 100vh;
-    background: var(--background);
-    color: var(--foreground);
+    background: var(--ui-bg-shell);
+    color: var(--ui-text-primary);
     overflow: hidden;
   }
 
@@ -97,7 +97,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: var(--background);
+    background: var(--ui-bg-page);
     transition: margin-inline-start var(--motion-default) var(--ease-standard),
       width var(--motion-default) var(--ease-standard),
       max-width var(--motion-default) var(--ease-standard);
@@ -116,10 +116,10 @@
     width: 100%;
     max-width: min(100%, var(--size-content-wide));
     margin: 0 auto;
-    padding: 1.75rem 1.5rem;
+    padding: var(--ui-space-5) var(--ui-space-5);
     box-sizing: border-box;
     display: grid;
-    gap: 1.5rem;
+    gap: var(--ui-space-5);
     min-width: 0;
   }
 
@@ -129,8 +129,8 @@
 
   @media (max-width: 1024px) {
     .content-wrapper {
-      padding: 1.5rem 1.25rem;
-      gap: 1.25rem;
+      padding: var(--ui-space-5) var(--ui-space-4);
+      gap: var(--ui-space-4);
     }
   }
 
@@ -150,8 +150,8 @@
     }
 
     .content-wrapper {
-      padding: 1rem 1rem calc(1rem + 72px);
-      gap: 1rem;
+      padding: var(--ui-space-4) var(--ui-space-4) calc(var(--ui-space-4) + 72px);
+      gap: var(--ui-space-4);
     }
   }
 </style>

@@ -1,4 +1,5 @@
 <script>
+  import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Tabs from '../lib/components/ui/Tabs.svelte';
   import AdminStats from './admin/AdminStats.svelte';
   import UserTable from './admin/UserTable.svelte';
@@ -22,11 +23,7 @@
 </script>
 
 <div class="admin-page">
-  <header class="admin-header">
-    <p class="eyebrow">Admin Console</p>
-    <h1>User Management &amp; Security</h1>
-    <p class="subtitle">Monitor platform activity, manage users, and audit actions.</p>
-  </header>
+  <PageHeader eyebrow="Admin Console" title="User Management & Security" subtitle="Monitor platform activity, manage users, and audit actions." className="admin-header" />
 
   <Tabs
     className="admin-tabs"
@@ -56,41 +53,12 @@
 <style>
   .admin-page {
     display: grid;
-    gap: 1.5rem;
+    gap: var(--ui-space-5);
     min-width: 0;
   }
 
-  .admin-header {
-    display: grid;
-    gap: 0.5rem;
+  :global(.admin-header) {
     max-width: 44rem;
-  }
-
-  .eyebrow {
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.67rem;
-    color: var(--color-text-secondary);
-    font-weight: 600;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: clamp(1.7rem, 3vw, 2.35rem);
-    font-weight: 600;
-    line-height: 1.06;
-    letter-spacing: -0.03em;
-    color: var(--color-text-primary);
-  }
-
-  .subtitle {
-    margin: 0;
-    color: var(--color-text-secondary);
-    font-size: 0.95rem;
-    font-weight: 500;
-    line-height: 1.6;
-    max-width: 58ch;
   }
 
   .admin-page :global(.admin-tabs) {

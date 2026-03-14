@@ -1,253 +1,300 @@
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap");
 
 :root {
-  /* v0 core tokens */
-  --background: #020202;
-  --foreground: #fafafa;
-  --card: #060606;
-  --card-foreground: #fafafa;
-  --popover: #060606;
-  --popover-foreground: #fafafa;
-  --border: #1b1b1b;
-  --muted: #121212;
-  --muted-foreground: #717171;
-  --accent: #121212;
-  --accent-foreground: #fafafa;
-  --ring: #484848;
-  --primary: #fafafa;
-  --primary-foreground: #020202;
-  --sidebar: #060606;
-  --sidebar-accent: #121212;
+  /* Foundation: dark */
+  --foundation-bg: #0f0f0f;
+  --foundation-surface-card: #171717;
+  --foundation-surface-secondary: #262626;
+  --foundation-surface-overlay: #1d1d1d;
+  --foundation-border: #2e2e2e;
+  --foundation-border-strong: #434343;
+  --foundation-text: #fafafa;
+  --foundation-text-secondary: #c9c9c9;
+  --foundation-text-muted: #737373;
+  --foundation-success: #34d399;
+  --foundation-success-button: #059669;
+  --foundation-success-hover: #047857;
+  --foundation-danger-button: #dc2626;
+  --foundation-danger-hover: #b91c1c;
+  --foundation-info: #60a5fa;
+  --foundation-warning: #fbbf24;
+  --foundation-backdrop: rgba(9, 9, 9, 0.72);
+  --foundation-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+  --foundation-shadow-md: 0 10px 24px rgba(0, 0, 0, 0.22);
+  --foundation-shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.34);
 
-  /* semantic status tokens */
-  --success: #10b981;
-  --success-foreground: #d1fae5;
-  --warning: #eab308;
-  --warning-foreground: #fef3c7;
-  --info: #3b82f6;
-  --info-foreground: #dbeafe;
-  --destructive: #e7000b;
-  --destructive-foreground: #fafafa;
+  /* Semantic colors */
+  --ui-bg-page: var(--foundation-bg);
+  --ui-bg-shell: color-mix(in srgb, var(--foundation-bg) 92%, black);
+  --ui-surface-card: var(--foundation-surface-card);
+  --ui-surface-secondary: var(--foundation-surface-secondary);
+  --ui-surface-study: color-mix(in srgb, var(--foundation-surface-secondary) 74%, var(--foundation-surface-card) 26%);
+  --ui-surface-overlay: var(--foundation-surface-overlay);
+  --ui-surface-ghost: color-mix(in srgb, var(--foundation-text) 4%, transparent);
+  --ui-surface-ghost-strong: color-mix(in srgb, var(--foundation-text) 8%, transparent);
+  --ui-border-default: var(--foundation-border);
+  --ui-border-strong: var(--foundation-border-strong);
+  --ui-border-focus: color-mix(in srgb, var(--foundation-text) 18%, var(--foundation-border-strong) 82%);
+  --ui-divider: var(--foundation-border);
+  --ui-text-primary: var(--foundation-text);
+  --ui-text-secondary: var(--foundation-text-secondary);
+  --ui-text-muted: var(--foundation-text-muted);
+  --ui-text-helper: color-mix(in srgb, var(--foundation-text-muted) 88%, var(--foundation-text) 12%);
+  --ui-accent-foreground: var(--foundation-text);
+  --ui-accent-success: var(--foundation-success);
+  --ui-accent-success-strong: var(--foundation-success-button);
+  --ui-accent-success-hover: var(--foundation-success-hover);
+  --ui-accent-danger: var(--foundation-danger-button);
+  --ui-accent-danger-hover: var(--foundation-danger-hover);
+  --ui-accent-info: var(--foundation-info);
+  --ui-accent-warning: var(--foundation-warning);
+  --ui-progress-track: color-mix(in srgb, var(--foundation-border) 78%, transparent);
+  --ui-progress-fill: var(--foundation-text);
+  --ui-backdrop: var(--foundation-backdrop);
 
-  /* supporting neutrals */
-  --surface-elevated: #1a1a1a;
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
-  --radius: 0.5rem;
+  /* Typography */
+  --font-family-en: "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-family-ar: "Cairo", "Geist", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-family-base: var(--font-family-en);
+  --ui-type-label: 0.75rem;
+  --ui-type-body-sm: 0.875rem;
+  --ui-type-body-md: 1rem;
+  --ui-type-body-lg: 1.125rem;
+  --ui-type-title-sm: clamp(1.1rem, 1rem + 0.5vw, 1.4rem);
+  --ui-type-title-md: clamp(1.45rem, 1.2rem + 1vw, 2rem);
+  --ui-type-title-lg: clamp(1.95rem, 1.55rem + 1.6vw, 2.9rem);
+  --ui-type-display: clamp(2.45rem, 1.95rem + 2.7vw, 4.5rem);
 
-  /* v0 elevation tokens */
-  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
-  --shadow-popover:
-    0 4px 6px -1px rgba(0, 0, 0, 0.38),
-    0 2px 4px -2px rgba(0, 0, 0, 0.38);
-  --shadow-dropdown:
-    0 10px 15px -3px rgba(0, 0, 0, 0.4),
-    0 4px 6px -4px rgba(0, 0, 0, 0.4);
-  --shadow-modal:
-    0 20px 25px -5px rgba(0, 0, 0, 0.42),
-    0 8px 10px -6px rgba(0, 0, 0, 0.42);
-  --shadow-inline-control: 0 1px 2px 0 rgba(0, 0, 0, 0.28);
+  /* 8px rhythm spacing */
+  --ui-space-0: 0;
+  --ui-space-1: 0.25rem;
+  --ui-space-2: 0.5rem;
+  --ui-space-3: 0.75rem;
+  --ui-space-4: 1rem;
+  --ui-space-5: 1.5rem;
+  --ui-space-6: 2rem;
+  --ui-space-7: 2.5rem;
+  --ui-space-8: 3rem;
+  --ui-space-9: 4rem;
+  --ui-space-10: 5rem;
 
-  /* v0 motion tokens */
-  --motion-fast: 120ms;
+  /* Radii */
+  --ui-radius-xs: 0.5rem;
+  --ui-radius-sm: 0.75rem;
+  --ui-radius-md: 1rem;
+  --ui-radius-lg: 1.25rem;
+  --ui-radius-xl: 1.5rem;
+  --ui-radius-pill: 999px;
+
+  /* Shadows */
+  --ui-shadow-1: var(--foundation-shadow-sm);
+  --ui-shadow-2: var(--foundation-shadow-md);
+  --ui-shadow-3: var(--foundation-shadow-lg);
+
+  /* Motion */
+  --motion-fast: 140ms;
   --motion-default: 180ms;
   --motion-normal: var(--motion-default);
-  --motion-slow: 300ms;
+  --motion-slow: 260ms;
   --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
 
-  /* compatibility aliases for the existing Svelte UI */
-  --color-bg: var(--background);
+  /* Layout */
+  --ui-control-height-sm: 2.25rem;
+  --ui-control-height-md: 2.75rem;
+  --ui-control-height-lg: 3.125rem;
+  --size-topbar: 3.75rem;
+  --size-sidebar: 16rem;
+  --size-sidebar-collapsed: 5rem;
+  --size-drawer: 24rem;
+  --size-content: 74rem;
+  --size-content-wide: 80rem;
+  --size-content-narrow: 52rem;
+  --size-content-study: 46rem;
+
+  /* Compatibility aliases */
+  --background: var(--ui-bg-page);
+  --foreground: var(--ui-text-primary);
+  --card: var(--ui-surface-card);
+  --card-foreground: var(--ui-text-primary);
+  --popover: var(--ui-surface-overlay);
+  --popover-foreground: var(--ui-text-primary);
+  --border: var(--ui-border-default);
+  --muted: var(--ui-surface-secondary);
+  --muted-foreground: var(--ui-text-muted);
+  --accent: var(--ui-surface-secondary);
+  --accent-foreground: var(--ui-text-primary);
+  --ring: var(--ui-border-focus);
+  --primary: var(--ui-text-primary);
+  --primary-foreground: var(--ui-bg-page);
+  --sidebar: color-mix(in srgb, var(--ui-surface-card) 94%, black);
+  --sidebar-accent: color-mix(in srgb, var(--ui-surface-secondary) 82%, var(--ui-surface-card) 18%);
+  --success: var(--ui-accent-success);
+  --success-foreground: #ecfdf5;
+  --warning: var(--ui-accent-warning);
+  --warning-foreground: #271800;
+  --info: var(--ui-accent-info);
+  --info-foreground: #eff6ff;
+  --destructive: var(--ui-accent-danger);
+  --destructive-foreground: #fef2f2;
+  --surface-elevated: var(--ui-surface-secondary);
+
+  --radius: var(--ui-radius-sm);
+  --shadow-card: var(--ui-shadow-1);
+  --shadow-popover: var(--ui-shadow-2);
+  --shadow-dropdown: var(--ui-shadow-2);
+  --shadow-modal: var(--ui-shadow-3);
+  --shadow-inline-control: 0 1px 0 rgba(255, 255, 255, 0.03), var(--ui-shadow-1);
+
+  --color-bg: var(--ui-bg-page);
   --color-sidebar: var(--sidebar);
-  --color-surface-1: var(--card);
-  --color-surface-2: var(--muted);
-  --color-surface-3: var(--surface-elevated);
-  --color-border: var(--border);
-  --color-border-strong-base: color-mix(in srgb, var(--border) 84%, var(--foreground) 16%);
-  --color-text-primary: var(--foreground);
-  --color-text-muted: var(--muted-foreground);
-  --color-accent-primary: var(--primary);
-  --color-accent-secondary: color-mix(in srgb, var(--foreground) 66%, var(--muted) 34%);
-  --color-accent-surface: color-mix(in srgb, var(--foreground) 8%, transparent);
-  --color-success-surface: color-mix(in srgb, var(--success) 10%, transparent);
-  --color-danger-surface: color-mix(in srgb, var(--destructive) 10%, transparent);
-  --color-danger-border: color-mix(in srgb, var(--destructive) 20%, transparent);
-  --color-surface-overlay: color-mix(in srgb, var(--popover) 96%, transparent);
-  --color-accent-outline: color-mix(in srgb, var(--foreground) 20%, transparent);
-  --color-accent-outline-strong: color-mix(in srgb, var(--foreground) 32%, transparent);
+  --color-surface-1: var(--ui-surface-card);
+  --color-surface-2: var(--ui-surface-secondary);
+  --color-surface-3: var(--ui-surface-study);
+  --color-border: var(--ui-border-default);
+  --color-border-strong-base: var(--ui-border-strong);
+  --color-text-primary: var(--ui-text-primary);
+  --color-text-muted: var(--ui-text-muted);
+  --color-accent-primary: var(--ui-text-primary);
+  --color-accent-secondary: color-mix(in srgb, var(--ui-text-primary) 72%, var(--ui-bg-page) 28%);
+  --color-accent-surface: var(--ui-surface-ghost);
+  --color-success-surface: color-mix(in srgb, var(--ui-accent-success) 12%, transparent);
+  --color-danger-surface: color-mix(in srgb, var(--ui-accent-danger) 12%, transparent);
+  --color-danger-border: color-mix(in srgb, var(--ui-accent-danger) 28%, var(--ui-border-default) 72%);
+  --color-surface-overlay: color-mix(in srgb, var(--ui-surface-overlay) 96%, transparent);
+  --color-accent-outline: color-mix(in srgb, var(--ui-text-primary) 18%, transparent);
+  --color-accent-outline-strong: color-mix(in srgb, var(--ui-text-primary) 28%, transparent);
+  --color-text-soft: var(--ui-text-primary);
+  --color-success: var(--ui-accent-success);
+  --color-warning: var(--ui-accent-warning);
+  --color-danger: var(--ui-accent-danger);
+  --color-info: var(--ui-accent-info);
+  --color-text: var(--ui-text-primary);
+  --color-text-secondary: var(--ui-text-secondary);
+  --color-text-tertiary: color-mix(in srgb, var(--ui-text-secondary) 78%, var(--ui-text-muted) 22%);
+  --color-text-faint: color-mix(in srgb, var(--ui-text-muted) 84%, var(--ui-text-primary) 16%);
+  --color-text-on-dark: var(--ui-bg-page);
+  --color-surface: var(--ui-surface-card);
+  --color-surface-hover: color-mix(in srgb, var(--ui-surface-secondary) 90%, var(--ui-text-primary) 10%);
+  --color-surface-panel: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
+  --color-surface-panel-strong: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-surface-secondary) 12%);
+  --color-surface-panel-elevated: var(--ui-surface-overlay);
+  --color-border-light: color-mix(in srgb, var(--ui-border-default) 62%, var(--ui-border-strong) 38%);
+  --color-border-panel: color-mix(in srgb, var(--ui-text-primary) 12%, transparent);
+  --color-border-panel-strong: color-mix(in srgb, var(--ui-text-primary) 18%, transparent);
+  --color-accent: var(--ui-text-primary);
+  --color-accent-light: var(--ui-text-primary);
+  --color-accent-hover: var(--ui-text-primary);
+  --color-accent-bg: var(--ui-surface-ghost);
+  --color-accent-bg-hover: var(--ui-surface-ghost-strong);
+  --color-danger-soft: #fecaca;
+  --color-danger-soft-strong: #fca5a5;
 
-  --color-text-soft: var(--foreground);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--destructive);
-  --color-info: var(--info);
+  --font-size-xs: var(--ui-type-label);
+  --font-size-sm: var(--ui-type-body-sm);
+  --font-size-md: var(--ui-type-body-md);
+  --font-size-lg: var(--ui-type-body-lg);
 
-  --color-text: var(--foreground);
-  --color-text-secondary: color-mix(in srgb, var(--foreground) 80%, var(--muted) 20%);
-  --color-text-tertiary: color-mix(in srgb, var(--foreground) 54%, var(--muted) 46%);
-  --color-text-faint: color-mix(in srgb, var(--foreground) 38%, var(--muted) 62%);
-  --color-text-on-dark: var(--primary-foreground);
+  --space-1: var(--ui-space-1);
+  --space-2: var(--ui-space-2);
+  --space-3: var(--ui-space-3);
+  --space-4: var(--ui-space-4);
+  --space-5: var(--ui-space-5);
+  --space-6: var(--ui-space-6);
+  --space-7: var(--ui-space-7);
+  --space-8: var(--ui-space-8);
+  --radius-1: var(--ui-radius-xs);
+  --radius-2: var(--ui-radius-sm);
+  --radius-3: var(--ui-radius-md);
 
-  --color-surface: var(--card);
-  --color-surface-hover: var(--surface-elevated);
-  --color-surface-panel: color-mix(in srgb, var(--card) 90%, transparent);
-  --color-surface-panel-strong: color-mix(in srgb, var(--card) 94%, transparent);
-  --color-surface-panel-elevated: color-mix(in srgb, var(--popover) 98%, transparent);
-
-  --color-border-light: color-mix(in srgb, var(--border) 72%, var(--foreground) 28%);
-  --color-border-panel: color-mix(in srgb, var(--foreground) 18%, transparent);
-  --color-border-panel-strong: color-mix(in srgb, var(--foreground) 28%, transparent);
-
-  --color-accent: var(--primary);
-  --color-accent-light: #ffffff;
-  --color-accent-hover: #ffffff;
-  --color-accent-bg: color-mix(in srgb, var(--foreground) 8%, transparent);
-  --color-accent-bg-hover: color-mix(in srgb, var(--foreground) 12%, transparent);
-
-  --color-danger-soft: #f0b4b4;
-  --color-danger-soft-strong: #e58f8f;
-
-  --font-family-en: Manrope, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  --font-family-ar: Cairo, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  --font-family-base: var(--font-family-en);
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.125rem;
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-7: 32px;
-  --space-8: 40px;
-  --radius-1: 6px;
-  --radius-2: 8px;
-  --radius-3: 10px;
-  --size-topbar: 56px;
-  --size-sidebar: 248px;
-  --size-sidebar-collapsed: 80px;
-  --size-drawer: 380px;
-  --size-content: 1180px;
-  --size-content-wide: 1240px;
-
-  --ui-radius-sm: calc(var(--radius) - 2px);
-  --ui-radius-md: var(--radius);
-  --ui-radius-lg: calc(var(--radius) + 2px);
-  --ui-radius-pill: 999px;
-  --ui-surface-base: var(--card);
-  --ui-surface-raised: var(--muted);
-  --ui-surface-soft: color-mix(in srgb, var(--card) 82%, transparent);
-  --ui-surface-overlay: var(--color-surface-panel-elevated);
-  --ui-border-subtle: color-mix(in srgb, var(--foreground) 9.5%, transparent);
-  --ui-border-strong: color-mix(in srgb, var(--foreground) 16%, transparent);
-  --ui-border-accent: color-mix(in srgb, var(--foreground) 20%, transparent);
-  --ui-shadow-sm: var(--shadow-card);
-  --ui-shadow-md: var(--shadow-popover);
-  --ui-shadow-lg: var(--shadow-modal);
-  --ui-control-height-sm: 32px;
-  --ui-control-height-md: 36px;
-  --ui-control-height-lg: 40px;
-  --ui-focus-ring: 0 0 0 1px color-mix(in srgb, var(--ring) 40%, transparent);
-  --ui-focus-ring-strong: 0 0 0 3px color-mix(in srgb, var(--ring) 32%, transparent);
+  --ui-surface-base: var(--ui-surface-card);
+  --ui-surface-raised: var(--ui-surface-secondary);
+  --ui-surface-soft: color-mix(in srgb, var(--ui-surface-secondary) 70%, transparent);
+  --ui-surface-overlay: var(--foundation-surface-overlay);
+  --ui-border-subtle: var(--ui-border-default);
+  --ui-border-accent: var(--ui-border-focus);
+  --ui-shadow-sm: var(--ui-shadow-1);
+  --ui-shadow-md: var(--ui-shadow-2);
+  --ui-shadow-lg: var(--ui-shadow-3);
+  --ui-focus-ring: 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 12%, transparent);
+  --ui-focus-ring-strong: 0 0 0 3px color-mix(in srgb, var(--ui-text-primary) 18%, transparent);
 
   --upload-modal-width: min(920px, 100%);
-  --upload-modal-bg: var(--ui-surface-base);
-  --upload-modal-border: var(--ui-border-subtle);
-  --upload-modal-shadow: var(--shadow-modal);
-  --upload-modal-title: var(--color-text-primary);
-  --upload-modal-description: var(--color-text-muted);
-  --upload-close-color: var(--color-text-primary);
-  --upload-close-hover-bg: color-mix(in srgb, var(--foreground) 6%, transparent);
-  --upload-dropzone-bg: color-mix(in srgb, var(--foreground) 1.5%, transparent);
-  --upload-dropzone-border: color-mix(in srgb, var(--foreground) 11%, transparent);
-  --upload-dropzone-text: var(--color-text-primary);
-  --upload-dropzone-or: var(--color-text-muted);
-  --upload-dropzone-active-bg: color-mix(in srgb, var(--foreground) 3%, transparent);
-  --upload-dropzone-active-border: color-mix(in srgb, var(--foreground) 18%, transparent);
-  --upload-dropzone-icon-bg: var(--ui-surface-raised);
-  --upload-drag-chip-bg: var(--ui-surface-raised);
-  --upload-drag-chip-text: var(--color-text-primary);
-  --upload-support-text: var(--color-text-muted);
-  --upload-file-row-bg: color-mix(in srgb, var(--foreground) 2%, transparent);
-  --upload-file-row-border: var(--ui-border-subtle);
-  --upload-file-name: var(--color-text-primary);
-  --upload-file-size: var(--color-text-muted);
-  --upload-file-remove: var(--color-text-muted);
-  --upload-file-remove-hover: #f1b2b2;
-  --upload-footer-border: var(--ui-border-subtle);
+  --upload-modal-bg: var(--ui-surface-card);
+  --upload-modal-border: var(--ui-border-default);
+  --upload-modal-shadow: var(--ui-shadow-3);
+  --upload-modal-title: var(--ui-text-primary);
+  --upload-modal-description: var(--ui-text-secondary);
+  --upload-close-color: var(--ui-text-primary);
+  --upload-close-hover-bg: var(--ui-surface-ghost);
+  --upload-dropzone-bg: color-mix(in srgb, var(--ui-surface-secondary) 66%, transparent);
+  --upload-dropzone-border: var(--ui-border-default);
+  --upload-dropzone-text: var(--ui-text-primary);
+  --upload-dropzone-or: var(--ui-text-muted);
+  --upload-dropzone-active-bg: color-mix(in srgb, var(--ui-surface-secondary) 82%, var(--ui-text-primary) 18%);
+  --upload-dropzone-active-border: var(--ui-border-strong);
+  --upload-dropzone-icon-bg: var(--ui-surface-secondary);
+  --upload-drag-chip-bg: var(--ui-surface-secondary);
+  --upload-drag-chip-text: var(--ui-text-primary);
+  --upload-support-text: var(--ui-text-secondary);
+  --upload-file-row-bg: color-mix(in srgb, var(--ui-surface-card) 82%, var(--ui-surface-secondary) 18%);
+  --upload-file-row-border: var(--ui-border-default);
+  --upload-file-name: var(--ui-text-primary);
+  --upload-file-size: var(--ui-text-muted);
+  --upload-file-remove: var(--ui-text-muted);
+  --upload-file-remove-hover: #fca5a5;
+  --upload-footer-border: var(--ui-border-default);
 
-  --color-shadow: rgba(0, 0, 0, 0.5);
+  --color-shadow: rgba(0, 0, 0, 0.42);
   --color-glow: rgba(0, 0, 0, 0);
-  --color-backdrop-strong: rgba(7, 7, 8, 0.72);
-  --color-code-bg: #151518;
-  --color-focus-ring: color-mix(in srgb, var(--ring) 24%, transparent);
-  --color-focus-ring-strong: color-mix(in srgb, var(--ring) 36%, transparent);
-  --gradient-accent: linear-gradient(180deg, #f5f5f6 0%, #dbdbe0 100%);
-  --gradient-accent-strong: linear-gradient(180deg, #ffffff 0%, #e4e4e7 100%);
-  --gradient-hero: none;
+  --color-backdrop-strong: var(--ui-backdrop);
+  --color-code-bg: #141414;
+  --color-focus-ring: color-mix(in srgb, var(--ui-text-primary) 12%, transparent);
+  --color-focus-ring-strong: color-mix(in srgb, var(--ui-text-primary) 18%, transparent);
+  --gradient-accent: linear-gradient(180deg, #ffffff 0%, #e8e8e8 100%);
+  --gradient-accent-strong: linear-gradient(180deg, #ffffff 0%, #ececec 100%);
+  --gradient-hero:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--ui-text-primary) 8%, transparent) 0%, transparent 44%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 92%, var(--ui-surface-secondary) 8%) 0%, var(--ui-surface-card) 100%);
   --gradient-card-border: none;
   --gradient-bg-radial: radial-gradient(circle at top, rgba(255, 255, 255, 0.028) 0%, transparent 58%);
-  --gradient-footer: linear-gradient(180deg, #020202 0%, #020202 100%);
-  --gradient-admin-action: linear-gradient(180deg, #f4f4f5, #d4d4d8);
-  --gradient-admin-action-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
-  --shadow-soft: var(--shadow-card);
-  --shadow-panel: var(--shadow-card);
-  --shadow-menu: var(--shadow-dropdown);
-  --shadow-modal-strong:
-    0 28px 64px rgba(0, 0, 0, 0.48);
+  --gradient-footer: linear-gradient(180deg, var(--ui-bg-page) 0%, color-mix(in srgb, var(--ui-bg-page) 92%, black) 100%);
+  --gradient-admin-action: linear-gradient(180deg, #ffffff, #d4d4d4);
+  --gradient-admin-action-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  --shadow-soft: var(--ui-shadow-1);
+  --shadow-panel: var(--ui-shadow-1);
+  --shadow-menu: var(--ui-shadow-2);
+  --shadow-modal-strong: var(--ui-shadow-3);
 }
 
 [data-theme="light"] {
-  --background: #ffffff;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --border: #ebebeb;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #f5f5f5;
-  --accent-foreground: #171717;
-  --ring: #b4b4b4;
-  --primary: #171717;
-  --primary-foreground: #fafafa;
-  --sidebar: #fafafa;
-  --sidebar-accent: #f5f5f5;
-  --surface-elevated: #eeeeee;
+  --foundation-bg: #f6f6f6;
+  --foundation-surface-card: #ffffff;
+  --foundation-surface-secondary: #f0f0f0;
+  --foundation-surface-overlay: #ffffff;
+  --foundation-border: #d6d6d6;
+  --foundation-border-strong: #c4c4c4;
+  --foundation-text: #171717;
+  --foundation-text-secondary: #333333;
+  --foundation-text-muted: #6a6a6a;
+  --foundation-success: #059669;
+  --foundation-success-button: #059669;
+  --foundation-success-hover: #047857;
+  --foundation-danger-button: #dc2626;
+  --foundation-danger-hover: #b91c1c;
+  --foundation-info: #2563eb;
+  --foundation-warning: #d97706;
+  --foundation-backdrop: rgba(15, 23, 42, 0.12);
+  --foundation-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --foundation-shadow-md: 0 12px 28px rgba(15, 23, 42, 0.12);
+  --foundation-shadow-lg: 0 28px 64px rgba(15, 23, 42, 0.18);
 
-  --success: #10b981;
-  --success-foreground: #064e3b;
-  --warning: #d97706;
-  --warning-foreground: #78350f;
-  --info: #2563eb;
-  --info-foreground: #1e3a8a;
-  --destructive: #dc2626;
+  --success-foreground: #ecfdf5;
+  --warning-foreground: #fff7ed;
+  --info-foreground: #eff6ff;
   --destructive-foreground: #fef2f2;
-
-  --shadow-card: 0 1px 2px 0 rgba(17, 18, 21, 0.08);
-  --shadow-popover:
-    0 4px 6px -1px rgba(17, 18, 21, 0.12),
-    0 2px 4px -2px rgba(17, 18, 21, 0.12);
-  --shadow-dropdown:
-    0 10px 15px -3px rgba(17, 18, 21, 0.14),
-    0 4px 6px -4px rgba(17, 18, 21, 0.14);
-  --shadow-modal:
-    0 20px 25px -5px rgba(17, 18, 21, 0.18),
-    0 8px 10px -6px rgba(17, 18, 21, 0.18);
-  --shadow-inline-control: 0 1px 2px 0 rgba(17, 18, 21, 0.08);
-
-  --color-danger-soft: #ad3d3d;
-  --color-danger-soft-strong: #8f3232;
-  --color-shadow: rgba(17, 18, 21, 0.16);
-  --color-backdrop-strong: rgba(17, 18, 21, 0.18);
-  --color-code-bg: #eef0f3;
-  --gradient-footer: linear-gradient(180deg, #f4f4f5 0%, #ececef 100%);
-  --gradient-admin-action-soft: linear-gradient(180deg, rgba(17, 18, 21, 0.06), rgba(17, 18, 21, 0.03));
-  --shadow-modal-strong: 0 28px 64px rgba(17, 18, 21, 0.22);
-  --upload-dropzone-bg: rgba(17, 17, 20, 0.02);
-  --upload-dropzone-active-bg: rgba(17, 17, 20, 0.04);
-  --upload-file-row-bg: rgba(17, 17, 20, 0.025);
+  --color-danger-soft: #b91c1c;
+  --color-danger-soft-strong: #991b1b;
+  --color-shadow: rgba(15, 23, 42, 0.16);
+  --color-code-bg: #eef2f7;
+  --gradient-admin-action-soft: linear-gradient(180deg, rgba(15, 23, 42, 0.06), rgba(15, 23, 42, 0.02));
 }

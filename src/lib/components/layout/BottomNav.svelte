@@ -53,9 +53,9 @@
     z-index: 95;
     display: none;
     pointer-events: none;
-    background: color-mix(in srgb, var(--card) 94%, transparent);
+    background: color-mix(in srgb, var(--ui-surface-card) 94%, transparent);
     backdrop-filter: blur(14px);
-    border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    border-top: 1px solid var(--ui-border-default);
     padding: var(--space-2) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
     justify-content: space-around;
   }
@@ -77,7 +77,7 @@
     gap: 0.2rem;
     min-height: 52px;
     padding: 0.35rem var(--space-1);
-    color: var(--color-text-secondary);
+    color: var(--ui-text-secondary);
     text-decoration: none;
     font-size: var(--font-size-xs);
     font-weight: 500;
@@ -91,13 +91,13 @@
   .bottom-nav-item:hover {
     border-color: var(--ui-border-subtle);
     background: rgba(255, 255, 255, 0.03);
-    color: var(--color-text-primary);
+    color: var(--ui-text-primary);
   }
 
   .bottom-nav-item.active {
-    border-color: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
-    color: var(--color-text-primary);
-    background: color-mix(in srgb, var(--foreground) 6%, transparent);
+    border-color: var(--ui-border-strong);
+    color: var(--ui-text-primary);
+    background: var(--ui-surface-ghost);
     box-shadow: var(--shadow-inline-control);
   }
 

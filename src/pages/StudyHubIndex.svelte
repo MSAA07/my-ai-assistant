@@ -3,13 +3,13 @@
   import { API_BASE } from '../config.js';
   import { routeParams } from '../stores/router.js';
   import { t } from '../lib/i18n/t.js';
-  import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
+  import DocumentCard from '../lib/components/ui/DocumentCard.svelte';
   import EmptyState from '../lib/components/ui/EmptyState.svelte';
   import MenuItem from '../lib/components/ui/MenuItem.svelte';
   import MenuSurface from '../lib/components/ui/MenuSurface.svelte';
-  import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
+  import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
   import PromptModal from '../lib/components/ui/PromptModal.svelte';
   import DocumentListSkeleton from '../lib/components/ui/DocumentListSkeleton.svelte';
@@ -245,15 +245,8 @@
 </script>
 
 <div class="library-page">
-  <Card as="section" class="page-hero" variant="base" padding="lg" border="strong">
-    <div class="heading">
-      <Badge tone="neutral" variant="outline" size="sm" className="page-eyebrow">{t('documentsPage.eyebrow')}</Badge>
-      <div class="heading-copy">
-        <h1>{t('documentsPage.title')}</h1>
-        <p class="subtitle">{t('documentsPage.description')}</p>
-      </div>
-    </div>
-    <div class="header-actions">
+  <PageHeader eyebrow={t('documentsPage.eyebrow')} title={t('documentsPage.title')} subtitle={t('documentsPage.description')}>
+    <div slot="actions" class="header-actions">
       <Button type="button" variant="secondary" on:click={() => loadDocuments({ background: documents.length > 0 })} disabled={loading || refreshing}>
         {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
       </Button>
@@ -261,7 +254,7 @@
         {t('documentsPage.actions.uploadCta')}
       </Button>
     </div>
-  </Card>
+  </PageHeader>
 
   {#if loading}
     <DocumentListSkeleton />
@@ -286,67 +279,49 @@
     {:else}
       <section class="documents-grid">
         {#each documents as doc}
-          <Card
-            as="article"
+          <DocumentCard
             class="document-card"
-            variant="base"
-            padding="sm"
-            hoverable
-            border={highlightDocumentId === doc.id ? 'accent' : 'subtle'}
             role="link"
             tabindex="0"
             aria-label={doc.originalName}
+            title={doc.originalName}
+            meta={`${t('documentsPage.labels.uploaded')}: ${formatDate(doc.uploadDate)}`}
+            badgeLabel={getFileType(doc)}
+            badgeTone={getFileBadgeTone(doc)}
+            status={getStatusTone(doc)}
+            statusLabel={t(`documentsPage.statuses.${getStatusKey(doc)}`)}
+            highlighted={highlightDocumentId === doc.id}
             on:click={() => openDocument(doc.id)}
             on:keydown={(event) => handleDocumentCardKeydown(event, doc.id)}
           >
-            <div class="card-top">
-              <Badge tone={getFileBadgeTone(doc)} variant="outline" size="sm" className="file-badge">
-                {getFileType(doc)}
-              </Badge>
-              <div class="menu-wrap" role="presentation" on:click|stopPropagation>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="card-menu-button"
-                  aria-label={t('documentsPage.actions.more')}
-                  aria-expanded={openMenuId === doc.id}
-                  on:click={(event) => toggleMenu(event, doc.id)}
-                >
-                  <span slot="icon">⋯</span>
-                </Button>
-                {#if openMenuId === doc.id}
-                  <MenuSurface class="library-menu" minWidth="140px">
-                    <MenuItem on:click={() => openRenameModal(doc)} disabled={actionBusyId === doc.id}>
-                      {t('documentsPage.actions.rename')}
-                    </MenuItem>
-                    <MenuItem
-                      tone="danger"
-                      on:click={() => openDeleteModal(doc)}
-                      disabled={actionBusyId === doc.id}
-                    >
-                      {t('documentsPage.actions.delete')}
-                    </MenuItem>
-                  </MenuSurface>
-                {/if}
-              </div>
+            <div slot="actions" class="menu-wrap" role="presentation" on:click|stopPropagation>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="card-menu-button"
+                aria-label={t('documentsPage.actions.more')}
+                aria-expanded={openMenuId === doc.id}
+                on:click={(event) => toggleMenu(event, doc.id)}
+              >
+                <span slot="icon">⋯</span>
+              </Button>
+              {#if openMenuId === doc.id}
+                <MenuSurface class="library-menu" minWidth="140px">
+                  <MenuItem on:click={() => openRenameModal(doc)} disabled={actionBusyId === doc.id}>
+                    {t('documentsPage.actions.rename')}
+                  </MenuItem>
+                  <MenuItem
+                    tone="danger"
+                    on:click={() => openDeleteModal(doc)}
+                    disabled={actionBusyId === doc.id}
+                  >
+                    {t('documentsPage.actions.delete')}
+                  </MenuItem>
+                </MenuSurface>
+              {/if}
             </div>
-
-            <div class="card-link">
-              <div class="card-main">
-                <h2>{doc.originalName}</h2>
-                <p class="meta">
-                  {t('documentsPage.labels.uploaded')}: {formatDate(doc.uploadDate)}
-                </p>
-              </div>
-              <div class="card-footer">
-                <StatusBadge
-                  status={getStatusTone(doc)}
-                  label={t(`documentsPage.statuses.${getStatusKey(doc)}`)}
-                />
-              </div>
-            </div>
-          </Card>
+          </DocumentCard>
         {/each}
       </section>
     {/if}
@@ -384,61 +359,14 @@
     width: min(100%, 64rem);
     margin: 0 auto;
     display: grid;
-    gap: 1.5rem;
+    gap: var(--ui-space-5);
     min-width: 0;
-  }
-
-  :global(.page-hero) {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
-  }
-
-  .heading {
-    display: grid;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .heading-copy {
-    display: grid;
-    gap: 0.4rem;
   }
 
   .header-actions {
     display: inline-flex;
-    gap: 0.75rem;
+    gap: var(--ui-space-3);
     flex-wrap: wrap;
-  }
-
-  :global(.page-eyebrow) {
-    min-height: 22px;
-    width: fit-content;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted-foreground);
-  }
-
-  h1 {
-    margin: 0;
-    color: var(--foreground);
-    font-size: clamp(1.55rem, 3vw, 1.95rem);
-    font-weight: 600;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-  }
-
-  .subtitle {
-    margin: 0;
-    max-width: 42rem;
-    font-size: 0.95rem;
-    line-height: 1.55;
-    color: var(--muted-foreground);
   }
 
   .alert-stack {
@@ -448,39 +376,18 @@
 
   .documents-grid {
     display: grid;
-    gap: 1rem;
+    gap: var(--ui-space-4);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     min-width: 0;
   }
 
   .library-page :global(.document-card) {
-    display: grid;
-    gap: 1rem;
     min-height: 216px;
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    box-shadow: none;
-    cursor: pointer;
-  }
-
-  .library-page :global(.document-card[data-border='accent']) {
-    border-color: color-mix(in srgb, var(--foreground) 18%, var(--border) 82%);
   }
 
   .library-page :global(.document-card:focus-visible) {
     outline: none;
     box-shadow: var(--ui-focus-ring-strong);
-  }
-
-  .card-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  :global(.file-badge) {
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 
   .menu-wrap {
@@ -501,42 +408,6 @@
     top: calc(var(--ui-control-height-sm) + 6px);
     inset-inline-end: 0;
     z-index: 20;
-  }
-
-  h2 {
-    margin: 0;
-    color: var(--foreground);
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.35;
-    letter-spacing: -0.02em;
-    word-break: break-word;
-  }
-
-  .meta {
-    margin: 0;
-    color: var(--muted-foreground);
-    font-size: 0.75rem;
-  }
-
-  .card-link {
-    color: inherit;
-    display: grid;
-    gap: 1rem;
-    min-height: 0;
-    height: 100%;
-    padding-top: 0.125rem;
-  }
-
-  .card-main {
-    display: grid;
-    gap: 0.55rem;
-  }
-
-  .card-footer {
-    margin-top: auto;
-    display: flex;
-    justify-content: flex-start;
   }
 
   .library-page :global(.document-card:hover h2),

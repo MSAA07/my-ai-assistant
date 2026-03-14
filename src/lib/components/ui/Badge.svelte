@@ -40,14 +40,17 @@
 
 <style>
   .ui-badge {
-    --badge-bg: color-mix(in srgb, var(--muted) 78%, transparent);
-    --badge-border: transparent;
-    --badge-fg: var(--foreground);
+    --badge-bg: color-mix(in srgb, var(--ui-surface-secondary) 78%, transparent);
+    --badge-border: var(--ui-border-default);
+    --badge-fg: var(--ui-text-primary);
+    border-radius: var(--ui-radius-pill);
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 
   .ui-badge[data-variant='outline'] {
     --badge-bg: transparent;
-    --badge-border: var(--border);
+    --badge-border: var(--ui-border-default);
   }
 
   .ui-badge[data-variant='solid'] {
@@ -55,49 +58,51 @@
   }
 
   .ui-badge[data-tone='neutral'] {
-    --badge-bg: var(--muted);
-    --badge-border: transparent;
-    --badge-fg: var(--foreground);
+    --badge-bg: color-mix(in srgb, var(--ui-surface-secondary) 90%, var(--ui-surface-card) 10%);
+    --badge-border: var(--ui-border-default);
+    --badge-fg: var(--ui-text-secondary);
   }
 
   .ui-badge[data-tone='accent'] {
-    --badge-bg: color-mix(in srgb, var(--foreground) 8%, transparent);
-    --badge-border: color-mix(in srgb, var(--foreground) 12%, transparent);
-    --badge-fg: var(--foreground);
+    --badge-bg: var(--ui-surface-ghost);
+    --badge-border: var(--ui-border-default);
+    --badge-fg: var(--ui-text-primary);
   }
 
   .ui-badge[data-tone='info'] {
-    --badge-bg: color-mix(in srgb, var(--info) 10%, transparent);
-    --badge-border: color-mix(in srgb, var(--info) 20%, transparent);
-    --badge-fg: color-mix(in srgb, var(--info) 74%, var(--foreground) 26%);
+    --badge-bg: color-mix(in srgb, var(--ui-accent-info) 12%, transparent);
+    --badge-border: color-mix(in srgb, var(--ui-accent-info) 26%, var(--ui-border-default) 74%);
+    --badge-fg: color-mix(in srgb, var(--ui-accent-info) 82%, var(--ui-text-primary) 18%);
   }
 
   .ui-badge[data-tone='success'] {
-    --badge-bg: color-mix(in srgb, var(--success) 10%, transparent);
-    --badge-border: color-mix(in srgb, var(--success) 20%, transparent);
-    --badge-fg: color-mix(in srgb, var(--success) 74%, var(--foreground) 26%);
+    --badge-bg: color-mix(in srgb, var(--ui-accent-success) 12%, transparent);
+    --badge-border: color-mix(in srgb, var(--ui-accent-success) 26%, var(--ui-border-default) 74%);
+    --badge-fg: color-mix(in srgb, var(--ui-accent-success) 84%, var(--ui-text-primary) 16%);
   }
 
   .ui-badge[data-tone='warning'] {
-    --badge-bg: color-mix(in srgb, var(--warning) 10%, transparent);
-    --badge-border: color-mix(in srgb, var(--warning) 20%, transparent);
-    --badge-fg: color-mix(in srgb, var(--warning) 74%, var(--foreground) 26%);
+    --badge-bg: color-mix(in srgb, var(--ui-accent-warning) 16%, transparent);
+    --badge-border: color-mix(in srgb, var(--ui-accent-warning) 28%, var(--ui-border-default) 72%);
+    --badge-fg: color-mix(in srgb, var(--ui-accent-warning) 84%, var(--ui-text-primary) 16%);
   }
 
   .ui-badge[data-tone='destructive'] {
-    --badge-bg: color-mix(in srgb, var(--destructive) 10%, transparent);
-    --badge-border: color-mix(in srgb, var(--destructive) 20%, transparent);
-    --badge-fg: color-mix(in srgb, var(--destructive) 78%, var(--foreground) 22%);
+    --badge-bg: color-mix(in srgb, var(--ui-accent-danger) 12%, transparent);
+    --badge-border: color-mix(in srgb, var(--ui-accent-danger) 28%, var(--ui-border-default) 72%);
+    --badge-fg: color-mix(in srgb, var(--ui-accent-danger) 84%, var(--ui-text-primary) 16%);
   }
 
   .ui-badge[data-variant='solid'][data-tone='neutral'] {
-    --badge-bg: var(--primary);
-    --badge-fg: var(--primary-foreground);
+    --badge-bg: var(--ui-text-primary);
+    --badge-fg: var(--ui-bg-page);
+    --badge-border: transparent;
   }
 
   .ui-badge[data-variant='solid'][data-tone='accent'] {
-    --badge-bg: var(--foreground);
-    --badge-fg: var(--background);
+    --badge-bg: var(--ui-text-primary);
+    --badge-fg: var(--ui-bg-page);
+    --badge-border: transparent;
   }
 
   .ui-badge[data-variant='solid'][data-tone='info'] {

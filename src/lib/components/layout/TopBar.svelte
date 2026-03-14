@@ -142,14 +142,14 @@
 <style>
   .topbar {
     display: flex;
-    min-height: 56px;
+    min-height: var(--size-topbar);
     flex: 0 0 auto;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 0 1.5rem;
-    border-bottom: 1px solid var(--border);
-    background: color-mix(in srgb, var(--card) 94%, transparent);
+    gap: var(--ui-space-4);
+    padding: 0 var(--ui-space-5);
+    border-bottom: 1px solid var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-surface-card) 94%, transparent);
     backdrop-filter: blur(10px);
   }
 
@@ -163,7 +163,7 @@
   .page-title {
     margin: 0;
     min-width: 0;
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     font-size: 1rem;
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -178,18 +178,18 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0 0.75rem;
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-pill);
+    background: color-mix(in srgb, var(--ui-surface-card) 72%, var(--ui-surface-secondary) 28%);
     box-shadow: var(--shadow-inline-control);
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard),
       border-color var(--motion-fast) var(--ease-standard);
   }
 
   .sidebar-toggle:hover {
-    background: color-mix(in srgb, var(--accent) 58%, transparent);
+    background: var(--ui-surface-ghost);
   }
 
   .sidebar-toggle:focus-visible {
@@ -222,8 +222,8 @@
     padding-inline: 0.625rem;
     border-radius: 999px;
     border-color: transparent;
-    background: var(--muted);
-    color: var(--foreground);
+    background: var(--ui-surface-secondary);
+    color: var(--ui-text-primary);
     letter-spacing: 0;
     font-weight: 500;
   }
@@ -235,10 +235,10 @@
     height: 32px;
     align-items: center;
     justify-content: center;
-    border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--muted) 66%, transparent);
-    color: var(--muted-foreground);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-pill);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 66%, transparent);
+    color: var(--ui-text-muted);
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard),
       color var(--motion-fast) var(--ease-standard),
@@ -248,8 +248,8 @@
   .utility-button:hover:enabled,
   .account-trigger:hover,
   .account-trigger[aria-expanded='true'] {
-    background: color-mix(in srgb, var(--accent) 58%, transparent);
-    color: var(--foreground);
+    background: var(--ui-surface-ghost);
+    color: var(--ui-text-primary);
   }
 
   .utility-button:disabled {

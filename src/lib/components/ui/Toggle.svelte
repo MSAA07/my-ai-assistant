@@ -66,13 +66,13 @@
 
 <style>
   .ui-toggle {
-    --toggle-bg: var(--muted);
-    --toggle-thumb: var(--background);
+    --toggle-bg: var(--ui-surface-secondary);
+    --toggle-thumb: var(--ui-text-primary);
   }
 
   .ui-toggle[aria-checked='true'] {
-    --toggle-bg: var(--primary);
-    --toggle-thumb: var(--primary-foreground);
+    --toggle-bg: var(--ui-text-primary);
+    --toggle-thumb: var(--ui-bg-page);
   }
 
   .ui-toggle:focus-visible {
@@ -91,9 +91,9 @@
   }
 
   .ui-toggle__label {
-    color: var(--foreground);
-    font-size: 0.875rem;
-    font-weight: 500;
+    color: var(--ui-text-primary);
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
   }
 
   .ui-toggle[data-size='sm'] .ui-toggle__thumb {

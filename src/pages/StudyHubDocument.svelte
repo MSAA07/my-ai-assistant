@@ -4,7 +4,10 @@
   import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
+  import MetaPill from '../lib/components/ui/MetaPill.svelte';
+  import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
+  import StudyActionCard from '../lib/components/ui/StudyActionCard.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
   import { getDocument, requestGeneration } from '../lib/api/studyHub.js';
   import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
@@ -415,36 +418,32 @@
 </script>
 
 <div class="document-hub">
-  <Card as="section" class="hub-hero" variant="base" padding="lg" border="strong">
-    <div class="hero-header">
-      <Button type="button" className="back-link" variant="back" size="sm" on:click={goBackToLibrary}>
+  <PageHeader
+    eyebrow={t('documentsPage.eyebrow')}
+    title={normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}
+    subtitle={t('document.hub.readyHint')}
+    className="hub-page-header"
+  >
+    <div slot="actions" class="header-actions">
+      <Button type="button" className="back-link" variant="outline" size="sm" on:click={goBackToLibrary}>
         <span slot="icon" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
         </span>
         {t('document.hub.backToStudyHub')}
       </Button>
-
-      <div class="hero-copy">
-        <div class="hero-badges">
-          <Badge tone="neutral" variant="outline" size="sm" className="hub-eyebrow">{t('documentsPage.eyebrow')}</Badge>
-          {#if fileTypeBadge}
-            <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
-          {/if}
-          {#if uploadedMeta}
-            <div class="hero-upload-meta" aria-label={uploadedMeta.label}>
-              <span class="hero-upload-meta-label">{uploadedMeta.label}</span>
-              <strong class="hero-upload-meta-value">{uploadedMeta.value}</strong>
-            </div>
-          {/if}
-        </div>
-
-        <div class="hero-heading">
-          <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
-          <p class="hero-subtitle">{t('document.hub.readyHint')}</p>
-        </div>
-      </div>
     </div>
-  </Card>
+
+    <div slot="meta" class="hero-meta">
+      {#if fileTypeBadge}
+        <MetaPill label={t('document.hub.meta.fileType')}>
+          <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
+        </MetaPill>
+      {/if}
+      {#if uploadedMeta}
+        <MetaPill label={uploadedMeta.label} value={uploadedMeta.value} />
+      {/if}
+    </div>
+  </PageHeader>
 
   {#if loading && !documentData}
     <DocumentDetailSkeleton />
@@ -483,19 +482,14 @@
 
     <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
       {#each featureCards as card (card.key)}
-        <Card as="article" class="feature-card" variant="base" padding="md" hoverable border={card.errorMessage ? 'strong' : 'subtle'}>
-          <div class="feature-card-header">
-            <div class="feature-heading">
-              <h2>{card.title}</h2>
-            </div>
-            <StatusBadge status={card.stateTone} label={card.stateLabel} />
-          </div>
+        <StudyActionCard class="feature-card" title={card.title} status={card.stateTone} statusLabel={card.stateLabel}>
+          <svelte:fragment slot="description">
+            {#if card.errorMessage}
+              <p class="feature-inline-error">{card.errorMessage}</p>
+            {/if}
+          </svelte:fragment>
 
-          {#if card.errorMessage}
-            <p class="feature-inline-error">{card.errorMessage}</p>
-          {/if}
-
-          <div class="feature-actions">
+          <div slot="actions" class="feature-actions">
             <Button
               type="button"
               variant="primary"
@@ -515,7 +509,7 @@
               </Button>
             {/if}
           </div>
-        </Card>
+        </StudyActionCard>
       {/each}
     </section>
   {/if}
@@ -526,21 +520,13 @@
     width: min(100%, 64rem);
     margin: 0 auto;
     display: grid;
-    gap: 1.5rem;
+    gap: var(--ui-space-5);
   }
 
-  :global(.hub-hero) {
-    display: grid;
-    gap: 1rem;
-    background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
-  }
-
-  .hero-header {
-    display: grid;
-    align-items: flex-start;
-    gap: 1rem;
+  .header-actions {
+    display: inline-flex;
+    gap: var(--ui-space-3);
+    flex-wrap: wrap;
   }
 
   .document-hub :global(.back-link) {
@@ -558,88 +544,22 @@
     stroke-linejoin: round;
   }
 
-  .hero-copy {
-    display: grid;
-    gap: 0.875rem;
-    min-width: 0;
-  }
-
-  .hero-badges {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  :global(.hub-eyebrow) {
-    width: fit-content;
-    color: var(--muted-foreground);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
   :global(.document-file-badge) {
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
-  .hero-upload-meta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    min-height: 1.875rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: color-mix(in srgb, var(--card) 78%, var(--muted) 22%);
-    box-shadow: var(--shadow-inline-control);
-    white-space: nowrap;
-  }
-
-  .hero-upload-meta-label {
-    color: var(--muted-foreground);
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .hero-upload-meta-value {
-    color: var(--foreground);
-    font-size: 0.8125rem;
-    font-weight: 600;
-  }
-
-  .hero-heading {
-    display: grid;
-    gap: 0.5rem;
-  }
-
-  h1 {
-    margin: 0;
-    color: var(--foreground);
-    font-size: clamp(1.55rem, 3vw, 1.95rem);
-    font-weight: 600;
-    line-height: 1.08;
-    letter-spacing: -0.03em;
-    word-break: break-word;
-  }
-
   h2 {
     margin: 0;
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.02em;
   }
 
-  .hero-subtitle {
-    margin: 0;
-    max-width: 44rem;
-    color: var(--muted-foreground);
-    font-size: 0.95rem;
-    line-height: 1.55;
+  .hero-meta {
+    display: contents;
   }
 
   .document-hub :global(.state-panel) {
@@ -659,36 +579,22 @@
   }
 
   .document-hub :global(.state-panel-error) {
-    border-color: color-mix(in srgb, var(--destructive) 35%, var(--border) 65%);
+    border-color: color-mix(in srgb, var(--destructive) 35%, var(--ui-border-default) 65%);
   }
 
   .document-hub :global(.processing-panel) {
-    border-color: color-mix(in srgb, var(--info) 24%, var(--border) 76%);
-    background: color-mix(in srgb, var(--info) 8%, var(--card) 92%);
+    border-color: color-mix(in srgb, var(--info) 24%, var(--ui-border-default) 76%);
+    background: color-mix(in srgb, var(--info) 8%, var(--ui-surface-card) 92%);
   }
 
   .features-grid {
     display: grid;
-    gap: 1rem;
+    gap: var(--ui-space-4);
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .document-hub :global(.feature-card) {
-    display: grid;
-    gap: 1rem;
     min-height: 190px;
-  }
-
-  .feature-card-header {
-    display: grid;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .feature-heading {
-    display: grid;
-    gap: 0.25rem;
   }
 
   .feature-inline-error {
@@ -725,15 +631,6 @@
 
   @media (max-width: 640px) {
     .features-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .hero-upload-meta {
-      width: fit-content;
-      max-width: 100%;
-    }
-
-    .feature-card-header {
       grid-template-columns: 1fr;
     }
 

@@ -5,7 +5,10 @@
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import FieldShell from '../lib/components/ui/FieldShell.svelte';
+  import FocusedStudyLayout from '../lib/components/ui/FocusedStudyLayout.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
+  import PageHeader from '../lib/components/ui/PageHeader.svelte';
+  import ProgressBar from '../lib/components/ui/ProgressBar.svelte';
   import GuidedRegenerateModal from '../lib/components/ui/GuidedRegenerateModal.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
   import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
@@ -559,8 +562,15 @@
 {:else}
   <div class="activity mode-{mode}" class:activity-flashcards-active={isFlashcardsActive}>
     {#if !isFlashcardsFocused}
-      <Card as="header" class="activity-hero" variant="base" padding="lg" border="strong">
-        <div class="hero-toolbar">
+      <PageHeader title={title} subtitle={modeSubtitle} className="activity-hero">
+        <div slot="eyebrow" class="hero-badges">
+          <Badge tone="accent" variant="soft" size="sm" uppercase>{modeLabel}</Badge>
+          {#if fileTypeBadge}
+            <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
+          {/if}
+        </div>
+
+        <div slot="actions" class="hero-toolbar">
           <Button type="button" class="activity-back-link" variant="back" size="sm" on:click={goBackToHub}>
             <span slot="icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
@@ -573,20 +583,7 @@
             </Button>
           {/if}
         </div>
-
-        <div class="hero-main">
-          <div class="hero-copy">
-            <div class="hero-badges">
-              <Badge tone="accent" variant="soft" size="sm" uppercase>{modeLabel}</Badge>
-              {#if fileTypeBadge}
-                <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
-              {/if}
-            </div>
-            <h1>{title}</h1>
-            <p class="sub">{modeSubtitle}</p>
-          </div>
-        </div>
-      </Card>
+      </PageHeader>
 
       {#if extractionStatus === 'failed'}
         <Card as="section" class="activity-panel activity-panel-error status-panel" variant="base" padding="md" border="strong">
@@ -608,7 +605,7 @@
     {/if}
 
     {#if mode === 'summary'}
-      <section class="activity-body summary-body">
+      <FocusedStudyLayout className="activity-body summary-body" narrow="wide">
         {#if summaryFeature.hasContent}
           <Card as="article" class="summary-surface" variant="base" padding="lg" border="strong">
             <div class="section-header">
@@ -647,7 +644,7 @@
             </Button>
           </Card>
         {/if}
-      </section>
+      </FocusedStudyLayout>
     {/if}
 
     {#if mode === 'flashcards'}
@@ -666,7 +663,7 @@
               </div>
             </Card>
           {:else}
-            <section class="flashcards-active" aria-label={modeLabel}>
+            <FocusedStudyLayout className="flashcards-active" aria-label={modeLabel}>
               <div class="flashcards-active-topbar">
                 <Button type="button" class="activity-back-link" variant="back" size="sm" on:click={goBackToHub}>
                   <span slot="icon" aria-hidden="true">
@@ -677,9 +674,7 @@
                 <p class="progress">{t('document.activity.flashcards.progressLabel', { current: flashcardIndex + 1, total: flashcards.length, correct: flashcardsCorrect, incorrect: flashcardsIncorrect })}</p>
               </div>
 
-              <div class="progress-rail" aria-hidden="true">
-                <span style={`width: ${flashcardProgressPercent}%`}></span>
-              </div>
+              <ProgressBar value={flashcardIndex + 1} max={flashcards.length || 1} ariaLabel={t('document.activity.flashcards.progressLabel', { current: flashcardIndex + 1, total: flashcards.length, correct: flashcardsCorrect, incorrect: flashcardsIncorrect })} />
 
               <Card as="article" class={`flashcard-stage ${revealAnswer ? 'flashcard-stage-answer' : ''}`} variant="raised" padding="xl" border={revealAnswer ? 'strong' : 'subtle'}>
                 <p class="card-side">{revealAnswer ? t('document.activity.flashcards.answerLabel') : t('document.activity.flashcards.questionLabel')}</p>
@@ -705,7 +700,7 @@
                 <Button type="button" variant="secondary" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</Button>
                 <Button type="button" variant="secondary" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</Button>
               </div>
-            </section>
+            </FocusedStudyLayout>
           {/if}
         {:else}
           <Card as="section" class="empty-state" variant="base" padding="lg" border="dashed">
@@ -723,7 +718,7 @@
     {/if}
 
     {#if mode === 'exam'}
-      <section class="activity-body exam-body">
+      <FocusedStudyLayout className="activity-body exam-body" narrow="wide">
         {#if examFeature.hasContent}
           {#if examPhase === 'intro'}
             <Card as="article" class="study-surface exam-intro" variant="base" padding="lg" border="strong">
@@ -742,9 +737,7 @@
                 </div>
               </div>
 
-              <div class="progress-rail" aria-hidden="true">
-                <span style={`width: ${examProgressPercent}%`}></span>
-              </div>
+              <ProgressBar value={currentQuestionIndex + 1} max={examQuestions.length || 1} ariaLabel={t('document.exam.progress', { current: currentQuestionIndex + 1, total: examQuestions.length })} />
 
               <Card as="article" class="question-surface" variant="raised" padding="lg" border="subtle">
                 {#if questionOptions(currentExamQuestion).length > 0}
@@ -820,7 +813,7 @@
             </Button>
           </Card>
         {/if}
-      </section>
+      </FocusedStudyLayout>
     {/if}
   </div>
 {/if}

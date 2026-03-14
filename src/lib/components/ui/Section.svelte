@@ -46,18 +46,17 @@
 
 <style>
   .ui-section {
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    border-radius: 1rem;
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, transparent) 0%, var(--card) 100%);
-    box-shadow: var(--shadow-card);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-lg);
+    background: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
+    box-shadow: var(--ui-shadow-1);
     display: grid;
-    gap: 1rem;
+    gap: var(--ui-space-4);
     min-width: 0;
   }
 
   .ui-section--padded {
-    padding: 1.5rem;
+    padding: var(--ui-space-5);
   }
 
   .ui-section__header {
@@ -65,29 +64,29 @@
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
+    gap: var(--ui-space-4);
+    padding-bottom: var(--ui-space-4);
+    border-bottom: 1px solid var(--ui-divider);
   }
 
   .ui-section__heading {
     display: grid;
-    gap: 0.2rem;
+    gap: var(--ui-space-1);
   }
 
   .ui-section__heading h2 {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: var(--ui-type-title-sm);
     font-weight: 600;
     letter-spacing: -0.02em;
-    color: var(--color-text-primary);
+    color: var(--ui-text-primary);
   }
 
   .ui-section__heading p {
     margin: 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--ui-type-body-sm);
     line-height: 1.55;
-    color: var(--muted-foreground);
+    color: var(--ui-text-secondary);
   }
 
   .ui-section__actions {

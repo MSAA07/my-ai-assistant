@@ -69,9 +69,12 @@
   }
 
   .ui-stat-card__label {
-    color: var(--muted-foreground);
-    font-size: 0.75rem;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-type-label);
     line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .ui-stat-card__body {
@@ -80,7 +83,7 @@
   }
 
   .ui-stat-card__value {
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     font-size: clamp(1.4rem, 2.2vw, 1.65rem);
     font-weight: 600;
     line-height: 1.1;
@@ -88,8 +91,8 @@
   }
 
   .ui-stat-card__meta {
-    color: var(--muted-foreground);
-    font-size: 0.75rem;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-label);
     line-height: 1.3;
   }
 
@@ -100,9 +103,9 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    border-radius: calc(var(--radius) - 2px);
-    background: color-mix(in srgb, var(--muted) 84%, transparent);
-    color: var(--muted-foreground);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 84%, transparent);
+    color: var(--ui-text-muted);
   }
 
   .ui-stat-card__icon :global(svg) {

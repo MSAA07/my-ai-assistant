@@ -114,23 +114,23 @@
     width: var(--shell-sidebar-width, 16rem);
     flex-direction: column;
     overflow: hidden auto;
-    background: var(--sidebar, var(--card));
-    border-inline-end: 1px solid var(--border);
-    box-shadow: inset -1px 0 0 color-mix(in srgb, var(--foreground) 4%, transparent);
+    background: var(--sidebar, var(--ui-surface-card));
+    border-inline-end: 1px solid var(--ui-border-default);
+    box-shadow: inset -1px 0 0 color-mix(in srgb, var(--ui-text-primary) 4%, transparent);
     transition: width var(--motion-default) var(--ease-standard);
   }
 
   .sidebar.rtl {
     border-inline-end: none;
-    border-inline-start: 1px solid var(--border);
+    border-inline-start: 1px solid var(--ui-border-default);
   }
 
   .sidebar-header {
     display: flex;
-    min-height: 56px;
+    min-height: var(--size-topbar);
     align-items: center;
-    padding: 0 1rem;
-    border-bottom: 1px solid var(--border);
+    padding: 0 var(--ui-space-4);
+    border-bottom: 1px solid var(--ui-border-default);
   }
 
   .brand {
@@ -139,7 +139,7 @@
     gap: 0.625rem;
     min-width: 0;
     width: 100%;
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     text-decoration: none;
   }
 
@@ -151,8 +151,8 @@
     align-items: center;
     justify-content: center;
     border-radius: calc(var(--radius) - 2px);
-    background: var(--foreground);
-    color: var(--background);
+    background: var(--ui-text-primary);
+    color: var(--ui-bg-page);
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -184,7 +184,7 @@
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
     border-radius: 0.75rem;
-    color: var(--muted-foreground);
+    color: var(--ui-text-muted);
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
@@ -194,12 +194,12 @@
 
   .nav-item:hover {
     background: color-mix(in srgb, var(--sidebar-accent) 58%, transparent);
-    color: var(--foreground);
+    color: var(--ui-text-primary);
   }
 
   .nav-item.active {
     background: var(--sidebar-accent);
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     box-shadow: var(--shadow-inline-control);
   }
 
@@ -241,7 +241,7 @@
     display: grid;
     gap: 0.75rem;
     padding: 1rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--ui-border-default);
   }
 
   .sidebar.collapsed .sidebar-header {

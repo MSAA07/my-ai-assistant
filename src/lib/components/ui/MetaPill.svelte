@@ -26,23 +26,24 @@
     display: grid;
     gap: 0.45rem;
     min-width: 0;
-    padding: 0.9rem 1rem;
-    border-radius: 0.9rem;
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: color-mix(in srgb, var(--card) 76%, var(--muted) 24%);
-    box-shadow: var(--shadow-inline-control);
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border-radius: var(--ui-radius-md);
+    border: 1px solid var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-surface-card) 82%, var(--ui-surface-secondary) 18%);
+    box-shadow: var(--ui-shadow-1);
   }
 
   .ui-meta-pill__label {
-    color: var(--muted-foreground);
-    font-size: var(--font-size-xs);
-    letter-spacing: 0.05em;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-type-label);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+    font-weight: 600;
   }
 
   .ui-meta-pill__value {
-    color: var(--foreground);
-    font-size: var(--font-size-sm);
+    color: var(--ui-text-primary);
+    font-size: var(--ui-type-body-sm);
     font-weight: 600;
     overflow-wrap: anywhere;
   }

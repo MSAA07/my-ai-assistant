@@ -1,20 +1,29 @@
 # UI Primitive Usage
 
-This folder defines the shared visual primitives for dark-first SaaS styling. Use these components instead of recreating local button/card/input/modal/dropdown visuals.
+This folder defines the shared visual primitives for the universal frontend design system. Use these components instead of recreating local button/card/input/modal/dropdown/hero/progress visuals.
+
+## Token source of truth
+
+- Global tokens live in `src/lib/styles/tokens.css`.
+- Use semantic tokens first: `--ui-*` for layout/surfaces/typography/motion, and keep `--color-*` / legacy aliases as compatibility only.
+- Do not hardcode page-specific hex colors inside components when a semantic token already exists.
+- The system is dual-theme: dark is primary, light remains fully supported through semantic token remapping.
 
 ## Components
 
 - `Button.svelte`
   - Use for all interactive actions.
-  - Variants: `primary`, `secondary`, `outline`, `ghost`, `destructive`.
-  - Backward-compatible aliases: `danger -> destructive`, plus semantic `success` and `warning`.
+  - Variants: `primary`, `secondary`, `outline`, `ghost`, `success`, `destructive`.
+  - Backward-compatible aliases: `danger -> destructive`, `back -> outline`, plus legacy `warning`.
   - Sizes: `sm`, `md`, `lg`, `icon`.
   - Supports: `loading`, `disabled`, `block`, `slot="icon"`.
 
 - `Card.svelte`
   - Use for surfaced containers and panel-like groups.
-  - Variants: `base`, `raised`, `soft`, `overlay`.
-  - Border styles: `subtle`, `strong`, `accent`, `dashed`, `none`.
+  - Canonical variants: `standard`, `secondary`, `study`, `overlay`.
+  - Backward-compatible aliases: `base -> standard`, `raised -> secondary`, `soft -> secondary`.
+  - Border styles: `default`, `strong`, `dashed`, `none`.
+  - Backward-compatible aliases: `subtle -> default`, `accent -> strong`.
   - Padding: `none`, `sm`, `md`, `lg`.
 
 - `DataSurface.svelte`
@@ -66,6 +75,27 @@ This folder defines the shared visual primitives for dark-first SaaS styling. Us
 - `Section.svelte`
   - Use for page section wrappers with optional heading/actions layout.
 
+- `PageHeader.svelte`
+  - Use for the standard page/header pattern across home, study hub, settings, admin, and document detail screens.
+  - Supports eyebrow, title, subtitle, optional `slot="actions"`, and optional `slot="meta"`.
+  - Replaces page-local hero card implementations.
+
+- `ProgressBar.svelte`
+  - Use for shared horizontal progress rails in study flows, previews, and status surfaces.
+  - Props: `value`, `max`, `ariaLabel`.
+
+- `FocusedStudyLayout.svelte`
+  - Use for summary, flashcard, and exam-focused layouts.
+  - Applies calmer width, centered study content, and shared section spacing.
+
+- `DocumentCard.svelte`
+  - Use for study/library document cards.
+  - Supports badge, status, metadata, highlight state, and action slot.
+
+- `StudyActionCard.svelte`
+  - Use for document-hub feature cards (summary/flashcards/exam) and similar study-entry actions.
+  - Supports title, status, description slot, body slot, and actions slot.
+
 ## Dense data-surface pattern
 
 Use `DataSurface.svelte` as the shared structure for data-heavy admin screens.
@@ -112,9 +142,10 @@ Primitive-driven styling now covers:
 
 ## Common reusable page patterns now in use
 
-- dashboard/page hero card with eyebrow, title, subtitle, and optional action row
+- page header card with eyebrow, title, subtitle, optional actions, and optional metadata row
 - metadata pill rows (`MetaPill`) for document/settings/admin hero metadata
-- centered study-stage surfaces for flashcards/exam states
+- focused study shells via `FocusedStudyLayout`
+- shared progress rails via `ProgressBar`
 - panel header with status badge for study and admin summaries
 - dense data-table surfaces via `DataSurface`
 
@@ -137,4 +168,4 @@ Post-rollout execution notes and backlog are tracked in `UI_POST_ROLLOUT.md` at 
 ## Token contract
 
 Primitives consume semantic tokens from `src/lib/styles/tokens.css` (`--ui-*`, `--color-*`, `--space-*`).
-Do not hardcode raw hex values inside local component styles unless there is a domain-specific exception.
+Use `--ui-*` as the authoritative API for new work and treat compatibility aliases as transitional only.

@@ -3,9 +3,10 @@
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
-  import Badge from "../lib/components/ui/Badge.svelte";
   import Card from "../lib/components/ui/Card.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
+  import PageHeader from "../lib/components/ui/PageHeader.svelte";
+  import StatCard from "../lib/components/ui/StatCard.svelte";
   import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
   import { readPageCache, writePageCache } from "../stores/pageCache.js";
 
@@ -290,15 +291,7 @@
 </script>
 
 <div class="home-page">
-  <Card as="section" class="page-hero" variant="base" padding="lg" border="strong" aria-labelledby="home-title" aria-busy={isRefreshingDashboard}>
-    <div class="heading">
-      <Badge tone="neutral" variant="outline" size="sm" className="page-eyebrow">{t("nav.home")}</Badge>
-      <div class="heading-copy">
-        <h1 id="home-title">{t("home.heroTitle")}</h1>
-        <p class="subtitle">{t("home.heroSubtitle")}</p>
-      </div>
-    </div>
-  </Card>
+  <PageHeader eyebrow={t("nav.home")} title={t("home.heroTitle")} subtitle={t("home.heroSubtitle")} aria-labelledby="home-title" aria-busy={isRefreshingDashboard} />
 
   {#if isLoadingDashboard}
     <section class="stats-grid" aria-label={t('nav.home')}>
@@ -309,13 +302,14 @@
   {:else if user}
     <section class="stats-grid" aria-label={t('nav.home')}>
       {#each homeStats as stat (stat.key)}
-        <Card as="article" class="home-stat-card" variant="base" padding="md" border="subtle">
-          <div class="home-stat-card__header">
-            <p class={`home-stat-card__value ${stat.compact ? 'home-stat-card__value--compact' : ''}`.trim()}>
-              {stat.value}
-            </p>
-
-            <div class="home-stat-card__icon" aria-hidden="true">
+        <StatCard
+          as="article"
+          label={stat.label}
+          value={stat.value}
+          className="home-stat-card"
+          valueClassName={stat.compact ? 'home-stat-card__value--compact' : ''}
+        >
+          <div slot="icon" aria-hidden="true">
               {#if stat.icon === 'infinity'}
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M18.5 15.5c-1.88 0-2.86-1.2-4.25-3-1.39 1.8-2.37 3-4.25 3a3.5 3.5 0 1 1 0-7c1.88 0 2.86 1.2 4.25 3 1.39-1.8 2.37-3 4.25-3a3.5 3.5 0 1 1 0 7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -330,11 +324,8 @@
                   <path d="M3.75 7.75A1.75 1.75 0 0 1 5.5 6h4l1.7 1.75h7.3a1.75 1.75 0 0 1 1.75 1.75v7.75A1.75 1.75 0 0 1 18.5 19h-13A1.75 1.75 0 0 1 3.75 17.25V7.75Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {/if}
-            </div>
           </div>
-
-          <p class="home-stat-card__label">{stat.label}</p>
-        </Card>
+        </StatCard>
       {/each}
     </section>
   {/if}
@@ -385,121 +376,23 @@
     width: min(100%, 64rem);
     margin: 0 auto;
     display: grid;
-    gap: 1rem;
+    gap: var(--ui-space-4);
     min-width: 0;
-  }
-
-  :global(.page-hero) {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
-  }
-
-  .heading {
-    display: grid;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .heading-copy {
-    display: grid;
-    gap: 0.4rem;
-  }
-
-  :global(.page-eyebrow) {
-    min-height: 22px;
-    width: fit-content;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted-foreground);
-  }
-
-  h1 {
-    margin: 0;
-    color: var(--foreground);
-    font-size: clamp(1.55rem, 3vw, 1.95rem);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.05;
-  }
-
-  .subtitle {
-    margin: 0;
-    max-width: 42rem;
-    color: var(--muted-foreground);
-    font-size: 0.95rem;
-    line-height: 1.55;
   }
 
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    gap: var(--ui-space-4);
     min-width: 0;
   }
 
   .home-page :global(.home-stat-card) {
-    gap: 1.75rem;
     min-height: 148px;
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: color-mix(in srgb, var(--card) 94%, transparent);
-    box-shadow: none;
   }
 
-  .home-stat-card__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .home-stat-card__value,
-  .home-stat-card__label {
-    margin: 0;
-  }
-
-  .home-stat-card__value {
-    color: var(--foreground);
-    font-size: clamp(1.85rem, 3vw, 2.1rem);
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -0.03em;
-    word-break: break-word;
-  }
-
-  .home-stat-card__value--compact {
+  :global(.home-stat-card__value--compact) {
     font-size: clamp(1.55rem, 2.6vw, 1.8rem);
-  }
-
-  .home-stat-card__label {
-    color: var(--muted-foreground);
-    font-size: 0.77rem;
-    font-weight: 600;
-    line-height: 1.25;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  .home-stat-card__icon {
-    display: inline-flex;
-    width: 2.5rem;
-    height: 2.5rem;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    border-radius: calc(var(--radius) - 2px);
-    background: color-mix(in srgb, var(--muted) 76%, transparent);
-    color: var(--muted-foreground);
-  }
-
-  .home-stat-card__icon svg {
-    width: 1.1rem;
-    height: 1.1rem;
   }
 
   :global(.home-alert) {
@@ -675,10 +568,6 @@
   @media (max-width: 720px) {
     .home-page {
       gap: 0.875rem;
-    }
-
-    h1 {
-      font-size: clamp(1.7rem, 8vw, 2rem);
     }
 
     .upload-section :global(.upload-panel) {

@@ -19,7 +19,7 @@
     'ui-tabs',
     variant === 'underline'
       ? 'flex items-end gap-5 border-b border-border bg-transparent p-0'
-      : 'inline-flex items-center gap-1 rounded-lg border border-border bg-muted/70 p-[3px] text-muted-foreground shadow-inline-control',
+      : 'inline-flex items-center gap-1 rounded-xl border border-border bg-muted/70 p-[4px] text-muted-foreground shadow-inline-control',
     fullWidth ? 'w-full' : 'w-fit',
     mobileScrollable ? 'max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none]' : '',
     className,
@@ -70,7 +70,7 @@
   }
 
   .ui-tabs__tab {
-    color: var(--muted-foreground);
+    color: var(--ui-text-muted);
     font: inherit;
     font-weight: 500;
     white-space: nowrap;
@@ -83,24 +83,24 @@
   }
 
   .ui-tabs[data-variant='pill'] .ui-tabs__tab:hover:not(:disabled) {
-    color: var(--foreground);
-    background: color-mix(in srgb, var(--foreground) 4%, transparent);
+    color: var(--ui-text-primary);
+    background: var(--ui-surface-ghost);
   }
 
   .ui-tabs[data-variant='pill'] .ui-tabs__tab[aria-selected='true'] {
-    background: var(--background);
-    border-color: color-mix(in srgb, var(--foreground) 8%, transparent);
-    color: var(--foreground);
-    box-shadow: var(--shadow-inline-control);
+    background: var(--ui-surface-card);
+    border-color: var(--ui-border-strong);
+    color: var(--ui-text-primary);
+    box-shadow: var(--ui-shadow-1);
   }
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab:hover:not(:disabled) {
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     background: transparent;
   }
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab {
-    color: color-mix(in srgb, var(--foreground) 72%, var(--muted-foreground) 28%);
+    color: var(--ui-text-secondary);
     background: transparent;
     border: 0;
     border-radius: 0;
@@ -108,7 +108,7 @@
   }
 
   .ui-tabs[data-variant='underline'] .ui-tabs__tab[aria-selected='true'] {
-    color: var(--foreground);
+    color: var(--ui-text-primary);
     font-weight: 600;
     background: transparent;
     border: 0;
@@ -121,7 +121,9 @@
     inset-inline: 0;
     bottom: -1px;
     height: 2px;
-    background: var(--foreground);
+    background: var(--ui-progress-fill);
+    transition: transform var(--motion-default) var(--ease-standard),
+      opacity var(--motion-default) var(--ease-standard);
   }
 
   .ui-tabs__tab:focus-visible {

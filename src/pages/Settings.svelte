@@ -3,6 +3,7 @@
   import Card from '../lib/components/ui/Card.svelte';
   import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
   import MetaPill from '../lib/components/ui/MetaPill.svelte';
+  import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Section from '../lib/components/ui/Section.svelte';
   import SettingsPanelSkeleton from '../lib/components/ui/SettingsPanelSkeleton.svelte';
@@ -40,16 +41,8 @@
   <SettingsPanelSkeleton />
 {:else}
   <div class="settings-page">
-    <Card as="header" class="page-hero" variant="base" padding="lg" border="strong">
-      <div class="heading">
-        <Badge tone="neutral" variant="outline" size="sm" className="page-eyebrow">{t('settings.eyebrow')}</Badge>
-        <div class="heading-copy">
-          <h1>{t('settings.title')}</h1>
-          <p class="subtitle">{t('settings.subtitle')}</p>
-        </div>
-      </div>
-
-      <div class="hero-meta">
+    <PageHeader eyebrow={t('settings.eyebrow')} title={t('settings.title')} subtitle={t('settings.subtitle')}>
+      <div slot="meta" class="hero-meta">
         <MetaPill label={t('settings.account.title')}>
           <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
         </MetaPill>
@@ -57,7 +50,7 @@
           <Badge tone="neutral" variant="outline" size="sm">{currentThemeLabel}</Badge>
         </MetaPill>
       </div>
-    </Card>
+    </PageHeader>
 
     <div class="settings-grid">
       <Section
@@ -150,78 +143,25 @@
 <style>
   .settings-page {
     display: grid;
-    gap: 1.5rem;
+    gap: var(--ui-space-5);
     min-width: 0;
-  }
-
-  :global(.page-hero) {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--foreground) 7%, transparent) 0%, transparent 46%),
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--muted) 8%) 0%, var(--card) 100%);
-  }
-
-  .heading {
-    display: grid;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .heading-copy {
-    display: grid;
-    gap: 0.4rem;
-  }
-
-  :global(.page-eyebrow) {
-    min-height: 22px;
-    width: fit-content;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted-foreground);
-  }
-
-  h1 {
-    margin: 0;
-    font-size: clamp(1.55rem, 3vw, 1.95rem);
-    font-weight: 600;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    color: var(--color-text-primary);
-  }
-
-  .subtitle {
-    margin: 0;
-    color: var(--color-text-secondary);
-    font-size: 0.96rem;
-    line-height: 1.6;
-    max-width: 60ch;
   }
 
   .hero-meta {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--ui-space-3);
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 
   .settings-grid {
     display: grid;
-    gap: 1rem;
+    gap: var(--ui-space-4);
     grid-template-columns: repeat(2, minmax(0, 1fr));
     min-width: 0;
   }
 
   :global(.settings-section) {
-    display: grid;
-    gap: 1rem;
     min-width: 0;
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, transparent) 0%, var(--card) 100%);
-    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    box-shadow: var(--shadow-card);
   }
 
   :global(.settings-section p) {
@@ -235,24 +175,24 @@
 
   .section-copy {
     display: grid;
-    gap: 0.35rem;
+    gap: var(--ui-space-1);
   }
 
   .section-eyebrow {
     margin: 0;
-    color: var(--muted-foreground);
+    color: var(--ui-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: 0.67rem;
+    font-size: var(--ui-type-label);
     font-weight: 600;
   }
 
   .section-copy h2 {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: var(--ui-type-title-sm);
     font-weight: 600;
     letter-spacing: -0.02em;
-    color: var(--foreground);
+    color: var(--ui-text-primary);
   }
 
   .settings-block {
