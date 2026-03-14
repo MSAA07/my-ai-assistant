@@ -23,8 +23,8 @@ const LEGACY_REDIRECTS = new Map([
 const LEGACY_DOCUMENT_SECTION_MAP = {
   summary: 'summary',
   flashcards: 'flashcards',
-  exam: 'exams',
-  exams: 'exams',
+  exam: 'exam',
+  exams: 'exam',
   exports: 'exports',
   notes: 'summary',
   activity: 'summary'
@@ -97,11 +97,13 @@ const STUDY_ROUTE = {
       return null;
     }
 
-    const allowedSections = new Set(['summary', 'flashcards', 'exams', 'exports']);
-    const requestedSection = (segments[2] ?? 'summary').toLowerCase();
-    const studyTab = allowedSections.has(requestedSection) ? requestedSection : 'summary';
+    const requestedSection = segments[2] ? segments[2].toLowerCase() : '';
+    const allowedSections = new Set(['summary', 'flashcards', 'exam', 'exams', 'exports']);
+    if (requestedSection && !allowedSections.has(requestedSection)) {
+      return { params: { documentId, studyTab: '' } };
+    }
 
-    return { params: { documentId, studyTab } };
+    return { params: { documentId, studyTab: requestedSection } };
   }
 };
 

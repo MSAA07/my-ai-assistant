@@ -82,7 +82,8 @@ Primary frontend env var:
 - `VITE_API_BASE_URL`
 
 If `VITE_API_BASE_URL` is not set, the app derives API base from hostname in `src/config.js`:
-- local host -> staging backend (`https://ai-assistant-backend-staging.up.railway.app`)
+- local Vite dev on `localhost` / `127.0.0.1` -> same-origin `/api`, proxied to the staging backend by `vite.config.js`
+- local preview/build host -> staging backend (`https://ai-assistant-backend-staging.up.railway.app`)
 - Vercel stage/preview host -> staging backend
 - Vercel production host -> production backend
 

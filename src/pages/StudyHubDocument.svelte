@@ -9,15 +9,17 @@
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import StudyActionCard from '../lib/components/ui/StudyActionCard.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
+  import DocumentActivityView from '../lib/components/study/DocumentActivityView.svelte';
   import { getDocument, requestGeneration } from '../lib/api/studyHub.js';
   import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   export let documentId = '';
-  export let studyTab = 'summary';
+  export let studyTab = '';
 
   const POLL_INTERVAL_MS = 2500;
   const DOCUMENT_CACHE_KEY = (id) => `page:study-document:${id}`;
+  const ACTIVITY_TABS = new Set(['summary', 'flashcards', 'exam', 'exams']);
   const FEATURE_CONFIG = {
     summary: {
       titleKey: 'document.hub.features.summary',
@@ -43,6 +45,8 @@
   let generationErrors = createFeatureMap('');
 
   $: void studyTab;
+  $: normalizedStudyTab = normalizeString(studyTab).toLowerCase();
+  $: isActivityRoute = ACTIVITY_TABS.has(normalizedStudyTab);
   $: extractionStatus = normalizeDocumentStatus(documentData?.processingStatus);
   $: isExtractionProcessing = extractionStatus === 'queued' || extractionStatus === 'processing';
   $: hasActiveGeneration = FEATURE_KEYS.some((featureKey) => {
@@ -63,7 +67,7 @@
   $: uploadedMeta = getUploadedMeta(documentData);
   $: featureCards = FEATURE_KEYS.map((featureKey) => createFeatureCard(featureKey, documentData, extractionStatus, pendingGeneration, generationErrors));
 
-  $: if (documentId && documentId !== currentDocumentId) {
+  $: if (!isActivityRoute && documentId && documentId !== currentDocumentId) {
     currentDocumentId = documentId;
     resetState();
     const cached = readPageCache(DOCUMENT_CACHE_KEY(documentId));
@@ -412,7 +416,7 @@
 
   function openFeature(featureKey) {
     const openSection = FEATURE_CONFIG[featureKey]?.openSection ?? 'summary';
-    window.location.hash = `/legacy/documents/${currentDocumentId}/${openSection}`;
+    window.location.hash = `/study/${currentDocumentId}/${openSection}`;
   }
 
   async function runPrimaryAction(card) {
@@ -435,96 +439,100 @@
   }
 </script>
 
-<div class="document-hub">
-  <header class="document-header">
-    <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
-      <span slot="icon" aria-hidden="true">
-        <ArrowLeft />
-      </span>
-      {t('document.hub.backToStudyHub')}
-    </Button>
+{#if isActivityRoute}
+  <DocumentActivityView {documentId} studyTab={studyTab} />
+{:else}
+  <div class="document-hub">
+    <header class="document-header">
+      <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
+        <span slot="icon" aria-hidden="true">
+          <ArrowLeft />
+        </span>
+        {t('document.hub.backToStudyHub')}
+      </Button>
 
-    <div class="document-title-block">
-      <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
-      <div class="document-meta">
-        {#if fileTypeBadge}
-          <Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge document-file-badge">{fileTypeBadge}</Badge>
-        {/if}
-        {#if languageMeta}
-          <MetaPill className="document-meta-pill" label="" value={languageMeta.value} />
-        {/if}
-        {#if uploadedMeta}
-          <MetaPill className="document-meta-pill" label="" value={`${uploadedMeta.label} ${uploadedMeta.value}`} />
-        {/if}
+      <div class="document-title-block">
+        <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
+        <div class="document-meta">
+          {#if fileTypeBadge}
+            <Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge document-file-badge">{fileTypeBadge}</Badge>
+          {/if}
+          {#if languageMeta}
+            <MetaPill className="document-meta-pill" label="" value={languageMeta.value} />
+          {/if}
+          {#if uploadedMeta}
+            <MetaPill className="document-meta-pill" label="" value={`${uploadedMeta.label} ${uploadedMeta.value}`} />
+          {/if}
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  {#if loading && !documentData}
-    <DocumentDetailSkeleton />
-  {:else if !documentData}
-    <Card as="section" class="state-panel state-panel-error" variant="base" padding="md" border="strong">
-      <h2>{t('document.processingFailedTitle')}</h2>
-      <p>{error || t('document.notFound')}</p>
-      <div class="row">
-        <Button type="button" variant="back" on:click={goBackToLibrary}>{t('document.hub.backToStudyHub')}</Button>
-      </div>
-    </Card>
-  {:else}
-    {#if error}
-      <Card class="inline-error" variant="soft" border="strong" padding="sm">{error}</Card>
-    {/if}
-
-    {#if extractionStatus === 'failed'}
+    {#if loading && !documentData}
+      <DocumentDetailSkeleton />
+    {:else if !documentData}
       <Card as="section" class="state-panel state-panel-error" variant="base" padding="md" border="strong">
+        <h2>{t('document.processingFailedTitle')}</h2>
+        <p>{error || t('document.notFound')}</p>
         <div class="row">
-          <h2>{t('document.processingFailedTitle')}</h2>
-          <StatusBadge status="failed" label={t('status.failed')} />
+          <Button type="button" variant="back" on:click={goBackToLibrary}>{t('document.hub.backToStudyHub')}</Button>
         </div>
-        <p>{normalizeString(documentData?.processingError) || t('document.processingFailed')}</p>
-        <p>{t('document.hub.processing.continues')}</p>
       </Card>
-    {:else if showProcessingBanner}
-      <Card as="section" class="state-panel processing-panel" variant="soft" padding="md" border="strong">
-        <div class="row">
-          <h2>{processingTitle}</h2>
-          <StatusBadge status={processingTone} label={isExtractionProcessing ? t('status.processing') : t('document.hub.states.generating')} />
-        </div>
-        <p>{processingBody}</p>
-        <p>{t('document.hub.processing.continues')}</p>
-      </Card>
+    {:else}
+      {#if error}
+        <Card class="inline-error" variant="soft" border="strong" padding="sm">{error}</Card>
+      {/if}
+
+      {#if extractionStatus === 'failed'}
+        <Card as="section" class="state-panel state-panel-error" variant="base" padding="md" border="strong">
+          <div class="row">
+            <h2>{t('document.processingFailedTitle')}</h2>
+            <StatusBadge status="failed" label={t('status.failed')} />
+          </div>
+          <p>{normalizeString(documentData?.processingError) || t('document.processingFailed')}</p>
+          <p>{t('document.hub.processing.continues')}</p>
+        </Card>
+      {:else if showProcessingBanner}
+        <Card as="section" class="state-panel processing-panel" variant="soft" padding="md" border="strong">
+          <div class="row">
+            <h2>{processingTitle}</h2>
+            <StatusBadge status={processingTone} label={isExtractionProcessing ? t('status.processing') : t('document.hub.states.generating')} />
+          </div>
+          <p>{processingBody}</p>
+          <p>{t('document.hub.processing.continues')}</p>
+        </Card>
+      {/if}
+
+      <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
+        {#each featureCards as card (card.key)}
+          {@const Icon = featureIcon(card.key)}
+          <StudyActionCard class="feature-card" title={card.title} description={card.description} status={card.stateTone} statusLabel={card.stateLabel}>
+            <div slot="icon">
+              <Icon />
+            </div>
+
+            <svelte:fragment slot="description">
+              <p>{card.description}</p>
+              {#if card.errorMessage}
+                <p class="feature-inline-error">{card.errorMessage}</p>
+              {/if}
+            </svelte:fragment>
+
+            <div slot="actions" class="feature-actions">
+              <Button
+                type="button"
+                variant={card.state === 'ready' ? 'primary' : 'secondary'}
+                on:click={() => runPrimaryAction(card)}
+                disabled={!card.canPrimaryAction}
+              >
+                {card.primaryLabel}
+              </Button>
+            </div>
+          </StudyActionCard>
+        {/each}
+      </section>
     {/if}
-
-    <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
-      {#each featureCards as card (card.key)}
-        {@const Icon = featureIcon(card.key)}
-        <StudyActionCard class="feature-card" title={card.title} description={card.description} status={card.stateTone} statusLabel={card.stateLabel}>
-          <div slot="icon">
-            <Icon />
-          </div>
-
-          <svelte:fragment slot="description">
-            <p>{card.description}</p>
-            {#if card.errorMessage}
-              <p class="feature-inline-error">{card.errorMessage}</p>
-            {/if}
-          </svelte:fragment>
-
-          <div slot="actions" class="feature-actions">
-            <Button
-              type="button"
-              variant={card.state === 'ready' ? 'primary' : 'secondary'}
-              on:click={() => runPrimaryAction(card)}
-              disabled={!card.canPrimaryAction}
-            >
-              {card.primaryLabel}
-            </Button>
-          </div>
-        </StudyActionCard>
-      {/each}
-    </section>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <style>
   .document-hub {

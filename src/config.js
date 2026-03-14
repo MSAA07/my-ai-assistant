@@ -10,8 +10,13 @@ function getHostDerivedApiBaseUrl() {
   }
 
   const hostname = window.location.hostname.toLowerCase();
+  const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
 
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
+  if (import.meta.env.DEV && isLocalHost) {
+    return window.location.origin;
+  }
+
+  if (isLocalHost) {
     return DEPLOYMENT_API_BASES.staging;
   }
 
