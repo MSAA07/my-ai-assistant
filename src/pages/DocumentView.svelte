@@ -46,6 +46,7 @@
   let flashcardResults = [];
   let flashcardProgressError = '';
   let flashcardProgressBusy = false;
+  let flashcardsSessionState = 'entry';
 
   let examPhase = 'intro';
   let currentQuestionIndex = 0;
@@ -73,6 +74,11 @@
   $: flashcardsCorrect = flashcardResults.filter((result) => result === 'correct').length;
   $: flashcardsIncorrect = flashcardResults.filter((result) => result === 'incorrect').length;
   $: flashcardProgressPercent = flashcards.length ? ((flashcardIndex + 1) / flashcards.length) * 100 : 0;
+  $: isFlashcardsFocused = mode === 'flashcards' && flashcardsFeature.hasContent;
+  $: isFlashcardsActive = isFlashcardsFocused && flashcardsSessionState === 'active';
+  $: if (!isFlashcardsFocused && flashcardsSessionState !== 'entry') {
+    flashcardsSessionState = 'entry';
+  }
   $: summaryParagraphs = text(docData?.summary)
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
@@ -213,12 +219,17 @@
     regenerateModalOpen = false;
     regenerateFeatureKey = 'summary';
     regenerateSubmitting = false;
+    resetFlashcardsState();
+    flashcardsSessionState = 'entry';
+    resetExamState(0);
+  }
+
+  function resetFlashcardsState(cardCount = 0) {
     flashcardIndex = 0;
     revealAnswer = false;
-    flashcardResults = [];
+    flashcardResults = new Array(Math.max(0, cardCount)).fill(null);
     flashcardProgressError = '';
     flashcardProgressBusy = false;
-    resetExamState(0);
   }
 
   function updatePendingFromDocument(document) {
@@ -248,10 +259,8 @@
     updatePendingFromDocument(nextDocument);
 
     if (flashcardsChanged) {
-      flashcardIndex = 0;
-      revealAnswer = false;
-      flashcardResults = new Array(nextFlashcards.length).fill(null);
-      flashcardProgressError = '';
+      resetFlashcardsState(nextFlashcards.length);
+      flashcardsSessionState = 'entry';
     }
 
     if (flashcardIndex > nextFlashcards.length - 1) {
@@ -384,6 +393,12 @@
 
   function goBackToHub() {
     window.location.hash = currentDocumentId ? `/study/${currentDocumentId}` : '/study';
+  }
+
+  function startFlashcards() {
+    if (!flashcardsFeature.hasContent) return;
+    resetFlashcardsState(flashcards.length);
+    flashcardsSessionState = 'active';
   }
 
   function previousFlashcard() {
@@ -542,52 +557,54 @@
     <Button type="button" variant="back" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
   </Card>
 {:else}
-  <div class="activity mode-{mode}">
-    <Card as="header" class="activity-hero" variant="base" padding="lg" border="strong">
-      <div class="hero-toolbar">
-        <Button type="button" class="activity-back-link" variant="back" size="sm" on:click={goBackToHub}>
-          <span slot="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
-          </span>
-          {t('document.activity.backToHub')}
-        </Button>
-        {#if activeFeature.hasContent}
-          <Button type="button" variant="secondary" on:click={() => openRegenerateModal(activeFeature)} disabled={!activeFeature.canRegenerate}>
-            {activeFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
+  <div class="activity mode-{mode}" class:activity-flashcards-active={isFlashcardsActive}>
+    {#if !isFlashcardsFocused}
+      <Card as="header" class="activity-hero" variant="base" padding="lg" border="strong">
+        <div class="hero-toolbar">
+          <Button type="button" class="activity-back-link" variant="back" size="sm" on:click={goBackToHub}>
+            <span slot="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
+            </span>
+            {t('document.activity.backToHub')}
           </Button>
-        {/if}
-      </div>
+          {#if activeFeature.hasContent}
+            <Button type="button" variant="secondary" on:click={() => openRegenerateModal(activeFeature)} disabled={!activeFeature.canRegenerate}>
+              {activeFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
+            </Button>
+          {/if}
+        </div>
 
-      <div class="hero-main">
-        <div class="hero-copy">
-          <div class="hero-badges">
-            <Badge tone="accent" variant="soft" size="sm" uppercase>{modeLabel}</Badge>
-            {#if fileTypeBadge}
-              <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
-            {/if}
+        <div class="hero-main">
+          <div class="hero-copy">
+            <div class="hero-badges">
+              <Badge tone="accent" variant="soft" size="sm" uppercase>{modeLabel}</Badge>
+              {#if fileTypeBadge}
+                <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
+              {/if}
+            </div>
+            <h1>{title}</h1>
+            <p class="sub">{modeSubtitle}</p>
           </div>
-          <h1>{title}</h1>
-          <p class="sub">{modeSubtitle}</p>
         </div>
-      </div>
-    </Card>
+      </Card>
 
-    {#if extractionStatus === 'failed'}
-      <Card as="section" class="activity-panel activity-panel-error status-panel" variant="base" padding="md" border="strong">
-        <div class="row">
-          <h2>{t('document.processingFailedTitle')}</h2>
-          <StatusBadge status="failed" label={t('status.failed')} />
-        </div>
-        <p>{text(docData?.processingError) || t('document.processingFailed')}</p>
-      </Card>
-    {:else if showProcessingBanner}
-      <Card as="section" class="activity-panel status-panel" variant="base" padding="md">
-        <div class="row">
-          <h2>{isExtractionActive(extractionStatus) ? t('document.activity.states.extractionProcessing') : t('document.activity.states.generationProcessing')}</h2>
-          <StatusBadge status="processing" label={t('status.processing')} />
-        </div>
-        <p>{t('document.activity.states.processingContinues')}</p>
-      </Card>
+      {#if extractionStatus === 'failed'}
+        <Card as="section" class="activity-panel activity-panel-error status-panel" variant="base" padding="md" border="strong">
+          <div class="row">
+            <h2>{t('document.processingFailedTitle')}</h2>
+            <StatusBadge status="failed" label={t('status.failed')} />
+          </div>
+          <p>{text(docData?.processingError) || t('document.processingFailed')}</p>
+        </Card>
+      {:else if showProcessingBanner}
+        <Card as="section" class="activity-panel status-panel" variant="base" padding="md">
+          <div class="row">
+            <h2>{isExtractionActive(extractionStatus) ? t('document.activity.states.extractionProcessing') : t('document.activity.states.generationProcessing')}</h2>
+            <StatusBadge status="processing" label={t('status.processing')} />
+          </div>
+          <p>{t('document.activity.states.processingContinues')}</p>
+        </Card>
+      {/if}
     {/if}
 
     {#if mode === 'summary'}
@@ -634,46 +651,62 @@
     {/if}
 
     {#if mode === 'flashcards'}
-      <section class="activity-body study-body">
+      <section class="activity-body study-body" class:study-body-focused={isFlashcardsFocused}>
         {#if flashcardsFeature.hasContent}
-          <Card as="section" class="study-surface flashcards-surface" variant="base" padding="lg" border="strong">
-            <div class="section-header section-header-study">
-              <div class="section-copy">
-                <p class="eyebrow">{modeLabel}</p>
-                <h2>{modeSubtitle}</h2>
+          {#if flashcardsSessionState === 'entry'}
+            <Card as="section" class="study-surface flashcards-entry" variant="base" padding="lg" border="strong">
+              <Badge tone="accent" variant="soft" size="sm" uppercase>{modeLabel}</Badge>
+              <h1>{title}</h1>
+              {#if flashcards.length}
+                <p class="entry-meta">{t('document.activity.flashcards.cardCount', { count: flashcards.length })}</p>
+              {/if}
+              <div class="controls controls-entry">
+                <Button type="button" variant="primary" on:click={startFlashcards}>{t('document.activity.actions.startFlashcards')}</Button>
+                <Button type="button" variant="secondary" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
+              </div>
+            </Card>
+          {:else}
+            <section class="flashcards-active" aria-label={modeLabel}>
+              <div class="flashcards-active-topbar">
+                <Button type="button" class="activity-back-link" variant="back" size="sm" on:click={goBackToHub}>
+                  <span slot="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
+                  </span>
+                  {t('document.activity.backToHub')}
+                </Button>
                 <p class="progress">{t('document.activity.flashcards.progressLabel', { current: flashcardIndex + 1, total: flashcards.length, correct: flashcardsCorrect, incorrect: flashcardsIncorrect })}</p>
               </div>
-            </div>
 
-            <div class="progress-rail" aria-hidden="true">
-              <span style={`width: ${flashcardProgressPercent}%`}></span>
-            </div>
+              <div class="progress-rail" aria-hidden="true">
+                <span style={`width: ${flashcardProgressPercent}%`}></span>
+              </div>
 
-            <Card as="article" class={`flashcard-stage ${revealAnswer ? 'flashcard-stage-answer' : ''}`} variant="raised" padding="xl" border={revealAnswer ? 'strong' : 'subtle'}>
-              <p class="card-side">{revealAnswer ? t('document.activity.flashcards.answerLabel') : t('document.activity.flashcards.questionLabel')}</p>
-              <h2>{revealAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</h2>
-              {#if revealAnswer && text(currentFlashcard?.explanation)}
-                <p class="explanation">{currentFlashcard.explanation}</p>
-              {/if}
-            </Card>
+              <Card as="article" class={`flashcard-stage ${revealAnswer ? 'flashcard-stage-answer' : ''}`} variant="raised" padding="xl" border={revealAnswer ? 'strong' : 'subtle'}>
+                <p class="card-side">{revealAnswer ? t('document.activity.flashcards.answerLabel') : t('document.activity.flashcards.questionLabel')}</p>
+                <h2>{revealAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</h2>
+                {#if revealAnswer && text(currentFlashcard?.explanation)}
+                  <p class="explanation">{currentFlashcard.explanation}</p>
+                {/if}
+              </Card>
 
-            <div class="controls controls-primary">
-              {#if !revealAnswer}
-                <Button type="button" variant="primary" on:click={() => (revealAnswer = true)}>{t('document.activity.actions.revealAnswer')}</Button>
-              {:else}
-                <Button type="button" variant="secondary" on:click={() => (revealAnswer = false)}>{t('document.activity.actions.hideAnswer')}</Button>
-                <Button type="button" variant="success" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markCorrect')}</Button>
-                <Button type="button" variant="danger" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markIncorrect')}</Button>
-              {/if}
-            </div>
+              <div class="controls controls-primary">
+                {#if !revealAnswer}
+                  <Button type="button" variant="primary" on:click={() => (revealAnswer = true)}>{t('document.activity.actions.revealAnswer')}</Button>
+                {:else}
+                  <Button type="button" variant="secondary" on:click={() => (revealAnswer = false)}>{t('document.activity.actions.hideAnswer')}</Button>
+                  <Button type="button" variant="success" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markCorrect')}</Button>
+                  <Button type="button" variant="danger" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markIncorrect')}</Button>
+                {/if}
+              </div>
 
-            {#if flashcardProgressError}<p class="error">{flashcardProgressError}</p>{/if}
+              {#if flashcardProgressError}<p class="error">{flashcardProgressError}</p>{/if}
 
-            <div class="controls controls-secondary">
-              <Button type="button" variant="secondary" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</Button>
-              <Button type="button" variant="secondary" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</Button>
-            </div>
-          </Card>
+              <div class="controls controls-secondary">
+                <Button type="button" variant="secondary" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</Button>
+                <Button type="button" variant="secondary" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</Button>
+              </div>
+            </section>
+          {/if}
         {:else}
           <Card as="section" class="empty-state" variant="base" padding="lg" border="dashed">
             <div class="empty">
@@ -814,6 +847,10 @@
     min-width: 0;
   }
 
+  .activity-flashcards-active {
+    gap: 1rem;
+  }
+
   .activity-hero {
     display: grid;
     gap: 1.5rem;
@@ -921,6 +958,10 @@
   .study-body,
   .exam-body {
     max-width: 56rem;
+  }
+
+  .study-body-focused {
+    max-width: 48rem;
   }
 
   :global(.activity-panel),
@@ -1048,6 +1089,46 @@
 
   .flashcards-surface {
     gap: 1.25rem;
+  }
+
+  .flashcards-entry {
+    max-width: 34rem;
+    min-height: min(72vh, 680px);
+    margin-inline: auto;
+    place-content: center;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .flashcards-entry h1 {
+    font-size: clamp(1.75rem, 4vw, 2.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .entry-meta {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+  }
+
+  .controls-entry {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .flashcards-active {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .flashcards-active-topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
   .flashcard-stage {
@@ -1247,6 +1328,7 @@
 
     .hero-toolbar,
     .section-header,
+    .flashcards-active-topbar,
     .controls-secondary,
     .review-head {
       align-items: stretch;

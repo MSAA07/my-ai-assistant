@@ -332,6 +332,7 @@ export default {
         generateSummary: 'Generate summary',
         generateFlashcards: 'Generate flashcards',
         generateExam: 'Generate exam',
+        startFlashcards: 'Start flashcards',
         revealAnswer: 'Reveal answer',
         hideAnswer: 'Hide answer',
         markCorrect: 'Mark correct',
@@ -347,6 +348,7 @@ export default {
         regenerating: 'Regenerating in the background. Your current summary remains visible.'
       },
       flashcards: {
+        cardCount: '{count} flashcards',
         progressLabel: 'Card {current}/{total} · Correct {correct} · Incorrect {incorrect}',
         questionLabel: 'Question',
         answerLabel: 'Answer',
