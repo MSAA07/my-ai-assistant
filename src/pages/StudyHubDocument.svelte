@@ -531,12 +531,12 @@
     width: min(100%, 96rem);
     margin: 0 auto;
     display: grid;
-    gap: clamp(2rem, 3vw, 3.5rem);
+    gap: clamp(1.25rem, 2vw, 1.9rem);
   }
 
   .document-header {
     display: grid;
-    gap: clamp(1.5rem, 2vw, 2rem);
+    gap: clamp(0.75rem, 1.1vw, 1rem);
   }
 
   .document-hub :global(.back-link) {
@@ -568,22 +568,22 @@
 
   .document-title-block {
     display: grid;
-    gap: 1.4rem;
+    gap: 0.65rem;
   }
 
   .document-title-block h1 {
     margin: 0;
-    font-size: clamp(2.55rem, 2rem + 1.7vw, 4rem);
-    line-height: 1.02;
-    letter-spacing: -0.05em;
+    font-size: clamp(1.8rem, 1.45rem + 1vw, 2.55rem);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
     color: var(--ui-text-primary);
-    max-width: 18ch;
+    max-width: 26ch;
   }
 
   .document-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.9rem;
+    gap: 0.6rem;
     align-items: center;
   }
 
@@ -653,25 +653,37 @@
 
   .features-grid {
     display: grid;
-    gap: 1.7rem;
+    gap: 1.25rem;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
   }
 
   .document-hub :global(.feature-card) {
-    min-height: 28rem;
+    min-height: 23rem;
+    height: 100%;
   }
 
   .feature-inline-error {
-    margin-top: 0.9rem;
+    margin-top: 0.7rem;
     color: var(--destructive);
     line-height: 1.5;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+  }
+
+  :global(.feature-card .ui-study-action-card__actions .ui-button) {
+    min-height: 3.4rem;
+    font-size: 0.98rem;
+    letter-spacing: -0.01em;
+  }
+
+  :global(.feature-card .ui-study-action-card__actions .ui-button[data-variant='primary']) {
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--ui-text-primary) 12%, transparent);
   }
 
   :global(.feature-card .ui-study-action-card__actions .ui-button[data-variant='secondary']) {
     background: color-mix(in srgb, var(--ui-surface-secondary) 46%, var(--ui-surface-card) 54%);
     color: var(--ui-text-primary);
-    border-color: transparent;
+    border-color: color-mix(in srgb, var(--ui-border-default) 82%, transparent);
     box-shadow: none;
   }
 
@@ -703,11 +715,11 @@
     }
 
     .document-title-block {
-      gap: 1rem;
+      gap: 0.6rem;
     }
 
     .document-title-block h1 {
-      font-size: clamp(2.1rem, 11vw, 2.8rem);
+      font-size: clamp(1.6rem, 7vw, 2rem);
     }
   }
 </style>

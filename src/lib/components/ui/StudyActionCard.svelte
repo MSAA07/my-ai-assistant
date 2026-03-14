@@ -67,8 +67,8 @@
 
 <style>
   :global(.ui-study-action-card) {
-    gap: var(--ui-space-5);
-    min-height: 27rem;
+    gap: var(--ui-space-4);
+    min-height: 23rem;
     justify-content: space-between;
     border-radius: var(--ui-radius-lg);
     background: color-mix(in srgb, var(--ui-surface-card) 98%, transparent);
@@ -83,24 +83,24 @@
 
   .ui-study-action-card__hero {
     display: grid;
-    gap: var(--ui-space-6);
+    gap: var(--ui-space-4);
   }
 
   .ui-study-action-card__icon {
-    width: 4.25rem;
-    height: 4.25rem;
+    width: 3.5rem;
+    height: 3.5rem;
     border-radius: var(--ui-radius-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: color-mix(in srgb, var(--ui-surface-secondary) 64%, transparent);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 72%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ui-border-default) 84%, transparent);
     color: var(--ui-text-primary);
   }
 
   .ui-study-action-card__icon :global(svg) {
-    width: 1.75rem;
-    height: 1.75rem;
-    stroke-width: 2.1;
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .ui-study-action-card__copy {
@@ -110,10 +110,10 @@
 
   .ui-study-action-card__copy h2 {
     margin: 0;
-    font-size: clamp(1.45rem, 1.18rem + 0.7vw, 1.9rem);
+    font-size: clamp(1.2rem, 1.05rem + 0.45vw, 1.55rem);
     color: var(--ui-text-primary);
-    line-height: 1.08;
-    letter-spacing: -0.035em;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
   }
 
   :global(.ui-study-action-card__status) {
@@ -144,8 +144,8 @@
 
   .ui-study-action-card__description {
     color: var(--ui-text-muted);
-    font-size: clamp(1rem, 0.95rem + 0.18vw, 1.08rem);
-    line-height: 1.65;
+    font-size: clamp(0.96rem, 0.93rem + 0.14vw, 1.02rem);
+    line-height: 1.58;
   }
 
   .ui-study-action-card__body {
@@ -154,20 +154,20 @@
 
   .ui-study-action-card__actions {
     display: grid;
-    gap: var(--ui-space-3);
+    gap: var(--ui-space-2);
     margin-top: auto;
   }
 
   .ui-study-action-card__actions :global(.ui-button) {
     width: 100%;
-    min-height: 3.8rem;
-    font-size: 1rem;
+    min-height: 3.4rem;
+    font-size: 0.98rem;
     border-radius: var(--ui-radius-md);
   }
 
   @media (max-width: 640px) {
     :global(.ui-study-action-card) {
-      min-height: 24rem;
+      min-height: 21.5rem;
     }
   }
 </style>
