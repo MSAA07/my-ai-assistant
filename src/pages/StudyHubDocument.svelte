@@ -4,7 +4,6 @@
   import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
-  import MetaPill from '../lib/components/ui/MetaPill.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
   import { getDocument, requestGeneration } from '../lib/api/studyHub.js';
@@ -57,7 +56,7 @@
     : t('document.hub.processing.generatingBody');
 
   $: fileTypeBadge = getFileType(documentData);
-  $: metaItems = getMetaItems(documentData);
+  $: uploadedMeta = getUploadedMeta(documentData);
   $: featureCards = FEATURE_KEYS.map((featureKey) => createFeatureCard(featureKey, documentData, extractionStatus, pendingGeneration, generationErrors));
 
   $: if (documentId && documentId !== currentDocumentId) {
@@ -219,22 +218,14 @@
     return parsed.toLocaleDateString();
   }
 
-  function getMetaItems(document) {
-    if (!document) return [];
+  function getUploadedMeta(document) {
+    if (!document) return null;
 
-    const items = [];
-    const language = normalizeString(document?.language);
     const uploadDate = formatDate(document?.uploadDate || document?.createdAt);
 
-    if (language) {
-      items.push({ key: 'language', label: t('document.language'), value: language });
-    }
+    if (!uploadDate) return null;
 
-    if (uploadDate) {
-      items.push({ key: 'uploaded', label: t('document.uploaded'), value: uploadDate });
-    }
-
-    return items;
+    return { label: t('document.uploaded'), value: uploadDate };
   }
 
   function clearPollTimer() {
@@ -439,20 +430,18 @@
           {#if fileTypeBadge}
             <Badge tone="destructive" variant="outline" size="sm" className="document-file-badge">{fileTypeBadge}</Badge>
           {/if}
+          {#if uploadedMeta}
+            <div class="hero-upload-meta" aria-label={uploadedMeta.label}>
+              <span class="hero-upload-meta-label">{uploadedMeta.label}</span>
+              <strong class="hero-upload-meta-value">{uploadedMeta.value}</strong>
+            </div>
+          {/if}
         </div>
 
         <div class="hero-heading">
           <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
           <p class="hero-subtitle">{t('document.hub.readyHint')}</p>
         </div>
-
-        {#if metaItems.length > 0}
-          <div class="meta-row">
-            {#each metaItems as item (item.key)}
-              <MetaPill label={item.label} value={item.value} />
-            {/each}
-          </div>
-        {/if}
       </div>
     </div>
   </Card>
@@ -594,6 +583,33 @@
     text-transform: uppercase;
   }
 
+  .hero-upload-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 1.875rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    background: color-mix(in srgb, var(--card) 78%, var(--muted) 22%);
+    box-shadow: var(--shadow-inline-control);
+    white-space: nowrap;
+  }
+
+  .hero-upload-meta-label {
+    color: var(--muted-foreground);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hero-upload-meta-value {
+    color: var(--foreground);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
   .hero-heading {
     display: grid;
     gap: 0.5rem;
@@ -624,12 +640,6 @@
     color: var(--muted-foreground);
     font-size: 0.95rem;
     line-height: 1.55;
-  }
-
-  .meta-row {
-    display: grid;
-    gap: 0.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 
   .document-hub :global(.state-panel) {
@@ -716,6 +726,11 @@
   @media (max-width: 640px) {
     .features-grid {
       grid-template-columns: 1fr;
+    }
+
+    .hero-upload-meta {
+      width: fit-content;
+      max-width: 100%;
     }
 
     .feature-card-header {
