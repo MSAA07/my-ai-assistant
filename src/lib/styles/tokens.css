@@ -110,6 +110,19 @@
   --size-content-wide: 80rem;
   --size-content-narrow: 52rem;
   --size-content-study: 46rem;
+  --size-page-default: 64rem;
+  --size-page-wide: var(--size-content-wide);
+  --size-page-full: 96rem;
+  --size-page-narrow: var(--size-content-narrow);
+  --size-page-readable: 44rem;
+  --size-page-study: var(--size-content-study);
+  --size-page-study-wide: 56rem;
+  --size-page-study-compact: 48rem;
+  --layout-shell-padding-inline: clamp(1rem, 0.7rem + 1.2vw, 2rem);
+  --layout-shell-padding-block: clamp(1rem, 0.85rem + 0.9vw, 1.75rem);
+  --layout-shell-page-gap-tight: 1rem;
+  --layout-shell-page-gap: 1.5rem;
+  --layout-shell-page-gap-spacious: 2rem;
 
   /* Compatibility aliases */
   --background: var(--ui-bg-page);

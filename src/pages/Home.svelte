@@ -3,6 +3,7 @@
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
+  import PageLayout from "../lib/components/layout/PageLayout.svelte";
   import Card from "../lib/components/ui/Card.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
   import PageHeader from "../lib/components/ui/PageHeader.svelte";
@@ -290,7 +291,7 @@
   }
 </script>
 
-<div class="home-page">
+<PageLayout class="home-page" width="default">
   <PageHeader eyebrow={t("nav.home")} title={t("home.heroTitle")} subtitle={t("home.heroSubtitle")} aria-labelledby="home-title" aria-busy={isRefreshingDashboard} />
 
   {#if isLoadingDashboard}
@@ -369,12 +370,10 @@
       />
     </section>
   {/if}
-</div>
+</PageLayout>
 
 <style>
-  .home-page {
-    width: min(100%, 64rem);
-    margin: 0 auto;
+  :global(.home-page) {
     display: grid;
     gap: var(--ui-space-4);
     min-width: 0;
@@ -387,7 +386,7 @@
     min-width: 0;
   }
 
-  .home-page :global(.home-stat-card) {
+  :global(.home-page .home-stat-card) {
     min-height: 148px;
   }
 
@@ -566,7 +565,7 @@
   }
 
   @media (max-width: 720px) {
-    .home-page {
+    :global(.home-page) {
       gap: 0.875rem;
     }
 
@@ -599,7 +598,7 @@
       grid-template-columns: 1fr;
     }
 
-    .home-page :global(.home-stat-card) {
+    :global(.home-page .home-stat-card) {
       min-height: 128px;
     }
   }

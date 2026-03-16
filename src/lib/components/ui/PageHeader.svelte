@@ -65,8 +65,12 @@
 
 <style>
   :global(.ui-page-header) {
-    gap: var(--ui-space-5);
-    background: var(--gradient-hero);
+    gap: var(--layout-shell-page-gap);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 10%, var(--ui-border-default) 90%);
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--ui-text-primary) 7%, transparent) 0%, transparent 42%),
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-surface-secondary) 4%) 0%, var(--ui-surface-card) 100%);
+    box-shadow: var(--ui-shadow-1);
   }
 
   .ui-page-header__main {

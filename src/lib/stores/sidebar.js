@@ -7,7 +7,7 @@ function readStoredValue() {
   if (!isBrowser) return false;
 
   try {
-    return window.sessionStorage.getItem(STORAGE_KEY) === 'true';
+    return window.localStorage.getItem(STORAGE_KEY) === 'true';
   } catch {
     return false;
   }
@@ -19,7 +19,7 @@ sidebarCollapsedStore.subscribe((collapsed) => {
   if (!isBrowser) return;
 
   try {
-    window.sessionStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false');
+    window.localStorage.setItem(STORAGE_KEY, collapsed ? 'true' : 'false');
   } catch {
     // Ignore storage failures so layout state remains in-memory.
   }

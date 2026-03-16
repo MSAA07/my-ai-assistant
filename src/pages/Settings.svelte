@@ -1,4 +1,5 @@
 <script>
+  import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import Badge from '../lib/components/ui/Badge.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
@@ -40,7 +41,7 @@
 {#if !$session}
   <SettingsPanelSkeleton />
 {:else}
-  <div class="settings-page">
+  <PageLayout class="settings-page" width="wide">
     <PageHeader eyebrow={t('settings.eyebrow')} title={t('settings.title')} subtitle={t('settings.subtitle')}>
       <div slot="meta" class="hero-meta">
         <MetaPill label={t('settings.account.title')}>
@@ -137,11 +138,11 @@
         </article>
       </Section>
     </div>
-  </div>
+  </PageLayout>
 {/if}
 
 <style>
-  .settings-page {
+  :global(.settings-page) {
     display: grid;
     gap: var(--ui-space-5);
     min-width: 0;

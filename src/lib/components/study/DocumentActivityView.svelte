@@ -1028,7 +1028,7 @@
   }
 
   :global(.status-panel) {
-    width: min(100%, 56rem);
+    width: min(100%, var(--size-page-study-wide));
     margin-inline: auto;
   }
 
@@ -1098,7 +1098,7 @@
   }
 
   :global(.flashcards-body) {
-    width: min(100%, 48rem);
+    width: min(100%, var(--size-page-study-compact));
   }
 
   .flashcards-active {
@@ -1151,12 +1151,12 @@
   }
 
   :global(.exam-body) {
-    width: min(100%, 56rem);
+    width: min(100%, var(--size-page-study-wide));
   }
 
   :global(.exam-intro),
   :global(.exam-results) {
-    max-width: 44rem;
+    max-width: var(--size-page-readable);
     margin-inline: auto;
   }
 

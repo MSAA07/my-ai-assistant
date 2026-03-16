@@ -28,18 +28,18 @@
 
 <style>
   .ui-study-layout {
-    width: min(100%, var(--size-content-study));
+    width: min(100%, var(--size-page-study));
     margin-inline: auto;
     display: grid;
     gap: var(--ui-space-4);
   }
 
   .ui-study-layout--narrow {
-    width: min(100%, 40rem);
+    width: min(100%, var(--size-page-narrow));
   }
 
   .ui-study-layout--wide {
-    width: min(100%, 56rem);
+    width: min(100%, var(--size-page-study-wide));
   }
 
   .ui-study-layout__header,

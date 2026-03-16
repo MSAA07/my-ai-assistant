@@ -1,4 +1,5 @@
 <script>
+  import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Tabs from '../lib/components/ui/Tabs.svelte';
   import AdminStats from './admin/AdminStats.svelte';
@@ -22,7 +23,7 @@
   }
 </script>
 
-<div class="admin-page">
+<PageLayout class="admin-page" width="full">
   <PageHeader eyebrow="Admin Console" title="User Management & Security" subtitle="Monitor platform activity, manage users, and audit actions." className="admin-header" />
 
   <Tabs
@@ -48,10 +49,10 @@
       <AuditLogViewer />
     {/if}
   </div>
-</div>
+</PageLayout>
 
 <style>
-  .admin-page {
+  :global(.admin-page) {
     display: grid;
     gap: var(--ui-space-5);
     min-width: 0;
@@ -61,14 +62,14 @@
     max-width: 44rem;
   }
 
-  .admin-page :global(.admin-tabs) {
+  :global(.admin-page .admin-tabs) {
     width: fit-content;
     max-width: 100%;
     gap: 1.5rem;
     border-bottom-color: color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
   }
 
-  .admin-page :global(.admin-tabs .ui-tabs__tab) {
+  :global(.admin-page .admin-tabs .ui-tabs__tab) {
     min-width: 0;
     justify-content: flex-start;
     padding: 0 0 0.875rem;
@@ -81,11 +82,11 @@
   }
 
   @media (max-width: 640px) {
-    .admin-page {
+    :global(.admin-page) {
       gap: 1.25rem;
     }
 
-    .admin-page :global(.admin-tabs .ui-tabs__tab) {
+    :global(.admin-page .admin-tabs .ui-tabs__tab) {
       min-width: max-content;
       padding-bottom: 0.8rem;
       font-size: 0.9rem;

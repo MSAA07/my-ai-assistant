@@ -5,6 +5,7 @@
   import SignUp from './components/auth/SignUp.svelte';
   import AppHeader from './components/AppHeader.svelte';
   import AppShell from './lib/components/layout/AppShell.svelte';
+  import PageLayout from './lib/components/layout/PageLayout.svelte';
   import { currentPath } from './stores/router.js';
   import { session, isLoading, signOut } from './stores/auth.js';
   import { t } from './lib/i18n/t.js';
@@ -125,19 +126,19 @@
       on:signOut={signOut}
     >
       {#if routeAccessDenied}
-        <div class="access-denied">
+        <PageLayout class="access-denied" width="narrow">
           <h1>{t('access.deniedTitle')}</h1>
           <p>{t('access.deniedMessage')}</p>
           <a href="#/home">{t('access.backToDashboard')}</a>
-        </div>
+        </PageLayout>
       {:else if ActiveComponent}
         <svelte:component this={ActiveComponent} {...componentProps} />
       {:else}
-        <div class="not-found">
+        <PageLayout class="not-found" width="narrow">
           <h1>404</h1>
           <p>{t('errors.notFoundTitle')}</p>
           <a href="#/home">{t('errors.notFoundCta')}</a>
-        </div>
+        </PageLayout>
       {/if}
     </AppShell>
   {:else}

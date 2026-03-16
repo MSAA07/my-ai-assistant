@@ -3,6 +3,7 @@
   import { API_BASE } from '../config.js';
   import { routeParams } from '../stores/router.js';
   import { t } from '../lib/i18n/t.js';
+  import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import DocumentCard from '../lib/components/ui/DocumentCard.svelte';
@@ -244,7 +245,7 @@
   }
 </script>
 
-<div class="library-page">
+<PageLayout class="library-page" width="default">
   <PageHeader eyebrow={t('documentsPage.eyebrow')} title={t('documentsPage.title')} subtitle={t('documentsPage.description')}>
     <div slot="actions" class="header-actions">
       <Button type="button" variant="secondary" on:click={() => loadDocuments({ background: documents.length > 0 })} disabled={loading || refreshing}>
@@ -352,12 +353,10 @@
     on:confirm={renameDocument}
     on:cancel={closeRenameModal}
   />
-</div>
+</PageLayout>
 
 <style>
-  .library-page {
-    width: min(100%, 64rem);
-    margin: 0 auto;
+  :global(.library-page) {
     display: grid;
     gap: var(--ui-space-5);
     min-width: 0;
@@ -381,11 +380,11 @@
     min-width: 0;
   }
 
-  .library-page :global(.document-card) {
+  :global(.library-page .document-card) {
     min-height: 216px;
   }
 
-  .library-page :global(.document-card:focus-visible) {
+  :global(.library-page .document-card:focus-visible) {
     outline: none;
     box-shadow: var(--ui-focus-ring-strong);
   }
@@ -394,24 +393,24 @@
     position: relative;
   }
 
-  .library-page :global(.card-menu-button) {
+  :global(.library-page .card-menu-button) {
     opacity: 0.78;
   }
 
-  .library-page :global(.document-card:hover .card-menu-button),
-  .library-page :global(.card-menu-button[aria-expanded='true']) {
+  :global(.library-page .document-card:hover .card-menu-button),
+  :global(.library-page .card-menu-button[aria-expanded='true']) {
     opacity: 1;
   }
 
-  .library-page :global(.library-menu) {
+  :global(.library-page .library-menu) {
     position: absolute;
     top: calc(var(--ui-control-height-sm) + 6px);
     inset-inline-end: 0;
     z-index: 20;
   }
 
-  .library-page :global(.document-card:hover h2),
-  .library-page :global(.document-card:focus-visible h2) {
+  :global(.library-page .document-card:hover h2),
+  :global(.library-page .document-card:focus-visible h2) {
     text-decoration: underline;
     text-decoration-color: color-mix(in srgb, var(--foreground) 45%, transparent);
     text-underline-offset: 0.16em;
@@ -421,14 +420,14 @@
     color: var(--destructive);
   }
 
-  .library-page :global(.empty-state) {
+  :global(.library-page .empty-state) {
     min-height: 320px;
     border-color: var(--border);
     background: var(--card);
     box-shadow: var(--shadow-card);
   }
 
-  .library-page :global(.document-list-skeleton) {
+  :global(.library-page .document-list-skeleton) {
     gap: 1rem;
   }
 
@@ -439,11 +438,6 @@
   }
 
   @media (max-width: 640px) {
-    :global(.page-hero) {
-      flex-direction: column;
-      gap: 1rem;
-    }
-
     .documents-grid {
       grid-template-columns: 1fr;
     }

@@ -2,10 +2,12 @@
   import { onDestroy } from 'svelte';
   import { ArrowLeft, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
   import { t } from '../lib/i18n/t.js';
+  import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import MetaPill from '../lib/components/ui/MetaPill.svelte';
+  import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import StudyActionCard from '../lib/components/ui/StudyActionCard.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
@@ -65,6 +67,12 @@
   $: fileTypeBadge = getFileType(documentData);
   $: languageMeta = getLanguageMeta(documentData);
   $: uploadedMeta = getUploadedMeta(documentData);
+  $: documentTitle = normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled');
+  $: documentSubtitle = extractionStatus === 'failed'
+    ? normalizeString(documentData?.processingError) || t('document.processingFailed')
+    : showProcessingBanner
+      ? processingBody
+      : t('document.hub.readyHint');
   $: featureCards = FEATURE_KEYS.map((featureKey) => createFeatureCard(featureKey, documentData, extractionStatus, pendingGeneration, generationErrors));
 
   $: if (!isActivityRoute && documentId && documentId !== currentDocumentId) {
@@ -442,30 +450,29 @@
 {#if isActivityRoute}
   <DocumentActivityView {documentId} studyTab={studyTab} />
 {:else}
-  <div class="document-hub">
-    <header class="document-header">
-      <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
-        <span slot="icon" aria-hidden="true">
-          <ArrowLeft />
-        </span>
-        {t('document.hub.backToStudyHub')}
-      </Button>
-
-      <div class="document-title-block">
-        <h1>{normalizeString(documentData?.originalName) || normalizeString(documentData?.title) || t('document.hub.untitled')}</h1>
-        <div class="document-meta">
-          {#if fileTypeBadge}
-            <Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge document-file-badge">{fileTypeBadge}</Badge>
-          {/if}
-          {#if languageMeta}
-            <MetaPill className="document-meta-pill" label="" value={languageMeta.value} />
-          {/if}
-          {#if uploadedMeta}
-            <MetaPill className="document-meta-pill" label="" value={`${uploadedMeta.label} ${uploadedMeta.value}`} />
-          {/if}
-        </div>
+  <PageLayout class="document-hub" width="wide">
+    <PageHeader eyebrow={t('nav.study')} title={documentTitle} subtitle={documentSubtitle}>
+      <div slot="actions" class="document-header-actions">
+        <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
+          <span slot="icon" aria-hidden="true">
+            <ArrowLeft />
+          </span>
+          {t('document.hub.backToStudyHub')}
+        </Button>
       </div>
-    </header>
+
+      <div slot="meta" class="document-meta">
+        {#if fileTypeBadge}
+          <Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge document-file-badge">{fileTypeBadge}</Badge>
+        {/if}
+        {#if languageMeta}
+          <MetaPill className="document-meta-pill" label="" value={languageMeta.value} />
+        {/if}
+        {#if uploadedMeta}
+          <MetaPill className="document-meta-pill" label="" value={`${uploadedMeta.label} ${uploadedMeta.value}`} />
+        {/if}
+      </div>
+    </PageHeader>
 
     {#if loading && !documentData}
       <DocumentDetailSkeleton />
@@ -531,23 +538,16 @@
         {/each}
       </section>
     {/if}
-  </div>
+  </PageLayout>
 {/if}
 
 <style>
-  .document-hub {
-    width: min(100%, 96rem);
-    margin: 0 auto;
+  :global(.document-hub) {
     display: grid;
-    gap: clamp(1.25rem, 2vw, 1.9rem);
+    gap: var(--layout-shell-page-gap);
   }
 
-  .document-header {
-    display: grid;
-    gap: clamp(0.75rem, 1.1vw, 1rem);
-  }
-
-  .document-hub :global(.back-link) {
+  :global(.document-hub .back-link) {
     justify-self: start;
     width: fit-content;
     padding-inline: 0;
@@ -559,7 +559,7 @@
     font-size: 0.95rem;
   }
 
-  .document-hub :global(.back-link svg) {
+  :global(.document-hub .back-link svg) {
     width: 1.15rem;
     height: 1.15rem;
     fill: none;
@@ -569,28 +569,19 @@
     stroke-linejoin: round;
   }
 
-  .document-hub :global(.back-link:hover) {
+  :global(.document-hub .back-link:hover) {
     color: var(--ui-text-primary);
     transform: none;
   }
 
-  .document-title-block {
-    display: grid;
-    gap: 0.65rem;
-  }
-
-  .document-title-block h1 {
-    margin: 0;
-    font-size: clamp(1.8rem, 1.45rem + 1vw, 2.55rem);
-    line-height: 1.08;
-    letter-spacing: -0.04em;
-    color: var(--ui-text-primary);
-    max-width: 26ch;
+  .document-header-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
   }
 
   .document-meta {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
     gap: 0.6rem;
     align-items: center;
   }
@@ -634,27 +625,27 @@
     letter-spacing: -0.02em;
   }
 
-  .document-hub :global(.state-panel) {
+  :global(.document-hub .state-panel) {
     display: grid;
     gap: var(--space-2);
   }
 
-  .document-hub :global(.state-panel h2),
-  .document-hub :global(.state-panel p) {
+  :global(.document-hub .state-panel h2),
+  :global(.document-hub .state-panel p) {
     margin: 0;
   }
 
-  .document-hub :global(.state-panel p) {
+  :global(.document-hub .state-panel p) {
     color: var(--muted-foreground);
     line-height: 1.45;
     font-size: var(--font-size-sm);
   }
 
-  .document-hub :global(.state-panel-error) {
+  :global(.document-hub .state-panel-error) {
     border-color: color-mix(in srgb, var(--destructive) 35%, var(--ui-border-default) 65%);
   }
 
-  .document-hub :global(.processing-panel) {
+  :global(.document-hub .processing-panel) {
     border-color: color-mix(in srgb, var(--info) 24%, var(--ui-border-default) 76%);
     background: color-mix(in srgb, var(--info) 8%, var(--ui-surface-card) 92%);
   }
@@ -666,7 +657,7 @@
     align-items: stretch;
   }
 
-  .document-hub :global(.feature-card) {
+  :global(.document-hub .feature-card) {
     min-height: 23rem;
     height: 100%;
   }
@@ -711,10 +702,6 @@
     .features-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
-    .document-title-block h1 {
-      max-width: 100%;
-    }
   }
 
   @media (max-width: 640px) {
@@ -722,12 +709,8 @@
       grid-template-columns: 1fr;
     }
 
-    .document-title-block {
-      gap: 0.6rem;
-    }
-
-    .document-title-block h1 {
-      font-size: clamp(1.6rem, 7vw, 2rem);
+    .document-meta {
+      grid-template-columns: 1fr;
     }
   }
 </style>

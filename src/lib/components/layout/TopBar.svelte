@@ -141,16 +141,18 @@
 
 <style>
   .topbar {
+    position: relative;
+    z-index: 1;
     display: flex;
     min-height: var(--size-topbar);
     flex: 0 0 auto;
     align-items: center;
     justify-content: space-between;
     gap: var(--ui-space-4);
-    padding: 0 var(--ui-space-5);
+    padding: 0 var(--layout-shell-padding-inline);
     border-bottom: 1px solid var(--ui-border-default);
-    background: color-mix(in srgb, var(--ui-surface-card) 94%, transparent);
-    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-bg-page) 12%);
+    backdrop-filter: blur(14px);
   }
 
   .title-area {
@@ -325,7 +327,11 @@
 
   @media (max-width: 767px) {
     .topbar {
-      padding: 0 1rem;
+      padding:
+        0
+        max(var(--ui-space-4), env(safe-area-inset-right))
+        0
+        max(var(--ui-space-4), env(safe-area-inset-left));
       gap: 0.75rem;
     }
 
