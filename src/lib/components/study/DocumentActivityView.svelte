@@ -48,7 +48,6 @@
   let flashcardResults = [];
   let flashcardProgressError = '';
   let flashcardProgressBusy = false;
-  let flashcardsStarted = false;
 
   let examPhase = 'question';
   let currentQuestionIndex = 0;
@@ -106,9 +105,8 @@
     total: examQuestions.length,
   });
 
-  $: showFlashcardsLaunch = mode === 'flashcards' && flashcardsFeature.hasContent && !flashcardsStarted;
   $: showExamLaunch = mode === 'exam' && examFeature.hasContent && examPhase === 'question' && !examStarted;
-  $: showFocusedFlashcardsChrome = mode === 'flashcards' && flashcardsFeature.hasContent && flashcardsStarted;
+  $: showFocusedFlashcardsChrome = mode === 'flashcards' && flashcardsFeature.hasContent;
   $: showChromeProgress = showFocusedFlashcardsChrome
     || (mode === 'exam' && examFeature.hasContent && !showExamLaunch);
   $: chromeProgressValue = mode === 'flashcards'
@@ -250,9 +248,7 @@
       if (!flashcardsFeature.hasContent) {
         return t('document.hub.features.flashcards');
       }
-      return flashcardsStarted
-        ? flashcardProgressLabel
-        : t('document.activity.flashcards.cardCount', { count: flashcards.length });
+      return flashcardProgressLabel;
     }
 
     if (mode === 'exam') {
@@ -274,9 +270,6 @@
     if (mode === 'flashcards') {
       if (!flashcardsFeature.hasContent) {
         return flashcardsFeature.errorMessage || modeSubtitle;
-      }
-      if (!flashcardsStarted) {
-        return modeSubtitle;
       }
       if (flashcardProgressError) {
         return flashcardProgressError;
@@ -329,7 +322,6 @@
 
   function handleModeChange(nextMode) {
     if (nextMode === 'flashcards') {
-      flashcardsStarted = false;
       revealAnswer = false;
       flashcardProgressError = '';
       return;
@@ -360,7 +352,6 @@
     flashcardResults = new Array(Math.max(0, cardCount)).fill(null);
     flashcardProgressError = '';
     flashcardProgressBusy = false;
-    flashcardsStarted = false;
   }
 
   function updatePendingFromDocument(document) {
@@ -523,12 +514,6 @@
 
   function goBackToHub() {
     window.location.hash = currentDocumentId ? `/study/${currentDocumentId}` : '/study';
-  }
-
-  function startFlashcards() {
-    if (!flashcardsFeature.hasContent) return;
-    flashcardsStarted = true;
-    flashcardProgressError = '';
   }
 
   function startExam() {
@@ -697,7 +682,7 @@
     progressLabel={chromeProgressLabel}
     progressValue={chromeProgressValue}
     progressMax={chromeProgressMax}
-    contentWidth="wide"
+    contentWidth={showFocusedFlashcardsChrome ? '' : 'wide'}
     chromeVariant={showFocusedFlashcardsChrome ? 'focused-flashcards' : 'default'}
   >
     <div slot="back" class="activity-back">
@@ -818,74 +803,46 @@
 
     {#if mode === 'flashcards'}
       {#if flashcardsFeature.hasContent}
-        {#if showFlashcardsLaunch}
-          <Card as="section" class="activity-launch" variant="base" padding="lg" border="strong">
-            <div class="launch-copy">
-              <Badge tone="info" variant="soft" size="sm" uppercase>{t('status.ready')}</Badge>
-              <p class="eyebrow">{title}</p>
-              <h2>{t('document.hub.features.flashcards')}</h2>
-              <p>{modeSubtitle}</p>
-            </div>
-
-            <div class="launch-metrics">
-              <div class="launch-metric">
-                <span class="launch-metric__label">{t('document.activity.flashcards.cardCount', { count: flashcards.length })}</span>
-                <strong>{flashcards.length}</strong>
-              </div>
-              <div class="launch-metric">
-                <span class="launch-metric__label">{t('document.exam.reviewCorrect')}</span>
-                <strong>{flashcardsCorrect}</strong>
-              </div>
-              <div class="launch-metric">
-                <span class="launch-metric__label">{t('document.exam.reviewIncorrect')}</span>
-                <strong>{flashcardsIncorrect}</strong>
-              </div>
-            </div>
-
-            <div class="launch-actions">
-              <Button type="button" variant="primary" on:click={startFlashcards}>{t('document.activity.actions.startFlashcards')}</Button>
-            </div>
-          </Card>
-        {:else}
-          <section class="activity-stack flashcards-active" aria-label={modeLabel}>
-            <section class="flashcards-focus-canvas">
-              <Card
-                as="article"
-                class={`activity-stage flashcard-stage flashcard-stage--focused ${revealAnswer ? 'flashcard-stage-answer' : ''}`}
-                variant="base"
-                padding="xl"
-                border={revealAnswer ? 'strong' : 'subtle'}
-              >
-                <div class="flashcard-stage__copy">
-                  <p class="card-side">{revealAnswer ? t('document.activity.flashcards.answerLabel') : t('document.activity.flashcards.questionLabel')}</p>
-                  <h2>{revealAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</h2>
-                  {#if revealAnswer && text(currentFlashcard?.explanation)}
-                    <p class="explanation">{currentFlashcard.explanation}</p>
-                  {/if}
-                </div>
-              </Card>
-
-              <div class="flashcards-focus-primary controls controls-primary">
-                {#if !revealAnswer}
-                  <Button type="button" variant="primary" size="lg" block on:click={() => (revealAnswer = true)}>{t('document.activity.actions.revealAnswer')}</Button>
-                {:else}
-                  <div class="flashcards-focus-answer-actions">
-                    <Button type="button" variant="secondary" size="sm" on:click={() => (revealAnswer = false)}>{t('document.activity.actions.hideAnswer')}</Button>
-                    <Button type="button" variant="success" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markCorrect')}</Button>
-                    <Button type="button" variant="danger" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markIncorrect')}</Button>
-                  </div>
+        <section class="flashcards-active" aria-label={modeLabel}>
+          <section class="flashcards-focus-canvas">
+            <Card
+              as="article"
+              class={`activity-stage flashcard-stage flashcard-stage--focused ${revealAnswer ? 'flashcard-stage-answer' : ''}`}
+              variant="base"
+              padding="xl"
+              border={revealAnswer ? 'strong' : 'subtle'}
+            >
+              <div class="flashcard-stage__copy">
+                <p class="card-side">{revealAnswer ? t('document.activity.flashcards.answerLabel') : t('document.activity.flashcards.questionLabel')}</p>
+                <h2>{revealAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</h2>
+                {#if revealAnswer && text(currentFlashcard?.explanation)}
+                  <p class="explanation">{currentFlashcard.explanation}</p>
                 {/if}
               </div>
+            </Card>
 
-              {#if flashcardProgressError}<p class="error flashcards-focus-error">{flashcardProgressError}</p>{/if}
+            <div class="flashcards-focus-primary controls controls-primary">
+              {#if !revealAnswer}
+                <Button type="button" variant="primary" size="lg" block on:click={() => (revealAnswer = true)}>{t('document.activity.actions.revealAnswer')}</Button>
+              {:else}
+                <div class="flashcards-focus-answer-actions">
+                  <Button type="button" variant="secondary" size="sm" on:click={() => (revealAnswer = false)}>{t('document.activity.actions.hideAnswer')}</Button>
+                  <Button type="button" variant="success" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markCorrect')}</Button>
+                  <Button type="button" variant="danger" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markIncorrect')}</Button>
+                </div>
+              {/if}
+            </div>
 
-              <div class="flashcards-focus-nav controls controls-secondary">
-                <Button type="button" variant="secondary" size="sm" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</Button>
-                <Button type="button" variant="secondary" size="sm" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</Button>
-              </div>
-            </section>
+            {#if flashcardProgressError}<p class="error flashcards-focus-error">{flashcardProgressError}</p>{/if}
+
+            <div class="flashcards-focus-nav controls controls-secondary">
+              <Button type="button" variant="secondary" size="sm" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</Button>
+              <Button type="button" variant="secondary" size="sm" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</Button>
+            </div>
           </section>
-        {/if}
+
+          <p class="flashcards-focus-hint">Use arrow keys to navigate, spacebar to reveal answer.</p>
+        </section>
       {:else}
         <Card as="section" class="activity-launch activity-launch--empty" variant="base" padding="lg" border="dashed">
           <div class="launch-copy">
@@ -1145,7 +1102,6 @@
     max-width: var(--size-page-study-wide);
   }
 
-  .activity-stack,
   .flashcards-active {
     display: grid;
     gap: 1rem;
@@ -1321,6 +1277,24 @@
     justify-items: center;
     gap: clamp(0.9rem, 0.75rem + 0.9vw, 1.35rem);
     padding-block: clamp(1rem, 3vh, 2rem) clamp(1.25rem, 4vh, 2.5rem);
+  }
+
+  .flashcards-active {
+    min-height: clamp(34rem, calc(100vh - 6.75rem), 48rem);
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-items: start;
+    justify-items: center;
+    width: 100%;
+  }
+
+  .flashcards-focus-hint {
+    justify-self: center;
+    text-align: center;
+    color: var(--ui-text-muted);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    padding-bottom: clamp(0.75rem, 2vh, 1.5rem);
   }
 
   .flashcards-focus-primary,
@@ -1514,6 +1488,11 @@
     .flashcards-focus-canvas {
       min-height: auto;
       padding-top: 0.5rem;
+    }
+
+    .flashcards-active {
+      min-height: auto;
+      grid-template-rows: auto auto;
     }
 
     .flashcards-focus-answer-actions {

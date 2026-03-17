@@ -166,8 +166,11 @@
     return 'info';
   }
 
-  function getPrimaryActionLabel(state) {
-    if (state === 'ready') return t('document.hub.actions.open');
+  function getPrimaryActionLabel(featureKey, state) {
+    if (state === 'ready') {
+      if (featureKey === 'flashcards') return t('document.activity.actions.startFlashcards');
+      return t('document.hub.actions.open');
+    }
     if (state === 'generating') return t('document.actions.generating');
     return t('document.actions.generate');
   }
@@ -222,7 +225,7 @@
       state,
       stateLabel: getStateLabel(state),
       stateTone: getStateTone(state),
-      primaryLabel: getPrimaryActionLabel(state),
+      primaryLabel: getPrimaryActionLabel(featureKey, state),
       description: getFeatureDescription(featureKey),
       canPrimaryAction,
       shouldRegenerate: hasContent || generationStatus === 'complete',
