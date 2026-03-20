@@ -1246,7 +1246,7 @@
     align-content: start;
     justify-items: center;
     gap: 0;
-    padding-top: clamp(0.9rem, 1.5vh, 1.4rem);
+    padding-top: clamp(0.2rem, 0.6vh, 0.45rem);
     overflow: hidden;
   }
 
