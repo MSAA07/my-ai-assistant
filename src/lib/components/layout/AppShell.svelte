@@ -146,6 +146,14 @@
     min-width: 0;
   }
 
+  :global(.shell-main:has(.study-activity-shell--active-session)) {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  :global(.shell-main:has(.study-activity-shell--active-session) .topbar) {
+    display: none;
+  }
+
   @media (max-width: 1024px) {
     .content-wrapper {
       padding-inline:

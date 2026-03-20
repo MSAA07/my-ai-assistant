@@ -222,9 +222,9 @@
   }
 
   :global(.study-activity-shell--active-session.activity-chrome) {
-    min-height: 100dvh;
-    height: 100dvh;
-    max-height: 100dvh;
+    min-height: 100%;
+    height: 100%;
+    max-height: 100%;
     gap: 0;
     overflow: clip;
   }
@@ -263,7 +263,7 @@
     min-height: 100%;
     height: 100%;
     gap: 0;
-    padding-top: clamp(4.35rem, 3.95rem + 1.25vw, 5.35rem);
+    padding-top: clamp(4.1rem, 3.8rem + 1vw, 4.9rem);
     padding-bottom: max(var(--ui-space-3), env(safe-area-inset-bottom));
     overflow: hidden;
   }
@@ -310,7 +310,7 @@
     }
 
     :global(.study-activity-shell--active-session .activity-chrome__body) {
-      padding-top: clamp(4rem, 3.7rem + 1.1vw, 4.85rem);
+      padding-top: clamp(3.8rem, 3.55rem + 0.9vw, 4.4rem);
     }
 
     :global(.study-activity-shell--active-session .study-activity-shell__session) {
