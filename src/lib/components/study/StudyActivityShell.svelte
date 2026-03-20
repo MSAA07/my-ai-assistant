@@ -37,7 +37,7 @@
   {/if}
 
   <svelte:fragment slot="progress">
-    {#if chromeVariant === 'focused-flashcards' && $$slots['chrome-progress']}
+    {#if chromeVariant === 'active-session' && $$slots['chrome-progress']}
       <div class="study-activity-shell__chrome-slot">
         <slot name="chrome-progress" />
       </div>
@@ -55,7 +55,7 @@
   </svelte:fragment>
 
   <svelte:fragment slot="status">
-    {#if chromeVariant === 'focused-flashcards' && $$slots['chrome-status']}
+    {#if chromeVariant === 'active-session' && $$slots['chrome-status']}
       <div class="study-activity-shell__chrome-slot">
         <slot name="chrome-status" />
       </div>
@@ -97,9 +97,15 @@
     </div>
   {/if}
 
-  <FocusedStudyLayout className="study-activity-shell__canvas" narrow={contentWidth}>
-    <slot />
-  </FocusedStudyLayout>
+  {#if chromeVariant === 'active-session'}
+    <div class="study-activity-shell__session">
+      <slot />
+    </div>
+  {:else}
+    <FocusedStudyLayout className="study-activity-shell__canvas" narrow={contentWidth}>
+      <slot />
+    </FocusedStudyLayout>
+  {/if}
 </ActivityChrome>
 
 <style>
@@ -110,6 +116,7 @@
   .study-activity-shell__progress,
   .study-activity-shell__status,
   .study-activity-shell__chrome-slot,
+  .study-activity-shell__session,
   .study-activity-shell__banner {
     width: 100%;
   }
@@ -204,13 +211,24 @@
     gap: 1rem;
   }
 
+  .study-activity-shell__session {
+    min-width: 0;
+  }
+
   :global(.study-activity-shell__canvas) {
     width: 100%;
     min-width: 0;
     margin-inline: auto;
   }
 
-  :global(.study-activity-shell--focused-flashcards .activity-chrome__rail) {
+  :global(.study-activity-shell--active-session.activity-chrome) {
+    min-height: 100dvh;
+    height: 100dvh;
+    gap: 0;
+    overflow: clip;
+  }
+
+  :global(.study-activity-shell--active-session .activity-chrome__rail) {
     position: fixed;
     inset: 0 0 auto 0;
     z-index: 32;
@@ -221,23 +239,36 @@
       max(var(--ui-space-4), env(safe-area-inset-left));
   }
 
-  :global(.study-activity-shell--focused-flashcards .activity-chrome__controls) {
+  :global(.study-activity-shell--active-session .activity-chrome__controls) {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: clamp(0.75rem, 1vw + 0.4rem, 1.4rem);
     align-items: center;
   }
 
-  :global(.study-activity-shell--focused-flashcards .activity-chrome__body) {
-    gap: clamp(1.25rem, 1vw + 1rem, 2rem);
+  :global(.study-activity-shell--active-session .activity-chrome__body) {
+    min-height: 100dvh;
+    height: 100dvh;
+    gap: 0;
     padding-top: clamp(5.5rem, 4.7rem + 2.8vw, 7.25rem);
+    padding-bottom: max(var(--ui-space-4), env(safe-area-inset-bottom));
+    overflow: hidden;
   }
 
-  :global(.study-activity-shell--focused-flashcards .activity-chrome__pane) {
+  :global(.study-activity-shell--active-session .activity-chrome__pane) {
     align-items: center;
   }
 
-  :global(.study-activity-shell--focused-flashcards .activity-chrome__pane--progress) {
+  :global(.study-activity-shell--active-session .activity-chrome__pane--progress) {
     justify-content: center;
+  }
+
+  :global(.study-activity-shell--active-session .study-activity-shell__session) {
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    padding-inline: max(var(--ui-space-4), env(safe-area-inset-left));
+    padding-right: max(var(--ui-space-4), env(safe-area-inset-right));
+    scrollbar-gutter: stable;
   }
 
   @media (max-width: 900px) {
@@ -245,20 +276,33 @@
       max-width: none;
     }
 
-    :global(.study-activity-shell--focused-flashcards .activity-chrome__controls) {
+    :global(.study-activity-shell--active-session .activity-chrome__controls) {
       grid-template-columns: minmax(0, 1fr) auto;
     }
 
-    :global(.study-activity-shell--focused-flashcards .activity-chrome__pane--progress) {
+    :global(.study-activity-shell--active-session .activity-chrome__pane--progress) {
       grid-column: 1 / -1;
       justify-content: center;
     }
   }
 
   @media (max-width: 640px) {
-    :global(.study-activity-shell--focused-flashcards .activity-chrome__controls) {
+    :global(.study-activity-shell--active-session .activity-chrome__rail) {
+      padding-top: max(var(--ui-space-3), env(safe-area-inset-top));
+    }
+
+    :global(.study-activity-shell--active-session .activity-chrome__controls) {
       grid-template-columns: minmax(0, 1fr) auto;
       gap: var(--ui-space-3);
+    }
+
+    :global(.study-activity-shell--active-session .activity-chrome__body) {
+      padding-top: clamp(6rem, 5.4rem + 2.2vw, 6.75rem);
+    }
+
+    :global(.study-activity-shell--active-session .study-activity-shell__session) {
+      padding-inline: max(var(--ui-space-3), env(safe-area-inset-left));
+      padding-right: max(var(--ui-space-3), env(safe-area-inset-right));
     }
   }
 </style>
