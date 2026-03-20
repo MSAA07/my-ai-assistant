@@ -819,6 +819,7 @@
     {#if mode === 'flashcards'}
       {#if flashcardsFeature.hasContent}
         <section class="study-session study-session--flashcards" aria-label={modeLabel}>
+          <p class="study-session__deploy-marker">DEPLOY TEST v1</p>
           <section class="study-session__canvas study-session__canvas--flashcards">
             <Card
               as="article"
@@ -1294,6 +1295,16 @@
     line-height: 1.5;
     letter-spacing: 0.01em;
     padding-bottom: clamp(0.2rem, 0.8vh, 0.55rem);
+  }
+
+  .study-session__deploy-marker {
+    margin: 0;
+    justify-self: center;
+    color: var(--ui-text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .study-session__primary,
