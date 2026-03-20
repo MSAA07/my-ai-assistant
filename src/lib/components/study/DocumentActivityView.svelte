@@ -1193,6 +1193,7 @@
 
   .session-chrome-progress {
     width: min(100%, 13rem);
+    padding-top: 0.18rem;
   }
 
   :global(.session-chrome-progress__bar) {
@@ -1206,6 +1207,7 @@
     justify-content: flex-end;
     gap: 0.5rem;
     flex-wrap: wrap;
+    padding-top: 0.14rem;
     color: var(--ui-text-secondary);
     font-size: 0.78rem;
     font-weight: 600;
@@ -1246,7 +1248,7 @@
     align-content: start;
     justify-items: center;
     gap: 0;
-    padding-top: clamp(0.2rem, 0.6vh, 0.45rem);
+    padding-top: 0;
     overflow: hidden;
   }
 
@@ -1293,7 +1295,8 @@
     font-size: 0.82rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
-    padding-bottom: clamp(0.2rem, 0.8vh, 0.55rem);
+    margin-top: clamp(0.4rem, 0.8vh, 0.55rem);
+    padding-bottom: clamp(0.1rem, 0.4vh, 0.3rem);
   }
 
   .study-session__primary,
@@ -1304,7 +1307,7 @@
 
   .study-session__primary {
     justify-content: center;
-    margin-top: clamp(0.75rem, 1.6vh, 1rem);
+    margin-top: clamp(0.5rem, 1vh, 0.7rem);
   }
 
   .study-session__answer-actions {
@@ -1328,7 +1331,7 @@
   .controls-secondary {
     justify-content: space-between;
     align-items: center;
-    margin-top: clamp(0.65rem, 1.4vh, 0.95rem);
+    margin-top: clamp(0.4rem, 0.8vh, 0.6rem);
   }
 
   .study-session__nav :global(.ui-button) {
@@ -1531,11 +1534,13 @@
 
     .session-chrome-progress {
       width: min(100%, 11rem);
+      padding-top: 0.14rem;
     }
 
     .session-chrome-status {
       gap: 0.35rem 0.45rem;
       font-size: 0.72rem;
+      padding-top: 0.12rem;
     }
 
     .controls-secondary,
