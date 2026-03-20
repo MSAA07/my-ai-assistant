@@ -1239,28 +1239,33 @@
 
   .study-session {
     width: 100%;
-    min-height: calc(100dvh - clamp(5.5rem, 4.7rem + 2.8vw, 7.25rem) - max(var(--ui-space-4), env(safe-area-inset-bottom)));
+    height: 100%;
+    min-height: 0;
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto;
-    align-items: start;
+    align-items: stretch;
     justify-items: center;
-    gap: 1rem;
+    gap: clamp(0.6rem, 0.45rem + 0.6vw, 0.9rem);
+    overflow: hidden;
   }
 
   .study-session--scrollable {
-    min-height: auto;
+    height: 100%;
+    min-height: 0;
     grid-template-rows: auto;
+    overflow: auto;
   }
 
   .study-session__canvas {
     width: 100%;
     margin-inline: auto;
-    min-height: 100%;
+    height: 100%;
+    min-height: 0;
     display: grid;
     align-content: center;
     justify-items: center;
-    gap: clamp(0.9rem, 0.75rem + 0.9vw, 1.35rem);
-    padding-block: clamp(1rem, 3vh, 2rem) clamp(1.25rem, 4vh, 2.5rem);
+    gap: clamp(0.75rem, 0.6rem + 0.7vw, 1rem);
+    padding-block: clamp(0.35rem, 1.25vh, 0.85rem) clamp(0.65rem, 2vh, 1rem);
   }
 
   .study-session__canvas--flashcards {
@@ -1277,8 +1282,10 @@
   }
 
   .study-session--scrollable .study-session__canvas {
+    height: auto;
     min-height: auto;
     align-content: start;
+    padding-block: 0;
   }
 
   .study-session__hint {
@@ -1288,7 +1295,7 @@
     font-size: 0.82rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
-    padding-bottom: clamp(0.75rem, 2vh, 1.5rem);
+    padding-bottom: clamp(0.35rem, 1vh, 0.75rem);
   }
 
   .study-session__primary,
@@ -1311,7 +1318,7 @@
 
   .controls {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.65rem;
     flex-wrap: wrap;
   }
 
@@ -1335,7 +1342,7 @@
   }
 
   :global(.study-session-card--flashcards) {
-    min-height: clamp(11.5rem, 18vh, 15rem);
+    min-height: clamp(10.5rem, 16vh, 13rem);
     display: grid;
     place-items: center;
     text-align: center;
@@ -1348,7 +1355,7 @@
 
   .study-session-card__copy--flashcards {
     width: min(100%, 38rem);
-    gap: var(--ui-space-4);
+    gap: var(--ui-space-3);
     justify-items: start;
     text-align: left;
   }
@@ -1375,7 +1382,7 @@
   }
 
   :global(.study-session-card--exam) {
-    max-height: min(32rem, calc(100dvh - 15rem));
+    max-height: min(31rem, calc(100dvh - 12.5rem));
     overflow: auto;
   }
 
@@ -1543,13 +1550,16 @@
     }
 
     .study-session__canvas {
-      min-height: auto;
-      padding-top: 0.5rem;
+      height: auto;
+      min-height: 0;
+      padding-top: 0.25rem;
     }
 
     .study-session {
-      min-height: auto;
+      height: auto;
+      min-height: 0;
       grid-template-rows: auto auto;
+      overflow: visible;
     }
 
     .study-session__answer-actions {

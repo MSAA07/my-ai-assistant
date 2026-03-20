@@ -224,8 +224,22 @@
   :global(.study-activity-shell--active-session.activity-chrome) {
     min-height: 100dvh;
     height: 100dvh;
+    max-height: 100dvh;
     gap: 0;
     overflow: clip;
+  }
+
+  :global(.shell-content:has(.study-activity-shell--active-session)) {
+    overflow: hidden;
+  }
+
+  :global(.content-wrapper:has(.study-activity-shell--active-session)) {
+    height: 100%;
+    min-height: 100%;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+    align-content: stretch;
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__rail) {
@@ -246,11 +260,11 @@
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__body) {
-    min-height: 100dvh;
-    height: 100dvh;
+    min-height: 100%;
+    height: 100%;
     gap: 0;
-    padding-top: clamp(5.5rem, 4.7rem + 2.8vw, 7.25rem);
-    padding-bottom: max(var(--ui-space-4), env(safe-area-inset-bottom));
+    padding-top: clamp(4.75rem, 4.1rem + 2vw, 6rem);
+    padding-bottom: max(var(--ui-space-3), env(safe-area-inset-bottom));
     overflow: hidden;
   }
 
@@ -265,10 +279,9 @@
   :global(.study-activity-shell--active-session .study-activity-shell__session) {
     height: 100%;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
     padding-inline: max(var(--ui-space-4), env(safe-area-inset-left));
     padding-right: max(var(--ui-space-4), env(safe-area-inset-right));
-    scrollbar-gutter: stable;
   }
 
   @media (max-width: 900px) {
@@ -297,7 +310,7 @@
     }
 
     :global(.study-activity-shell--active-session .activity-chrome__body) {
-      padding-top: clamp(6rem, 5.4rem + 2.2vw, 6.75rem);
+      padding-top: clamp(5.25rem, 4.9rem + 1.8vw, 6rem);
     }
 
     :global(.study-activity-shell--active-session .study-activity-shell__session) {
