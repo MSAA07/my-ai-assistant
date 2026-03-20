@@ -247,7 +247,7 @@
     inset: 0 0 auto 0;
     z-index: 32;
     padding:
-      max(var(--ui-space-4), env(safe-area-inset-top))
+      max(var(--ui-space-3), env(safe-area-inset-top))
       max(var(--ui-space-4), env(safe-area-inset-right))
       0
       max(var(--ui-space-4), env(safe-area-inset-left));
@@ -263,7 +263,7 @@
     min-height: 100%;
     height: 100%;
     gap: 0;
-    padding-top: clamp(4.75rem, 4.1rem + 2vw, 6rem);
+    padding-top: clamp(4.05rem, 3.55rem + 1.45vw, 5rem);
     padding-bottom: max(var(--ui-space-3), env(safe-area-inset-bottom));
     overflow: hidden;
   }
@@ -301,7 +301,7 @@
 
   @media (max-width: 640px) {
     :global(.study-activity-shell--active-session .activity-chrome__rail) {
-      padding-top: max(var(--ui-space-3), env(safe-area-inset-top));
+      padding-top: max(var(--ui-space-2), env(safe-area-inset-top));
     }
 
     :global(.study-activity-shell--active-session .activity-chrome__controls) {
@@ -310,7 +310,7 @@
     }
 
     :global(.study-activity-shell--active-session .activity-chrome__body) {
-      padding-top: clamp(5.25rem, 4.9rem + 1.8vw, 6rem);
+      padding-top: clamp(4.5rem, 4.1rem + 1.6vw, 5.25rem);
     }
 
     :global(.study-activity-shell--active-session .study-activity-shell__session) {

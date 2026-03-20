@@ -824,7 +824,7 @@
               as="article"
               class={`activity-stage flashcard-stage study-session-card study-session-card--flashcards ${revealAnswer ? 'flashcard-stage-answer' : ''}`}
               variant="base"
-              padding="xl"
+              padding="lg"
               border={revealAnswer ? 'strong' : 'subtle'}
             >
               <div class="flashcard-stage__copy study-session-card__copy study-session-card__copy--flashcards">
@@ -951,7 +951,7 @@
         {:else}
           <section class="study-session study-session--exam" aria-label={modeLabel}>
             <section class="study-session__canvas study-session__canvas--exam">
-              <Card as="article" class="activity-stage question-surface study-session-card study-session-card--exam" variant="base" padding="xl" border="strong">
+              <Card as="article" class="activity-stage question-surface study-session-card study-session-card--exam" variant="base" padding="lg" border="strong">
                 <div class="study-session-card__copy study-session-card__copy--exam">
                   <p class="card-side">{t('document.activity.exam.questionLabel', { index: currentQuestionIndex + 1 })}</p>
                   <h2>{currentExamQuestion?.question}</h2>
@@ -1245,7 +1245,7 @@
     grid-template-rows: minmax(0, 1fr) auto;
     align-items: stretch;
     justify-items: center;
-    gap: clamp(0.6rem, 0.45rem + 0.6vw, 0.9rem);
+    gap: clamp(0.45rem, 0.35rem + 0.45vw, 0.75rem);
     overflow: hidden;
   }
 
@@ -1264,8 +1264,8 @@
     display: grid;
     align-content: center;
     justify-items: center;
-    gap: clamp(0.75rem, 0.6rem + 0.7vw, 1rem);
-    padding-block: clamp(0.35rem, 1.25vh, 0.85rem) clamp(0.65rem, 2vh, 1rem);
+    gap: clamp(0.55rem, 0.45rem + 0.45vw, 0.8rem);
+    padding-block: 0 clamp(1.15rem, 3vh, 1.75rem);
   }
 
   .study-session__canvas--flashcards {
@@ -1288,6 +1288,12 @@
     padding-block: 0;
   }
 
+  .study-session:not(.study-session--scrollable) .study-session__canvas {
+    align-content: center;
+    padding-top: 0;
+    padding-bottom: clamp(1.35rem, 4.5vh, 2.4rem);
+  }
+
   .study-session__hint {
     justify-self: center;
     text-align: center;
@@ -1295,7 +1301,7 @@
     font-size: 0.82rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
-    padding-bottom: clamp(0.35rem, 1vh, 0.75rem);
+    padding-bottom: clamp(0.2rem, 0.8vh, 0.55rem);
   }
 
   .study-session__primary,
@@ -1312,13 +1318,13 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
   }
 
   .controls {
     display: flex;
-    gap: 0.65rem;
+    gap: 0.55rem;
     flex-wrap: wrap;
   }
 
@@ -1342,7 +1348,7 @@
   }
 
   :global(.study-session-card--flashcards) {
-    min-height: clamp(10.5rem, 16vh, 13rem);
+    min-height: clamp(9.75rem, 14vh, 11.75rem);
     display: grid;
     place-items: center;
     text-align: center;
@@ -1350,7 +1356,7 @@
 
   .study-session-card__copy {
     display: grid;
-    gap: 0.85rem;
+    gap: 0.7rem;
   }
 
   .study-session-card__copy--flashcards {
@@ -1362,6 +1368,7 @@
 
   .study-session-card__copy--exam {
     width: min(100%, 42rem);
+    gap: var(--ui-space-3);
     justify-items: start;
     text-align: left;
   }
@@ -1382,7 +1389,7 @@
   }
 
   :global(.study-session-card--exam) {
-    max-height: min(31rem, calc(100dvh - 12.5rem));
+    max-height: min(29.5rem, calc(100dvh - 11.5rem));
     overflow: auto;
   }
 
