@@ -824,7 +824,7 @@
               as="article"
               class={`activity-stage flashcard-stage study-session-card study-session-card--flashcards ${revealAnswer ? 'flashcard-stage-answer' : ''}`}
               variant="base"
-              padding="lg"
+              padding="md"
               border={revealAnswer ? 'strong' : 'subtle'}
             >
               <div class="flashcard-stage__copy study-session-card__copy study-session-card__copy--flashcards">
@@ -1193,7 +1193,6 @@
 
   .session-chrome-progress {
     width: min(100%, 13rem);
-    padding-top: 0.18rem;
   }
 
   :global(.session-chrome-progress__bar) {
@@ -1207,7 +1206,6 @@
     justify-content: flex-end;
     gap: 0.5rem;
     flex-wrap: wrap;
-    padding-top: 0.14rem;
     color: var(--ui-text-secondary);
     font-size: 0.78rem;
     font-weight: 600;
@@ -1295,7 +1293,7 @@
     font-size: 0.82rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
-    margin-top: clamp(0.4rem, 0.8vh, 0.55rem);
+    margin-top: clamp(0.25rem, 0.5vh, 0.4rem);
     padding-bottom: clamp(0.1rem, 0.4vh, 0.3rem);
   }
 
@@ -1307,7 +1305,7 @@
 
   .study-session__primary {
     justify-content: center;
-    margin-top: clamp(0.5rem, 1vh, 0.7rem);
+    margin-top: clamp(0.32rem, 0.7vh, 0.5rem);
   }
 
   .study-session__answer-actions {
@@ -1331,7 +1329,7 @@
   .controls-secondary {
     justify-content: space-between;
     align-items: center;
-    margin-top: clamp(0.4rem, 0.8vh, 0.6rem);
+    margin-top: clamp(0.22rem, 0.45vh, 0.4rem);
   }
 
   .study-session__nav :global(.ui-button) {
@@ -1345,7 +1343,7 @@
   }
 
   :global(.study-session-card--flashcards) {
-    min-height: clamp(9.75rem, 14vh, 11.75rem);
+    min-height: clamp(8.75rem, 11.5vh, 10.4rem);
     display: grid;
     place-items: center;
     text-align: center;
@@ -1353,12 +1351,12 @@
 
   .study-session-card__copy {
     display: grid;
-    gap: 0.7rem;
+    gap: 0.55rem;
   }
 
   .study-session-card__copy--flashcards {
     width: min(100%, 38rem);
-    gap: var(--ui-space-3);
+    gap: var(--ui-space-2);
     justify-items: start;
     text-align: left;
   }
@@ -1534,13 +1532,11 @@
 
     .session-chrome-progress {
       width: min(100%, 11rem);
-      padding-top: 0.14rem;
     }
 
     .session-chrome-status {
       gap: 0.35rem 0.45rem;
       font-size: 0.72rem;
-      padding-top: 0.12rem;
     }
 
     .controls-secondary,
@@ -1582,7 +1578,7 @@
     }
 
     :global(.study-session-card--flashcards) {
-      min-height: 14rem;
+      min-height: 12.5rem;
     }
 
     :global(.study-session-card--exam) {

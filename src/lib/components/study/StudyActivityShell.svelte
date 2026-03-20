@@ -247,7 +247,7 @@
     inset: 0 0 auto 0;
     z-index: 32;
     padding:
-      max(var(--ui-space-2), calc(env(safe-area-inset-top) + 0.2rem))
+      max(var(--ui-space-2), calc(env(safe-area-inset-top) + 0.4rem))
       max(var(--ui-space-4), env(safe-area-inset-right))
       0
       max(var(--ui-space-4), env(safe-area-inset-left));
@@ -256,20 +256,20 @@
   :global(.study-activity-shell--active-session .activity-chrome__controls) {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: clamp(0.75rem, 1vw + 0.4rem, 1.4rem);
-    align-items: center;
+    align-items: end;
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__body) {
     min-height: 100%;
     height: 100%;
     gap: 0;
-    padding-top: clamp(3.65rem, 3.45rem + 0.75vw, 4.25rem);
+    padding-top: clamp(3.05rem, 2.9rem + 0.55vw, 3.45rem);
     padding-bottom: max(var(--ui-space-3), env(safe-area-inset-bottom));
     overflow: hidden;
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__pane) {
-    align-items: center;
+    align-items: flex-end;
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__pane--progress) {
@@ -301,7 +301,7 @@
 
   @media (max-width: 640px) {
     :global(.study-activity-shell--active-session .activity-chrome__rail) {
-      padding-top: max(var(--ui-space-1), calc(env(safe-area-inset-top) + 0.15rem));
+      padding-top: max(var(--ui-space-1), calc(env(safe-area-inset-top) + 0.3rem));
     }
 
     :global(.study-activity-shell--active-session .activity-chrome__controls) {
@@ -310,7 +310,7 @@
     }
 
     :global(.study-activity-shell--active-session .activity-chrome__body) {
-      padding-top: clamp(3.4rem, 3.2rem + 0.8vw, 3.9rem);
+      padding-top: clamp(2.95rem, 2.8rem + 0.7vw, 3.35rem);
     }
 
     :global(.study-activity-shell--active-session .study-activity-shell__session) {
