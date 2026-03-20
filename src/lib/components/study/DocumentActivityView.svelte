@@ -1242,30 +1242,28 @@
     height: 100%;
     min-height: 0;
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    align-items: stretch;
+    grid-template-rows: auto auto;
+    align-content: start;
     justify-items: center;
-    gap: clamp(0.45rem, 0.35rem + 0.45vw, 0.75rem);
+    gap: 0;
+    padding-top: clamp(0.9rem, 1.5vh, 1.4rem);
     overflow: hidden;
   }
 
   .study-session--scrollable {
-    height: 100%;
-    min-height: 0;
     grid-template-rows: auto;
     overflow: auto;
+    padding-top: 0;
   }
 
   .study-session__canvas {
     width: 100%;
     margin-inline: auto;
-    height: 100%;
-    min-height: 0;
     display: grid;
-    align-content: center;
+    align-content: start;
     justify-items: center;
-    gap: clamp(0.55rem, 0.45rem + 0.45vw, 0.8rem);
-    padding-block: 0 clamp(1.15rem, 3vh, 1.75rem);
+    gap: 0;
+    padding-block: 0;
   }
 
   .study-session__canvas--flashcards {
@@ -1288,12 +1286,6 @@
     padding-block: 0;
   }
 
-  .study-session:not(.study-session--scrollable) .study-session__canvas {
-    align-content: center;
-    padding-top: 0;
-    padding-bottom: clamp(1.35rem, 4.5vh, 2.4rem);
-  }
-
   .study-session__hint {
     justify-self: center;
     text-align: center;
@@ -1312,6 +1304,7 @@
 
   .study-session__primary {
     justify-content: center;
+    margin-top: clamp(0.75rem, 1.6vh, 1rem);
   }
 
   .study-session__answer-actions {
@@ -1335,6 +1328,7 @@
   .controls-secondary {
     justify-content: space-between;
     align-items: center;
+    margin-top: clamp(0.65rem, 1.4vh, 0.95rem);
   }
 
   .study-session__nav :global(.ui-button) {

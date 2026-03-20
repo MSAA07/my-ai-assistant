@@ -263,7 +263,7 @@
     min-height: 100%;
     height: 100%;
     gap: 0;
-    padding-top: clamp(4.05rem, 3.55rem + 1.45vw, 5rem);
+    padding-top: clamp(5.25rem, 4.8rem + 1.7vw, 6.75rem);
     padding-bottom: max(var(--ui-space-3), env(safe-area-inset-bottom));
     overflow: hidden;
   }
@@ -310,7 +310,7 @@
     }
 
     :global(.study-activity-shell--active-session .activity-chrome__body) {
-      padding-top: clamp(4.5rem, 4.1rem + 1.6vw, 5.25rem);
+      padding-top: clamp(4.75rem, 4.35rem + 1.45vw, 5.75rem);
     }
 
     :global(.study-activity-shell--active-session .study-activity-shell__session) {
