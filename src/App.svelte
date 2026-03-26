@@ -9,6 +9,7 @@
   import { currentPath } from './stores/router.js';
   import { session, isLoading, signOut } from './stores/auth.js';
   import { t } from './lib/i18n/t.js';
+  import { language } from './lib/stores/language.js';
   import {
     DEFAULT_AUTH_PATH,
     resolveRoute,
@@ -94,77 +95,79 @@
   }
 </script>
 
-{#if $isLoading}
-  <div class="loading-screen">
-    <div class="spinner"></div>
-    <p>{t('app.loadingSession')}</p>
-  </div>
-{:else}
-  {#if normalizedPath === '/'}
-    <div class="landing-wrapper">
-      <Landing />
-      <Footer />
+{#key $language}
+  {#if $isLoading}
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <p>{t('app.loadingSession')}</p>
     </div>
-  {:else if !isAuthenticated}
-    <div class="auth-wrapper">
-      {#if showSignUp}
-        <SignUp on:success={() => (showSignUp = false)} on:toggle={toggleAuthMode} />
-      {:else}
-        <SignIn on:success={() => {}} on:toggle={toggleAuthMode} />
-      {/if}
-    </div>
-  {:else if useAppShell}
-    <AppShell
-      navItems={navItems}
-      secondaryItems={secondaryItems}
-      activeNav={activeNav}
-      pageTitle={pageTitle}
-      userName={$session?.user?.name ?? ''}
-      userEmail={$session?.user?.email ?? ''}
-      planLabel={planLabel}
-      bottomNavItems={bottomNavItems}
-      on:signOut={signOut}
-    >
-      {#if routeAccessDenied}
-        <PageLayout class="access-denied" width="narrow">
-          <h1>{t('access.deniedTitle')}</h1>
-          <p>{t('access.deniedMessage')}</p>
-          <a href="#/home">{t('access.backToDashboard')}</a>
-        </PageLayout>
-      {:else if ActiveComponent}
-        <svelte:component this={ActiveComponent} {...componentProps} />
-      {:else}
-        <PageLayout class="not-found" width="narrow">
-          <h1>404</h1>
-          <p>{t('errors.notFoundTitle')}</p>
-          <a href="#/home">{t('errors.notFoundCta')}</a>
-        </PageLayout>
-      {/if}
-    </AppShell>
   {:else}
-    <div class="legacy-layout">
-      <AppHeader />
-      <main class="content">
+    {#if normalizedPath === '/'}
+      <div class="landing-wrapper">
+        <Landing />
+        <Footer />
+      </div>
+    {:else if !isAuthenticated}
+      <div class="auth-wrapper">
+        {#if showSignUp}
+          <SignUp on:success={() => (showSignUp = false)} on:toggle={toggleAuthMode} />
+        {:else}
+          <SignIn on:success={() => {}} on:toggle={toggleAuthMode} />
+        {/if}
+      </div>
+    {:else if useAppShell}
+      <AppShell
+        navItems={navItems}
+        secondaryItems={secondaryItems}
+        activeNav={activeNav}
+        pageTitle={pageTitle}
+        userName={$session?.user?.name ?? ''}
+        userEmail={$session?.user?.email ?? ''}
+        planLabel={planLabel}
+        bottomNavItems={bottomNavItems}
+        on:signOut={signOut}
+      >
         {#if routeAccessDenied}
-          <div class="access-denied">
+          <PageLayout class="access-denied" width="narrow">
             <h1>{t('access.deniedTitle')}</h1>
             <p>{t('access.deniedMessage')}</p>
             <a href="#/home">{t('access.backToDashboard')}</a>
-          </div>
+          </PageLayout>
         {:else if ActiveComponent}
           <svelte:component this={ActiveComponent} {...componentProps} />
         {:else}
-          <div class="not-found">
+          <PageLayout class="not-found" width="narrow">
             <h1>404</h1>
             <p>{t('errors.notFoundTitle')}</p>
             <a href="#/home">{t('errors.notFoundCta')}</a>
-          </div>
+          </PageLayout>
         {/if}
-      </main>
-      <Footer />
-    </div>
+      </AppShell>
+    {:else}
+      <div class="legacy-layout">
+        <AppHeader />
+        <main class="content">
+          {#if routeAccessDenied}
+            <div class="access-denied">
+              <h1>{t('access.deniedTitle')}</h1>
+              <p>{t('access.deniedMessage')}</p>
+              <a href="#/home">{t('access.backToDashboard')}</a>
+            </div>
+          {:else if ActiveComponent}
+            <svelte:component this={ActiveComponent} {...componentProps} />
+          {:else}
+            <div class="not-found">
+              <h1>404</h1>
+              <p>{t('errors.notFoundTitle')}</p>
+              <a href="#/home">{t('errors.notFoundCta')}</a>
+            </div>
+          {/if}
+        </main>
+        <Footer />
+      </div>
+    {/if}
   {/if}
-{/if}
+{/key}
 
 <style>
   .loading-screen {

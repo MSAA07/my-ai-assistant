@@ -21,11 +21,6 @@ function readInitialLanguage() {
     return stored;
   }
 
-  const navigatorLang = window.navigator.language?.toLowerCase() ?? '';
-  if (navigatorLang.startsWith('ar')) {
-    return 'ar';
-  }
-
   return DEFAULT_LANGUAGE;
 }
 

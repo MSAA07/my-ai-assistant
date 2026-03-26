@@ -30,12 +30,38 @@
     meta: lang.shortLabel
   }))}
   value={currentLanguage}
-  stacked
+  fullWidth
+  size="lg"
   on:change={handleChange}
 />
 
 <style>
   :global(.language-toggle) {
-    min-width: 120px;
+    min-width: 200px;
+  }
+
+  :global(.language-toggle .ui-tabs__tab) {
+    min-width: 0;
+  }
+
+  :global(.language-toggle .ui-tabs__meta) {
+    color: inherit;
+    opacity: 0.72;
+  }
+
+  :global(.language-toggle .ui-tabs__label) {
+    font-weight: 700;
+  }
+
+  :global(.language-toggle .ui-tabs__tab[aria-selected='true']) {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 16%, transparent), var(--ui-shadow-1);
+  }
+
+  :global(.language-toggle .ui-tabs__tab[aria-selected='false']) {
+    color: var(--ui-text-secondary);
+  }
+
+  :global(.language-toggle .ui-tabs__tab[aria-selected='false'] .ui-tabs__meta) {
+    opacity: 0.95;
   }
 </style>
