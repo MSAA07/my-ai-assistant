@@ -1051,7 +1051,6 @@
                   </Button>
                 </div>
 
-                <p class="study-session__hint study-session__hint--flashcards">Use arrow keys to navigate, spacebar to reveal answer.</p>
               </div>
             {/if}
           </section>
@@ -2197,37 +2196,38 @@
   }
 
   .option:hover {
-    border-color: color-mix(in srgb, var(--ui-text-primary) 34%, var(--ui-border-default) 66%);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 56%, var(--ui-border-default) 44%);
     background:
-      linear-gradient(90deg, color-mix(in srgb, var(--ui-text-primary) 9%, transparent), transparent 16%),
-      color-mix(in srgb, var(--ui-surface-secondary) 62%, var(--ui-surface-card) 38%);
+      linear-gradient(90deg, color-mix(in srgb, var(--ui-text-primary) 14%, transparent), transparent 18%),
+      color-mix(in srgb, var(--ui-surface-secondary) 86%, var(--ui-surface-card) 14%);
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 14%, transparent),
-      0 10px 24px rgba(0, 0, 0, 0.18);
-    transform: translateY(-2px);
+      inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 18%, transparent),
+      0 12px 28px rgba(0, 0, 0, 0.22);
+    transform: translateY(-3px);
   }
 
   .option-selected {
-    border-color: color-mix(in srgb, var(--ui-text-primary) 42%, var(--ui-border-default) 58%);
-    background:
-      linear-gradient(90deg, color-mix(in srgb, var(--ui-text-primary) 10%, transparent), transparent 18%),
-      color-mix(in srgb, var(--ui-surface-secondary) 78%, var(--ui-surface-card) 22%);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 76%, var(--ui-border-default) 24%);
+    background: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
+    color: #111111;
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 16%, transparent),
-      0 12px 28px rgba(0, 0, 0, 0.22);
-    transform: translateY(-1px);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+      0 16px 36px rgba(0, 0, 0, 0.26);
+    transform: translateY(-2px);
   }
 
   .option-selected .option-letter {
-    border-color: color-mix(in srgb, var(--ui-text-primary) 42%, var(--ui-border-default) 58%);
-    background: var(--ui-text-primary);
-    color: var(--ui-bg-page);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    border-color: #111111;
+    background: #111111;
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
   }
 
   .option:focus-visible {
     outline: none;
-    box-shadow: var(--ui-focus-ring);
+    box-shadow:
+      var(--ui-focus-ring-strong),
+      0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 22%, transparent);
   }
 
   .option-letter {
@@ -2247,10 +2247,10 @@
   }
 
   .option:hover .option-letter {
-    border-color: color-mix(in srgb, var(--ui-text-primary) 28%, var(--ui-border-default) 72%);
-    background: color-mix(in srgb, var(--ui-text-primary) 18%, var(--ui-surface-secondary) 82%);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 46%, var(--ui-border-default) 54%);
+    background: color-mix(in srgb, var(--ui-text-primary) 28%, var(--ui-surface-secondary) 72%);
     color: var(--ui-text-primary);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 14%, transparent);
   }
 
   :global(.answer-input-shell) {

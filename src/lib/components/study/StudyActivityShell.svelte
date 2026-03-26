@@ -304,9 +304,7 @@
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--progress) {
-    justify-content: center;
-    min-width: 0;
-    width: 100%;
+    display: none;
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--status) {
