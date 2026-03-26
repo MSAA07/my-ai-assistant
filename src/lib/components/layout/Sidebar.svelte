@@ -1,9 +1,7 @@
 <script>
   import { direction } from '../../stores/language.js';
-  import LanguageToggle from '../ui/LanguageToggle.svelte';
   import Badge from '../ui/Badge.svelte';
   import { t } from '../../i18n/t.js';
-  import { ENABLE_ARABIC_UI } from '../../config/features.js';
 
   export let items = [];
   export let secondaryItems = [];
@@ -94,15 +92,6 @@
       </a>
     {/if}
 
-    {#if ENABLE_ARABIC_UI}
-      <div class="language-card">
-        <div>
-          <p class="language-title">{t('language.sidebarLabel')}</p>
-          <p class="language-description">{t('language.sidebarDescription')}</p>
-        </div>
-        <LanguageToggle />
-      </div>
-    {/if}
   </div>
 </aside>
 
@@ -268,8 +257,7 @@
   .sidebar.collapsed .nav-label,
   .sidebar.collapsed :global(.nav-badge),
   .sidebar.collapsed .footer-links,
-  .sidebar.collapsed .plan-card,
-  .sidebar.collapsed .language-card {
+  .sidebar.collapsed .plan-card {
     display: none;
   }
 
@@ -326,38 +314,6 @@
   .plan-value {
     font-size: 0.875rem;
     font-weight: 500;
-  }
-
-  .language-card {
-    display: grid;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    border-radius: 0.95rem;
-    background: color-mix(in srgb, var(--sidebar-accent) 62%, transparent);
-    box-shadow: var(--shadow-inline-control);
-  }
-
-  .language-title,
-  .language-description {
-    margin: 0;
-  }
-
-  .language-title {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--foreground);
-  }
-
-  .language-description {
-    margin-top: 0.2rem;
-    font-size: 0.75rem;
-    color: var(--muted-foreground);
-  }
-
-  .language-card :global(.language-toggle) {
-    width: 100%;
-    justify-content: space-between;
   }
 
   @media (max-width: 767px) {
