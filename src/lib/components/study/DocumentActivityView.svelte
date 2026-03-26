@@ -2223,13 +2223,6 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
   }
 
-  .option-selected:hover .option-letter {
-    border-color: #111111;
-    background: #111111;
-    color: #ffffff;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
-  }
-
   .option:focus-visible {
     outline: none;
     box-shadow:
