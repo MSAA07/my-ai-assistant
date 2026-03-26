@@ -38,6 +38,10 @@ export function getDocument(documentId) {
   return requestJson(`/api/document/${documentId}`);
 }
 
+export function getJob(jobId) {
+  return requestJson(`/api/jobs/${jobId}`);
+}
+
 export async function exportStudyMaterialPdf(documentId, feature) {
   const response = await fetch(`${API_BASE}/api/document/${documentId}/export-pdf?feature=${encodeURIComponent(feature)}`, {
     method: 'GET',

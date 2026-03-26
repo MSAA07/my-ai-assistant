@@ -18,13 +18,7 @@
   import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
-  const statusToneMap = {
-    queued: 'processing',
-    processing: 'processing',
-    running: 'processing',
-    complete: 'ready',
-    failed: 'failed'
-  };
+  const FEATURE_KEYS = ['summary', 'flashcards', 'exam'];
   const STUDY_INDEX_CACHE_KEY = 'page:study-index';
 
   let documents = [];
@@ -130,13 +124,89 @@
     openMenuId = openMenuId === docId ? '' : docId;
   }
 
-  function getStatusKey(doc) {
-    const status = typeof doc?.processingStatus === 'string' ? doc.processingStatus.toLowerCase() : 'unknown';
-    return statusToneMap[status] ? status : 'unknown';
+  function normalizeString(value) {
+    return typeof value === 'string' ? value.trim() : '';
   }
 
-  function getStatusTone(doc) {
-    return statusToneMap[getStatusKey(doc)] ?? 'info';
+  function normalizeDocumentStatus(status) {
+    const normalized = normalizeString(status).toLowerCase();
+    if (normalized === 'queued' || normalized === 'processing' || normalized === 'complete' || normalized === 'failed') {
+      return normalized;
+    }
+    return 'unknown';
+  }
+
+  function normalizeGenerationStatus(status) {
+    const normalized = normalizeString(status).toLowerCase();
+    if (normalized === 'not_requested' || normalized === 'queued' || normalized === 'running' || normalized === 'complete' || normalized === 'failed') {
+      return normalized;
+    }
+    return 'not_requested';
+  }
+
+  function getDocumentDisplayState(doc) {
+    const processingStatus = normalizeDocumentStatus(doc?.processingStatus);
+    const generationStatuses = FEATURE_KEYS.map((featureKey) =>
+      normalizeGenerationStatus(doc?.generationState?.[featureKey]?.status)
+    );
+    const hasActiveGeneration = generationStatuses.some((status) => status === 'queued' || status === 'running');
+    const hasCompletedGeneration = generationStatuses.some((status) => status === 'complete');
+    const hasFailedGeneration = generationStatuses.some((status) => status === 'failed');
+    const hasRequestedGeneration = generationStatuses.some((status) => status !== 'not_requested');
+
+    if (processingStatus === 'queued' || processingStatus === 'processing') {
+      return {
+        tone: 'processing',
+        labelKey: 'documentsPage.statuses.processingUpload',
+        messageKey: 'documentsPage.statusMessages.processingUpload',
+      };
+    }
+
+    if (processingStatus === 'failed') {
+      return {
+        tone: 'failed',
+        labelKey: 'documentsPage.statuses.failed',
+        messageKey: 'documentsPage.statusMessages.processingFailed',
+      };
+    }
+
+    if (hasActiveGeneration) {
+      return {
+        tone: 'processing',
+        labelKey: 'documentsPage.statuses.generatingSelected',
+        messageKey: 'documentsPage.statusMessages.generatingSelected',
+      };
+    }
+
+    if (!hasRequestedGeneration) {
+      return {
+        tone: 'info',
+        labelKey: 'documentsPage.statuses.readyToGenerate',
+        messageKey: 'documentsPage.statusMessages.readyToGenerate',
+      };
+    }
+
+    if (hasCompletedGeneration) {
+      return {
+        tone: 'ready',
+        labelKey: 'documentsPage.statuses.complete',
+        messageKey: 'documentsPage.statusMessages.ready',
+      };
+    }
+
+    if (hasFailedGeneration) {
+      return {
+        tone: 'failed',
+        labelKey: 'documentsPage.statuses.failed',
+        messageKey: 'documentsPage.statusMessages.generationFailed',
+      };
+    }
+
+    return {
+      tone: 'info',
+      labelKey: 'documentsPage.statuses.unknown',
+      messageKey: 'documentsPage.statusMessages.unknown',
+    };
   }
 
   function formatDocumentDate(value) {
@@ -297,6 +367,7 @@
     {:else}
       <section class="documents-grid">
         {#each documents as doc}
+          {@const displayState = getDocumentDisplayState(doc)}
           <DocumentCard
             class="document-card"
             role="link"
@@ -306,12 +377,14 @@
             meta={`${t('documentsPage.labels.uploaded')}: ${formatDocumentDate(doc.uploadDate)}`}
             badgeLabel={getFileType(doc)}
             badgeTone={getFileBadgeTone(doc)}
-            status={getStatusTone(doc)}
-            statusLabel={t(`documentsPage.statuses.${getStatusKey(doc)}`)}
+            status={displayState.tone}
+            statusLabel={t(displayState.labelKey)}
             highlighted={highlightDocumentId === doc.id}
             on:click={() => openDocument(doc.id)}
             on:keydown={(event) => handleDocumentCardKeydown(event, doc.id)}
           >
+            <p class="document-card__detail">{t(displayState.messageKey)}</p>
+
             <div slot="actions" class="menu-wrap" role="presentation" on:click|stopPropagation>
               <Button
                 type="button"
@@ -411,6 +484,13 @@
 
   :global(.library-page .document-card) {
     min-height: 180px;
+  }
+
+  .document-card__detail {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
   }
 
   :global(.library-page .document-card:focus-visible) {

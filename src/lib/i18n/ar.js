@@ -130,13 +130,17 @@ const ar = {
       title: 'رفع مستند جديد',
       modalTitle: 'رفع الملفات',
       modalDescription: 'أضف مستندك هنا',
+      modalDescriptionSingle: 'ارفع مستندًا واحدًا ثم اختر ما تريد إنشاءه بعد ذلك.',
       dropzoneTitle: 'اسحب ملفك لبدء الرفع',
       dropzoneOr: 'أو',
       browse: 'استعراض الملفات',
       supportedFiles: 'يدعم PDF وDOCX وPPTX',
+      supportedFilesSingle: 'يدعم PDF وDOCX وPPTX. مستند واحد في كل مرة.',
       openModalCta: 'رفع الملفات',
       cancel: 'إلغاء',
       next: 'التالي',
+      submitUpload: 'رفع المستند',
+      submitUploading: 'جارٍ رفع المستند...',
       removeFile: 'حذف الملف',
       languageLabel: 'لغة استجابة الذكاء الاصطناعي',
       englishOption: 'الإنجليزية',
@@ -159,6 +163,57 @@ const ar = {
         network: 'خطأ في الشبكة. حاول مرة أخرى.'
       },
       success: 'تمت معالجة المستند بنجاح. تم إنشاء {flashcards} بطاقة تعليمية و{questions} سؤالًا.'
+    },
+    guided: {
+      eyebrow: 'اكتمل الرفع',
+      title: 'اختر ما تريد إنشاءه',
+      subtitle: 'حدد المواد الدراسية التي تريدها للمستند {name}.',
+      processingHint: 'سنبدأ طلباتك فور اكتمال تجهيز المستند.',
+      readyHint: 'المستند جاهز. اختر مادة دراسية واحدة أو أكثر لبدء إنشائها الآن.',
+      featureSelected: 'محدد',
+      featureOptional: 'اختياري',
+      addFeature: 'أضف إلى التحديد',
+      removeFeature: 'إزالة',
+      selectedTitle: 'إنشاء المواد المحددة',
+      selectedBody: 'سنجهز المستند عند الحاجة ثم نبدأ كل مادة دراسية محددة قبل نقلك إلى مركز الدراسة.',
+      emptyTitle: 'لم يتم طلب أي مواد دراسية بعد',
+      emptyBody: 'يمكنك التخطي الآن للمتابعة إلى مركز الدراسة أو اختيار مادة دراسية واحدة أو أكثر للبدء فورًا.',
+      skip: 'تخطي الآن',
+      generateSelected: 'إنشاء المحدد',
+      features: {
+        summary: 'احصل على ملخص دراسي موجز مبني على المحتوى المستخرج من المستند.',
+        flashcards: 'أنشئ مجموعة بطاقات تعليمية بسجلات بطاقات قانونية للمراجعة.',
+        exam: 'أنشئ اختبارًا تجريبيًا بسجلات اختبارات قانونية عندما يصبح جاهزًا.'
+      },
+      errors: {
+        generationRequest: 'تعذر بدء كل عمليات الإنشاء المحددة. راجع اختياراتك وحاول مرة أخرى.',
+        progress: 'تعذر إكمال إعداد ما بعد الرفع. حاول مرة أخرى.',
+        progressTitle: 'حدثت مشكلة أثناء تجهيز مسار الدراسة.'
+      },
+      progress: {
+        title: 'جارٍ تجهيز مسار الدراسة',
+        eyebrow: 'الإنشاء قيد التنفيذ',
+        ariaLabel: 'تقدم إنشاء ما بعد الرفع',
+        preparingTitle: 'جارٍ تجهيز المستند',
+        preparingBody: 'نستخرج محتوى المستند حتى تبدأ المواد الدراسية المحددة بشكل واضح وصحيح.',
+        generatingTitle: 'جارٍ إنشاء المواد المحددة',
+        generatingBody: 'يتم الآن بدء المواد الدراسية التي طلبتها.',
+        finishingTitle: 'اللمسات الأخيرة',
+        finishingBody: 'أصبح مستندك جاهزًا في مركز الدراسة. جارٍ نقلك الآن.',
+        activeFeatureTitle: {
+          summary: 'جارٍ إنشاء الملخص',
+          flashcards: 'جارٍ إنشاء البطاقات التعليمية',
+          exam: 'جارٍ إنشاء الاختبار التجريبي'
+        },
+        steps: {
+          uploadComplete: 'اكتمل الرفع',
+          preparingDocument: 'جارٍ تجهيز المستند',
+          summary: 'جارٍ إنشاء الملخص',
+          flashcards: 'جارٍ إنشاء البطاقات التعليمية',
+          exam: 'جارٍ إنشاء الاختبار التجريبي',
+          finishing: 'اللمسات الأخيرة'
+        }
+      }
     },
     documents: {
       title: 'مستنداتي ({count})',
@@ -207,7 +262,7 @@ const ar = {
       questionCount: 'عدد الأسئلة'
     },
     generation: {
-      queuedNoContent: 'تمت إضافة عملية الإنشاء إلى قائمة الانتظار لهذه الأداة.',
+      queuedNoContent: 'تم طلب الإنشاء لهذه الأداة الدراسية.',
       runningNoContent: 'الإنشاء قيد التنفيذ الآن. أعد المحاولة بعد قليل.',
       regenerating: 'جارٍ إعادة الإنشاء. سيبقى المحتوى الحالي متاحًا حتى تكتمل النسخة الجديدة.',
       failedNoContent: 'فشل الإنشاء. حاول مرة أخرى.',
@@ -227,6 +282,7 @@ const ar = {
       untitled: 'مستند بدون عنوان',
       featuresTitle: 'مواد الدراسة',
       readyHint: 'تم الإنشاء وأصبح جاهزًا للفتح.',
+      readyToGenerateHint: 'لم يتم طلب أي مواد دراسية بعد. اختر ما تريد إنشاءه عندما تكون جاهزًا.',
       featureDescriptions: {
         summary: 'احصل على ملخص شامل يولده الذكاء الاصطناعي لأهم المفاهيم والنقاط الرئيسية في مستندك.',
         flashcards: 'راجع باستخدام بطاقات تعليمية مولدة بالذكاء الاصطناعي تساعدك على حفظ المصطلحات والمفاهيم المهمة.',
@@ -239,6 +295,8 @@ const ar = {
       },
       states: {
         notGenerated: 'غير مُنشأ',
+        readyToGenerate: 'جاهز للإنشاء',
+        preparing: 'جارٍ تجهيز المستند',
         generating: 'جارٍ الإنشاء',
         waitingForExtraction: 'بانتظار اكتمال معالجة المستند قبل أن يبدأ الإنشاء.'
       },
@@ -425,12 +483,24 @@ const ar = {
       exams: 'أسئلة الاختبار'
     },
     statuses: {
-      queued: 'قيد الانتظار',
+      queued: 'جارٍ تجهيز الرفع',
+      processingUpload: 'جارٍ تجهيز الرفع',
       processing: 'قيد المعالجة',
       running: 'قيد المعالجة',
+      generatingSelected: 'جارٍ إنشاء المحدد',
+      readyToGenerate: 'جاهز للإنشاء',
       complete: 'جاهز',
       failed: 'فشل',
       unknown: 'غير معروف'
+    },
+    statusMessages: {
+      processingUpload: 'استخراج محتوى المستند ما زال قيد التشغيل.',
+      readyToGenerate: 'لم يتم طلب أي مواد دراسية بعد.',
+      generatingSelected: 'هناك مادة دراسية واحدة أو أكثر قيد الإنشاء الآن.',
+      ready: 'المواد الدراسية جاهزة للفتح.',
+      generationFailed: 'فشل إنشاء مادة دراسية مطلوبة وقد تحتاج إلى إعادة المحاولة.',
+      processingFailed: 'تعذر إنهاء تجهيز هذا المستند.',
+      unknown: 'افتح المستند للاطلاع على أحدث حالة.'
     },
     actions: {
       refresh: 'تحديث القائمة',

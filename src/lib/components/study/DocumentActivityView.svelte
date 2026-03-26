@@ -148,7 +148,9 @@
       ? t('status.processing')
       : activeFeature.hasContent
         ? t('status.ready')
-        : t('document.hub.states.notGenerated');
+        : isExtractionActive(extractionStatus)
+          ? t('document.hub.states.preparing')
+          : t('document.hub.states.readyToGenerate');
   $: chromeStatusHeadline = getChromeStatusHeadline();
   $: chromeStatusCopy = getChromeStatusCopy();
 

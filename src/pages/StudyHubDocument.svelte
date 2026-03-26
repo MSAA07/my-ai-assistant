@@ -50,6 +50,10 @@
   $: isActivityRoute = ACTIVITY_TABS.has(normalizedStudyTab);
   $: extractionStatus = normalizeDocumentStatus(documentData?.processingStatus);
   $: isExtractionProcessing = extractionStatus === 'queued' || extractionStatus === 'processing';
+  $: hasRequestedGeneration = FEATURE_KEYS.some((featureKey) => {
+    const status = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
+    return status !== 'not_requested';
+  });
   $: hasActiveGeneration = FEATURE_KEYS.some((featureKey) => {
     const status = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
     return status === 'queued' || status === 'running';
@@ -71,7 +75,9 @@
     ? normalizeString(documentData?.processingError) || t('document.processingFailed')
     : showProcessingBanner
       ? processingBody
-      : t('document.hub.readyHint');
+      : !hasRequestedGeneration
+        ? t('document.hub.readyToGenerateHint')
+        : t('document.hub.readyHint');
   $: featureCards = FEATURE_KEYS.map((featureKey) => createFeatureCard(featureKey, documentData, extractionStatus, pendingGeneration, generationErrors));
 
   $: if (!isActivityRoute && documentId && documentId !== currentDocumentId) {
@@ -145,23 +151,24 @@
     }
 
     if (extraction === 'queued' || extraction === 'processing') {
-      return 'generating';
+      return 'preparing';
     }
 
-    return 'not_generated';
+    return 'ready_to_generate';
   }
 
   function getStateLabel(state) {
     if (state === 'ready') return t('status.ready');
     if (state === 'generating') return t('document.hub.states.generating');
+    if (state === 'preparing') return t('document.hub.states.preparing');
     if (state === 'failed') return t('status.failed');
-    return t('document.hub.states.notGenerated');
+    return t('document.hub.states.readyToGenerate');
   }
 
   function getStateTone(state) {
     if (state === 'ready') return 'ready';
     if (state === 'failed') return 'failed';
-    if (state === 'generating') return 'processing';
+    if (state === 'generating' || state === 'preparing') return 'processing';
     return 'info';
   }
 
@@ -170,7 +177,7 @@
       if (featureKey === 'flashcards') return t('document.activity.actions.startFlashcards');
       return t('document.hub.actions.open');
     }
-    if (state === 'generating') return t('document.actions.generating');
+    if (state === 'generating' || state === 'preparing') return t('document.actions.generating');
     return t('document.actions.generate');
   }
 

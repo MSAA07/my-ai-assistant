@@ -84,7 +84,10 @@ Home flow:
 
 - `Home.svelte` loads `GET /api/user/me`
 - upload posts `POST /api/upload`
-- successful upload navigates to `#/study?highlight=:documentId`
+- successful single-document upload stays on `#/home` for a guided post-upload selection step
+- the guided step can request one or more generations through `POST /api/document/:id/generations`
+- `Home.svelte` polls `GET /api/jobs/:id` plus `GET /api/document/:id` for honest staged progress
+- the guided flow hands off to the canonical document route `#/study/:documentId`
 
 Study Hub Library:
 

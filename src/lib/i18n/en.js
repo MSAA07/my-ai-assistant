@@ -112,13 +112,17 @@ export default {
       title: 'Upload New Document',
       modalTitle: 'Media Upload',
       modalDescription: 'Add your document here',
+      modalDescriptionSingle: 'Upload one document, then choose what you want to generate next.',
       dropzoneTitle: 'Drag your file to start uploading',
       dropzoneOr: 'OR',
       browse: 'Browse files',
       supportedFiles: 'Supports PDF, DOCX, and PPTX',
+      supportedFilesSingle: 'Supports PDF, DOCX, and PPTX. One document at a time.',
       openModalCta: 'Upload Documents',
       cancel: 'Cancel',
       next: 'Next',
+      submitUpload: 'Upload document',
+      submitUploading: 'Uploading document...',
       removeFile: 'Remove file',
       languageLabel: 'AI Response Language',
       englishOption: 'English',
@@ -141,6 +145,57 @@ export default {
         network: 'Network error. Please try again.'
       },
       success: 'Document processed successfully! Generated {flashcards} flashcards and {questions} exam questions.'
+    },
+    guided: {
+      eyebrow: 'Upload complete',
+      title: 'Choose what you want to generate',
+      subtitle: 'Pick the study materials you want for {name}.',
+      processingHint: 'We can queue your selections as soon as document preparation finishes.',
+      readyHint: 'Your document is ready. Choose one or more study materials to generate now.',
+      featureSelected: 'Selected',
+      featureOptional: 'Optional',
+      addFeature: 'Add to selection',
+      removeFeature: 'Remove',
+      selectedTitle: 'Generate selected materials',
+      selectedBody: 'We will prepare the document if needed, then start each selected study material before taking you into Study Hub.',
+      emptyTitle: 'No study materials requested yet',
+      emptyBody: 'Skip for now to continue into Study Hub, or choose one or more study materials to start immediately.',
+      skip: 'Skip for now',
+      generateSelected: 'Generate selected',
+      features: {
+        summary: 'Get a concise study summary built from the extracted document content.',
+        flashcards: 'Create a flashcard set with canonical flashcard records for practice.',
+        exam: 'Generate a mock exam with canonical exam records when it is ready.'
+      },
+      errors: {
+        generationRequest: 'We could not start every selected generation. Review your selections and try again.',
+        progress: 'We could not finish the post-upload setup. Please try again.',
+        progressTitle: 'We hit a problem while preparing your study flow.'
+      },
+      progress: {
+        title: 'Preparing your study flow',
+        eyebrow: 'Generation in progress',
+        ariaLabel: 'Post-upload generation progress',
+        preparingTitle: 'Preparing document',
+        preparingBody: 'We are extracting your upload so the selected study materials can start honestly and cleanly.',
+        generatingTitle: 'Generating selected materials',
+        generatingBody: 'Your requested study materials are being started now.',
+        finishingTitle: 'Finishing up',
+        finishingBody: 'Your document is ready in Study Hub. Taking you there now.',
+        activeFeatureTitle: {
+          summary: 'Generating summary',
+          flashcards: 'Generating flashcards',
+          exam: 'Generating mock exam'
+        },
+        steps: {
+          uploadComplete: 'Upload complete',
+          preparingDocument: 'Preparing document',
+          summary: 'Generating summary',
+          flashcards: 'Generating flashcards',
+          exam: 'Generating mock exam',
+          finishing: 'Finishing up'
+        }
+      }
     },
     documents: {
       title: 'My Documents ({count})',
@@ -199,7 +254,7 @@ export default {
       questionCount: 'Question count'
     },
     generation: {
-      queuedNoContent: 'Generation is queued for this study tool.',
+      queuedNoContent: 'Generation has been requested for this study tool.',
       runningNoContent: 'Generation is in progress. Check back in a moment.',
       regenerating: 'Regenerating. Your current content stays available until the new version finishes.',
       failedNoContent: 'Generation failed. Try again.',
@@ -219,6 +274,7 @@ export default {
       untitled: 'Untitled document',
       featuresTitle: 'Study features',
       readyHint: 'Generated and ready to open.',
+      readyToGenerateHint: 'No study materials requested yet. Choose what you want to generate when you are ready.',
       featureDescriptions: {
         summary: 'Get a comprehensive AI-generated summary of the key concepts and main points from your document.',
         flashcards: 'Study with AI-generated flashcards that help you memorize important terms and concepts.',
@@ -231,6 +287,8 @@ export default {
       },
       states: {
         notGenerated: 'Not generated',
+        readyToGenerate: 'Ready to generate',
+        preparing: 'Preparing document',
         generating: 'Generating',
         waitingForExtraction: 'Waiting for document processing to finish before generation can start.'
       },
@@ -425,12 +483,24 @@ export default {
       exams: 'Exam questions'
     },
     statuses: {
-      queued: 'Queued',
+      queued: 'Processing upload',
+      processingUpload: 'Processing upload',
       processing: 'Processing',
       running: 'Processing',
+      generatingSelected: 'Generating selected',
+      readyToGenerate: 'Ready to generate',
       complete: 'Ready',
       failed: 'Failed',
       unknown: 'Unknown'
+    },
+    statusMessages: {
+      processingUpload: 'Document extraction is still running.',
+      readyToGenerate: 'No study materials requested yet.',
+      generatingSelected: 'One or more selected study materials are generating.',
+      ready: 'Study materials are ready to open.',
+      generationFailed: 'A requested study material failed and may need another try.',
+      processingFailed: 'We could not finish preparing this document.',
+      unknown: 'Open the document for the latest status.'
     },
     actions: {
       refresh: 'Refresh list',
