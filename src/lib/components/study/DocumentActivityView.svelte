@@ -914,7 +914,20 @@
           <h1 class="activity-content-head__title">{title}</h1>
         </div>
         <div class="activity-content-head__actions">
-          {#if !summaryFeature.hasContent && (summaryFeature.canGenerate || summaryFeature.busy)}
+          {#if summaryFeature.hasContent}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => exportFeature(summaryFeature.key)}
+              loading={exportBusy[summaryFeature.key]}
+              disabled={!summaryFeature.hasContent || summaryFeature.busy}
+            >
+              <span slot="icon" aria-hidden="true"><Download /></span>
+              {exportBusy[summaryFeature.key] ? t('document.activity.actions.exportingPdf') : t('document.activity.actions.exportPdf')}
+            </Button>
+          {:else if !summaryFeature.hasContent && (summaryFeature.canGenerate || summaryFeature.busy)}
             <Button
               type="button"
               variant="primary"
@@ -987,6 +1000,22 @@
           <Badge tone="accent" variant="outline" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
           <h1 class="activity-content-head__title">{title}</h1>
         </div>
+        {#if flashcardsFeature.hasContent}
+          <div class="activity-content-head__actions">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => exportFeature(flashcardsFeature.key)}
+              loading={exportBusy[flashcardsFeature.key]}
+              disabled={!flashcardsFeature.hasContent || flashcardsFeature.busy}
+            >
+              <span slot="icon" aria-hidden="true"><Download /></span>
+              {exportBusy[flashcardsFeature.key] ? t('document.activity.actions.exportingPdf') : t('document.activity.actions.exportPdf')}
+            </Button>
+          </div>
+        {/if}
       </div>
 
       {#if activeExportError}
@@ -1129,6 +1158,22 @@
           <Badge tone="warning" variant="soft" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
           <h1 class="activity-content-head__title">{title}</h1>
         </div>
+        {#if examFeature.hasContent}
+          <div class="activity-content-head__actions">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => exportFeature(examFeature.key)}
+              loading={exportBusy[examFeature.key]}
+              disabled={!examFeature.hasContent || examFeature.busy}
+            >
+              <span slot="icon" aria-hidden="true"><Download /></span>
+              {exportBusy[examFeature.key] ? t('document.activity.actions.exportingPdf') : t('document.activity.actions.exportPdf')}
+            </Button>
+          </div>
+        {/if}
       </div>
 
       {#if activeExportError}
