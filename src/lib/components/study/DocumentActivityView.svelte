@@ -1,6 +1,6 @@
 <script>
   import { onDestroy } from 'svelte';
-  import { Check, ChevronLeft, ChevronRight, Play, RefreshCw, RotateCcw, X } from '@lucide/svelte';
+  import { Check, ChevronLeft, ChevronRight, Download, Play, RotateCcw, X } from '@lucide/svelte';
   import { t } from '../../i18n/t.js';
   import Badge from '../ui/Badge.svelte';
   import Button from '../ui/Button.svelte';
@@ -14,6 +14,7 @@
   import { getDocumentFileTypeLabel } from '../../utils/fileType.js';
   import { readPageCache, writePageCache } from '../../../stores/pageCache.js';
   import {
+    exportStudyMaterialPdf,
     getDocument,
     requestGeneration,
     saveLegacyExamAttempt,
@@ -39,6 +40,8 @@
   let pollTimer = null;
   let pendingGeneration = mapByFeature(false);
   let generationErrors = mapByFeature('');
+  let exportBusy = mapByFeature(false);
+  let exportErrors = mapByFeature('');
 
   let regenerateModalOpen = false;
   let regenerateFeatureKey = 'summary';
@@ -71,6 +74,7 @@
   $: flashcardsFeature = featureState('flashcards', { document: docData, extractionStatus, pendingGeneration, generationErrors });
   $: examFeature = featureState('exam', { document: docData, extractionStatus, pendingGeneration, generationErrors });
   $: activeFeature = activeFeatureKey === 'summary' ? summaryFeature : activeFeatureKey === 'flashcards' ? flashcardsFeature : examFeature;
+  $: activeExportError = text(exportErrors?.[activeFeatureKey]);
 
   $: modeLabel = mode === 'summary'
     ? t('document.activity.section.summary')
@@ -166,6 +170,7 @@
       docData = cached.docData;
       pendingGeneration = cached.pendingGeneration ?? mapByFeature(false);
       generationErrors = cached.generationErrors ?? mapByFeature('');
+      exportErrors = cached.exportErrors ?? mapByFeature('');
       loading = false;
     }
     void fetchDocumentState({ background: Boolean(cached?.loaded && cached?.docData) });
@@ -376,6 +381,14 @@
     generationErrors = { ...generationErrors, [featureKey]: value };
   }
 
+  function setExportBusy(featureKey, value) {
+    exportBusy = { ...exportBusy, [featureKey]: value };
+  }
+
+  function setExportError(featureKey, value = '') {
+    exportErrors = { ...exportErrors, [featureKey]: value };
+  }
+
   function clearPollTimer() {
     if (pollTimer) {
       clearTimeout(pollTimer);
@@ -408,6 +421,8 @@
     pageError = '';
     pendingGeneration = mapByFeature(false);
     generationErrors = mapByFeature('');
+    exportBusy = mapByFeature(false);
+    exportErrors = mapByFeature('');
     regenerateModalOpen = false;
     regenerateFeatureKey = 'summary';
     regenerateSubmitting = false;
@@ -498,6 +513,7 @@
           docData: nextDocument,
           pendingGeneration,
           generationErrors,
+          exportErrors,
         });
       }
 
@@ -563,6 +579,34 @@
       return false;
     } finally {
       if (!queued) setFeaturePending(featureState.key, false);
+    }
+  }
+
+  function triggerBlobDownload(blob, fileName) {
+    const href = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = href;
+    anchor.download = fileName || 'study-export.pdf';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 0);
+  }
+
+  async function exportFeature(featureKey) {
+    const target = featureState(featureKey, { document: docData, extractionStatus, pendingGeneration, generationErrors });
+    if (!currentDocumentId || !target.hasContent || target.busy || exportBusy[featureKey]) return;
+
+    setExportError(featureKey, '');
+    setExportBusy(featureKey, true);
+
+    try {
+      const { blob, fileName } = await exportStudyMaterialPdf(currentDocumentId, featureKey);
+      triggerBlobDownload(blob, fileName);
+    } catch (error) {
+      setExportError(featureKey, text(error?.message) || t('document.activity.errors.exportPdfFailed'));
+    } finally {
+      setExportBusy(featureKey, false);
     }
   }
 
@@ -822,6 +866,19 @@
           type="button"
           variant="secondary"
           size="sm"
+          on:click={() => exportFeature(activeFeature.key)}
+          loading={exportBusy[activeFeature.key]}
+          disabled={!activeFeature.hasContent || activeFeature.busy}
+        >
+          <span slot="icon" aria-hidden="true">
+            <Download />
+          </span>
+          {exportBusy[activeFeature.key] ? t('document.activity.actions.exportingPdf') : t('document.activity.actions.exportPdf')}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
           on:click={() => openRegenerateModal(activeFeature)}
           disabled={!activeFeature.canRegenerate}
         >
@@ -857,19 +914,7 @@
           <h1 class="activity-content-head__title">{title}</h1>
         </div>
         <div class="activity-content-head__actions">
-          {#if summaryFeature.hasContent}
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="summary-regenerate-button"
-              on:click={() => openRegenerateModal(summaryFeature)}
-              disabled={!summaryFeature.canRegenerate}
-            >
-              <span slot="icon" aria-hidden="true"><RefreshCw /></span>
-              {summaryFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
-            </Button>
-          {:else if summaryFeature.canGenerate || summaryFeature.busy}
+          {#if !summaryFeature.hasContent && (summaryFeature.canGenerate || summaryFeature.busy)}
             <Button
               type="button"
               variant="primary"
@@ -883,6 +928,10 @@
           {/if}
         </div>
       </div>
+
+      {#if activeExportError}
+        <p class="error activity-inline-error">{activeExportError}</p>
+      {/if}
 
       {#if summaryFeature.hasContent}
         <Card as="article" class="activity-frame activity-frame--summary" variant="base" padding="lg" border="strong">
@@ -939,6 +988,10 @@
           <h1 class="activity-content-head__title">{title}</h1>
         </div>
       </div>
+
+      {#if activeExportError}
+        <p class="error activity-inline-error">{activeExportError}</p>
+      {/if}
 
       {#if flashcardsFeature.hasContent}
         <section class="study-session study-session--flashcards" aria-label={modeLabel}>
@@ -1076,22 +1129,11 @@
           <Badge tone="warning" variant="soft" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
           <h1 class="activity-content-head__title">{title}</h1>
         </div>
-        {#if examFeature.hasContent}
-          <div class="activity-content-head__actions">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="summary-regenerate-button"
-              on:click={() => openRegenerateModal(examFeature)}
-              disabled={!examFeature.canRegenerate}
-            >
-              <span slot="icon" aria-hidden="true"><RefreshCw /></span>
-              {examFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
-            </Button>
-          </div>
-        {/if}
       </div>
+
+      {#if activeExportError}
+        <p class="error activity-inline-error">{activeExportError}</p>
+      {/if}
 
       {#if examFeature.hasContent}
         {#if examPhase === 'submitting'}
@@ -1329,6 +1371,11 @@
     display: flex;
     align-items: flex-start;
     flex-shrink: 0;
+  }
+
+  .activity-inline-error {
+    width: 100%;
+    margin: 0 auto;
   }
 
   :global(.chrome-back-link) {
@@ -2393,4 +2440,5 @@
       font-size: clamp(1.3rem, 1.02rem + 0.75vw, 1.7rem);
     }
   }
+
 </style>

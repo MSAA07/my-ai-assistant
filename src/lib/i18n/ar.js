@@ -328,10 +328,15 @@ export default {
         generationProcessing: 'Generation is in progress',
         processingContinues: 'Processing continues in the background if you leave this view.'
       },
+      errors: {
+        exportPdfFailed: 'Could not export this PDF. Try again.'
+      },
       actions: {
         generateSummary: 'Generate summary',
         generateFlashcards: 'Generate flashcards',
         generateExam: 'Generate exam',
+        exportPdf: 'Export PDF',
+        exportingPdf: 'Exporting PDF...',
         startFlashcards: 'Start flashcards',
         revealAnswer: 'Reveal answer',
         hideAnswer: 'Hide answer',

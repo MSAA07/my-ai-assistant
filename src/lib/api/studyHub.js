@@ -16,8 +16,44 @@ async function requestJson(path, { method = 'GET', body } = {}) {
   return data;
 }
 
+function parseDownloadFileName(contentDisposition, fallback = 'study-export.pdf') {
+  if (typeof contentDisposition !== 'string' || !contentDisposition.trim()) {
+    return fallback;
+  }
+
+  const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    return decodeURIComponent(utf8Match[1]).trim();
+  }
+
+  const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+  if (fileNameMatch?.[1]) {
+    return fileNameMatch[1].trim();
+  }
+
+  return fallback;
+}
+
 export function getDocument(documentId) {
   return requestJson(`/api/document/${documentId}`);
+}
+
+export async function exportStudyMaterialPdf(documentId, feature) {
+  const response = await fetch(`${API_BASE}/api/document/${documentId}/export-pdf?feature=${encodeURIComponent(feature)}`, {
+    method: 'GET',
+    credentials: 'include'
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.error || 'Failed to export PDF');
+  }
+
+  const blob = await response.blob();
+  return {
+    blob,
+    fileName: parseDownloadFileName(response.headers.get('content-disposition'), `${feature}.pdf`)
+  };
 }
 
 export function requestGeneration(documentId, payload) {
