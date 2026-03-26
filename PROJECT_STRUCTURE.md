@@ -86,7 +86,7 @@ Routing and app entry:
 
 Canonical study flow:
 
-- `pages/Home.svelte`: authenticated upload entry
+- `pages/Home.svelte`: authenticated upload entry plus guided post-upload selection and progress flow for single-document uploads
 - `pages/StudyHubIndex.svelte`: canonical Study Hub Library
 - `pages/StudyHubDocument.svelte`: canonical Study Hub Document and canonical activity-route handoff
 
@@ -107,7 +107,7 @@ Data and integration:
 - `stores/auth.js`: Better Auth session bootstrap and auth actions
 - `stores/theme.js`: theme persistence and DOM sync
 - `stores/pageCache.js`: page-level caching helpers
-- `lib/api/studyHub.js`: wrappers for canonical and legacy study APIs
+- `lib/api/studyHub.js`: wrappers for canonical and legacy study APIs plus guided upload polling helpers for `/api/document/:id` and `/api/jobs/:id`
 
 ## Notes on Legacy Files
 
@@ -123,4 +123,4 @@ Data and integration:
 - `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`: archival phase-1 audit/spec
 - `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`: archival rollout checklist
 
-Last Updated: March 23, 2026
+Last Updated: March 27, 2026
