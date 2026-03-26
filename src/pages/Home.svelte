@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { FileText, FolderOpen, Infinity as InfinityIcon } from "@lucide/svelte";
   import { API_BASE } from "../config.js";
-  import { t } from "../lib/i18n/t.js";
+  import { formatNumber, t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
   import PageLayout from "../lib/components/layout/PageLayout.svelte";
   import Card from "../lib/components/ui/Card.svelte";
@@ -58,19 +58,19 @@
   $: homeStats = [
     {
       key: "remaining",
-      value: normalizedRole === "admin" ? t("home.stats.unlimited") : remainingDocumentsValue,
+      value: normalizedRole === "admin" ? t("home.stats.unlimited") : formatNumber(remainingDocumentsValue),
       subtitle: t("home.stats.documentsRemaining"),
       icon: InfinityIcon,
     },
     {
       key: "used",
-      value: `${usedThisMonthValue}/${monthlyLimitValue}`,
+      value: `${formatNumber(usedThisMonthValue)}/${formatNumber(monthlyLimitValue)}`,
       subtitle: t("home.stats.usedThisMonth"),
       icon: FileText,
     },
     {
       key: "total",
-      value: totalDocumentsValue,
+      value: formatNumber(totalDocumentsValue),
       subtitle: t("home.stats.totalDocuments"),
       icon: FolderOpen,
     },

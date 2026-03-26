@@ -21,6 +21,10 @@
 
   $: planItem = secondaryItems.find((item) => item.icon === 'plan') ?? secondaryItems[0] ?? null;
   $: footerItems = secondaryItems.filter((item) => item !== planItem);
+
+  function labelFor(item) {
+    return item?.labelKey ? t(item.labelKey) : item?.label ?? '';
+  }
 </script>
 
 <aside
@@ -40,8 +44,8 @@
         class={`nav-item ${activeId === item.id ? 'active' : ''}`}
         href={item.href}
         aria-current={activeId === item.id ? 'page' : undefined}
-        aria-label={collapsed ? item.label : undefined}
-        title={collapsed ? item.label : undefined}
+        aria-label={collapsed ? labelFor(item) : undefined}
+        title={collapsed ? labelFor(item) : undefined}
       >
         <span class="nav-icon" aria-hidden="true">
           {#if item.icon === 'dashboard'}
@@ -61,7 +65,7 @@
           {/if}
         </span>
 
-        <span class="nav-label">{item.label}</span>
+        <span class="nav-label">{labelFor(item)}</span>
 
         {#if item.badge}
           <Badge className="nav-badge" size="xs" tone={badgeToneMap[item.badge.variant] ?? 'neutral'}>
@@ -77,7 +81,7 @@
       <div class="footer-links">
         {#each footerItems as item}
           <a class="nav-item footer-link" href={item.href}>
-            <span class="nav-label">{item.label}</span>
+            <span class="nav-label">{labelFor(item)}</span>
           </a>
         {/each}
       </div>
@@ -85,7 +89,7 @@
 
     {#if planItem}
       <a class="plan-card" href={planItem.href}>
-        <p class="plan-label">{planItem.label}</p>
+        <p class="plan-label">{labelFor(planItem)}</p>
         <p class="plan-value">{planItem.badge?.label || planLabel || t('nav.freeBadge')}</p>
       </a>
     {/if}

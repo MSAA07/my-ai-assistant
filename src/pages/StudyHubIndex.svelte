@@ -3,7 +3,7 @@
   import { MoreVertical, Upload } from '@lucide/svelte';
   import { API_BASE } from '../config.js';
   import { routeParams } from '../stores/router.js';
-  import { t } from '../lib/i18n/t.js';
+  import { formatDate, t } from '../lib/i18n/t.js';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
@@ -139,12 +139,12 @@
     return statusToneMap[getStatusKey(doc)] ?? 'info';
   }
 
-  function formatDate(value) {
+  function formatDocumentDate(value) {
     if (!value) {
       return 'Unknown';
     }
     const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? 'Unknown' : parsed.toLocaleDateString();
+    return Number.isNaN(parsed.getTime()) ? 'Unknown' : formatDate(parsed);
   }
 
   function getFileType(doc) {
@@ -303,7 +303,7 @@
             tabindex="0"
             aria-label={doc.originalName}
             title={doc.originalName}
-            meta={`${t('documentsPage.labels.uploaded')}: ${formatDate(doc.uploadDate)}`}
+            meta={`${t('documentsPage.labels.uploaded')}: ${formatDocumentDate(doc.uploadDate)}`}
             badgeLabel={getFileType(doc)}
             badgeTone={getFileBadgeTone(doc)}
             status={getStatusTone(doc)}

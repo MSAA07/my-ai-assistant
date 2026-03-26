@@ -1,7 +1,7 @@
 <script>
   import { onDestroy } from 'svelte';
   import { ArrowLeft, ClipboardCheck, FileText, Layers3, Sparkles } from '@lucide/svelte';
-  import { t } from '../lib/i18n/t.js';
+  import { formatDate, t } from '../lib/i18n/t.js';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
@@ -236,7 +236,7 @@
     return getDocumentFileTypeLabel(document);
   }
 
-  function formatDate(value) {
+  function formatDocumentDate(value) {
     if (!value) return '';
 
     const parsed = new Date(value);
@@ -244,13 +244,13 @@
       return '';
     }
 
-    return parsed.toLocaleDateString();
+    return formatDate(parsed);
   }
 
   function getUploadedMeta(document) {
     if (!document) return null;
 
-    const uploadDate = formatDate(document?.uploadDate || document?.createdAt);
+    const uploadDate = formatDocumentDate(document?.uploadDate || document?.createdAt);
 
     if (!uploadDate) return null;
 

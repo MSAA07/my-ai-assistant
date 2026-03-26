@@ -58,6 +58,7 @@
   $: navRoutes = getNavRoutes({ includeAdmin: isAdmin });
   $: navItems = navRoutes.map((route) => ({
     id: route.id,
+    labelKey: route.labelKey,
     label: t(route.labelKey),
     href: `#${route.path}`,
     icon: route.icon,
@@ -69,6 +70,7 @@
   $: bottomNavRoutes = getBottomNavRoutes({ includeAdmin: isAdmin });
   $: bottomNavItems = bottomNavRoutes.map((route) => ({
     id: route.id,
+    labelKey: route.labelKey,
     label: t(route.labelKey),
     href: `#${route.path}`,
     icon: route.icon,
@@ -80,6 +82,7 @@
   $: secondaryItems = [
     {
       id: 'plan',
+      labelKey: 'nav.plan',
       label: t('nav.plan'),
       href: '#/settings',
       icon: 'plan',

@@ -13,6 +13,10 @@
     danger: 'danger',
     accent: 'accent',
   };
+
+  function labelFor(item) {
+    return item?.labelKey ? t(item.labelKey) : item?.label ?? '';
+  }
 </script>
 
 <nav class={`bottom-nav ${$direction === 'rtl' ? 'rtl' : 'ltr'}`} aria-label={t('nav.mobileLabel')}>
@@ -35,7 +39,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a3.25 3.25 0 0 1 2.79 1.58l.38.63 2.37.46a3.25 3.25 0 0 1 2.6 3.53l-.09.73.57.9a3.25 3.25 0 0 1-.55 4.08l-.58.59.1.82a3.25 3.25 0 0 1-2.62 3.53l-2.37.46-.38.63a3.25 3.25 0 0 1-5.58 0l-.38-.63-2.37-.46a3.25 3.25 0 0 1-2.6-3.53l.09-.73-.57-.9a3.25 3.25 0 0 1 .55-4.08l.58-.59-.1-.82a3.25 3.25 0 0 1 2.62-3.53l2.37-.46.38-.63A3.25 3.25 0 0 1 12 2Z" /></svg>
         {/if}
       </span>
-      <span class="label">{item.label}</span>
+      <span class="label">{labelFor(item)}</span>
       {#if item.badge}
         <Badge className="badge" size="xs" tone={badgeToneMap[item.badge.variant] ?? 'neutral'}>
           {item.badge.label}

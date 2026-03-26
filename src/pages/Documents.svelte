@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { API_BASE } from '../config.js';
-  import { t } from '../lib/i18n/t.js';
+  import { formatDate, t } from '../lib/i18n/t.js';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import EmptyState from '../lib/components/ui/EmptyState.svelte';
@@ -162,7 +162,7 @@
               />
             </div>
             <p class="meta">
-              {t('documentsPage.labels.uploaded')}: {new Date(doc.uploadDate).toLocaleDateString()}
+              {t('documentsPage.labels.uploaded')}: {formatDate(doc.uploadDate)}
               · {t('documentsPage.labels.language')}:
               {doc.language === 'arabic' ? t('home.documents.languageArabic') : t('home.documents.languageEnglish')}
             </p>
