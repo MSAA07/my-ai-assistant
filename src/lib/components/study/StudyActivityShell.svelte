@@ -278,6 +278,9 @@
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__rail) {
+    width: calc(100% + (var(--layout-shell-padding-inline) * 2));
+    margin-inline: calc(-1 * var(--layout-shell-padding-inline));
+    padding-inline: var(--layout-shell-padding-inline);
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--ui-bg-page) 97%, transparent), color-mix(in srgb, var(--ui-bg-page) 92%, transparent) 78%, transparent);
   }
@@ -291,23 +294,36 @@
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__controls) {
-    grid-template-columns: auto minmax(11rem, 1fr) auto;
-    gap: var(--ui-space-4);
-    min-height: 0;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    min-height: 2.75rem;
+    position: relative;
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--progress) {
     justify-content: center;
     min-width: 0;
+    width: 100%;
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--status) {
+    position: absolute;
+    inset-inline-end: 0;
+    top: 50%;
+    transform: translateY(-50%);
     justify-content: flex-end;
     width: auto;
     max-width: none;
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--back) {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 50%;
+    transform: translateY(-50%);
     justify-content: flex-start;
     width: auto;
   }
@@ -348,6 +364,16 @@
     :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__controls) {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--ui-space-3);
+      min-height: 0;
+      position: static;
+    }
+
+    :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--back),
+    :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--status) {
+      position: static;
+      inset: auto;
+      top: auto;
+      transform: none;
     }
   }
 
