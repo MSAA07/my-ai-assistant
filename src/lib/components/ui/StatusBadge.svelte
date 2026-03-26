@@ -9,7 +9,7 @@
     },
     processing: {
       key: 'status.processing',
-      tone: 'info',
+      tone: 'warning',
     },
     ready: {
       key: 'status.ready',
@@ -28,13 +28,16 @@
   $: text = label || t(config.key);
 </script>
 
-<Badge tone={config.tone} variant="soft" size="sm" uppercase className="status-badge">
+<Badge tone={config.tone} variant="soft" size="sm" className="status-badge">
   <slot>{text}</slot>
 </Badge>
 
 <style>
   :global(.status-badge) {
-    font-size: var(--font-size-xs);
-    letter-spacing: 0.05em;
+    min-height: 1.5rem;
+    padding-inline: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0;
   }
 </style>

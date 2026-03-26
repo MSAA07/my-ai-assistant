@@ -1,5 +1,6 @@
 <script>
   import { onDestroy } from 'svelte';
+  import { Check, ChevronLeft, ChevronRight, Play, RefreshCw, RotateCcw, X } from '@lucide/svelte';
   import { t } from '../../i18n/t.js';
   import Badge from '../ui/Badge.svelte';
   import Button from '../ui/Button.svelte';
@@ -46,6 +47,7 @@
   let flashcardIndex = 0;
   let revealAnswer = false;
   let flashcardResults = [];
+  let flashcardPhase = 'question';
   let flashcardProgressError = '';
   let flashcardProgressBusy = false;
 
@@ -81,15 +83,14 @@
       ? t('document.activity.subtitle.flashcards')
       : t('document.activity.subtitle.exam');
 
-  $: summaryParagraphs = text(docData?.summary)
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
+  $: summaryBlocks = parseSummaryBlocks(docData?.summary);
 
   $: flashcards = Array.isArray(docData?.flashcards) ? docData.flashcards : [];
   $: currentFlashcard = flashcards[flashcardIndex] ?? null;
   $: flashcardsCorrect = flashcardResults.filter((result) => result === 'correct').length;
   $: flashcardsIncorrect = flashcardResults.filter((result) => result === 'incorrect').length;
+  $: flashcardsUnanswered = flashcardResults.filter((result) => result !== 'correct' && result !== 'incorrect').length;
+  $: flashcardsCompleted = flashcardPhase === 'result';
   $: flashcardProgressLabel = t('document.activity.flashcards.progressLabel', {
     current: flashcards.length ? flashcardIndex + 1 : 0,
     total: flashcards.length,
@@ -107,8 +108,7 @@
 
   $: showExamLaunch = mode === 'exam' && examFeature.hasContent && examPhase === 'question' && !examStarted;
   $: showActiveFlashcardsSession = mode === 'flashcards' && flashcardsFeature.hasContent;
-  $: showActiveExamSession = mode === 'exam' && examFeature.hasContent && !showExamLaunch;
-  $: showActiveStudyShell = showActiveFlashcardsSession || showActiveExamSession;
+  $: showActiveStudyShell = showActiveFlashcardsSession;
   $: showChromeProgress = showActiveStudyShell;
   $: chromeProgressValue = mode === 'flashcards'
     ? (flashcards.length ? flashcardIndex + 1 : 0)
@@ -127,6 +127,7 @@
     : examPhase === 'submitting'
       ? t('status.processing')
       : `${examAnsweredCount} answered`;
+  $: examScorePercent = examQuestions.length ? Math.round((examScore / examQuestions.length) * 100) : 0;
 
   $: chromeStatus = extractionStatus === 'failed'
     ? 'failed'
@@ -180,6 +181,66 @@
 
   function text(value) {
     return typeof value === 'string' ? value.trim() : '';
+  }
+
+  function parseSummaryBlocks(value) {
+    const source = text(value);
+    if (!source) return [];
+
+    return source
+      .split(/\n\s*\n/)
+      .map((block) => block.trim())
+      .filter(Boolean)
+      .map((block) => {
+        const lines = block
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        if (lines.length === 1 && /^##\s+/.test(lines[0])) {
+          return { type: 'heading', text: lines[0].replace(/^##\s+/, '').trim() };
+        }
+
+        if (lines.length > 0 && lines.every((line) => /^-\s+/.test(line))) {
+          return {
+            type: 'list',
+            items: lines.map((line) => line.replace(/^-\s+/, '').trim()).filter(Boolean),
+          };
+        }
+
+        return {
+          type: 'paragraph',
+          text: block.replace(/\s*\n+\s*/g, ' ').trim(),
+        };
+      });
+  }
+
+  function parseInlineSegments(value) {
+    const source = typeof value === 'string' ? value : '';
+    if (!source) return [];
+
+    const segments = [];
+    const pattern = /\*\*(.*?)\*\*/g;
+    let cursor = 0;
+    let match;
+
+    while ((match = pattern.exec(source)) !== null) {
+      if (match.index > cursor) {
+        segments.push({ text: source.slice(cursor, match.index), strong: false });
+      }
+
+      if (match[1]) {
+        segments.push({ text: match[1], strong: true });
+      }
+
+      cursor = match.index + match[0].length;
+    }
+
+    if (cursor < source.length) {
+      segments.push({ text: source.slice(cursor), strong: false });
+    }
+
+    return segments.filter((segment) => segment.text);
   }
 
   function normalizeMode(value) {
@@ -329,6 +390,7 @@
 
   function handleModeChange(nextMode) {
     if (nextMode === 'flashcards') {
+      flashcardPhase = 'question';
       revealAnswer = false;
       flashcardProgressError = '';
       return;
@@ -354,6 +416,7 @@
   }
 
   function resetFlashcardsState(cardCount = 0) {
+    flashcardPhase = 'question';
     flashcardIndex = 0;
     revealAnswer = false;
     flashcardResults = new Array(Math.max(0, cardCount)).fill(null);
@@ -388,6 +451,10 @@
     updatePendingFromDocument(nextDocument);
 
     if (flashcardsChanged) {
+      resetFlashcardsState(nextFlashcards.length);
+    }
+
+    if (!flashcardsChanged && flashcardResults.length !== nextFlashcards.length) {
       resetFlashcardsState(nextFlashcards.length);
     }
 
@@ -530,6 +597,7 @@
   }
 
   function previousFlashcard() {
+    if (flashcardPhase !== 'question') return;
     if (flashcardIndex <= 0) return;
     flashcardIndex -= 1;
     revealAnswer = false;
@@ -537,10 +605,20 @@
   }
 
   function nextFlashcard() {
-    if (flashcardIndex >= flashcards.length - 1) return;
+    if (flashcardPhase !== 'question') return;
+    if (flashcardIndex >= flashcards.length - 1) {
+      flashcardPhase = 'result';
+      revealAnswer = false;
+      flashcardProgressError = '';
+      return;
+    }
     flashcardIndex += 1;
     revealAnswer = false;
     flashcardProgressError = '';
+  }
+
+  function restartFlashcardsSession() {
+    resetFlashcardsState(flashcards.length);
   }
 
   async function markFlashcard(result) {
@@ -555,9 +633,11 @@
         mastered: result === 'correct',
       });
       flashcardResults = flashcardResults.map((value, index) => (index === flashcardIndex ? result : value));
+      revealAnswer = false;
       if (flashcardIndex < flashcards.length - 1) {
         flashcardIndex += 1;
-        revealAnswer = false;
+      } else {
+        flashcardPhase = 'result';
       }
     } catch (error) {
       flashcardProgressError = text(error?.message) || t('document.activity.flashcards.progressSaveError');
@@ -692,11 +772,11 @@
     contentWidth={showActiveStudyShell ? '' : 'wide'}
     chromeVariant={showActiveStudyShell ? 'active-session' : 'default'}
   >
-    <div slot="back" class="activity-back">
+    <div slot="back" class={`activity-back ${mode === 'flashcards' ? 'activity-back--flashcards' : ''}`}>
       <Button
         type="button"
-        className={`chrome-back-link ${showActiveStudyShell ? 'chrome-back-link--session' : ''}`}
-        variant={showActiveStudyShell ? 'ghost' : 'back'}
+        className={`chrome-back-link ${showActiveStudyShell ? 'chrome-back-link--session' : 'chrome-back-link--summary'}`}
+        variant="ghost"
         size="sm"
         on:click={goBackToHub}
       >
@@ -708,7 +788,7 @@
     </div>
 
     <svelte:fragment slot="chrome-progress">
-      <div class="session-chrome-progress">
+      <div class={`session-chrome-progress ${mode === 'flashcards' ? 'session-chrome-progress--flashcards' : ''}`}>
         <ProgressBar
           value={chromeProgressValue}
           max={chromeProgressMax}
@@ -720,7 +800,7 @@
 
     <svelte:fragment slot="chrome-status">
       {#if mode === 'flashcards'}
-        <div class="session-chrome-status" aria-label={chromeProgressLabel}>
+        <div class="session-chrome-status session-chrome-status--flashcards" aria-label={chromeProgressLabel}>
           <span class="session-chrome-status__metric session-chrome-status__metric--current">
             Card {flashcards.length ? flashcardIndex + 1 : 0} / {flashcards.length}
           </span>
@@ -732,12 +812,6 @@
           <span class="session-chrome-status__metric session-chrome-status__metric--incorrect">
             {t('document.exam.reviewIncorrect')} {flashcardsIncorrect}
           </span>
-        </div>
-      {:else if mode === 'exam'}
-        <div class="session-chrome-status" aria-label={chromeProgressLabel}>
-          <span class="session-chrome-status__metric session-chrome-status__metric--current">{examChromeCurrentLabel}</span>
-          <span class="session-chrome-status__dot" aria-hidden="true">&bull;</span>
-          <span class="session-chrome-status__metric session-chrome-status__metric--info">{examChromeMetaLabel}</span>
         </div>
       {/if}
     </svelte:fragment>
@@ -777,92 +851,214 @@
     </svelte:fragment>
 
     {#if mode === 'summary'}
+      <div class="activity-content-head activity-content-head--summary">
+        <div class="activity-content-head__copy">
+          <Badge tone="success" variant="outline" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
+          <h1 class="activity-content-head__title">{title}</h1>
+        </div>
+        <div class="activity-content-head__actions">
+          {#if summaryFeature.hasContent}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => openRegenerateModal(summaryFeature)}
+              disabled={!summaryFeature.canRegenerate}
+            >
+              <span slot="icon" aria-hidden="true"><RefreshCw /></span>
+              {summaryFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
+            </Button>
+          {:else if summaryFeature.canGenerate || summaryFeature.busy}
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => queueGeneration(summaryFeature, { regenerate: summaryFeature.shouldRegenerate })}
+              disabled={!summaryFeature.canGenerate}
+            >
+              {summaryFeature.busy ? t('document.actions.generating') : t('document.activity.actions.generateSummary')}
+            </Button>
+          {/if}
+        </div>
+      </div>
+
       {#if summaryFeature.hasContent}
         <Card as="article" class="activity-frame activity-frame--summary" variant="base" padding="lg" border="strong">
-          <div class="section-header">
-            <div class="section-copy">
-              <p class="eyebrow">{title}</p>
-              <h2>{t('document.activity.summary.title')}</h2>
-            </div>
-            {#if summaryFeature.busy}
-              <StatusBadge status="processing" label={t('status.processing')} />
-            {/if}
-          </div>
-
           <article class="reader">
-            {#if summaryParagraphs.length}
-              {#each summaryParagraphs as paragraph}
-                <p>{paragraph}</p>
+            {#if summaryBlocks.length}
+              {#each summaryBlocks as block}
+                {#if block.type === 'heading'}
+                  <h3 class="reader-section-title">{block.text}</h3>
+                {:else if block.type === 'list'}
+                  <ul class="reader-list">
+                    {#each block.items as item}
+                      <li>
+                        {#each parseInlineSegments(item) as segment}
+                          {#if segment.strong}
+                            <strong>{segment.text}</strong>
+                          {:else}
+                            {segment.text}
+                          {/if}
+                        {/each}
+                      </li>
+                    {/each}
+                  </ul>
+                {:else}
+                  <p class="reader-paragraph">
+                    {#each parseInlineSegments(block.text) as segment}
+                      {#if segment.strong}
+                        <strong>{segment.text}</strong>
+                      {:else}
+                        {segment.text}
+                      {/if}
+                    {/each}
+                  </p>
+                {/if}
               {/each}
             {:else}
-              <p>{docData.summary}</p>
+              <p class="reader-paragraph">{docData.summary}</p>
             {/if}
           </article>
         </Card>
       {:else}
         <Card as="section" class="activity-launch activity-launch--empty" variant="base" padding="lg" border="dashed">
           <div class="launch-copy">
-            <Badge tone="neutral" variant="outline" size="sm" uppercase>{modeLabel}</Badge>
-            <p class="eyebrow">{title}</p>
             <h2>{t('document.activity.summary.title')}</h2>
             <p>{summaryFeature.errorMessage || t('document.summary.generatePrompt')}</p>
-          </div>
-          <div class="launch-actions">
-            <Button type="button" variant="primary" on:click={() => queueGeneration(summaryFeature, { regenerate: summaryFeature.shouldRegenerate })} disabled={!summaryFeature.canGenerate}>
-              {summaryFeature.busy ? t('document.actions.generating') : t('document.activity.actions.generateSummary')}
-            </Button>
           </div>
         </Card>
       {/if}
     {/if}
 
     {#if mode === 'flashcards'}
+      <div class="activity-content-head activity-content-head--flashcards">
+        <div class="activity-content-head__copy">
+          <Badge tone="accent" variant="outline" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
+          <h1 class="activity-content-head__title">{title}</h1>
+        </div>
+      </div>
+
       {#if flashcardsFeature.hasContent}
         <section class="study-session study-session--flashcards" aria-label={modeLabel}>
           <section class="study-session__canvas study-session__canvas--flashcards">
-            <Card
-              as="article"
-              class={`activity-stage flashcard-stage study-session-card study-session-card--flashcards ${revealAnswer ? 'flashcard-stage-answer' : ''}`}
-              variant="base"
-              padding="md"
-              border={revealAnswer ? 'strong' : 'subtle'}
-            >
-              <div class="flashcard-stage__copy study-session-card__copy study-session-card__copy--flashcards">
-                <p class="card-side">{revealAnswer ? t('document.activity.flashcards.answerLabel') : t('document.activity.flashcards.questionLabel')}</p>
-                <h2>{revealAnswer ? currentFlashcard?.answer : currentFlashcard?.question}</h2>
-                {#if revealAnswer && text(currentFlashcard?.explanation)}
-                  <p class="explanation">{currentFlashcard.explanation}</p>
-                {/if}
-              </div>
-            </Card>
+            {#if flashcardsCompleted}
+              <Card as="article" class="activity-frame study-session-panel study-session-panel--review flashcard-results-card" variant="base" padding="lg" border="strong">
+                <p class="flashcard-results-card__label">Flashcard results</p>
+                <p class="flashcard-results-card__value">{flashcardsCorrect} / {flashcards.length}</p>
+                <p class="flashcard-results-card__meta">{flashcardsIncorrect} incorrect &middot; {flashcardsUnanswered} unanswered</p>
+              </Card>
 
-            <div class="study-session__primary controls controls-primary">
-              {#if !revealAnswer}
-                <Button type="button" variant="primary" size="lg" block on:click={() => (revealAnswer = true)}>{t('document.activity.actions.revealAnswer')}</Button>
-              {:else}
-                <div class="study-session__answer-actions">
-                  <Button type="button" variant="secondary" size="sm" on:click={() => (revealAnswer = false)}>{t('document.activity.actions.hideAnswer')}</Button>
-                  <Button type="button" variant="success" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markCorrect')}</Button>
-                  <Button type="button" variant="danger" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>{t('document.activity.actions.markIncorrect')}</Button>
+              <div class="flashcard-review-head">
+                <h3>Review</h3>
+              </div>
+
+              <div class="stack stack-spacious flashcard-review-list">
+                {#each flashcards as flashcard, index}
+                  <article class="review" class:review-correct={flashcardResults[index] === 'correct'}>
+                    <div class="review-head">
+                      <p class="review-question">{index + 1}. {flashcard.question}</p>
+                      <span class={`review-icon ${flashcardResults[index] === 'correct' ? 'review-icon--correct' : 'review-icon--incorrect'}`} aria-hidden="true">
+                        {#if flashcardResults[index] === 'correct'}
+                          <Check />
+                        {:else if flashcardResults[index] === 'incorrect'}
+                          <X />
+                        {:else}
+                          <span class="review-icon__dash">-</span>
+                        {/if}
+                      </span>
+                    </div>
+                    <div class="review-copy">
+                      <p><strong>Result:</strong> {flashcardResults[index] === 'correct' ? 'Correct' : flashcardResults[index] === 'incorrect' ? 'Incorrect' : 'Not answered'}</p>
+                      <p><strong>Answer:</strong> {flashcard.answer}</p>
+                      {#if text(flashcard.explanation)}
+                        <p>{flashcard.explanation}</p>
+                      {/if}
+                    </div>
+                  </article>
+                {/each}
+              </div>
+
+              <Button type="button" variant="primary" block className="flashcard-retake-button" on:click={restartFlashcardsSession}>
+                <span slot="icon" aria-hidden="true">
+                  <RotateCcw />
+                </span>
+                Restart flashcards
+              </Button>
+            {:else}
+              <Card
+                as="article"
+                class={`activity-stage flashcard-stage study-session-card study-session-card--flashcards ${revealAnswer ? 'flashcard-stage-answer' : ''}`}
+                variant="base"
+                padding="lg"
+                border={revealAnswer ? 'strong' : 'subtle'}
+              >
+                <div class="flashcard-stage__copy study-session-card__copy study-session-card__copy--flashcards">
+                  <p class="card-side">{t('document.activity.flashcards.questionLabel')}</p>
+                  <h2>{currentFlashcard?.question}</h2>
+                </div>
+
+                <div class={`flashcard-stage__answer ${revealAnswer ? 'flashcard-stage__answer--visible' : ''}`}>
+                  <div class="flashcard-stage__answer-copy">
+                    <p class="flashcard-stage__answer-label">{t('document.activity.flashcards.answerLabel')}</p>
+                    <p class="flashcard-stage__answer-text">{currentFlashcard?.answer}</p>
+                    {#if revealAnswer && text(currentFlashcard?.explanation)}
+                      <p class="explanation">{currentFlashcard.explanation}</p>
+                    {/if}
+                  </div>
+                </div>
+              </Card>
+
+              <div class="study-session__primary study-session__primary--flashcards controls controls-primary">
+                {#if !revealAnswer}
+                  <Button type="button" variant="primary" size="lg" block className="flashcard-reveal-button" on:click={() => (revealAnswer = true)}>
+                    {t('document.activity.actions.revealAnswer')}
+                  </Button>
+                {:else}
+                  <div class="study-session__answer-actions study-session__answer-actions--flashcards">
+                    <Button type="button" variant="success" className="flashcard-score-button" on:click={() => markFlashcard('correct')} disabled={flashcardProgressBusy}>
+                      <span slot="icon" aria-hidden="true">
+                        <Check />
+                      </span>
+                      {t('document.activity.actions.markCorrect')}
+                  </Button>
+                  <Button type="button" variant="danger" className="flashcard-score-button" on:click={() => markFlashcard('incorrect')} disabled={flashcardProgressBusy}>
+                    <span slot="icon" aria-hidden="true">
+                      <X />
+                    </span>
+                    {t('document.activity.actions.markIncorrect')}
+                  </Button>
                 </div>
               {/if}
             </div>
 
-            {#if flashcardProgressError}<p class="error study-session__error">{flashcardProgressError}</p>{/if}
+              {#if flashcardProgressError}<p class="error study-session__error">{flashcardProgressError}</p>{/if}
 
-            <div class="study-session__nav controls controls-secondary">
-              <Button type="button" variant="secondary" size="sm" on:click={previousFlashcard} disabled={flashcardIndex === 0}>{t('document.activity.actions.previous')}</Button>
-              <Button type="button" variant="secondary" size="sm" on:click={nextFlashcard} disabled={flashcardIndex >= flashcards.length - 1}>{t('document.activity.actions.next')}</Button>
-            </div>
+              <div class="flashcard-session-footer">
+                <div class="study-session__nav controls controls-secondary flashcard-nav">
+                  <Button type="button" variant="secondary" size="lg" className="flashcard-nav-button" on:click={previousFlashcard} disabled={flashcardIndex === 0}>
+                    <span slot="icon" aria-hidden="true">
+                      <ChevronLeft />
+                    </span>
+                    {t('document.activity.actions.previous')}
+                  </Button>
+                <Button type="button" variant="secondary" size="lg" className="flashcard-nav-button" on:click={nextFlashcard}>
+                    {flashcardIndex >= flashcards.length - 1 ? 'View results' : t('document.activity.actions.next')}
+                    <span slot="icon" aria-hidden="true">
+                      <ChevronRight />
+                    </span>
+                  </Button>
+                </div>
+
+                <p class="study-session__hint study-session__hint--flashcards">Use arrow keys to navigate, spacebar to reveal answer.</p>
+              </div>
+            {/if}
           </section>
-
-          <p class="study-session__hint">Use arrow keys to navigate, spacebar to reveal answer.</p>
         </section>
       {:else}
         <Card as="section" class="activity-launch activity-launch--empty" variant="base" padding="lg" border="dashed">
           <div class="launch-copy">
-            <Badge tone="neutral" variant="outline" size="sm" uppercase>{modeLabel}</Badge>
-            <p class="eyebrow">{title}</p>
             <h2>{t('document.hub.features.flashcards')}</h2>
             <p>{flashcardsFeature.errorMessage || t('document.flashcards.generatePrompt')}</p>
           </div>
@@ -876,14 +1072,35 @@
     {/if}
 
     {#if mode === 'exam'}
+      <div class="activity-content-head activity-content-head--exam">
+        <div class="activity-content-head__copy">
+          <Badge tone="warning" variant="soft" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
+          <h1 class="activity-content-head__title">{title}</h1>
+        </div>
+        {#if examFeature.hasContent}
+          <div class="activity-content-head__actions">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => openRegenerateModal(examFeature)}
+              disabled={!examFeature.canRegenerate}
+            >
+              <span slot="icon" aria-hidden="true"><RefreshCw /></span>
+              {examFeature.busy ? t('document.activity.regenerate.running') : t('document.actions.regenerate')}
+            </Button>
+          </div>
+        {/if}
+      </div>
+
       {#if examFeature.hasContent}
         {#if examPhase === 'submitting'}
-          <section class="study-session study-session--exam">
+          <section class="study-session study-session--exam exam-surface">
             <section class="study-session__canvas study-session__canvas--compact">
-              <Card as="article" class="activity-launch activity-launch--submitting study-session-panel study-session-panel--compact" variant="base" padding="lg" border="strong">
+              <Card as="article" class="activity-launch activity-launch--submitting study-session-panel study-session-panel--compact exam-start-card" variant="base" padding="lg" border="strong">
                 <div class="launch-copy">
                   <Badge tone="info" variant="soft" size="sm" uppercase>{t('status.processing')}</Badge>
-                  <p class="eyebrow">{title}</p>
                   <h2>{t('document.activity.exam.submittingTitle')}</h2>
                   <p>{t('document.activity.exam.submittingBody')}</p>
                 </div>
@@ -891,74 +1108,96 @@
             </section>
           </section>
         {:else if examPhase === 'result'}
-          <section class="study-session study-session--exam study-session--scrollable" aria-label={modeLabel}>
+          <section class="study-session study-session--exam study-session--scrollable exam-surface" aria-label={modeLabel}>
             <section class="study-session__canvas study-session__canvas--results">
-              <Card as="article" class="activity-frame activity-frame--results study-session-panel study-session-panel--review" variant="base" padding="lg" border="strong">
-                <div class="results-summary">
-                  <Badge tone={examScore === examQuestions.length ? 'success' : examScore > 0 ? 'info' : 'destructive'} variant="soft" size="sm" uppercase>{t('document.activity.exam.resultsTitle')}</Badge>
-                  <p class="eyebrow">{title}</p>
-                  <h2>{t('document.activity.exam.scoreLabel', { score: examScore, total: examQuestions.length })}</h2>
-                  <p>{t('document.activity.exam.reviewTitle')}</p>
+              <Card as="article" class="activity-frame activity-frame--results study-session-panel study-session-panel--review exam-score-card" variant="base" padding="lg" border="strong">
+                <p class="exam-score-card__label">{t('document.activity.exam.resultsTitle')}</p>
+                <p class="exam-score-card__value">{examScore} / {examQuestions.length}</p>
+                <p class="exam-score-card__meta">{examScorePercent}% correct</p>
+              </Card>
+
+              {#if examSubmitError}<p class="error">{examSubmitError}</p>{/if}
+
+              <div class="exam-review-head">
+                <h3>{t('document.activity.exam.reviewTitle')}</h3>
+              </div>
+
+              <div class="stack stack-spacious exam-review-list">
+                {#each examQuestions as question, index}
+                  <article class="review" class:review-correct={isAnswerCorrect(question, examAnswers[index])}>
+                    <div class="review-head">
+                      <p class="review-question">{index + 1}. {question.question}</p>
+                      <span class={`review-icon ${isAnswerCorrect(question, examAnswers[index]) ? 'review-icon--correct' : 'review-icon--incorrect'}`} aria-hidden="true">
+                        {#if isAnswerCorrect(question, examAnswers[index])}
+                          <Check />
+                        {:else}
+                          <X />
+                        {/if}
+                      </span>
+                    </div>
+                    <div class="review-copy">
+                      <p>
+                        {t('document.activity.exam.yourAnswer', { answer: text(examAnswers[index]) || t('document.activity.exam.notAnswered') })}
+                      </p>
+                      {#if !isAnswerCorrect(question, examAnswers[index])}
+                        <p>{t('document.activity.exam.correctAnswer', { answer: text(question?.correctAnswer) })}</p>
+                      {/if}
+                    </div>
+                  </article>
+                {/each}
+              </div>
+
+              <Button type="button" variant="primary" block className="exam-retake-button" on:click={() => resetExamState(examQuestions.length)}>
+                <span slot="icon" aria-hidden="true">
+                  <RotateCcw />
+                </span>
+                {t('document.activity.actions.retakeExam')}
+              </Button>
+            </section>
+          </section>
+        {:else if showExamLaunch}
+          <section class="study-session study-session--exam exam-surface" aria-label={modeLabel}>
+            <section class="study-session__canvas study-session__canvas--compact">
+              <Card as="section" class="activity-launch exam-start-card" variant="base" padding="lg" border="strong">
+                <div class="launch-copy exam-start-card__copy">
+                  <h2>{t('document.activity.exam.introTitle')}</h2>
+                  <p>{t('document.activity.exam.introDescription', { count: examQuestions.length })}</p>
                 </div>
 
-                {#if examSubmitError}<p class="error">{examSubmitError}</p>{/if}
-
-                <div class="stack stack-spacious">
-                  {#each examQuestions as question, index}
-                    <article class="review" class:review-correct={isAnswerCorrect(question, examAnswers[index])}>
-                      <div class="review-head">
-                        <p class="review-question">{question.question}</p>
-                        <Badge tone={isAnswerCorrect(question, examAnswers[index]) ? 'success' : 'destructive'} variant="soft" size="sm">
-                          {isAnswerCorrect(question, examAnswers[index]) ? t('document.exam.reviewCorrect') : t('document.exam.reviewIncorrect')}
-                        </Badge>
-                      </div>
-                      <p>{t('document.activity.exam.yourAnswer', { answer: text(examAnswers[index]) || t('document.activity.exam.notAnswered') })}</p>
-                      <p>{t('document.activity.exam.correctAnswer', { answer: text(question?.correctAnswer) })}</p>
-                    </article>
-                  {/each}
-                </div>
-
-                <div class="launch-actions">
-                  <Button type="button" variant="primary" on:click={() => resetExamState(examQuestions.length)}>{t('document.activity.actions.retakeExam')}</Button>
+                <div class="launch-actions exam-start-card__actions">
+                  <Button type="button" variant="primary" size="lg" block className="exam-start-button" on:click={startExam}>
+                    <span slot="icon" aria-hidden="true">
+                      <Play />
+                    </span>
+                    {t('document.activity.actions.startExam')}
+                  </Button>
                 </div>
               </Card>
             </section>
           </section>
-        {:else if showExamLaunch}
-          <Card as="section" class="activity-launch" variant="base" padding="lg" border="strong">
-            <div class="launch-copy">
-              <Badge tone="info" variant="soft" size="sm" uppercase>{t('status.ready')}</Badge>
-              <p class="eyebrow">{title}</p>
-              <h2>{t('document.activity.exam.introTitle')}</h2>
-              <p>{t('document.activity.exam.introDescription', { count: examQuestions.length })}</p>
-            </div>
-
-            <div class="launch-metrics">
-              <div class="launch-metric">
-                <span class="launch-metric__label">{t('document.exam.questionCount', { count: examQuestions.length })}</span>
-                <strong>{examQuestions.length}</strong>
-              </div>
-              <div class="launch-metric">
-                <span class="launch-metric__label">{t('document.activity.exam.answeredCount', { answered: examAnsweredCount, total: examQuestions.length })}</span>
-                <strong>{examAnsweredCount}</strong>
-              </div>
-            </div>
-
-            <div class="launch-actions">
-              <Button type="button" variant="primary" on:click={startExam}>{t('document.activity.actions.startExam')}</Button>
-            </div>
-          </Card>
         {:else}
-          <section class="study-session study-session--exam" aria-label={modeLabel}>
+          <section class="study-session study-session--exam exam-surface" aria-label={modeLabel}>
             <section class="study-session__canvas study-session__canvas--exam">
-              <Card as="article" class="activity-stage question-surface study-session-card study-session-card--exam" variant="base" padding="lg" border="strong">
+              <div class="exam-progress">
+                <div class="exam-progress__meta">
+                  <span>{examChromeCurrentLabel}</span>
+                  <span>{examAnsweredCount} answered</span>
+                </div>
+                <ProgressBar
+                  value={currentQuestionIndex + 1}
+                  max={examQuestions.length || 1}
+                  ariaLabel={examProgressLabel}
+                  className="exam-progress__bar"
+                />
+              </div>
+
+              <Card as="article" class="activity-stage question-surface study-session-card study-session-card--exam exam-question-card" variant="base" padding="lg" border="strong">
                 <div class="study-session-card__copy study-session-card__copy--exam">
-                  <p class="card-side">{t('document.activity.exam.questionLabel', { index: currentQuestionIndex + 1 })}</p>
-                  <h2>{currentExamQuestion?.question}</h2>
+                  <p class="exam-question-card__prompt">{currentExamQuestion?.question}</p>
                 </div>
 
                 {#if questionOptions(currentExamQuestion).length > 0}
-                  <div class="stack stack-spacious study-session-card__body">
+                  <div class="stack stack-spacious study-session-card__body exam-option-stack">
                     {#each questionOptions(currentExamQuestion) as option, optionIndex}
                       <button type="button" class="option" class:option-selected={text(examAnswers[currentQuestionIndex]) === option} on:click={() => setExamAnswer(option)}>
                         <span class="option-letter">{optionLetter(optionIndex)}</span>
@@ -973,24 +1212,35 @@
                 {/if}
               </Card>
 
-              <div class="study-session__nav controls controls-secondary">
-                <Button type="button" variant="secondary" size="sm" on:click={previousQuestion} disabled={currentQuestionIndex === 0}>{t('document.activity.actions.previous')}</Button>
+              <div class="study-session__nav controls controls-secondary exam-nav">
+                <Button type="button" variant="secondary" size="md" className="exam-nav-button" on:click={previousQuestion} disabled={currentQuestionIndex === 0}>
+                  <span slot="icon" aria-hidden="true">
+                    <ChevronLeft />
+                  </span>
+                  {t('document.activity.actions.previous')}
+                </Button>
                 {#if currentQuestionIndex < examQuestions.length - 1}
-                  <Button type="button" variant="secondary" size="sm" on:click={nextQuestion}>{t('document.activity.actions.next')}</Button>
+                  <Button type="button" variant="primary" size="md" className="exam-nav-button" on:click={nextQuestion} disabled={!text(examAnswers[currentQuestionIndex])}>
+                    {t('document.activity.actions.next')}
+                    <span slot="icon" aria-hidden="true">
+                      <ChevronRight />
+                    </span>
+                  </Button>
                 {:else}
-                  <Button type="button" variant="primary" size="sm" on:click={submitExam} disabled={examSubmitting}>{t('document.activity.actions.submitExam')}</Button>
+                  <Button type="button" variant="primary" size="md" className="exam-nav-button" on:click={submitExam} disabled={examSubmitting || !text(examAnswers[currentQuestionIndex])}>
+                    {t('document.activity.actions.submitExam')}
+                    <span slot="icon" aria-hidden="true">
+                      <ChevronRight />
+                    </span>
+                  </Button>
                 {/if}
               </div>
             </section>
-
-            <p class="study-session__hint">Use arrow keys to move between questions.</p>
           </section>
         {/if}
       {:else}
         <Card as="section" class="activity-launch activity-launch--empty" variant="base" padding="lg" border="dashed">
           <div class="launch-copy">
-            <Badge tone="neutral" variant="outline" size="sm" uppercase>{modeLabel}</Badge>
-            <p class="eyebrow">{title}</p>
             <h2>{t('document.hub.features.exam')}</h2>
             <p>{examFeature.errorMessage || t('document.exam.generatePrompt')}</p>
           </div>
@@ -1029,11 +1279,74 @@
     width: 100%;
   }
 
+  .activity-back--flashcards {
+    width: fit-content;
+    display: flex;
+    justify-content: flex-start;
+    justify-self: start;
+    align-items: center;
+  }
+
+  /* Inline page header that now lives inside the content body for summary/exam */
+  .activity-content-head {
+    width: 100%;
+    margin-inline: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--study-flow-action-gap);
+    flex-wrap: wrap;
+  }
+
+  .activity-content-head--summary {
+    max-width: var(--study-flow-reading-width);
+  }
+
+  .activity-content-head--flashcards {
+    max-width: var(--study-flow-session-content-width);
+  }
+
+  .activity-content-head--exam {
+    max-width: var(--study-flow-session-width);
+  }
+
+  .activity-content-head__copy {
+    display: grid;
+    gap: var(--ui-space-2);
+    min-width: 0;
+    flex: 1;
+  }
+
+  .activity-content-head__title {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: var(--study-flow-title-size);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .activity-content-head__actions {
+    display: flex;
+    align-items: flex-start;
+    flex-shrink: 0;
+  }
+
   :global(.chrome-back-link) {
     width: fit-content;
-    border-color: color-mix(in srgb, var(--ui-border-default) 80%, transparent);
-    background: color-mix(in srgb, var(--ui-surface-card) 88%, transparent);
-    backdrop-filter: blur(10px);
+    border-color: transparent;
+    background: transparent;
+  }
+
+  :global(.chrome-back-link--summary.ui-button) {
+    min-height: auto;
+    padding-inline: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+  }
+
+  :global(.chrome-back-link--summary.ui-button:hover:not(:disabled)) {
+    transform: none;
   }
 
   :global(.chrome-back-link svg) {
@@ -1044,6 +1357,27 @@
     stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  .summary-chrome__actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: var(--study-flow-action-gap);
+  }
+
+  :global(.summary-mode-badge.ui-badge) {
+    width: fit-content;
+    min-height: var(--study-flow-chip-min-height);
+    padding-inline: var(--study-flow-chip-padding-inline);
+    border-radius: var(--study-flow-chip-radius);
+  }
+
+  :global(.summary-chrome__actions .ui-button) {
+    min-height: var(--ui-control-height-sm);
+  }
+
+  :global(.summary-regenerate-button.ui-button) {
+    box-shadow: none;
   }
 
   .row,
@@ -1057,10 +1391,9 @@
   }
 
   .section-copy,
-  .results-summary,
   .launch-copy {
     display: grid;
-    gap: 0.5rem;
+    gap: var(--study-flow-copy-gap);
   }
 
   .error,
@@ -1081,13 +1414,13 @@
   :global(.activity-launch),
   :global(.activity-stage) {
     display: grid;
-    gap: 1rem;
+    gap: var(--study-flow-card-gap);
   }
 
   :global(.status-panel),
   :global(.activity-frame),
   :global(.activity-launch) {
-    width: min(100%, var(--size-page-study-wide));
+    width: min(100%, var(--study-flow-hub-width));
     margin-inline: auto;
   }
 
@@ -1096,14 +1429,13 @@
   }
 
   :global(.activity-launch) {
-    min-height: clamp(280px, 44vh, 380px);
-    align-content: space-between;
+    min-height: 0;
+    align-content: start;
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 100%, transparent), color-mix(in srgb, var(--ui-surface-card) 86%, var(--ui-surface-secondary) 14%));
   }
 
   :global(.activity-launch--empty) {
-    min-height: 18rem;
     background: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
   }
 
@@ -1113,7 +1445,12 @@
   }
 
   :global(.activity-frame--summary) {
-    min-height: min(72vh, 780px);
+    width: min(100%, var(--study-flow-reading-width));
+    min-height: 0;
+    gap: var(--study-flow-card-gap);
+    border-radius: var(--study-flow-card-radius);
+    background: var(--study-flow-card-surface);
+    box-shadow: none;
   }
 
   .eyebrow,
@@ -1131,8 +1468,6 @@
     margin: 0;
   }
 
-  .section-copy h2,
-  .results-summary h2,
   .launch-copy h2,
   :global(.flashcard-stage) h2 {
     font-size: clamp(1.15rem, 2vw, 1.6rem);
@@ -1143,14 +1478,37 @@
 
   .reader {
     display: grid;
-    gap: 1.25rem;
+    gap: 1.35rem;
   }
 
-  .reader p {
+  .reader-paragraph,
+  .reader-list li {
     line-height: 1.8;
     white-space: pre-wrap;
-    color: color-mix(in srgb, var(--foreground) 86%, var(--muted-foreground) 14%);
+    color: color-mix(in srgb, var(--foreground) 84%, var(--muted-foreground) 16%);
     font-size: clamp(0.98rem, 1vw, 1.03rem);
+  }
+
+  .reader-section-title {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(1rem, 0.92rem + 0.42vw, 1.18rem);
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+  }
+
+  .reader-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .reader strong,
+  .reader-list strong {
+    color: var(--ui-text-primary);
+    font-weight: 600;
   }
 
   .launch-metrics {
@@ -1166,11 +1524,6 @@
     border: 1px solid color-mix(in srgb, var(--ui-border-default) 88%, transparent);
     border-radius: var(--ui-radius-md);
     background: color-mix(in srgb, var(--ui-surface-secondary) 54%, var(--ui-surface-card) 46%);
-  }
-
-  .launch-metric strong {
-    font-size: clamp(1.1rem, 1rem + 0.45vw, 1.45rem);
-    line-height: 1;
   }
 
   .launch-metric__label {
@@ -1195,6 +1548,11 @@
     width: min(100%, 13rem);
   }
 
+  .session-chrome-progress--flashcards {
+    width: min(100%, var(--study-flow-session-progress-width));
+    justify-self: center;
+  }
+
   :global(.session-chrome-progress__bar) {
     height: 0.38rem;
     background: color-mix(in srgb, var(--ui-progress-track) 82%, transparent);
@@ -1211,6 +1569,40 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+
+  .session-chrome-status--flashcards {
+    width: 100%;
+    justify-content: flex-end;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    gap: 0.45rem;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__controls) {
+    align-items: center;
+    gap: clamp(0.85rem, 0.9vw + 0.45rem, 1.25rem);
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__rail) {
+    width: 100%;
+    padding-block: 0 0;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ui-bg-page) 96%, transparent), color-mix(in srgb, var(--ui-bg-page) 88%, transparent) 72%, transparent);
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--progress) {
+    justify-content: center;
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--status) {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .session-chrome-status__metric {
+    white-space: nowrap;
   }
 
   .session-chrome-status__metric--current {
@@ -1233,27 +1625,40 @@
     color: var(--ui-text-muted);
   }
 
-  :global(.chrome-back-link--session) {
-    padding-inline: var(--ui-space-1);
+  :global(.chrome-back-link--session.ui-button) {
+    min-height: auto;
+    padding: 0;
+    width: auto;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  :global(.chrome-back-link--session.ui-button:hover:not(:disabled)) {
+    transform: none;
+    color: var(--ui-text-primary);
   }
 
   .study-session {
     width: 100%;
-    height: 100%;
-    min-height: 0;
     display: grid;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto;
     align-content: start;
     justify-items: center;
-    gap: 0;
+    gap: clamp(1.1rem, 0.9rem + 0.7vw, 1.5rem);
     padding-top: 0;
-    overflow: hidden;
   }
 
   .study-session--scrollable {
     grid-template-rows: auto;
-    overflow: auto;
-    padding-top: 0;
   }
 
   .study-session__canvas {
@@ -1262,26 +1667,25 @@
     display: grid;
     align-content: start;
     justify-items: center;
-    gap: 0;
+    gap: clamp(1rem, 0.85rem + 0.55vw, 1.35rem);
     padding-block: 0;
   }
 
   .study-session__canvas--flashcards {
-    max-width: var(--size-page-study-compact);
+    max-width: var(--study-flow-session-content-width);
+    gap: var(--study-flow-card-gap);
   }
 
   .study-session__canvas--exam {
-    max-width: var(--size-page-study-wide);
+    max-width: var(--study-flow-session-width);
   }
 
   .study-session__canvas--results,
   .study-session__canvas--compact {
-    max-width: var(--size-page-readable);
+    max-width: var(--study-flow-session-width);
   }
 
   .study-session--scrollable .study-session__canvas {
-    height: auto;
-    min-height: auto;
     align-content: start;
     padding-block: 0;
   }
@@ -1293,27 +1697,46 @@
     font-size: 0.82rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
-    margin-top: clamp(0.25rem, 0.5vh, 0.4rem);
-    padding-bottom: clamp(0.1rem, 0.4vh, 0.3rem);
+    margin-top: 0;
+    padding-bottom: 0;
+  }
+
+  .study-session__hint--flashcards {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    color: var(--ui-text-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    text-align: center;
   }
 
   .study-session__primary,
   .study-session__nav,
   .study-session__error {
-    width: min(100%, 48rem);
+    width: min(100%, var(--study-flow-session-width));
   }
 
   .study-session__primary {
     justify-content: center;
-    margin-top: clamp(0.32rem, 0.7vh, 0.5rem);
+    margin-top: 0;
+  }
+
+  .study-session__primary--flashcards {
+    margin-top: 0;
   }
 
   .study-session__answer-actions {
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 0.6rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
+  }
+
+  .study-session__answer-actions--flashcards {
+    gap: var(--study-flow-card-gap);
   }
 
   .controls {
@@ -1329,24 +1752,28 @@
   .controls-secondary {
     justify-content: space-between;
     align-items: center;
-    margin-top: clamp(0.22rem, 0.45vh, 0.4rem);
+    margin-top: 0;
   }
 
   .study-session__nav :global(.ui-button) {
-    min-width: 7.5rem;
+    min-width: 0;
   }
 
   :global(.study-session-card) {
-    width: min(100%, 48rem);
-    background: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
+    width: min(100%, var(--study-flow-session-width));
+    background: var(--study-flow-card-surface);
     box-shadow: none;
   }
 
   :global(.study-session-card--flashcards) {
-    min-height: clamp(8.75rem, 11.5vh, 10.4rem);
+    width: 100%;
+    min-height: clamp(18rem, 38vh, 22rem);
     display: grid;
-    place-items: center;
-    text-align: center;
+    gap: clamp(1rem, 0.8rem + 0.75vw, 1.5rem);
+    text-align: left;
+    border-radius: var(--study-flow-card-radius);
+    padding: clamp(1.5rem, 1.15rem + 0.8vw, 2rem);
+    box-shadow: none;
   }
 
   .study-session-card__copy {
@@ -1355,21 +1782,21 @@
   }
 
   .study-session-card__copy--flashcards {
-    width: min(100%, 38rem);
-    gap: var(--ui-space-2);
+    width: 100%;
+    gap: 0.9rem;
     justify-items: start;
     text-align: left;
   }
 
   .study-session-card__copy--exam {
-    width: min(100%, 42rem);
+    width: 100%;
     gap: var(--ui-space-3);
     justify-items: start;
     text-align: left;
   }
 
   .study-session-card__body {
-    width: min(100%, 42rem);
+    width: 100%;
   }
 
   :global(.study-session-card) h2 {
@@ -1379,18 +1806,199 @@
 
   :global(.study-session-card--flashcards) h2 {
     max-width: none;
-    font-size: clamp(1.7rem, 1.35rem + 1vw, 2.15rem);
-    line-height: 1.3;
+    font-size: clamp(1.55rem, 1.15rem + 0.95vw, 2.2rem);
+    line-height: 1.38;
+    font-weight: 500;
+    letter-spacing: -0.03em;
   }
 
   :global(.study-session-card--exam) {
-    max-height: min(29.5rem, calc(100dvh - 11.5rem));
-    overflow: auto;
+    max-height: none;
+    gap: calc(var(--study-flow-card-gap) + var(--ui-space-2));
+    border-radius: var(--study-flow-card-radius);
+    box-shadow: none;
   }
 
   :global(.study-session-card--exam) h2 {
     font-size: clamp(1.35rem, 1.15rem + 0.8vw, 1.8rem);
     line-height: 1.35;
+  }
+
+  .exam-surface {
+    gap: var(--study-flow-card-gap);
+  }
+
+  .exam-start-card {
+    width: min(100%, var(--study-flow-hub-width));
+    min-height: 0;
+    justify-items: center;
+    text-align: center;
+    gap: calc(var(--study-flow-card-gap) + var(--ui-space-2));
+    border-radius: var(--study-flow-card-radius);
+    background: var(--study-flow-card-surface);
+    box-shadow: none;
+    align-content: center;
+  }
+
+  :global(.activity-launch.exam-start-card) {
+    width: min(100%, var(--study-flow-hub-width));
+    min-height: 0;
+    align-content: center;
+  }
+
+  .exam-start-card__copy,
+  .exam-start-card__actions {
+    width: 100%;
+  }
+
+  .exam-start-card__copy {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .exam-start-card__actions {
+    display: grid;
+  }
+
+  .exam-start-button {
+    width: 100%;
+    min-height: 3.5rem;
+    box-shadow: none;
+    border-radius: calc(var(--ui-radius-md) + 0.05rem);
+  }
+
+  .exam-progress {
+    width: min(100%, var(--study-flow-session-width));
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .exam-progress__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: var(--ui-text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.4;
+  }
+
+  :global(.exam-progress__bar) {
+    height: 0.38rem;
+  }
+
+  .exam-question-card {
+    gap: 1.5rem;
+    background: var(--study-flow-card-surface);
+  }
+
+  .exam-question-card__prompt {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.18rem);
+    font-weight: 500;
+    line-height: 1.65;
+  }
+
+  .exam-option-stack {
+    width: 100%;
+  }
+
+  .exam-nav {
+    width: min(100%, var(--study-flow-session-width));
+    gap: 0.75rem;
+  }
+
+  :global(.exam-nav-button.ui-button) {
+    flex: 1 1 0;
+    min-width: 0;
+    box-shadow: none;
+  }
+
+  .exam-score-card {
+    width: min(100%, var(--study-flow-session-width));
+    justify-items: center;
+    text-align: center;
+    gap: 0.55rem;
+    box-shadow: none;
+  }
+
+  .exam-score-card__label,
+  .exam-score-card__meta {
+    margin: 0;
+    color: var(--ui-text-secondary);
+  }
+
+  .exam-score-card__label {
+    font-size: 0.84rem;
+  }
+
+  .exam-score-card__value {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(2.25rem, 2rem + 1vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .exam-score-card__meta {
+    font-size: 0.9rem;
+  }
+
+  .exam-review-head h3 {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .exam-review-list {
+    width: 100%;
+  }
+
+  .review-copy {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .review-copy p {
+    color: var(--ui-text-secondary);
+  }
+
+  .review-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .review-icon svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .review-icon__dash {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--ui-text-muted);
+  }
+
+  .review-icon--correct {
+    color: var(--ui-accent-success);
+  }
+
+  .review-icon--incorrect {
+    color: var(--ui-accent-danger);
+  }
+
+  :global(.exam-retake-button.ui-button) {
+    box-shadow: none;
   }
 
   :global(.study-session-panel--compact),
@@ -1400,6 +2008,150 @@
 
   :global(.flashcard-stage-answer) {
     border-color: var(--ui-border-strong);
+  }
+
+  .flashcard-stage__answer {
+    display: grid;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    border-top: 0 solid transparent;
+    padding-top: 0;
+    transition:
+      max-height var(--motion-slow) var(--ease-standard),
+      opacity var(--motion-default) var(--ease-standard),
+      padding-top var(--motion-default) var(--ease-standard),
+      border-color var(--motion-default) var(--ease-standard);
+  }
+
+  .flashcard-stage__answer--visible {
+    max-height: 22rem;
+    opacity: 1;
+    border-top: 1px solid var(--ui-border-default);
+    padding-top: 1.1rem;
+  }
+
+  .flashcard-stage__answer-copy {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .flashcard-stage__answer-label {
+    margin: 0;
+    color: var(--ui-accent-success);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .flashcard-stage__answer-text {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.65;
+  }
+
+  :global(.flashcard-reveal-button.ui-button) {
+    min-height: 3.25rem;
+    font-size: 0.98rem;
+    box-shadow: none;
+    border-radius: calc(var(--ui-radius-md) + 0.05rem);
+    border: 1px solid var(--ui-text-primary);
+  }
+
+  :global(.flashcard-score-button.ui-button) {
+    min-height: 3.1rem;
+    flex: 1 1 0;
+    font-size: 0.95rem;
+    box-shadow: none;
+    border: 1px solid currentColor;
+  }
+
+  :global(.flashcard-score-button .ui-button__icon svg),
+  :global(.flashcard-nav-button .ui-button__icon svg) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .flashcard-nav {
+    width: 100%;
+    gap: var(--ui-space-4);
+    margin-top: 0;
+  }
+
+  :global(.flashcard-nav-button.ui-button) {
+    flex: 1 1 0;
+    min-width: var(--study-flow-session-nav-button-min-width);
+    min-height: var(--study-flow-session-nav-button-height);
+    padding-inline: 1.25rem;
+    border-radius: calc(var(--ui-radius-md) - 0.05rem);
+    background: var(--ui-surface-card);
+    border: 1px solid var(--ui-border-default);
+    color: var(--ui-text-primary);
+    box-shadow: none;
+  }
+
+  :global(.flashcard-nav-button.ui-button:hover:not(:disabled)) {
+    transform: none;
+  }
+
+  :global(.flashcard-nav-button .ui-button__icon) {
+    color: var(--ui-text-secondary);
+  }
+
+  .flashcard-session-footer {
+    width: 100%;
+    display: grid;
+    justify-items: center;
+    gap: var(--ui-space-3);
+  }
+
+  .flashcard-results-card {
+    width: min(100%, var(--study-flow-session-width));
+    justify-items: center;
+    text-align: center;
+    gap: 0.55rem;
+    box-shadow: none;
+  }
+
+  .flashcard-results-card__label,
+  .flashcard-results-card__meta {
+    margin: 0;
+    color: var(--ui-text-secondary);
+  }
+
+  .flashcard-results-card__label {
+    font-size: 0.84rem;
+  }
+
+  .flashcard-results-card__value {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(2.1rem, 1.9rem + 0.9vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .flashcard-results-card__meta {
+    font-size: 0.9rem;
+  }
+
+  .flashcard-review-head h3 {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .flashcard-review-list {
+    width: 100%;
+  }
+
+  :global(.flashcard-retake-button.ui-button) {
+    box-shadow: none;
   }
 
   .explanation {
@@ -1413,14 +2165,6 @@
     gap: 1rem;
   }
 
-  .results-summary h2 {
-    font-size: clamp(1.35rem, 2vw, 1.85rem);
-  }
-
-  .results-summary p {
-    color: var(--muted-foreground);
-  }
-
   .stack {
     display: grid;
     gap: 0.75rem;
@@ -1431,12 +2175,12 @@
   }
 
   .option {
-    border: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
-    border-radius: 1rem;
-    background: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--card) 88%, var(--muted) 12%);
     color: var(--color-text-primary);
-    min-height: 4rem;
-    padding: 0.9rem 1rem;
+    min-height: 3.75rem;
+    padding: 0.95rem 1rem;
     display: flex;
     gap: 0.85rem;
     align-items: start;
@@ -1444,22 +2188,41 @@
     text-align: left;
     font: inherit;
     font-size: var(--font-size-sm);
-    box-shadow: var(--shadow-inline-control);
+    box-shadow: none;
     transition: border-color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard),
       color var(--motion-fast) var(--ease-standard),
-      box-shadow var(--motion-fast) var(--ease-standard);
+      box-shadow var(--motion-fast) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
   }
 
   .option:hover {
-    border-color: var(--ui-border-strong);
-    background: color-mix(in srgb, var(--card) 56%, var(--muted) 44%);
-    box-shadow: var(--shadow-card);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 34%, var(--ui-border-default) 66%);
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--ui-text-primary) 9%, transparent), transparent 16%),
+      color-mix(in srgb, var(--ui-surface-secondary) 62%, var(--ui-surface-card) 38%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 14%, transparent),
+      0 10px 24px rgba(0, 0, 0, 0.18);
+    transform: translateY(-2px);
   }
 
   .option-selected {
-    border-color: color-mix(in srgb, var(--foreground) 22%, var(--border) 78%);
-    background: color-mix(in srgb, var(--foreground) 6%, var(--muted) 94%);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 42%, var(--ui-border-default) 58%);
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--ui-text-primary) 10%, transparent), transparent 18%),
+      color-mix(in srgb, var(--ui-surface-secondary) 78%, var(--ui-surface-card) 22%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 16%, transparent),
+      0 12px 28px rgba(0, 0, 0, 0.22);
+    transform: translateY(-1px);
+  }
+
+  .option-selected .option-letter {
+    border-color: color-mix(in srgb, var(--ui-text-primary) 42%, var(--ui-border-default) 58%);
+    background: var(--ui-text-primary);
+    color: var(--ui-bg-page);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
   }
 
   .option:focus-visible {
@@ -1468,16 +2231,26 @@
   }
 
   .option-letter {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 1.75rem;
+    height: 1.75rem;
     flex: 0 0 auto;
-    border-radius: 999px;
+    border-radius: 0.5rem;
     border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     display: grid;
     place-items: center;
     font-size: 0.67rem;
     font-weight: 600;
     background: color-mix(in srgb, var(--background) 75%, var(--muted) 25%);
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .option:hover .option-letter {
+    border-color: color-mix(in srgb, var(--ui-text-primary) 28%, var(--ui-border-default) 72%);
+    background: color-mix(in srgb, var(--ui-text-primary) 18%, var(--ui-surface-secondary) 82%);
+    color: var(--ui-text-primary);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
   }
 
   :global(.answer-input-shell) {
@@ -1496,18 +2269,18 @@
   }
 
   .review {
-    border: 1px solid color-mix(in srgb, var(--color-danger) 24%, var(--ui-border-subtle) 76%);
-    border-radius: 1rem;
-    background: color-mix(in srgb, var(--color-danger) 8%, var(--card) 92%);
-    padding: 1rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--color-danger) 22%, var(--ui-border-subtle) 78%);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--color-danger) 4%, var(--card) 96%);
+    padding: 1rem;
     display: grid;
-    gap: 0.5rem;
+    gap: 0.6rem;
     font-size: var(--font-size-sm);
   }
 
   .review-correct {
-    border-color: color-mix(in srgb, var(--color-success) 24%, var(--ui-border-subtle) 76%);
-    background: color-mix(in srgb, var(--color-success) 8%, var(--card) 92%);
+    border-color: color-mix(in srgb, var(--color-success) 22%, var(--ui-border-subtle) 78%);
+    background: color-mix(in srgb, var(--color-success) 4%, var(--card) 96%);
   }
 
   .review-question {
@@ -1526,6 +2299,31 @@
   }
 
   @media (max-width: 640px) {
+    .activity-content-head {
+      flex-direction: column;
+      gap: var(--ui-space-3);
+    }
+
+    .activity-content-head__actions {
+      width: 100%;
+    }
+
+    :global(.summary-regenerate-button.ui-button) {
+      width: 100%;
+    }
+
+    .exam-progress__meta {
+      font-size: 0.78rem;
+    }
+
+    .exam-nav {
+      gap: 0.65rem;
+    }
+
+    .exam-question-card__prompt {
+      font-size: 1rem;
+    }
+
     .launch-metrics {
       grid-template-columns: 1fr;
     }
@@ -1537,6 +2335,12 @@
     .session-chrome-status {
       gap: 0.35rem 0.45rem;
       font-size: 0.72rem;
+    }
+
+    .session-chrome-status--flashcards {
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      white-space: normal;
     }
 
     .controls-secondary,
@@ -1552,16 +2356,7 @@
     }
 
     .study-session__canvas {
-      height: auto;
-      min-height: 0;
-      padding-top: 0.25rem;
-    }
-
-    .study-session {
-      height: auto;
-      min-height: 0;
-      grid-template-rows: auto auto;
-      overflow: visible;
+      padding-top: 0;
     }
 
     .study-session__answer-actions {
@@ -1569,8 +2364,16 @@
       width: 100%;
     }
 
+    .study-session__answer-actions--flashcards {
+      gap: 0.75rem;
+    }
+
     .study-session__nav {
       gap: 0.75rem;
+    }
+
+    .flashcard-session-footer {
+      gap: var(--ui-space-4);
     }
 
     .study-session__nav :global(.ui-button) {
@@ -1578,7 +2381,8 @@
     }
 
     :global(.study-session-card--flashcards) {
-      min-height: 12.5rem;
+      gap: 1.25rem;
+      padding: 1.25rem;
     }
 
     :global(.study-session-card--exam) {
@@ -1586,7 +2390,7 @@
     }
 
     :global(.study-session-card--flashcards) h2 {
-      font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
+      font-size: clamp(1.3rem, 1.02rem + 0.75vw, 1.7rem);
     }
   }
 </style>

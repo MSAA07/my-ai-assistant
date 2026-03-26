@@ -11,6 +11,7 @@
   export let files = [];
   export let accept = '';
   export let multiple = true;
+  export let className = '';
 
   export let title = '';
   export let description = '';
@@ -25,8 +26,8 @@
   export let removeFileLabel = '';
   export let errorMessage = '';
 
-  $: activeFileName = files?.[0]?.name || '';
   $: canSubmit = Array.isArray(files) && files.length > 0 && !busy;
+  $: showFooter = busy || files.length > 0 || showCounter;
 
   function handleSubmit() {
     dispatch('submit');
@@ -46,7 +47,10 @@
   }
 </script>
 
-<section class="upload-panel" aria-label={title}>
+<section
+  class={['upload-panel', className, $$props.class ?? ''].filter(Boolean).join(' ')}
+  aria-label={title}
+>
   <div class="upload-panel__header">
     <div class="upload-panel__titles">
       <h2>{title}</h2>
@@ -63,7 +67,6 @@
     title={dropzoneTitle}
     orLabel={dropzoneOr}
     {browseLabel}
-    {activeFileName}
     on:filesSelected={handleFilesSelected}
   />
 
@@ -88,49 +91,49 @@
     </div>
   {/if}
 
-  <footer class="upload-panel__footer">
-    {#if showCounter}
-      <p class="upload-panel__counter">{files.length}/{maxFiles}</p>
-    {/if}
-    <div class="upload-panel__actions">
-      <Button type="button" variant="outline" class="upload-panel__cancel" on:click={handleCancel} disabled={busy}>
-        {cancelLabel}
-      </Button>
-      <Button
-        type="button"
-        variant="primary"
-        class="upload-panel__submit"
-        on:click={handleSubmit}
-        disabled={!canSubmit}
-        loading={busy}
-      >
-        {busy ? submitBusyLabel : submitLabel}
-      </Button>
-    </div>
-  </footer>
+  {#if showFooter}
+    <footer class="upload-panel__footer">
+      {#if showCounter}
+        <p class="upload-panel__counter">{files.length}/{maxFiles}</p>
+      {/if}
+      <div class="upload-panel__actions">
+        <Button type="button" variant="outline" class="upload-panel__cancel" on:click={handleCancel} disabled={busy}>
+          {cancelLabel}
+        </Button>
+        <Button
+          type="button"
+          variant="primary"
+          class="upload-panel__submit"
+          on:click={handleSubmit}
+          disabled={!canSubmit}
+          loading={busy}
+        >
+          {busy ? submitBusyLabel : submitLabel}
+        </Button>
+      </div>
+    </footer>
+  {/if}
 </section>
 
 <style>
   .upload-panel {
     display: grid;
-    gap: 1.25rem;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: var(--upload-modal-bg);
-    box-shadow: var(--shadow-card);
+    gap: var(--upload-panel-gap);
+    padding: var(--upload-panel-padding);
+    border-radius: var(--ui-radius-md);
+    border: 1px solid var(--upload-panel-border);
+    background: var(--upload-panel-bg);
+    box-shadow: var(--upload-panel-shadow);
   }
 
   .upload-panel__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--space-3);
+    display: grid;
+    gap: var(--ui-space-1);
   }
 
   .upload-panel__titles {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--ui-space-1);
   }
 
   .upload-panel__titles h2,
@@ -141,26 +144,28 @@
   }
 
   .upload-panel__titles h2 {
-    color: var(--upload-modal-title);
-    font-size: 1.08rem;
+    color: var(--upload-panel-title);
+    font-size: var(--ui-type-title-sm);
     font-weight: 600;
     letter-spacing: -0.02em;
   }
 
   .upload-panel__titles p {
-    color: var(--upload-modal-description);
+    max-width: 32rem;
+    color: var(--upload-panel-description);
     font-size: var(--font-size-sm);
-    line-height: 1.6;
+    line-height: 1.5;
   }
 
   .upload-panel__support {
-    color: var(--upload-support-text);
+    margin-top: -0.125rem;
+    color: var(--upload-panel-support);
     font-size: var(--font-size-xs);
   }
 
   .upload-panel__error {
     margin: 0;
-    color: color-mix(in srgb, var(--color-danger) 72%, var(--color-text-primary) 28%);
+    color: var(--upload-panel-error);
     font-size: var(--font-size-sm);
     line-height: 1.5;
   }
@@ -175,49 +180,47 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    border-top: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
-    padding-top: 1rem;
-    margin-top: var(--space-1);
+    border-top: 1px solid var(--upload-footer-border);
+    padding-top: var(--ui-space-4);
   }
 
   .upload-panel__counter {
-    color: var(--upload-support-text);
+    color: var(--upload-panel-support);
     font-size: var(--font-size-xs);
   }
 
   .upload-panel__actions {
     display: flex;
-    gap: var(--space-2);
+    gap: 0.75rem;
   }
 
   :global(.upload-panel__cancel.ui-button) {
-    min-width: 120px;
+    min-width: 6.5rem;
   }
 
   :global(.upload-panel__submit.ui-button) {
-    min-width: 120px;
+    min-width: 6.5rem;
+    box-shadow: none;
   }
 
   @media (max-width: 720px) {
-    .upload-panel {
-      padding: var(--space-4);
-    }
-
     .upload-panel__footer {
-      flex-direction: column;
-      align-items: stretch;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     .upload-panel__counter {
-      text-align: center;
+      text-align: left;
     }
 
     .upload-panel__actions {
-      width: 100%;
+      width: min(100%, 228px);
+      margin-left: auto;
     }
 
     :global(.upload-panel__actions .ui-button) {
-      flex: 1;
+      flex: 1 1 0;
       min-width: 0;
     }
   }

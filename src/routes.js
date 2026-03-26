@@ -81,7 +81,7 @@ const STUDY_ROUTE = {
   parentNavId: 'study',
   path: '/study/:id/:section?',
   component: StudyHubDocument,
-  pageTitleKey: 'nav.study',
+  pageTitleKey: 'nav.studyDetail',
   match(path) {
     if (!path.startsWith('/study/')) {
       return null;

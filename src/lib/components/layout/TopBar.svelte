@@ -149,10 +149,11 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--ui-space-4);
-    padding: 0 var(--layout-shell-padding-inline);
+    padding: 0 max(var(--layout-shell-padding-inline), env(safe-area-inset-left))
+      0 max(var(--layout-shell-padding-inline), env(safe-area-inset-right));
     border-bottom: 1px solid var(--ui-border-default);
-    background: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-bg-page) 12%);
-    backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--ui-surface-card) 90%, var(--ui-bg-page) 10%);
+    backdrop-filter: blur(10px);
   }
 
   .title-area {
@@ -176,22 +177,26 @@
 
   .sidebar-toggle {
     display: inline-flex;
-    min-height: 34px;
+    width: 32px;
+    min-height: 32px;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0 0.75rem;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
     border: 1px solid var(--ui-border-default);
-    border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-surface-card) 72%, var(--ui-surface-secondary) 28%);
-    box-shadow: var(--shadow-inline-control);
-    color: var(--ui-text-primary);
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+    box-shadow: none;
+    color: var(--ui-text-secondary);
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard);
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
   }
 
   .sidebar-toggle:hover {
     background: var(--ui-surface-ghost);
+    color: var(--ui-text-primary);
   }
 
   .sidebar-toggle:focus-visible {
@@ -207,9 +212,7 @@
   }
 
   .toggle-label {
-    white-space: nowrap;
-    font-size: 0.8125rem;
-    font-weight: 500;
+    display: none;
   }
 
   .utility-area {
@@ -222,9 +225,9 @@
   :global(.plan-pill) {
     min-height: 24px;
     padding-inline: 0.625rem;
-    border-radius: 999px;
+    border-radius: var(--ui-radius-sm);
     border-color: transparent;
-    background: var(--ui-surface-secondary);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 82%, transparent);
     color: var(--ui-text-primary);
     letter-spacing: 0;
     font-weight: 500;
@@ -238,8 +241,8 @@
     align-items: center;
     justify-content: center;
     border: 1px solid var(--ui-border-default);
-    border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-surface-secondary) 66%, transparent);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 48%, transparent);
     color: var(--ui-text-muted);
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard),
@@ -276,12 +279,12 @@
   }
 
   .account-trigger {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: color-mix(in srgb, var(--card) 70%, var(--muted) 30%);
+    background: color-mix(in srgb, var(--card) 78%, var(--muted) 22%);
     color: var(--foreground);
-    box-shadow: var(--shadow-inline-control);
+    box-shadow: none;
   }
 
   .account-avatar {

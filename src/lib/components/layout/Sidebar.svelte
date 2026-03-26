@@ -104,21 +104,21 @@
 
 <style>
   .sidebar {
-    position: fixed;
-    inset-block: 0;
-    inset-inline-start: 0;
+    position: sticky;
+    top: 0;
+    inset-inline-start: auto;
     z-index: 20;
     box-sizing: border-box;
     display: flex;
     height: 100dvh;
     width: var(--shell-sidebar-width, 16rem);
     flex-direction: column;
-    overflow: hidden auto;
-    overscroll-behavior: contain;
+    overflow-x: hidden;
+    overflow-y: auto;
     scrollbar-gutter: stable;
-    background: color-mix(in srgb, var(--sidebar, var(--ui-surface-card)) 96%, black);
+    background: color-mix(in srgb, var(--sidebar, var(--ui-surface-card)) 92%, black);
     border-inline-end: 1px solid var(--ui-border-default);
-    box-shadow: inset -1px 0 0 color-mix(in srgb, var(--ui-text-primary) 4%, transparent);
+    box-shadow: none;
     transition: width var(--motion-default) var(--ease-standard);
   }
 
@@ -137,7 +137,7 @@
     padding: 0 var(--ui-space-4);
     border-bottom: 1px solid var(--ui-border-default);
     background: inherit;
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(10px);
   }
 
   .brand {
@@ -190,7 +190,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
-    border-radius: 0.75rem;
+    border-radius: var(--ui-radius-sm);
     color: var(--ui-text-muted);
     text-decoration: none;
     font-size: 0.875rem;
@@ -207,7 +207,7 @@
   .nav-item.active {
     background: var(--sidebar-accent);
     color: var(--ui-text-primary);
-    box-shadow: var(--shadow-inline-control);
+    box-shadow: none;
   }
 
   .nav-item:focus-visible,
@@ -297,10 +297,10 @@
     display: grid;
     gap: 0.2rem;
     padding: 0.85rem 0.9rem;
-    border-radius: 0.95rem;
+    border-radius: var(--ui-radius-md);
     border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: color-mix(in srgb, var(--sidebar-accent) 72%, transparent);
-    box-shadow: var(--shadow-inline-control);
+    background: color-mix(in srgb, var(--sidebar-accent) 64%, transparent);
+    box-shadow: none;
     color: var(--foreground);
     text-decoration: none;
   }

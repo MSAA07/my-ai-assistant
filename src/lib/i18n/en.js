@@ -32,6 +32,7 @@ export default {
     home: 'Home',
     dashboard: 'Home',
     study: 'Study Hub Library',
+    studyDetail: 'Study',
     documents: 'Library',
     exams: 'Exams',
     flashcards: 'Flashcards',

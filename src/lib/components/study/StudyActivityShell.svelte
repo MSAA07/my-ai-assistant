@@ -19,6 +19,7 @@
   export let progressMax = 1;
   export let contentWidth = 'wide';
   export let chromeVariant = 'default';
+  $: stickyChrome = chromeVariant === 'active-session';
 
   $: resolvedClass = [
     'study-activity-shell',
@@ -31,10 +32,12 @@
     .join(' ');
 </script>
 
-<ActivityChrome {...$$restProps} className={resolvedClass}>
-  {#if $$slots.back}
-    <slot name="back" slot="back" />
-  {/if}
+<ActivityChrome {...$$restProps} className={resolvedClass} sticky={stickyChrome}>
+  <svelte:fragment slot="back">
+    {#if $$slots.back}
+      <slot name="back" />
+    {/if}
+  </svelte:fragment>
 
   <svelte:fragment slot="progress">
     {#if chromeVariant === 'active-session' && $$slots['chrome-progress']}
@@ -57,6 +60,10 @@
   <svelte:fragment slot="status">
     {#if chromeVariant === 'active-session' && $$slots['chrome-status']}
       <div class="study-activity-shell__chrome-slot">
+        <slot name="chrome-status" />
+      </div>
+    {:else if $$slots['chrome-status']}
+      <div class="study-activity-shell__chrome-slot study-activity-shell__chrome-slot--default">
         <slot name="chrome-status" />
       </div>
     {:else}
@@ -213,6 +220,8 @@
 
   .study-activity-shell__session {
     min-width: 0;
+    display: grid;
+    gap: var(--ui-space-3);
   }
 
   :global(.study-activity-shell__canvas) {
@@ -221,55 +230,97 @@
     margin-inline: auto;
   }
 
+  /* Summary/exam chrome: single-column controls; only the back link lives in the rail.
+     Badge, title, and regenerate have moved into the content body column. */
+  :global(.study-activity-shell--summary .activity-chrome__controls) {
+    width: min(100%, var(--study-flow-reading-width));
+    margin-inline: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--study-flow-copy-gap);
+  }
+
+  :global(.study-activity-shell--exam .activity-chrome__controls) {
+    width: min(100%, var(--study-flow-session-width));
+    margin-inline: auto;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--study-flow-copy-gap);
+  }
+
+  /* Hide progress and status panes; they are unused for summary/exam now */
+  :global(.study-activity-shell--summary .activity-chrome__pane--progress),
+  :global(.study-activity-shell--exam .activity-chrome__pane--progress),
+  :global(.study-activity-shell--summary .activity-chrome__pane--status),
+  :global(.study-activity-shell--exam .activity-chrome__pane--status) {
+    display: none;
+  }
+
+  :global(.study-activity-shell--summary .study-activity-shell__canvas) {
+    width: min(100%, var(--study-flow-reading-width));
+  }
+
+  :global(.study-activity-shell--exam .study-activity-shell__canvas) {
+    width: min(100%, var(--study-flow-session-width));
+  }
+
+  /* Tighten back-link rail to content-body gap for summary and exam */
+  :global(.study-activity-shell--summary.activity-chrome),
+  :global(.study-activity-shell--exam.activity-chrome) {
+    gap: var(--ui-space-2);
+  }
+
   :global(.study-activity-shell--active-session.activity-chrome) {
-    min-height: 100%;
-    height: 100%;
-    max-height: 100%;
-    gap: 0;
-    overflow: clip;
-  }
-
-  :global(.shell-content:has(.study-activity-shell--active-session)) {
-    overflow: hidden;
-  }
-
-  :global(.content-wrapper:has(.study-activity-shell--active-session)) {
-    height: 100%;
-    min-height: 100%;
-    padding: 0;
-    gap: 0;
-    overflow: hidden;
-    align-content: stretch;
+    gap: var(--ui-space-3);
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__rail) {
-    position: fixed;
-    inset: 0 0 auto 0;
-    z-index: 32;
-    padding:
-      max(var(--ui-space-2), calc(env(safe-area-inset-top) + 0.4rem))
-      max(var(--ui-space-4), env(safe-area-inset-right))
-      0
-      max(var(--ui-space-4), env(safe-area-inset-left));
+    z-index: 12;
+    padding-bottom: var(--ui-space-1);
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__rail) {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-bg-page) 97%, transparent), color-mix(in srgb, var(--ui-bg-page) 92%, transparent) 78%, transparent);
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__controls) {
+    width: min(100%, var(--study-flow-session-content-width));
+    margin-inline: auto;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: clamp(0.75rem, 1vw + 0.4rem, 1.4rem);
-    align-items: end;
+    align-items: center;
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__controls) {
+    grid-template-columns: auto minmax(11rem, 1fr) auto;
+    gap: var(--ui-space-4);
+    min-height: 0;
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--progress) {
+    justify-content: center;
+    min-width: 0;
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--status) {
+    justify-content: flex-end;
+    width: auto;
+    max-width: none;
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--back) {
+    justify-content: flex-start;
+    width: auto;
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__body) {
-    min-height: 100%;
-    height: 100%;
-    gap: 0;
-    padding-top: clamp(3.05rem, 2.9rem + 0.55vw, 3.45rem);
+    width: min(100%, var(--study-flow-session-content-width));
+    margin-inline: auto;
+    gap: var(--study-flow-card-gap);
     padding-bottom: max(var(--ui-space-3), env(safe-area-inset-bottom));
-    overflow: hidden;
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__pane) {
-    align-items: flex-end;
+    align-items: center;
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__pane--progress) {
@@ -277,11 +328,7 @@
   }
 
   :global(.study-activity-shell--active-session .study-activity-shell__session) {
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-    padding-inline: max(var(--ui-space-4), env(safe-area-inset-left));
-    padding-right: max(var(--ui-space-4), env(safe-area-inset-right));
+    padding-inline: 0;
   }
 
   @media (max-width: 900px) {
@@ -297,25 +344,26 @@
       grid-column: 1 / -1;
       justify-content: center;
     }
+
+    :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__controls) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--ui-space-3);
+    }
   }
 
   @media (max-width: 640px) {
-    :global(.study-activity-shell--active-session .activity-chrome__rail) {
-      padding-top: max(var(--ui-space-1), calc(env(safe-area-inset-top) + 0.3rem));
-    }
-
     :global(.study-activity-shell--active-session .activity-chrome__controls) {
-      grid-template-columns: minmax(0, 1fr) auto;
+      width: 100%;
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--ui-space-3);
     }
 
-    :global(.study-activity-shell--active-session .activity-chrome__body) {
-      padding-top: clamp(2.95rem, 2.8rem + 0.7vw, 3.35rem);
+    :global(.study-activity-shell--active-session .study-activity-shell__session) {
+      gap: var(--ui-space-3);
     }
 
-    :global(.study-activity-shell--active-session .study-activity-shell__session) {
-      padding-inline: max(var(--ui-space-3), env(safe-area-inset-left));
-      padding-right: max(var(--ui-space-3), env(safe-area-inset-right));
+    :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__controls) {
+      gap: var(--ui-space-2);
     }
   }
 </style>

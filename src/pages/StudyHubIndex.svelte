@@ -1,5 +1,6 @@
 <script>
   import { onDestroy, onMount } from 'svelte';
+  import { MoreVertical, Upload } from '@lucide/svelte';
   import { API_BASE } from '../config.js';
   import { routeParams } from '../stores/router.js';
   import { t } from '../lib/i18n/t.js';
@@ -245,13 +246,29 @@
   }
 </script>
 
-<PageLayout class="library-page" width="default">
-  <PageHeader eyebrow={t('documentsPage.eyebrow')} title={t('documentsPage.title')} subtitle={t('documentsPage.description')}>
+<PageLayout class="library-page" width="wide">
+  <PageHeader
+    className="library-header"
+    eyebrow={t('documentsPage.eyebrow')}
+    title={t('documentsPage.title')}
+    subtitle={t('documentsPage.description')}
+  >
     <div slot="actions" class="header-actions">
-      <Button type="button" variant="secondary" on:click={() => loadDocuments({ background: documents.length > 0 })} disabled={loading || refreshing}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="library-refresh"
+        on:click={() => loadDocuments({ background: documents.length > 0 })}
+        disabled={loading || refreshing}
+        aria-label={t('documentsPage.actions.refresh')}
+      >
         {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
       </Button>
-      <Button type="button" variant="primary" on:click={goToHome}>
+      <Button type="button" variant="primary" className="library-upload" on:click={goToHome}>
+        <span slot="icon" aria-hidden="true">
+          <Upload />
+        </span>
         {t('documentsPage.actions.uploadCta')}
       </Button>
     </div>
@@ -305,7 +322,9 @@
                 aria-expanded={openMenuId === doc.id}
                 on:click={(event) => toggleMenu(event, doc.id)}
               >
-                <span slot="icon">⋯</span>
+                <span slot="icon" aria-hidden="true">
+                  <MoreVertical />
+                </span>
               </Button>
               {#if openMenuId === doc.id}
                 <MenuSurface class="library-menu" minWidth="140px">
@@ -358,30 +377,40 @@
 <style>
   :global(.library-page) {
     display: grid;
-    gap: var(--ui-space-5);
+    gap: var(--study-flow-page-gap);
     min-width: 0;
   }
 
   .header-actions {
     display: inline-flex;
-    gap: var(--ui-space-3);
+    align-items: center;
+    gap: var(--study-flow-action-gap);
     flex-wrap: wrap;
+  }
+
+  :global(.library-refresh.ui-button) {
+    --button-shadow: none;
+    font-weight: 500;
+  }
+
+  :global(.library-upload.ui-button) {
+    --button-shadow: none;
   }
 
   .alert-stack {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--study-flow-copy-gap);
   }
 
   .documents-grid {
     display: grid;
-    gap: var(--ui-space-4);
+    gap: var(--study-flow-card-gap);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     min-width: 0;
   }
 
   :global(.library-page .document-card) {
-    min-height: 216px;
+    min-height: 180px;
   }
 
   :global(.library-page .document-card:focus-visible) {
@@ -394,10 +423,20 @@
   }
 
   :global(.library-page .card-menu-button) {
-    opacity: 0.78;
+    opacity: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    transition: opacity var(--motion-fast) var(--ease-standard);
+  }
+
+  :global(.library-page .card-menu-button .ui-button__icon svg) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
   }
 
   :global(.library-page .document-card:hover .card-menu-button),
+  :global(.library-page .document-card:focus-within .card-menu-button),
   :global(.library-page .card-menu-button[aria-expanded='true']) {
     opacity: 1;
   }
@@ -411,9 +450,7 @@
 
   :global(.library-page .document-card:hover h2),
   :global(.library-page .document-card:focus-visible h2) {
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--foreground) 45%, transparent);
-    text-underline-offset: 0.16em;
+    color: var(--ui-text-primary);
   }
 
   :global(.inline-error) {
@@ -422,16 +459,22 @@
 
   :global(.library-page .empty-state) {
     min-height: 320px;
-    border-color: var(--border);
-    background: var(--card);
-    box-shadow: var(--shadow-card);
+    border-color: var(--ui-border-default);
+    background: var(--ui-surface-card);
+    box-shadow: none;
   }
 
   :global(.library-page .document-list-skeleton) {
-    gap: 1rem;
+    gap: var(--study-flow-card-gap);
   }
 
   @media (max-width: 1024px) {
+    .documents-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
     .documents-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -444,10 +487,11 @@
 
     .header-actions {
       width: 100%;
+      justify-content: space-between;
     }
 
     .header-actions :global(.ui-button) {
-      flex: 1;
+      flex: 1 1 auto;
     }
   }
 </style>

@@ -1,59 +1,30 @@
-﻿# Agent Documentation (Frontend)
+# Agent Documentation (Frontend)
 
-Practical contributor guide for `my-ai-assistant`.
+Contributor guide for `my-ai-assistant`.
 
-## Stack
+## Scope
 
-- Svelte 5.53.7
-- Vite 7.3.1
-- TailwindCSS 3.4 + PostCSS
-- Better Auth client calls over cookie sessions
+This file is for frontend contributor behavior only.
 
-## Key Runtime Behavior
+For routing, lifecycle ownership, and runtime truth:
 
-- Hash routes are normalized and resolved in `src/routes.js`
-- Session is bootstrapped in `src/stores/auth.js`
-- `src/config.js` selects backend base URL from env or hostname
-- `AppShell.svelte` is the shared authenticated dashboard frame
-- `DocumentView.svelte` drives consolidated summary/flashcards/exam UX and polling for legacy activity routes
-- `StudyHubDocument.svelte` is the canonical document hub for `/study/:id/:section?`
+- see `SYSTEM_OVERVIEW.md`
 
-## Important flows
+For file ownership:
 
-1. Auth
-- Sign in/up via `/api/auth/*/email`
-- Store session in Svelte store
+- see `PROJECT_STRUCTURE.md`
 
-2. Upload
-- `Home.svelte` posts multipart form to `/api/upload`
-- On success, navigate to `/study?highlight=:id`
+For primitive usage:
 
-3. Document processing and generation
-- Poll `GET /api/document/:id` while extraction or generation is active
-- Load excerpts from `/api/document/:id/excerpts`
-- Queue on-demand generation with `POST /api/document/:id/generations`
+- see `src/lib/components/ui/PRIMITIVES.md`
 
-4. Learning interactions
-- Save flashcard progress with `/api/flashcard/progress`
-- Save exam attempts with `/api/exam/attempt`
+## UI System Expectations
 
-## Folder Map
-
-- `src/pages`: page containers and route-level behavior
-- `src/components`: auth/admin feature components
-- `src/lib/components/layout`: shared dashboard shell pieces
-- `src/lib/components/ui`: reusable design-system primitives and dense data surfaces
-- `src/stores`: global auth/router stores
-- `src/lib/i18n`: dictionaries and translator helper
-
-## Current page ownership
-
-- `Home.svelte`: dashboard landing, stats, upload surface
-- `StudyHubIndex.svelte`: library grid of uploaded documents
-- `StudyHubDocument.svelte`: document hub with Summary / Flashcards / Mock Exam action cards
-- `DocumentView.svelte`: consolidated study states for summary, flashcards, and exam
-- `Settings.svelte`: grouped account/theme/language settings
-- `AdminDashboard.svelte`: premium admin shell + tabs
+- Use primitives in `src/lib/components/ui/*` before creating local one-off controls.
+- Use layout primitives in `src/lib/components/layout/*` for shared shell behavior.
+- Use semantic tokens from `src/lib/styles/tokens.css`.
+- Do not add feature styling to `src/styles/global.css`.
+- Keep route and lifecycle wording aligned with `SYSTEM_OVERVIEW.md`.
 
 ## Commands
 
@@ -61,18 +32,19 @@ Practical contributor guide for `my-ai-assistant`.
 - `npm run build`
 - `npm run preview`
 
-## Git Workflow
-
-- Push to `stage` for staging deploy and QA
-- Push to `production` only on explicit request
-
 ## Environment
 
-- `VITE_API_BASE_URL` (optional override)
+- `VITE_API_BASE_URL` optionally overrides host-derived API resolution in `src/config.js`.
 
-Host-derived defaults in code:
-- local: `http://localhost:3001`
-- staging preview hosts: staging Railway backend
-- production host: production Railway backend
+## Documentation Triggers
 
-Last Updated: March 13, 2026
+Update docs when any of these change:
+
+- routing or lifecycle truth: update `SYSTEM_OVERVIEW.md`
+- file ownership: update `PROJECT_STRUCTURE.md`
+- onboarding/setup: update `README.md`
+- primitive usage: update `PRIMITIVES.md`
+- rollout status/history: update `UI_POST_ROLLOUT.md` or archival docs
+- agent workflow rules: update `agent.md` / `AGENTS.md`
+
+Last Updated: March 23, 2026

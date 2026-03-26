@@ -131,16 +131,7 @@ Stop introducing local one-off classes that duplicate primitives:
 - auth form wrappers that do not use `Card + FieldShell + Button`.
 - admin action rows that use raw `<button>` styling when `Button` variants already match.
 
-## Coverage snapshot
-
-Primitive-driven styling now covers:
-
-- shared app shell and reusable UI primitives
-- core user-facing pages (`Home`, `Study`, document detail/activity, `Settings`)
-- auth screens (`SignIn`, `SignUp`)
-- admin overview, users, sessions, storage, audit, and user detail modal
-
-## Common reusable page patterns now in use
+## Common reusable page patterns
 
 - page header card with eyebrow, title, subtitle, optional actions, and optional metadata row
 - metadata pill rows (`MetaPill`) for document/settings/admin hero metadata
@@ -164,8 +155,11 @@ These areas are intentionally left for future structural redesign, not primitive
 3. Revisit sticky table headers only if future data density justifies it.
 
 Post-rollout execution notes and backlog are tracked in `UI_POST_ROLLOUT.md` at the frontend root.
+Route ownership and runtime behavior live in the frontend `SYSTEM_OVERVIEW.md`.
 
 ## Token contract
 
 Primitives consume semantic tokens from `src/lib/styles/tokens.css` (`--ui-*`, `--color-*`, `--space-*`).
 Use `--ui-*` as the authoritative API for new work and treat compatibility aliases as transitional only.
+
+Last Updated: March 23, 2026

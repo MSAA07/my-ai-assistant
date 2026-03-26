@@ -1,10 +1,11 @@
 <script>
   export let className = '';
+  export let sticky = true;
 </script>
 
 <section
   {...$$restProps}
-  class={['activity-chrome', className, $$props.class ?? ''].filter(Boolean).join(' ')}
+  class={['activity-chrome', sticky ? 'activity-chrome--sticky' : 'activity-chrome--static', className, $$props.class ?? ''].filter(Boolean).join(' ')}
 >
   <div class="activity-chrome__rail">
     <div class="activity-chrome__controls">
@@ -41,7 +42,7 @@
     gap: clamp(1rem, 1vw + 0.75rem, 1.5rem);
   }
 
-  .activity-chrome__rail {
+  .activity-chrome--sticky .activity-chrome__rail {
     position: sticky;
     top: 0;
     z-index: 24;
@@ -49,7 +50,19 @@
     pointer-events: none;
   }
 
+  .activity-chrome--static {
+    gap: var(--ui-space-4);
+  }
+
+  .activity-chrome--static .activity-chrome__rail {
+    position: static;
+    z-index: 0;
+    padding-top: 0;
+    pointer-events: auto;
+  }
+
   .activity-chrome__controls {
+    width: 100%;
     display: grid;
     gap: 0.9rem;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
@@ -75,10 +88,16 @@
   }
 
   .activity-chrome__body {
+    width: 100%;
     min-width: 0;
     display: grid;
     gap: clamp(1rem, 1vw + 0.75rem, 1.5rem);
     padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+
+  .activity-chrome--static .activity-chrome__controls,
+  .activity-chrome--static .activity-chrome__body {
+    gap: var(--ui-space-4);
   }
 
   @media (max-width: 900px) {

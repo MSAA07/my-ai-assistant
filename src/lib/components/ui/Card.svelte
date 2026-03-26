@@ -61,27 +61,27 @@
     --card-bg: var(--ui-surface-card);
     --card-fg: var(--ui-text-primary);
     --card-border-color: var(--ui-border-default);
-    --card-shadow: var(--ui-shadow-1);
+    --card-shadow: none;
     --card-gap: var(--ui-space-4);
     --card-hover-border: var(--ui-border-strong);
-    --card-hover-bg: color-mix(in srgb, var(--ui-surface-card) 84%, var(--ui-text-primary) 16%);
-    --card-hover-shadow: var(--ui-shadow-2);
+    --card-hover-bg: color-mix(in srgb, var(--ui-surface-card) 90%, var(--ui-text-primary) 10%);
+    --card-hover-shadow: none;
     border-radius: var(--ui-radius-md);
   }
 
   .ui-card[data-variant='standard'] {
     --card-bg: var(--ui-surface-card);
-    --card-shadow: var(--ui-shadow-1);
+    --card-shadow: none;
   }
 
   .ui-card[data-variant='secondary'] {
     --card-bg: color-mix(in srgb, var(--ui-surface-secondary) 80%, var(--ui-surface-card) 20%);
-    --card-shadow: var(--ui-shadow-1);
+    --card-shadow: none;
   }
 
   .ui-card[data-variant='study'] {
     --card-bg: var(--ui-surface-study);
-    --card-shadow: var(--ui-shadow-1);
+    --card-shadow: none;
   }
 
   .ui-card[data-variant='ghost'] {
@@ -92,7 +92,7 @@
   .ui-card[data-variant='overlay'] {
     --card-bg: var(--ui-surface-overlay);
     --card-fg: var(--ui-text-primary);
-    --card-shadow: var(--ui-shadow-2);
+    --card-shadow: var(--ui-shadow-1);
   }
 
   .ui-card[data-border='none'] {

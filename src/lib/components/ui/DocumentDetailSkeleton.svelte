@@ -5,7 +5,11 @@
 <div class="document-detail-skeleton" aria-hidden="true">
   <div class="head back"></div>
   <div class="head title"></div>
-  <div class="head subtitle"></div>
+  <div class="meta-row">
+    <div class="head chip"></div>
+    <div class="head chip chip-short"></div>
+    <div class="head chip chip-mid"></div>
+  </div>
 
   <Card as="section" class="panel" variant="base" padding="md">
     <div class="line line-strong"></div>
@@ -28,7 +32,7 @@
 <style>
   .document-detail-skeleton {
     display: grid;
-    gap: var(--space-3);
+    gap: 1rem;
   }
 
   .head,
@@ -51,13 +55,28 @@
   }
 
   .title {
-    width: min(620px, 92%);
-    height: 1.6rem;
+    width: min(540px, 92%);
+    height: 1.8rem;
   }
 
-  .subtitle {
-    width: min(320px, 62%);
-    height: 0.95rem;
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .chip {
+    width: 66px;
+    height: 2rem;
+    border-radius: 0.375rem;
+  }
+
+  .chip-short {
+    width: 84px;
+  }
+
+  .chip-mid {
+    width: 132px;
   }
 
   :global(.panel),
@@ -81,7 +100,7 @@
 
   .grid {
     display: grid;
-    gap: var(--space-3);
+    gap: 1rem;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

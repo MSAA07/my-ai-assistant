@@ -1,12 +1,11 @@
 <script>
   import { onDestroy } from 'svelte';
-  import { ArrowLeft, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
+  import { ArrowLeft, ClipboardCheck, FileText, Layers3, Sparkles } from '@lucide/svelte';
   import { t } from '../lib/i18n/t.js';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
-  import MetaPill from '../lib/components/ui/MetaPill.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import StudyActionCard from '../lib/components/ui/StudyActionCard.svelte';
@@ -454,25 +453,30 @@
   <DocumentActivityView {documentId} studyTab={studyTab} />
 {:else}
   <PageLayout class="document-hub" width="wide">
-    <PageHeader eyebrow={t('nav.study')} title={documentTitle} subtitle={documentSubtitle}>
-      <div slot="actions" class="document-header-actions">
-        <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
-          <span slot="icon" aria-hidden="true">
-            <ArrowLeft />
-          </span>
-          {t('document.hub.backToStudyHub')}
-        </Button>
-      </div>
+    <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
+      <span slot="icon" aria-hidden="true">
+        <ArrowLeft />
+      </span>
+      {t('document.hub.backToStudyHub')}
+    </Button>
 
+    <PageHeader
+      className="document-header"
+      eyebrow={t('nav.study')}
+      title={documentTitle}
+      subtitle={documentSubtitle}
+    >
       <div slot="meta" class="document-meta">
         {#if fileTypeBadge}
-          <Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge document-file-badge">{fileTypeBadge}</Badge>
+          <Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge document-file-badge">
+            {fileTypeBadge}
+          </Badge>
         {/if}
         {#if languageMeta}
-          <MetaPill className="document-meta-pill" label="" value={languageMeta.value} />
+          <span class="document-meta-pill">{languageMeta.value}</span>
         {/if}
         {#if uploadedMeta}
-          <MetaPill className="document-meta-pill" label="" value={`${uploadedMeta.label} ${uploadedMeta.value}`} />
+          <span class="document-meta-pill">{uploadedMeta.label} {uploadedMeta.value}</span>
         {/if}
       </div>
     </PageHeader>
@@ -531,9 +535,13 @@
               <Button
                 type="button"
                 variant={card.state === 'ready' ? 'primary' : 'secondary'}
+                className="feature-action-button"
                 on:click={() => runPrimaryAction(card)}
                 disabled={!card.canPrimaryAction}
               >
+                <span slot="icon" aria-hidden="true">
+                  <Sparkles />
+                </span>
                 {card.primaryLabel}
               </Button>
             </div>
@@ -547,19 +555,20 @@
 <style>
   :global(.document-hub) {
     display: grid;
-    gap: var(--layout-shell-page-gap);
+    gap: var(--study-flow-page-gap);
   }
 
   :global(.document-hub .back-link) {
     justify-self: start;
     width: fit-content;
     padding-inline: 0;
-    min-height: auto;
+    min-height: 0;
     border: 0;
     background: transparent;
     box-shadow: none;
     color: var(--ui-text-secondary);
-    font-size: 0.95rem;
+    font-size: 0.875rem;
+    font-weight: 500;
   }
 
   :global(.document-hub .back-link svg) {
@@ -577,46 +586,33 @@
     transform: none;
   }
 
-  .document-header-actions {
-    display: inline-flex;
-    flex-wrap: wrap;
-  }
-
   .document-meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
+    display: flex;
+    flex-wrap: wrap;
     gap: 0.6rem;
     align-items: center;
   }
 
   :global(.document-meta-badge) {
-    min-height: 2.75rem;
-    padding-inline: 1.05rem;
-    border-radius: var(--ui-radius-md);
-    font-size: 0.82rem;
+    min-height: var(--study-flow-chip-min-height);
+    padding-inline: var(--study-flow-chip-padding-inline);
+    border-radius: var(--study-flow-chip-radius);
+    font-size: 0.75rem;
     letter-spacing: 0;
   }
 
-  :global(.document-meta-pill) {
+  .document-meta-pill {
     display: inline-flex;
     align-items: center;
-    min-height: 2.75rem;
-    padding: 0 1.05rem;
-    border-radius: var(--ui-radius-md);
-    background: color-mix(in srgb, var(--ui-surface-card) 84%, var(--ui-surface-secondary) 16%);
-    box-shadow: none;
-  }
-
-  :global(.document-meta-pill .ui-meta-pill__value) {
-    font-size: 0.82rem;
+    min-height: var(--study-flow-chip-min-height);
+    padding: 0 var(--study-flow-chip-padding-inline);
+    border-radius: var(--study-flow-chip-radius);
+    border: 1px solid var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 50%, transparent);
     color: var(--ui-text-secondary);
+    font-size: 0.75rem;
     font-weight: 500;
-  }
-
-  :global(.document-file-badge) {
-    color: #ff6b6b;
-    border-color: color-mix(in srgb, #ff6b6b 26%, var(--ui-border-default) 74%);
-    background: color-mix(in srgb, #ff6b6b 10%, transparent);
+    box-shadow: none;
   }
 
   h2 {
@@ -655,38 +651,20 @@
 
   .features-grid {
     display: grid;
-    gap: 1.25rem;
+    gap: var(--study-flow-card-gap);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
   }
 
-  :global(.document-hub .feature-card) {
-    min-height: 23rem;
-    height: 100%;
+  :global(.feature-card) {
+    min-height: 0;
   }
 
   .feature-inline-error {
-    margin-top: 0.7rem;
+    margin-top: 0.35rem;
     color: var(--destructive);
     line-height: 1.5;
-    font-size: 0.88rem;
-  }
-
-  :global(.feature-card .ui-study-action-card__actions .ui-button) {
-    min-height: 3.4rem;
-    font-size: 0.98rem;
-    letter-spacing: -0.01em;
-  }
-
-  :global(.feature-card .ui-study-action-card__actions .ui-button[data-variant='primary']) {
-    box-shadow: 0 10px 22px color-mix(in srgb, var(--ui-text-primary) 12%, transparent);
-  }
-
-  :global(.feature-card .ui-study-action-card__actions .ui-button[data-variant='secondary']) {
-    background: color-mix(in srgb, var(--ui-surface-secondary) 46%, var(--ui-surface-card) 54%);
-    color: var(--ui-text-primary);
-    border-color: color-mix(in srgb, var(--ui-border-default) 82%, transparent);
-    box-shadow: none;
+    font-size: 0.8125rem;
   }
 
   .row {
@@ -701,7 +679,23 @@
     color: var(--destructive);
   }
 
+  :global(.feature-action-button.ui-button) {
+    --button-shadow: none;
+  }
+
+  :global(.feature-action-button .ui-button__icon svg) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
   @media (max-width: 1024px) {
+    .features-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
     .features-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -713,7 +707,7 @@
     }
 
     .document-meta {
-      grid-template-columns: 1fr;
+      align-items: stretch;
     }
   }
 </style>

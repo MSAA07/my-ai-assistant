@@ -206,20 +206,22 @@
 <style>
   .documents-page {
     display: grid;
-    gap: var(--space-4);
+    width: min(100%, var(--size-page-wide));
+    margin-inline: auto;
+    gap: var(--study-flow-page-gap);
   }
 
   .page-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--study-flow-header-gap);
     flex-wrap: wrap;
   }
 
   .heading {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--ui-space-1);
   }
 
   .eyebrow {
@@ -232,7 +234,7 @@
 
   h1 {
     margin: 0;
-    font-size: clamp(1.16rem, 2.4vw, 1.5rem);
+    font-size: var(--study-flow-title-size);
     font-weight: 600;
     letter-spacing: -0.03em;
     color: var(--color-text-primary);
@@ -240,7 +242,7 @@
 
   .subtitle {
     margin: 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--study-flow-subtitle-size);
     color: var(--color-text-secondary);
   }
 
@@ -256,7 +258,7 @@
 
   .documents-grid {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--study-flow-card-gap);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
   }
@@ -264,9 +266,12 @@
   .documents-page :global(.document-card) {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--study-flow-card-gap);
     height: 100%;
     min-height: 228px;
+    border-radius: var(--study-flow-card-radius);
+    background: var(--study-flow-card-surface);
+    box-shadow: none;
   }
 
   .card-head {

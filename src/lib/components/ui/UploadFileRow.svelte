@@ -7,8 +7,6 @@
   export let disabled = false;
   export let removeLabel = 'Remove file';
 
-  $: extensionLabel = (file?.name?.split('.').pop() || 'FILE').slice(0, 4).toUpperCase();
-
   function formatSize(sizeInBytes) {
     if (!Number.isFinite(sizeInBytes) || sizeInBytes < 0) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB'];
@@ -31,7 +29,12 @@
 </script>
 
 <div class="upload-file-row">
-  <div class="upload-file-row__icon" aria-hidden="true">{extensionLabel}</div>
+  <div class="upload-file-row__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M8 3.75h5.5L18 8.25V19a1.75 1.75 0 0 1-1.75 1.75h-8.5A1.75 1.75 0 0 1 6 19V5.5A1.75 1.75 0 0 1 7.75 3.75Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M13 3.75V8.5h4.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </div>
   <div class="upload-file-row__meta">
     <p class="upload-file-row__name">{file?.name || ''}</p>
     <p class="upload-file-row__size">{formatSize(file?.size ?? 0)}</p>
@@ -54,11 +57,10 @@
   .upload-file-row {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    border: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
-    border-radius: 0.9rem;
-    background: color-mix(in srgb, var(--card) 76%, var(--muted) 24%);
-    box-shadow: var(--shadow-inline-control);
+    gap: 0.75rem;
+    border: 1px solid var(--upload-file-row-border);
+    border-radius: 0.75rem;
+    background: var(--upload-file-row-bg);
     padding: 0.8rem 1rem;
   }
 
@@ -66,14 +68,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: calc(var(--radius) - 2px);
-    background: color-mix(in srgb, var(--background) 78%, var(--muted) 22%);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--ui-surface-secondary) 92%, transparent);
     color: var(--muted-foreground);
-    font-size: 0.64rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
+    flex: 0 0 auto;
+  }
+
+  .upload-file-row__icon svg {
+    width: 1rem;
+    height: 1rem;
   }
 
   .upload-file-row__meta {

@@ -1,10 +1,10 @@
 <script>
-  import Card from './Card.svelte';
   import Badge from './Badge.svelte';
 
   export let eyebrow = '';
   export let title = '';
   export let subtitle = '';
+  export let framed = false;
   export let border = 'strong';
   export let variant = 'standard';
   export let padding = 'lg';
@@ -14,6 +14,7 @@
 
   $: resolvedClass = [
     'ui-page-header',
+    framed ? 'ui-page-header--framed' : '',
     centered ? 'ui-page-header--centered' : '',
     narrow ? 'ui-page-header--narrow' : '',
     className,
@@ -23,7 +24,13 @@
     .join(' ');
 </script>
 
-<Card {...$$restProps} as="header" {variant} {padding} {border} className={resolvedClass}>
+<header
+  {...$$restProps}
+  class={resolvedClass}
+  data-variant={variant}
+  data-padding={padding}
+  data-border={border}
+>
   <div class="ui-page-header__main">
     <div class="ui-page-header__copy">
       {#if $$slots.eyebrow}
@@ -61,12 +68,20 @@
       <slot name="meta" />
     </div>
   {/if}
-</Card>
+</header>
 
 <style>
   :global(.ui-page-header) {
-    gap: var(--layout-shell-page-gap);
-    border-color: color-mix(in srgb, var(--ui-text-primary) 10%, var(--ui-border-default) 90%);
+    display: grid;
+    gap: var(--ui-page-header-gap);
+    min-width: 0;
+    padding: var(--ui-page-header-padding);
+  }
+
+  :global(.ui-page-header--framed) {
+    --ui-page-header-padding: var(--ui-space-5);
+    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 10%, var(--ui-border-default) 90%);
+    border-radius: var(--ui-radius-lg);
     background:
       radial-gradient(circle at top right, color-mix(in srgb, var(--ui-text-primary) 7%, transparent) 0%, transparent 42%),
       linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-surface-secondary) 4%) 0%, var(--ui-surface-card) 100%);
@@ -83,7 +98,7 @@
 
   .ui-page-header__copy {
     display: grid;
-    gap: var(--ui-space-3);
+    gap: var(--ui-page-header-eyebrow-gap);
     min-width: 0;
     flex: 1 1 28rem;
   }
@@ -120,7 +135,7 @@
 
   .ui-page-header__meta {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(var(--ui-page-header-meta-column-min), 1fr));
     gap: var(--ui-space-3);
   }
 
@@ -143,6 +158,10 @@
   }
 
   @media (max-width: 640px) {
+    :global(.ui-page-header--framed) {
+      --ui-page-header-padding: var(--ui-space-4);
+    }
+
     .ui-page-header__actions {
       width: 100%;
     }

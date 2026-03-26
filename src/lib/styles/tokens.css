@@ -19,9 +19,9 @@
   --foundation-info: #60a5fa;
   --foundation-warning: #fbbf24;
   --foundation-backdrop: rgba(9, 9, 9, 0.72);
-  --foundation-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
-  --foundation-shadow-md: 0 10px 24px rgba(0, 0, 0, 0.22);
-  --foundation-shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.34);
+  --foundation-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --foundation-shadow-md: 0 8px 20px rgba(0, 0, 0, 0.16);
+  --foundation-shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.22);
 
   /* Semantic colors */
   --ui-bg-page: var(--foundation-bg);
@@ -80,9 +80,9 @@
 
   /* Radii */
   --ui-radius-xs: 0.5rem;
-  --ui-radius-sm: 0.75rem;
-  --ui-radius-md: 1rem;
-  --ui-radius-lg: 1.25rem;
+  --ui-radius-sm: 0.5rem;
+  --ui-radius-md: 0.75rem;
+  --ui-radius-lg: 1rem;
   --ui-radius-xl: 1.5rem;
   --ui-radius-pill: 999px;
 
@@ -103,6 +103,7 @@
   --ui-control-height-md: 2.75rem;
   --ui-control-height-lg: 3.125rem;
   --size-topbar: 3.75rem;
+  --size-bottom-nav: 4.5rem;
   --size-sidebar: 16rem;
   --size-sidebar-collapsed: 5rem;
   --size-drawer: 24rem;
@@ -118,11 +119,68 @@
   --size-page-study: var(--size-content-study);
   --size-page-study-wide: 56rem;
   --size-page-study-compact: 48rem;
-  --layout-shell-padding-inline: clamp(1rem, 0.7rem + 1.2vw, 2rem);
-  --layout-shell-padding-block: clamp(1rem, 0.85rem + 0.9vw, 1.75rem);
+  --size-page-study-session: 50rem;
+  --size-page-study-session-content: 50rem;
+  --size-page-study-session-shell: 100%;
+  --size-page-study-hub: var(--size-page-study-wide);
+  --layout-shell-padding-inline: clamp(1rem, 0.85rem + 0.8vw, 1.5rem);
+  --layout-shell-padding-block: clamp(0.875rem, 0.8rem + 0.6vw, 1.25rem);
   --layout-shell-page-gap-tight: 1rem;
   --layout-shell-page-gap: 1.5rem;
   --layout-shell-page-gap-spacious: 2rem;
+  --study-flow-page-gap: var(--ui-space-6);
+  --study-flow-page-gap-mobile: var(--ui-space-5);
+  --study-flow-header-gap: var(--ui-space-5);
+  --study-flow-copy-gap: var(--ui-space-3);
+  --study-flow-action-gap: var(--ui-space-2);
+  --study-flow-reading-width: var(--size-page-study-compact);
+  --study-flow-session-width: var(--size-page-study-session);
+  --study-flow-session-content-width: var(--size-page-study-session-content);
+  --study-flow-session-progress-width: 14rem;
+  --study-flow-session-nav-button-min-width: 10.5rem;
+  --study-flow-session-nav-button-height: 3rem;
+  --study-flow-shell-width: var(--size-page-study-session-shell);
+  --study-flow-hub-width: var(--size-page-study-hub);
+  --study-flow-title-size: clamp(1.5rem, 1.35rem + 0.4vw, 1.75rem);
+  --study-flow-subtitle-size: 0.9375rem;
+  --study-flow-card-gap: var(--ui-space-4);
+  --study-flow-card-radius: 0.875rem;
+  --study-flow-card-surface: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
+  --study-flow-chip-min-height: 1.5rem;
+  --study-flow-chip-radius: 0.375rem;
+  --study-flow-chip-padding-inline: 0.5rem;
+  --study-flow-icon-box-size: 2.5rem;
+  --study-flow-icon-box-radius: 0.625rem;
+  --ui-page-header-gap: var(--ui-space-4);
+  --ui-page-header-padding: 0;
+  --ui-page-header-eyebrow-gap: var(--ui-space-3);
+  --ui-page-header-meta-column-min: 180px;
+  --upload-panel-gap: var(--ui-space-4);
+  --upload-panel-padding: 1.5rem;
+  --upload-panel-bg: color-mix(in srgb, var(--ui-surface-card) 98%, transparent);
+  --upload-panel-border: var(--ui-border-default);
+  --upload-panel-shadow: none;
+  --upload-panel-title: var(--ui-text-primary);
+  --upload-panel-description: var(--ui-text-secondary);
+  --upload-panel-support: var(--ui-text-muted);
+  --upload-panel-error: color-mix(in srgb, var(--ui-accent-danger) 72%, var(--ui-text-primary) 28%);
+  --upload-dropzone-gap: var(--ui-space-3);
+  --upload-dropzone-padding-block: clamp(2rem, 5vw, 3rem);
+  --upload-dropzone-padding-inline: 1.25rem;
+  --upload-dropzone-radius: 0.5rem;
+  --upload-dropzone-border-width: 1px;
+  --upload-dropzone-bg: color-mix(in srgb, var(--ui-surface-secondary) 30%, transparent);
+  --upload-dropzone-border: var(--ui-border-default);
+  --upload-dropzone-hover-bg: color-mix(in srgb, var(--ui-surface-secondary) 42%, transparent);
+  --upload-dropzone-hover-border: color-mix(in srgb, var(--ui-text-primary) 18%, var(--ui-border-default) 82%);
+  --upload-dropzone-icon-size: 3rem;
+  --upload-dropzone-icon-radius: var(--ui-radius-pill);
+  --upload-dropzone-icon-bg: var(--ui-surface-secondary);
+  --upload-dropzone-icon-border: transparent;
+  --upload-dropzone-icon-color: var(--ui-text-primary);
+  --upload-dropzone-title: var(--ui-text-primary);
+  --upload-dropzone-divider-width: min(30rem, 100%);
+  --upload-dropzone-divider-label: var(--ui-text-muted);
 
   /* Compatibility aliases */
   --background: var(--ui-bg-page);
@@ -156,7 +214,7 @@
   --shadow-popover: var(--ui-shadow-2);
   --shadow-dropdown: var(--ui-shadow-2);
   --shadow-modal: var(--ui-shadow-3);
-  --shadow-inline-control: 0 1px 0 rgba(255, 255, 255, 0.03), var(--ui-shadow-1);
+  --shadow-inline-control: 0 1px 0 rgba(255, 255, 255, 0.02), var(--ui-shadow-1);
 
   --color-bg: var(--ui-bg-page);
   --color-sidebar: var(--sidebar);
@@ -239,17 +297,17 @@
   --upload-modal-description: var(--ui-text-secondary);
   --upload-close-color: var(--ui-text-primary);
   --upload-close-hover-bg: var(--ui-surface-ghost);
-  --upload-dropzone-bg: color-mix(in srgb, var(--ui-surface-secondary) 66%, transparent);
+  --upload-dropzone-bg: color-mix(in srgb, var(--ui-surface-secondary) 54%, transparent);
   --upload-dropzone-border: var(--ui-border-default);
   --upload-dropzone-text: var(--ui-text-primary);
   --upload-dropzone-or: var(--ui-text-muted);
-  --upload-dropzone-active-bg: color-mix(in srgb, var(--ui-surface-secondary) 82%, var(--ui-text-primary) 18%);
+  --upload-dropzone-active-bg: color-mix(in srgb, var(--ui-surface-secondary) 74%, var(--ui-text-primary) 10%);
   --upload-dropzone-active-border: var(--ui-border-strong);
   --upload-dropzone-icon-bg: var(--ui-surface-secondary);
   --upload-drag-chip-bg: var(--ui-surface-secondary);
   --upload-drag-chip-text: var(--ui-text-primary);
   --upload-support-text: var(--ui-text-secondary);
-  --upload-file-row-bg: color-mix(in srgb, var(--ui-surface-card) 82%, var(--ui-surface-secondary) 18%);
+  --upload-file-row-bg: color-mix(in srgb, var(--ui-surface-secondary) 28%, transparent);
   --upload-file-row-border: var(--ui-border-default);
   --upload-file-name: var(--ui-text-primary);
   --upload-file-size: var(--ui-text-muted);

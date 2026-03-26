@@ -1,149 +1,172 @@
-﻿# System Overview (Frontend)
+# System Overview (Frontend)
 
-This document describes how the frontend is wired to backend APIs and how UI state maps to backend lifecycle state.
+This document describes the current implemented frontend runtime.
 
 ## Stack
 
 - Svelte 5
 - Vite 7
-- Better Auth cookie sessions
-- Hash routing (`#/...`)
+- Better Auth cookie-session calls
+- Hash-based routing
 
-## Runtime Architecture
+## Routing and Shell
 
-1. Client app (`src/App.svelte`)
-- Resolves route from hash path
-- Enforces auth and admin route access
-- Uses `AppShell` layout by default
+Routing files:
 
-2. Route state (`src/stores/router.js` + `src/routes.js`)
-- Static routes: home, study, settings, admin
-- Dynamic routes:
-  - `/study/:id/:section?`
-  - `/legacy/documents/:id/:section?`
-  - `/admin/*`
+- `src/stores/router.js`
+- `src/routes.js`
 
-3. Auth state (`src/stores/auth.js`)
-- Requests Better Auth endpoints with `credentials: include`
-- Bootstraps session on load
+Current behavior:
 
-4. Theme state (`src/stores/theme.js`)
-- Canonical theme values: `dark`, `light`
-- Applies theme globally via `document.documentElement[data-theme]`
-- Mirrors theme mode to a `.dark` class so Tailwind dark-mode utilities stay aligned with runtime theme
-- Persists preference in localStorage key `my-ai-assistant:theme`
-- Startup sequence:
-  - `index.html` applies persisted theme before app scripts run
-  - `src/main.js` calls `theme.initializeTheme()` to sync store + DOM
+- The browser hash is the route source of truth.
+- `App.svelte` resolves the normalized route and renders the active page.
+- `AppShell.svelte` is the default authenticated shell.
+- `AppHeader.svelte` + `Footer.svelte` remain only for the non-default fallback shell path when `VITE_FEATURE_APPSHELL=false`.
 
-5. Styling/runtime UI layer
-- Shared tokens live in `src/lib/styles/tokens.css`
-- Foundation-only global CSS lives in `src/styles/global.css`
-- Shared authenticated app chrome lives in `src/lib/components/layout/*`
-- Reusable primitives live in `src/lib/components/ui/*`
-- TailwindCSS 3 is configured for utility use, but design values should still come from tokens/primitives
+Canonical study routes:
 
-5. API base resolution (`src/config.js`)
-- Uses `VITE_API_BASE_URL` when set
-- Otherwise derives from hostname for local/stage/production
+- `#/study`
+- `#/study/:id/:section?`
 
-## Core User Flows
+Legacy activity routes:
 
-### Authentication
+- `#/legacy/documents/:id/:section?`
+- `#/documents-legacy/:id/:section?`
 
-- `sign-up`: `POST /api/auth/sign-up/email`
-- `sign-in`: `POST /api/auth/sign-in/email`
-- `session fetch`: `GET /api/auth/get-session`
-- `sign-out`: `POST /api/auth/sign-out`
+Compatibility normalization also maps older routes like `#/documents/:id/:section?` and `#/document/:id` onto the canonical study routes.
 
-All calls include credentials so browser session cookies are sent.
+## Page Ownership
 
-### Home, upload, and library flow
+- `Home.svelte`: authenticated upload/dashboard entry
+- `StudyHubIndex.svelte`: canonical Study Hub Library
+- `StudyHubDocument.svelte`: canonical Study Hub Document
+- `DocumentView.svelte`: legacy activity route wrapper
+- `DocumentActivityView.svelte`: shared summary/flashcards/exam activity implementation
+- `Settings.svelte`: settings and preferences
+- `AdminDashboard.svelte`: admin console
 
-- Home requests `GET /api/user/me`
-- Upload sends `POST /api/upload` with `multipart/form-data`
-- After upload, UI navigates to `/study?highlight=:id`
-- Study Hub Library requests `GET /api/user/me` and is the canonical browse/select surface for documents
-- Document Hub (`StudyHubDocument.svelte`) is the canonical per-document launch surface for summary, flashcards, and exam tools
+Important distinction:
 
-### Document view lifecycle behavior
+- Canonical study routes are the user-facing route model.
+- `DocumentView.svelte` is kept to preserve the legacy activity route contract.
+- On canonical routes, activity sections are rendered from `StudyHubDocument.svelte` through `DocumentActivityView.svelte`.
 
-Document page loads:
-- `GET /api/document/:id`
+## Lifecycle and State Model
 
-If extraction is `queued` or `processing`:
-- poll same endpoint until complete/failed
+Document processing lifecycle:
 
-When extraction is complete:
-- source excerpts can be loaded with `GET /api/document/:id/excerpts`
+- source: `Document.processingStatus`
+- values: `queued`, `processing`, `complete`, `failed`
+- UI meaning: extraction readiness for the document
 
-On-demand generation actions:
-- queue generation: `POST /api/document/:id/generations`
-- read generation state: `GET /api/document/:id/generations` (also mirrored in document payload)
-- regeneration UX can pass optional `options.regenerationGuidance` (`reasonKey`, `customInstruction`) with the same generation endpoint
+Generation lifecycle:
 
-Supported generation features in UI:
-- summary
-- flashcards
-- exam
+- source: `DocumentGeneration`
+- surfaced as `document.generationState`
+- keys: `summary`, `flashcards`, `exam`
+- values: `not_requested`, `queued`, `running`, `complete`, `failed`
 
-Study activity modes:
-- Summary mode: focused reading + secondary regenerate
-- Flashcards mode: one card at a time, reveal answer, mark correct/incorrect, prev/next
-- Exam mode: intro/start, question flow, submit/complete, results/review
+Job execution lifecycle:
 
-Important route ownership:
-- `/study` -> `StudyHubIndex.svelte`
-- `/study/:id/:section?` -> `StudyHubDocument.svelte`
-- `/legacy/documents/:id/:section?` -> `DocumentView.svelte`
+- source: `Job.status`
+- values surfaced through `/api/jobs/:id`
+- used for queue/progress visibility, not as the main page-rendering source of truth
 
-This split is intentional:
-- Study Hub routes are the primary user-facing browse/launch surfaces
-- `DocumentView.svelte` preserves the legacy activity route contract without changing business logic
+Compatibility mirrors still present in document payloads:
 
-### Progress tracking
-
-- Flashcards progress: `POST /api/flashcard/progress`
-- Exam attempts: `POST /api/exam/attempt`
-
-## State Contracts
-
-Extraction status contract:
-- backend source: `Document.processingStatus`
-- values used by UI: `queued`, `processing`, `complete`, `failed`
-
-Generation status contract:
-- backend source: `DocumentGeneration` surfaced as `document.generationState`
-- values used by UI: `not_requested`, `queued`, `running`, `complete`, `failed`
-
-Compatibility mirrors still consumed by UI:
 - `document.summary`
 - `document.flashcards`
 - `document.examQuestions`
 
-## Error Handling
+## Data Flow
 
-- Route/page errors are surfaced as user-facing messages
-- Upload/network errors are normalized to translated keys
-- Failed processing state shows recovery navigation back to home/library
-- Empty/loading/error surfaces are standardized through shared `Card`, `EmptyState`, `DataSurface`, and `StatusBadge` usage where applicable
+Home flow:
 
-## Deployment Mapping
+- `Home.svelte` loads `GET /api/user/me`
+- upload posts `POST /api/upload`
+- successful upload navigates to `#/study?highlight=:documentId`
 
-Frontend hosts:
-- stage preview: `my-ai-assistant-git-stage-*.vercel.app`
-- production: `my-ai-assistant.vercel.app`
+Study Hub Library:
 
-Configured backend hosts:
-- staging: `https://ai-assistant-backend-staging.up.railway.app`
-- production: `https://ai-assistant-backend-production-ddf0.up.railway.app`
+- `StudyHubIndex.svelte` loads `GET /api/user/me`
+- supports rename via `PATCH /api/document/:id`
+- supports delete via `DELETE /api/document/:id`
 
-## Maintenance triggers
+Study Hub Document:
 
-Update this file when:
-- routes change
-- API endpoints used by UI change
-- lifecycle status contract changes
-- environment host mapping changes
+- `StudyHubDocument.svelte` loads `GET /api/document/:id`
+- when extraction or generation is active, it polls the same document endpoint
+- it queues generation via `POST /api/document/:id/generations`
+- it uses `generationState` plus compatibility mirror content to determine feature readiness
 
-Last Updated: March 13, 2026
+Study activities:
+
+- `DocumentActivityView.svelte` consumes `GET /api/document/:id`
+- legacy compatibility writes:
+  - `POST /api/flashcard/progress`
+  - `POST /api/exam/attempt`
+- canonical study artifact APIs are wrapped in `src/lib/api/studyHub.js`
+
+## Shared UI System
+
+Current UI source of truth:
+
+- tokens: `src/lib/styles/tokens.css`
+- global foundations: `src/styles/global.css`
+- layout primitives: `src/lib/components/layout/*`
+- shared UI primitives: `src/lib/components/ui/*`
+
+Notable current primitives:
+
+- `PageHeader`
+- `DocumentCard`
+- `StudyActionCard`
+- `DataSurface`
+- `FocusedStudyLayout`
+- `ProgressBar`
+- `ConfirmModal`
+- `PromptModal`
+- `ThemeToggle`
+- `LanguageToggle`
+
+## Theme and Session
+
+Theme:
+
+- owned by `src/stores/theme.js`
+- values: `dark`, `light`
+- persisted in `localStorage` key `my-ai-assistant:theme`
+- initialized before and during app bootstrap to keep DOM and store aligned
+
+Session:
+
+- owned by `src/stores/auth.js`
+- Better Auth endpoints are called with `credentials: include`
+- app bootstraps the current session on load
+
+## API Base Resolution
+
+`src/config.js` resolves the backend base URL in this order:
+
+1. `VITE_API_BASE_URL`
+2. host-derived mapping
+3. local fallback
+
+Current host-derived mapping:
+
+- Vite dev localhost -> same-origin dev proxy
+- local non-dev host -> staging backend
+- Vercel preview/stage hosts -> staging backend
+- production host -> production backend
+
+## Maintenance Triggers
+
+Update this file when any of these change:
+
+- canonical study routes or legacy activity routes
+- lifecycle ownership between document state, job state, and `DocumentGeneration`
+- page ownership between `StudyHubIndex`, `StudyHubDocument`, `DocumentView`, and `DocumentActivityView`
+- shared UI primitive or token ownership
+- host-derived API base mapping
+
+Last Updated: March 23, 2026

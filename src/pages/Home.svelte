@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { FileText, FolderOpen, Infinity as InfinityIcon } from "@lucide/svelte";
   import { API_BASE } from "../config.js";
   import { t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
@@ -7,7 +8,6 @@
   import Card from "../lib/components/ui/Card.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
   import PageHeader from "../lib/components/ui/PageHeader.svelte";
-  import StatCard from "../lib/components/ui/StatCard.svelte";
   import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
   import { readPageCache, writePageCache } from "../stores/pageCache.js";
 
@@ -58,24 +58,21 @@
   $: homeStats = [
     {
       key: "remaining",
-      label: t("home.stats.documentsRemaining"),
       value: normalizedRole === "admin" ? t("home.stats.unlimited") : remainingDocumentsValue,
-      icon: "infinity",
-      compact: normalizedRole === "admin",
+      subtitle: t("home.stats.documentsRemaining"),
+      icon: InfinityIcon,
     },
     {
       key: "used",
-      label: t("home.stats.usedThisMonth"),
       value: `${usedThisMonthValue}/${monthlyLimitValue}`,
-      icon: "file",
-      compact: false,
+      subtitle: t("home.stats.usedThisMonth"),
+      icon: FileText,
     },
     {
       key: "total",
-      label: t("home.stats.totalDocuments"),
       value: totalDocumentsValue,
-      icon: "folder",
-      compact: false,
+      subtitle: t("home.stats.totalDocuments"),
+      icon: FolderOpen,
     },
   ];
 
@@ -291,8 +288,14 @@
   }
 </script>
 
-<PageLayout class="home-page" width="default">
-  <PageHeader eyebrow={t("nav.home")} title={t("home.heroTitle")} subtitle={t("home.heroSubtitle")} aria-labelledby="home-title" aria-busy={isRefreshingDashboard} />
+<PageLayout class="home-page" width="wide" gap="spacious">
+  <PageHeader
+    className="home-header"
+    eyebrow={t("nav.home")}
+    title={t("home.heroTitle")}
+    subtitle={t("home.heroSubtitle")}
+    aria-busy={isRefreshingDashboard}
+  />
 
   {#if isLoadingDashboard}
     <section class="stats-grid" aria-label={t('nav.home')}>
@@ -303,30 +306,20 @@
   {:else if user}
     <section class="stats-grid" aria-label={t('nav.home')}>
       {#each homeStats as stat (stat.key)}
-        <StatCard
-          as="article"
-          label={stat.label}
-          value={stat.value}
-          className="home-stat-card"
-          valueClassName={stat.compact ? 'home-stat-card__value--compact' : ''}
-        >
-          <div slot="icon" aria-hidden="true">
-              {#if stat.icon === 'infinity'}
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18.5 15.5c-1.88 0-2.86-1.2-4.25-3-1.39 1.8-2.37 3-4.25 3a3.5 3.5 0 1 1 0-7c1.88 0 2.86 1.2 4.25 3 1.39-1.8 2.37-3 4.25-3a3.5 3.5 0 1 1 0 7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              {:else if stat.icon === 'file'}
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M8 3.75h5.5L18 8.25V19a1.75 1.75 0 0 1-1.75 1.75h-8.5A1.75 1.75 0 0 1 6 19V5.5A1.75 1.75 0 0 1 7.75 3.75Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M13 3.75V8.5h4.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              {:else}
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M3.75 7.75A1.75 1.75 0 0 1 5.5 6h4l1.7 1.75h7.3a1.75 1.75 0 0 1 1.75 1.75v7.75A1.75 1.75 0 0 1 18.5 19h-13A1.75 1.75 0 0 1 3.75 17.25V7.75Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              {/if}
+        {@const Icon = stat.icon}
+        <Card as="article" class="home-stat-card" variant="base" padding="md" border="subtle">
+          <div class="home-stat-card__content">
+            <div class="home-stat-card__copy">
+              <p class={`home-stat-card__value ${stat.key === 'remaining' && normalizedRole === 'admin' ? 'home-stat-card__value--compact' : ''}`.trim()}>
+                {stat.value}
+              </p>
+              <p class="home-stat-card__subtitle">{stat.subtitle}</p>
+            </div>
+            <div class="home-stat-card__icon" aria-hidden="true">
+              <Icon />
+            </div>
           </div>
-        </StatCard>
+        </Card>
       {/each}
     </section>
   {/if}
@@ -375,23 +368,76 @@
 <style>
   :global(.home-page) {
     display: grid;
-    gap: var(--ui-space-4);
+    gap: var(--study-flow-page-gap);
     min-width: 0;
   }
 
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--ui-space-4);
+    gap: var(--study-flow-card-gap);
     min-width: 0;
   }
 
   :global(.home-page .home-stat-card) {
-    min-height: 148px;
+    min-height: 0;
+    border-radius: var(--study-flow-card-radius);
+    background: var(--study-flow-card-surface);
+    border-color: var(--ui-border-default);
+    box-shadow: none;
+  }
+
+  .home-stat-card__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .home-stat-card__copy {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  :global(.home-stat-card__value) {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.7rem, 1.45rem + 0.7vw, 2rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
   }
 
   :global(.home-stat-card__value--compact) {
-    font-size: clamp(1.55rem, 2.6vw, 1.8rem);
+    font-size: clamp(1.55rem, 1.35rem + 0.55vw, 1.8rem);
+  }
+
+  .home-stat-card__subtitle {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .home-stat-card__icon {
+    display: inline-flex;
+    width: var(--study-flow-icon-box-size);
+    height: var(--study-flow-icon-box-size);
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--study-flow-icon-box-radius);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 92%, transparent);
+    color: var(--ui-text-muted);
+  }
+
+  .home-stat-card__icon :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
   }
 
   :global(.home-alert) {
@@ -433,132 +479,7 @@
     min-width: 0;
   }
 
-  .upload-section :global(.upload-panel) {
-    gap: 1rem;
-    padding: 1.5rem;
-    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    border-radius: 1rem;
-    background: color-mix(in srgb, var(--card) 96%, transparent);
-    box-shadow: none;
-  }
-
-  .upload-section :global(.upload-panel__titles) {
-    gap: 0.25rem;
-  }
-
-  .upload-section :global(.upload-panel__titles h2) {
-    color: var(--foreground);
-    font-size: 1.125rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-
-  .upload-section :global(.upload-panel__titles p) {
-    max-width: 32rem;
-    color: var(--muted-foreground);
-    line-height: 1.5;
-  }
-
-  .upload-section :global(.upload-panel__support) {
-    margin-top: -0.125rem;
-    color: var(--muted-foreground);
-  }
-
-  .upload-section :global(.upload-dropzone) {
-    gap: 0.875rem;
-    padding: clamp(2rem, 5vw, 3rem) 1.25rem;
-    border-width: 1px;
-    border-color: color-mix(in srgb, var(--foreground) 9%, transparent);
-    border-radius: 0.875rem;
-    background: color-mix(in srgb, var(--secondary) 65%, transparent);
-    box-shadow: none;
-  }
-
-  .upload-section :global(.upload-dropzone:hover:not(.upload-dropzone--disabled)),
-  .upload-section :global(.upload-dropzone--active) {
-    border-color: color-mix(in srgb, var(--foreground) 16%, transparent);
-    background: color-mix(in srgb, var(--secondary) 84%, transparent);
-  }
-
-  .upload-section :global(.upload-dropzone__icon) {
-    width: 48px;
-    height: 48px;
-    border-radius: 999px;
-    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: color-mix(in srgb, var(--card) 92%, transparent);
-    color: var(--foreground);
-  }
-
-  .upload-section :global(.upload-dropzone__icon svg) {
-    width: 18px;
-    height: 18px;
-  }
-
-  .upload-section :global(.upload-dropzone__title) {
-    max-width: 36rem;
-    color: var(--foreground);
-    font-size: 0.95rem;
-    line-height: 1.45;
-  }
-
-  .upload-section :global(.upload-dropzone__divider) {
-    width: min(520px, 100%);
-  }
-
-  .upload-section :global(.upload-dropzone__divider strong) {
-    color: var(--muted-foreground);
-  }
-
-  .upload-section :global(.upload-dropzone__browse.ui-button) {
-    --button-bg: color-mix(in srgb, var(--card) 95%, transparent);
-    --button-bg-hover: color-mix(in srgb, var(--accent) 72%, transparent);
-    --button-bg-active: color-mix(in srgb, var(--accent) 86%, transparent);
-    --button-fg: var(--foreground);
-    --button-fg-hover: var(--foreground);
-    --button-border: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    --button-border-hover: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
-    --button-shadow: none;
-    border-style: solid;
-    min-width: 122px;
-  }
-
-  .upload-section :global(.upload-panel__files) {
-    gap: 0.75rem;
-  }
-
-  .upload-section :global(.upload-panel__footer) {
-    padding-top: 1rem;
-    margin-top: 0;
-    border-top-color: color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
-  }
-
-  .upload-section :global(.upload-panel__counter) {
-    color: var(--muted-foreground);
-  }
-
-  .upload-section :global(.upload-panel__actions) {
-    gap: 0.75rem;
-  }
-
-  .upload-section :global(.upload-panel__cancel.ui-button) {
-    --button-bg: color-mix(in srgb, var(--card) 94%, transparent);
-    --button-bg-hover: color-mix(in srgb, var(--accent) 68%, transparent);
-    --button-bg-active: color-mix(in srgb, var(--accent) 82%, transparent);
-    --button-fg: var(--foreground);
-    --button-fg-hover: var(--foreground);
-    --button-border: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    --button-border-hover: color-mix(in srgb, var(--foreground) 14%, var(--border) 86%);
-    --button-shadow: none;
-    border-style: solid;
-    min-width: 100px;
-  }
-
-  .upload-section :global(.upload-panel__submit.ui-button) {
-    --button-shadow: none;
-    min-width: 100px;
-  }
-
-  @media (max-width: 1024px) {
+  @media (max-width: 768px) {
     .stats-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -566,34 +487,11 @@
 
   @media (max-width: 720px) {
     :global(.home-page) {
-      gap: 0.875rem;
-    }
-
-    .upload-section :global(.upload-panel) {
-      padding: 1rem;
-    }
-
-    .upload-section :global(.upload-panel__footer) {
-      flex-direction: row;
-      align-items: center;
-    }
-
-    .upload-section :global(.upload-panel__counter) {
-      text-align: left;
-    }
-
-    .upload-section :global(.upload-panel__actions) {
-      width: min(100%, 228px);
-      margin-left: auto;
-    }
-
-    .upload-section :global(.upload-panel__actions .ui-button) {
-      flex: 1 1 0;
-      min-width: 0;
+      gap: var(--study-flow-page-gap-mobile);
     }
   }
 
-  @media (max-width: 680px) {
+  @media (max-width: 480px) {
     .stats-grid {
       grid-template-columns: 1fr;
     }

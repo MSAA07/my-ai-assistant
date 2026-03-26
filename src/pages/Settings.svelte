@@ -41,8 +41,13 @@
 {#if !$session}
   <SettingsPanelSkeleton />
 {:else}
-  <PageLayout class="settings-page" width="wide">
-    <PageHeader eyebrow={t('settings.eyebrow')} title={t('settings.title')} subtitle={t('settings.subtitle')}>
+  <PageLayout class="settings-page" width="wide" gap="spacious">
+    <PageHeader
+      className="settings-header"
+      eyebrow={t('settings.eyebrow')}
+      title={t('settings.title')}
+      subtitle={t('settings.subtitle')}
+    >
       <div slot="meta" class="hero-meta">
         <MetaPill label={t('settings.account.title')}>
           <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
@@ -144,7 +149,7 @@
 <style>
   :global(.settings-page) {
     display: grid;
-    gap: var(--ui-space-5);
+    gap: var(--study-flow-page-gap);
     min-width: 0;
   }
 

@@ -73,11 +73,13 @@
     --shell-sidebar-width-expanded: var(--size-sidebar, 16rem);
     --shell-sidebar-width-collapsed: var(--size-sidebar-collapsed, 5rem);
     --shell-sidebar-width: var(--shell-sidebar-width-expanded);
+    display: grid;
+    grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr);
     min-height: 100dvh;
     background: var(--ui-bg-shell);
     color: var(--ui-text-primary);
-    overflow: clip;
     isolation: isolate;
+    transition: grid-template-columns var(--motion-default) var(--ease-standard);
   }
 
   .app-shell.sidebar-collapsed {
@@ -90,19 +92,11 @@
 
   .shell-main {
     position: relative;
-    height: 100dvh;
-    width: calc(100% - var(--shell-sidebar-width));
-    max-width: calc(100% - var(--shell-sidebar-width));
     min-height: 100dvh;
     min-width: 0;
-    margin-inline-start: var(--shell-sidebar-width);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
-    overflow: clip;
     background: var(--ui-bg-page);
-    transition: margin-inline-start var(--motion-default) var(--ease-standard),
-      width var(--motion-default) var(--ease-standard),
-      max-width var(--motion-default) var(--ease-standard);
   }
 
   .shell-main::before {
@@ -110,20 +104,15 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--ui-text-primary) 6%, transparent) 0%, transparent 32%),
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 28%, transparent) 0%, transparent 32%);
-    opacity: 0.8;
+    background: radial-gradient(circle at top right, color-mix(in srgb, var(--ui-text-primary) 4%, transparent) 0%, transparent 30%);
+    opacity: 0.35;
   }
 
   .shell-content {
-    flex: 1;
     min-width: 0;
-    min-height: 0;
+    min-height: auto;
     overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable both-edges;
+    overflow-y: visible;
     position: relative;
     z-index: 0;
   }
@@ -137,21 +126,12 @@
     align-content: start;
     gap: var(--layout-shell-page-gap);
     min-width: 0;
-    min-height: 100%;
     position: relative;
     z-index: 1;
   }
 
   .content-wrapper > :global(*) {
     min-width: 0;
-  }
-
-  :global(.shell-main:has(.study-activity-shell--active-session)) {
-    grid-template-rows: minmax(0, 1fr);
-  }
-
-  :global(.shell-main:has(.study-activity-shell--active-session) .topbar) {
-    display: none;
   }
 
   @media (max-width: 1024px) {
@@ -167,22 +147,17 @@
     .app-shell,
     .app-shell.rtl {
       display: block;
-      overflow: visible;
     }
 
     .shell-main {
-      height: auto;
-      width: 100%;
-      max-width: 100%;
       min-height: 100dvh;
-      margin-inline-start: 0;
     }
 
     .content-wrapper {
       padding:
         var(--layout-shell-padding-block)
         max(var(--ui-space-4), env(safe-area-inset-left))
-        calc(var(--layout-shell-padding-block) + 72px + env(safe-area-inset-bottom))
+        calc(var(--layout-shell-padding-block) + var(--size-bottom-nav) + env(safe-area-inset-bottom))
         max(var(--ui-space-4), env(safe-area-inset-right));
       gap: var(--layout-shell-page-gap-tight);
     }

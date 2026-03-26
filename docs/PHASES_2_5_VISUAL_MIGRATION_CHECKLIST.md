@@ -1,32 +1,27 @@
 # Phases 2-5 Visual Migration Checklist
 
-Date: March 12, 2026  
-Primary spec: `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`
+Date: March 23, 2026
+Status: Completed archival checklist
 
-## Phase 2: Foundations
+This file is an archival rollout record. It is not the current runtime source of truth for routes, lifecycle ownership, or page structure.
 
-- [x] Normalize tokens to dark-neutral, border-led contract
-- [x] Deprecate gradient/glow tokens from shell and primary controls
-- [x] Update shell surfaces (`App`, `AppShell`, `Sidebar`, `TopBar`, `BottomNav`)
-- [x] Refit core primitives (`Button`, `Card`, `FieldShell`, `Tabs`, `ModalSurface`, `MenuSurface`)
-- [x] Keep behavior and routing unchanged
+## Completed Rollout Summary
 
-## Phase 3: Shared shell and primitives
+- Phase 2 foundations were completed.
+- Phase 3 shared shell and primitive normalization was completed.
+- Phase 4 core user-facing Study Hub and settings surfaces were completed.
+- Phase 5 admin parity and responsive QA pass were completed.
 
-- [x] Apply primitive-first styling to shell + reusable components
-- [x] Replace local button/input/card/menu/modal patterns with shared primitives
-- [x] Standardize interaction states (`hover`, `active`, `selected`, `disabled`, `loading`, `focus-visible`)
-- [x] Keep table/list overflow scoped to component wrappers
+## Remaining Verified Deferred Items
 
-## Phase 4: Core user-facing pages
+- sticky table headers are still not implemented
+- visual regression screenshot automation is still not present in the repo
+- the fallback non-default shell path still exists behind `VITE_FEATURE_APPSHELL=false`
 
-- [x] Reskin `Home`, `Study`, `Document`, and `Settings` page composition
-- [x] Reduce page-level overrides where primitives own the style contract
-- [x] Standardize empty/loading/error/state surfaces in primary user workflows
+For current runtime guidance, prefer:
 
-## Phase 5: Admin parity and QA lock
+- `../UI_POST_ROLLOUT.md`
+- `../SYSTEM_OVERVIEW.md`
+- `../src/lib/components/ui/PRIMITIVES.md`
 
-- [x] Reskin admin overview/users/sessions/storage/audit to match the same visual language
-- [x] Standardize dense table/filter/bulk/action rows through `DataSurface` + primitive controls
-- [x] Run final responsive and overflow QA pass on user + admin routes
-- [x] Document final visual contract for post-migration work
+Last Updated: March 23, 2026

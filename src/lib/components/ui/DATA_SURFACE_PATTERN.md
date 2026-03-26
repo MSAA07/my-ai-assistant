@@ -1,7 +1,7 @@
 # Data Surface Pattern
 
-Date: March 12, 2026  
-Status: Adopted across admin dense views (`overview`, `users`, `sessions`, `storage`, `audit`)
+Date: March 23, 2026
+Status: Current pattern guidance
 
 ## Why this exists
 
@@ -97,15 +97,9 @@ Canonical scaffold:
 - One of loading/error/empty/data should be prominent at a time.
 - Error states should use primitive visual language (`Card` soft + strong border or equivalent).
 
-## Adoption state
-
-Completed:
-
-1. Established `DataSurface` primitive and contract docs.
-2. Migrated admin dense surfaces (`Users`, `Sessions`, `Storage`, `Audit`, overview stats wrapper).
-3. Standardized dense state handling (`loading`, `error`, `empty`) within surface slots.
-
-Remaining follow-up (non-blocking):
+## Non-blocking follow-up
 
 1. Optional sticky headers for very large tables.
 2. Optional visual regression snapshots for dense admin routes.
+
+Last Updated: March 23, 2026

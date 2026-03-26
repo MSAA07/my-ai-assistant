@@ -13,6 +13,7 @@
   export let orLabel = 'OR';
   export let browseLabel = '';
   export let activeFileName = '';
+  export let className = '';
 
   let isDragActive = false;
 
@@ -66,7 +67,7 @@
 </script>
 
 <div
-  class="upload-dropzone"
+  class={['upload-dropzone', className, $$props.class ?? ''].filter(Boolean).join(' ')}
   class:upload-dropzone--active={isDragActive}
   class:upload-dropzone--disabled={disabled || isBusy}
   role="button"
@@ -122,11 +123,11 @@
     position: relative;
     display: grid;
     justify-items: center;
-    gap: 0.875rem;
-    border: 1px dashed color-mix(in srgb, var(--foreground) 10%, transparent);
-    border-radius: 0.95rem;
-    background: color-mix(in srgb, var(--card) 74%, var(--muted) 26%);
-    padding: clamp(1.25rem, 4vw, 1.8rem) var(--space-3);
+    gap: var(--upload-dropzone-gap);
+    border: var(--upload-dropzone-border-width) dashed var(--upload-dropzone-border);
+    border-radius: var(--upload-dropzone-radius);
+    background: var(--upload-dropzone-bg);
+    padding: var(--upload-dropzone-padding-block) var(--upload-dropzone-padding-inline);
     text-align: center;
     transition: border-color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard),
@@ -136,9 +137,8 @@
 
   .upload-dropzone:hover:not(.upload-dropzone--disabled),
   .upload-dropzone--active {
-    border-color: color-mix(in srgb, var(--foreground) 16%, transparent);
-    background: color-mix(in srgb, var(--card) 60%, var(--muted) 40%);
-    box-shadow: var(--shadow-inline-control);
+    border-color: var(--upload-dropzone-hover-border);
+    background: var(--upload-dropzone-hover-bg);
   }
 
   .upload-dropzone--disabled {
@@ -151,12 +151,12 @@
   }
 
   .upload-dropzone__icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 0.875rem;
-    background: var(--muted);
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    color: var(--foreground);
+    width: var(--upload-dropzone-icon-size);
+    height: var(--upload-dropzone-icon-size);
+    border-radius: var(--upload-dropzone-icon-radius);
+    background: var(--upload-dropzone-icon-bg);
+    border: 1px solid var(--upload-dropzone-icon-border);
+    color: var(--upload-dropzone-icon-color);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -185,15 +185,15 @@
 
   .upload-dropzone__title {
     margin: 0;
-    color: var(--upload-dropzone-text);
-    font-size: 0.95rem;
-    font-weight: 600;
-    line-height: 1.45;
     max-width: 36rem;
+    color: var(--upload-dropzone-title);
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.45;
   }
 
   .upload-dropzone__divider {
-    width: min(420px, 100%);
+    width: var(--upload-dropzone-divider-width);
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -206,7 +206,7 @@
   }
 
   .upload-dropzone__divider strong {
-    color: var(--upload-dropzone-or);
+    color: var(--upload-dropzone-divider-label);
     font-size: var(--font-size-xs);
     font-weight: 500;
   }
@@ -216,11 +216,6 @@
   }
 
   @media (max-width: 640px) {
-    .upload-dropzone {
-      gap: var(--space-2);
-      padding-inline: var(--space-3);
-    }
-
     .upload-dropzone__drag-chip {
       position: static;
       max-width: 100%;

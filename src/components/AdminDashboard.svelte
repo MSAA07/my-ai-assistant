@@ -23,8 +23,13 @@
   }
 </script>
 
-<PageLayout class="admin-page" width="full">
-  <PageHeader eyebrow="Admin Console" title="User Management & Security" subtitle="Monitor platform activity, manage users, and audit actions." className="admin-header" />
+<PageLayout class="admin-page" width="full" gap="spacious">
+  <PageHeader
+    eyebrow="Admin Console"
+    title="User Management & Security"
+    subtitle="Monitor platform activity, manage users, and audit actions."
+    className="admin-header"
+  />
 
   <Tabs
     className="admin-tabs"
@@ -54,7 +59,7 @@
 <style>
   :global(.admin-page) {
     display: grid;
-    gap: var(--ui-space-5);
+    gap: var(--study-flow-page-gap);
     min-width: 0;
   }
 

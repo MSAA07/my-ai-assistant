@@ -13,10 +13,9 @@
         <div class="icon"></div>
       </div>
       <div class="title"></div>
-      <div class="meta"></div>
-      <div class="meta meta-short"></div>
-      <div class="row actions">
-        <div class="button"></div>
+      <div class="title title-short"></div>
+      <div class="row footer">
+        <div class="meta"></div>
         <div class="button"></div>
       </div>
     </Card>
@@ -33,7 +32,7 @@
   :global(.skeleton-card) {
     display: grid;
     gap: var(--space-2);
-    min-height: 196px;
+    min-height: 180px;
   }
 
   .row {
@@ -80,21 +79,22 @@
   }
 
   .meta {
-    width: 70%;
+    width: 42%;
     height: 0.8rem;
   }
 
-  .meta-short {
-    width: 58%;
+  .title-short {
+    width: 72%;
   }
 
-  .actions {
+  .footer {
     margin-top: auto;
+    align-items: flex-end;
   }
 
   .button {
-    width: 88px;
-    height: 34px;
+    width: 68px;
+    height: 22px;
     border-radius: 9px;
   }
 

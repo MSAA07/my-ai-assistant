@@ -43,7 +43,7 @@
     --badge-bg: color-mix(in srgb, var(--ui-surface-secondary) 78%, transparent);
     --badge-border: var(--ui-border-default);
     --badge-fg: var(--ui-text-primary);
-    border-radius: var(--ui-radius-pill);
+    border-radius: var(--ui-radius-sm);
     font-weight: 600;
     letter-spacing: 0.01em;
   }
