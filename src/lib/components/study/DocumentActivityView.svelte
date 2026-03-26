@@ -5,7 +5,6 @@
   import Badge from '../ui/Badge.svelte';
   import Button from '../ui/Button.svelte';
   import Card from '../ui/Card.svelte';
-  import FieldShell from '../ui/FieldShell.svelte';
   import ProgressBar from '../ui/ProgressBar.svelte';
   import StatusBadge from '../ui/StatusBadge.svelte';
   import GuidedRegenerateModal from '../ui/GuidedRegenerateModal.svelte';
@@ -703,15 +702,12 @@
   function questionType(question) {
     const type = text(question?.type).toLowerCase();
     if (type === 'true_false' || type === 'truefalse') return 'true_false';
-    if (type === 'mcq' || type === 'multiple_choice') return 'mcq';
-    return Array.isArray(question?.options) && question.options.length ? 'mcq' : 'short';
+    return 'mcq';
   }
 
   function questionOptions(question) {
     const options = Array.isArray(question?.options) ? question.options.map((option) => text(option)).filter(Boolean) : [];
-    if (options.length) return options;
-    if (questionType(question) === 'true_false') return ['True', 'False'];
-    return [];
+    return questionType(question) === 'true_false' ? ['True', 'False'] : options;
   }
 
   function setExamAnswer(answer) {
@@ -1282,20 +1278,14 @@
                   <p class="exam-question-card__prompt">{currentExamQuestion?.question}</p>
                 </div>
 
-                {#if questionOptions(currentExamQuestion).length > 0}
-                  <div class="stack stack-spacious study-session-card__body exam-option-stack">
-                    {#each questionOptions(currentExamQuestion) as option, optionIndex}
-                      <button type="button" class="option" class:option-selected={text(examAnswers[currentQuestionIndex]) === option} on:click={() => setExamAnswer(option)}>
-                        <span class="option-letter">{optionLetter(optionIndex)}</span>
-                        <span>{option}</span>
-                      </button>
-                    {/each}
-                  </div>
-                {:else}
-                  <FieldShell class="answer-input-shell">
-                    <input class="answer-input" type="text" value={examAnswers[currentQuestionIndex] || ''} placeholder={t('document.exam.inputPlaceholder')} on:input={(event) => setExamAnswer(event.currentTarget.value)} />
-                  </FieldShell>
-                {/if}
+                <div class="stack stack-spacious study-session-card__body exam-option-stack">
+                  {#each questionOptions(currentExamQuestion) as option, optionIndex}
+                    <button type="button" class="option" class:option-selected={text(examAnswers[currentQuestionIndex]) === option} on:click={() => setExamAnswer(option)}>
+                      <span class="option-letter">{optionLetter(optionIndex)}</span>
+                      <span>{option}</span>
+                    </button>
+                  {/each}
+                </div>
               </Card>
 
               <div class="study-session__nav controls controls-secondary exam-nav">
@@ -2343,21 +2333,6 @@
     background: color-mix(in srgb, var(--ui-text-primary) 28%, var(--ui-surface-secondary) 72%);
     color: var(--ui-text-primary);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 14%, transparent);
-  }
-
-  :global(.answer-input-shell) {
-    margin-top: 0;
-  }
-
-  .answer-input {
-    width: 100%;
-    min-height: 3rem;
-    padding: 0;
-    border: none;
-    background: transparent;
-    color: var(--color-text-primary);
-    font: inherit;
-    font-size: 1rem;
   }
 
   .review {

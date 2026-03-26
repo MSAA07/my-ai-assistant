@@ -183,7 +183,7 @@
       return 'Study with AI-generated flashcards that help you memorize important terms and concepts.';
     }
 
-    return 'Test your knowledge with a practice exam featuring multiple-choice questions based on the content.';
+    return 'Test your knowledge with a practice exam featuring multiple-choice and true/false questions based on the content.';
   }
 
   function getGenerationOptions(featureKey) {
