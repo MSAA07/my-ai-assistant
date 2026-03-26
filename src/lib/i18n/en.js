@@ -16,7 +16,7 @@ export default {
   },
   language: {
     english: 'English',
-    arabic: 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
+    arabic: 'Arabic',
     toggleLabel: 'Switch language',
     sidebarLabel: 'Interface language',
     sidebarDescription: 'Applies instantly across the workspace.'
@@ -60,6 +60,7 @@ export default {
   },
   emptyState: {
     title: 'No items yet',
+    subtitle: 'When you add new content it will appear here.',
     description: 'When you add new content it will appear here.'
   },
   confirmModal: {
@@ -124,7 +125,7 @@ export default {
       arabicOption: 'Arabic',
       filePlaceholder: 'Click to select a file (PDF, DOCX, PPTX)',
       dragActive: 'Release to drop file',
-      fileSelected: 'File selected â€” ready to generate',
+      fileSelected: 'File selected - ready to generate',
       constraints: 'PDF, DOCX, PPTX (Max 25MB)',
       selectedFileLabel: '{name}',
       fileInfo: 'Maximum file size: 25MB',
@@ -218,6 +219,11 @@ export default {
       untitled: 'Untitled document',
       featuresTitle: 'Study features',
       readyHint: 'Generated and ready to open.',
+      featureDescriptions: {
+        summary: 'Get a comprehensive AI-generated summary of the key concepts and main points from your document.',
+        flashcards: 'Study with AI-generated flashcards that help you memorize important terms and concepts.',
+        exam: 'Test your knowledge with a practice exam featuring multiple-choice and true/false questions based on the content.'
+      },
       features: {
         summary: 'Summary',
         flashcards: 'Flashcards',
@@ -358,13 +364,20 @@ export default {
         progressLabel: 'Card {current}/{total} · Correct {correct} · Incorrect {incorrect}',
         questionLabel: 'Question',
         answerLabel: 'Answer',
-        progressSaveError: 'Could not save flashcard progress. Try again.'
+        progressSaveError: 'Could not save flashcard progress. Try again.',
+        resultsTitle: 'Flashcard results',
+        resultsMeta: '{incorrect} incorrect · {unanswered} unanswered',
+        resultLabel: 'Result:',
+        restart: 'Restart flashcards',
+        viewResults: 'View results'
       },
       exam: {
         introTitle: 'Ready to start your exam?',
         introDescription: 'This exam has {count} questions.',
         questionLabel: 'Question {index}',
+        currentLabel: 'Question {current} / {total}',
         answeredCount: '{answered} answered out of {total}',
+        answeredInline: '{answered} answered',
         submittingTitle: 'Completing your exam',
         submittingBody: 'Scoring your attempt and saving progress.',
         resultsTitle: 'Exam results',
@@ -373,7 +386,11 @@ export default {
         yourAnswer: 'Your answer: {answer}',
         correctAnswer: 'Correct answer: {answer}',
         notAnswered: 'Not answered',
-        saveAttemptError: 'Could not save this exam attempt.'
+        saveAttemptError: 'Could not save this exam attempt.',
+        boolean: {
+          true: 'True',
+          false: 'False'
+        }
       },
       regenerate: {
         title: 'Regenerate with guidance',
@@ -468,9 +485,15 @@ export default {
     eyebrow: 'Preferences',
     title: 'Settings',
     subtitle: 'Tune the experience for your study workflow.',
+    tabs: {
+      systems: 'Systems',
+      account: 'Account'
+    },
     language: {
       title: 'Language',
-      description: 'Switch between English and Arabic at any time.'
+      description: 'Switch between English and Arabic at any time.',
+      helper: 'Your selection is saved on this device and applied immediately across the interface.',
+      disabled: 'Arabic interface support is currently unavailable.'
     },
     theme: {
       title: 'Theme',
@@ -490,6 +513,54 @@ export default {
         profile: 'Profile',
         logout: 'Sign out',
         loggingOut: 'Signing out...'
+      }
+    }
+  },
+  auth: {
+    fields: {
+      name: 'Full name',
+      email: 'Email',
+      password: 'Password'
+    },
+    signIn: {
+      eyebrow: 'Sign in',
+      title: 'Welcome back',
+      subtitle: 'Sign in to continue your study workflow.',
+      placeholders: {
+        email: 'Enter your email',
+        password: 'Enter your password'
+      },
+      actions: {
+        submit: 'Login',
+        loading: 'Logging in...'
+      },
+      switch: {
+        prompt: "Don't have an account?",
+        action: 'Sign up'
+      },
+      errors: {
+        failed: 'Login failed'
+      }
+    },
+    signUp: {
+      eyebrow: 'Create account',
+      title: 'Create account',
+      subtitle: 'Set up your profile to start generating study materials.',
+      placeholders: {
+        name: 'Enter your name',
+        email: 'Enter your email',
+        password: 'Choose a password (min 8 chars)'
+      },
+      actions: {
+        submit: 'Sign up',
+        loading: 'Creating account...'
+      },
+      switch: {
+        prompt: 'Already have an account?',
+        action: 'Login'
+      },
+      errors: {
+        failed: 'Signup failed'
       }
     }
   }

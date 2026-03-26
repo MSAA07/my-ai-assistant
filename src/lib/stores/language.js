@@ -38,7 +38,10 @@ function applyLanguageSettings(lang) {
   document.documentElement.dir = dir;
   document.documentElement.lang = lang;
   document.documentElement.dataset.dir = dir;
+  document.documentElement.dataset.language = lang;
+  document.body.dir = dir;
   document.body.dataset.dir = dir;
+  document.body.dataset.language = lang;
   document.body.style.fontFamily = font;
   document.documentElement.style.setProperty('--font-family-base', font);
 
@@ -72,6 +75,18 @@ export const isRTL = derived(direction, ($dir) => $dir === 'rtl');
 export const currentFontFamily = derived(language, ($lang) =>
   $lang === 'ar' ? 'var(--font-family-ar)' : 'var(--font-family-en)'
 );
+
+export function getCurrentLanguage() {
+  let current = DEFAULT_LANGUAGE;
+  language.subscribe((value) => {
+    current = value;
+  })();
+  return current;
+}
+
+export function initializeLanguage() {
+  applyLanguageSettings(getCurrentLanguage());
+}
 
 export function toggleLanguage() {
   if (!ENABLE_ARABIC_UI) return;

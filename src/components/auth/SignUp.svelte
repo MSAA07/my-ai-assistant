@@ -3,6 +3,7 @@
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import { t } from '../../lib/i18n/t.js';
   import { signUp } from '../../stores/auth';
 
   const dispatch = createEventDispatcher();
@@ -21,7 +22,7 @@
     loading = false;
 
     if (res.error) {
-      error = res.error.message || 'Signup failed';
+      error = res.error.message || t('auth.signUp.errors.failed');
       return;
     }
 
@@ -31,22 +32,22 @@
 
 <Card class="auth-card" variant="raised" padding="lg" border="subtle">
   <header class="auth-header">
-    <p class="auth-eyebrow">Create account</p>
-    <h2>Create account</h2>
-    <p>Set up your profile to start generating study materials.</p>
+    <p class="auth-eyebrow">{t('auth.signUp.eyebrow')}</p>
+    <h2>{t('auth.signUp.title')}</h2>
+    <p>{t('auth.signUp.subtitle')}</p>
   </header>
 
   <form class="auth-form" on:submit|preventDefault={handleSubmit}>
-    <FieldShell label="Full Name" forId="name">
-      <input id="name" type="text" bind:value={name} required placeholder="Enter your name" />
+    <FieldShell label={t('auth.fields.name')} forId="name">
+      <input id="name" type="text" bind:value={name} required placeholder={t('auth.signUp.placeholders.name')} />
     </FieldShell>
 
-    <FieldShell label="Email" forId="email">
-      <input id="email" type="email" bind:value={email} required placeholder="Enter your email" />
+    <FieldShell label={t('auth.fields.email')} forId="email">
+      <input id="email" type="email" bind:value={email} required placeholder={t('auth.signUp.placeholders.email')} />
     </FieldShell>
 
-    <FieldShell label="Password" forId="password">
-      <input id="password" type="password" bind:value={password} required placeholder="Choose a password (min 8 chars)" minlength="8" />
+    <FieldShell label={t('auth.fields.password')} forId="password">
+      <input id="password" type="password" bind:value={password} required placeholder={t('auth.signUp.placeholders.password')} minlength="8" />
     </FieldShell>
 
     {#if error}
@@ -54,14 +55,14 @@
     {/if}
 
     <Button type="submit" variant="primary" loading={loading} block>
-      {loading ? 'Creating Account...' : 'Sign Up'}
+      {loading ? t('auth.signUp.actions.loading') : t('auth.signUp.actions.submit')}
     </Button>
   </form>
 
   <p class="toggle-text">
-    Already have an account?
+    {t('auth.signUp.switch.prompt')}
     <Button type="button" variant="ghost" size="sm" className="link-btn" on:click={() => dispatch('toggle')}>
-      Login
+      {t('auth.signUp.switch.action')}
     </Button>
   </p>
 </Card>

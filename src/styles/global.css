@@ -32,6 +32,7 @@ body {
     var(--ui-bg-page);
   color: var(--ui-text-primary);
   line-height: 1.55;
+  text-align: start;
 }
 
 #app {
@@ -106,6 +107,7 @@ textarea,
 select {
   font: inherit;
   color: inherit;
+  text-align: start;
   background: var(--ui-surface-card);
   border: 1px solid var(--ui-border-default);
   border-radius: var(--ui-radius-sm);
@@ -137,6 +139,24 @@ select {
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
   padding-inline-end: 2rem;
+}
+
+html[dir='rtl'] select {
+  background-position:
+    14px calc(50% - 2px),
+    19px calc(50% - 2px);
+}
+
+.rtl-flip {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+html[dir='rtl'] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+.bidi-isolate {
+  unicode-bidi: plaintext;
 }
 
 input:not([type='checkbox']):not([type='radio']):not([type='file'])::placeholder,

@@ -8,14 +8,15 @@
   import Button from '../lib/components/ui/Button.svelte';
   import Section from '../lib/components/ui/Section.svelte';
   import SettingsPanelSkeleton from '../lib/components/ui/SettingsPanelSkeleton.svelte';
+  import Tabs from '../lib/components/ui/Tabs.svelte';
   import ThemeToggle from '../lib/components/ui/ThemeToggle.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
-  import { ENABLE_ARABIC_UI } from '../lib/config/features.js';
   import { session, signOut } from '../stores/auth.js';
   import { theme } from '../stores/theme.js';
   import { t } from '../lib/i18n/t.js';
 
   let loggingOut = false;
+  let activeTab = 'systems';
 
   $: userName = $session?.user?.name ?? t('settings.account.anonymous');
   $: userEmail = $session?.user?.email ?? t('settings.account.noEmail');
@@ -36,6 +37,11 @@
   function handleThemeChange(event) {
     theme.setTheme(event.detail.theme);
   }
+
+  $: settingsTabs = [
+    { value: 'systems', label: t('settings.tabs.systems') },
+    { value: 'account', label: t('settings.tabs.account') }
+  ];
 </script>
 
 {#if !$session}
@@ -59,89 +65,97 @@
     </PageHeader>
 
     <div class="settings-grid">
-      <Section
-        id="language"
-        className="settings-section settings-section-language"
-        title={t('settings.language.title')}
-        description={ENABLE_ARABIC_UI ? t('settings.language.description') : t('settings.language.disabled')}
-      >
-        <div slot="header" class="section-copy">
-          <p class="section-eyebrow">{t('settings.eyebrow')}</p>
-          <h2>{t('settings.language.title')}</h2>
-          <p>{ENABLE_ARABIC_UI ? t('settings.language.description') : t('settings.language.disabled')}</p>
-        </div>
+      <div class="settings-tabs-wrap">
+        <Tabs
+          className="settings-tabs"
+          ariaLabel={t('settings.title')}
+          items={settingsTabs}
+          value={activeTab}
+          fullWidth
+          on:change={(event) => (activeTab = event.detail.value)}
+        />
+      </div>
 
-        {#if ENABLE_ARABIC_UI}
+      {#if activeTab === 'systems'}
+        <Section
+          id="language"
+          className="settings-section settings-section-language"
+          title={t('settings.language.title')}
+          description={t('settings.language.description')}
+        >
+          <div slot="header" class="section-copy">
+            <p class="section-eyebrow">{t('settings.tabs.systems')}</p>
+            <h2>{t('settings.language.title')}</h2>
+            <p>{t('settings.language.description')}</p>
+          </div>
+
           <div class="settings-block">
             <LanguageToggle />
+            <p class="helper">{t('settings.language.helper')}</p>
           </div>
-        {:else}
-          <Card class="hint-panel" variant="soft" padding="sm" border="strong">
-            <p>{t('settings.language.disabled')}</p>
-          </Card>
-        {/if}
-      </Section>
+        </Section>
 
-      <Section
-        className="settings-section settings-section-theme"
-        title={t('settings.theme.title')}
-        description={t('settings.theme.description')}
-      >
-        <div slot="header" class="section-copy">
-          <p class="section-eyebrow">{t('settings.eyebrow')}</p>
-          <h2>{t('settings.theme.title')}</h2>
-          <p>{t('settings.theme.description')}</p>
-        </div>
-
-        <div class="theme-row">
-          <ThemeToggle value={$theme} on:change={handleThemeChange} />
-          <div class="theme-summary">
-            <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
-            <p class="helper">{t('settings.theme.helper')}</p>
-          </div>
-        </div>
-      </Section>
-
-      <Section
-        id="plan"
-        className="settings-section settings-section-account"
-        title={t('settings.account.title')}
-        description={t('settings.account.description')}
-      >
-        <div slot="header" class="section-copy">
-          <p class="section-eyebrow">{t('settings.eyebrow')}</p>
-          <h2>{t('settings.account.title')}</h2>
-          <p>{t('settings.account.description')}</p>
-        </div>
-
-        <div slot="actions">
-          <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
-        </div>
-
-        <article class="account-card">
-          <div class="account-copy">
-            <p class="account-label">{t('settings.account.title')}</p>
-            <h3>{userName}</h3>
-            <p>{userEmail}</p>
+        <Section
+          className="settings-section settings-section-theme"
+          title={t('settings.theme.title')}
+          description={t('settings.theme.description')}
+        >
+          <div slot="header" class="section-copy">
+            <p class="section-eyebrow">{t('settings.tabs.systems')}</p>
+            <h2>{t('settings.theme.title')}</h2>
+            <p>{t('settings.theme.description')}</p>
           </div>
 
-          <div class="account-side">
-            <div class="account-plan">
-              <span>{t('settings.account.title')}</span>
-              <Badge tone={plan === 'free' ? 'info' : 'success'} variant="soft" size="sm">{planLabel}</Badge>
-            </div>
-
-            <div class="actions">
-              <Button type="button" variant="secondary" size="sm" disabled title={t('common.comingSoon')}>
-                {t('settings.account.actions.profile')}
-              </Button>
-              <Button type="button" variant="danger" size="sm" on:click={handleLogout} loading={loggingOut}>
-                {loggingOut ? t('settings.account.actions.loggingOut') : t('settings.account.actions.logout')}
-              </Button>
+          <div class="theme-row">
+            <ThemeToggle value={$theme} on:change={handleThemeChange} />
+            <div class="theme-summary">
+              <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
+              <p class="helper">{t('settings.theme.helper')}</p>
             </div>
           </div>
-        </article>
-      </Section>
+        </Section>
+      {:else}
+        <Section
+          id="plan"
+          className="settings-section settings-section-account"
+          title={t('settings.account.title')}
+          description={t('settings.account.description')}
+        >
+          <div slot="header" class="section-copy">
+            <p class="section-eyebrow">{t('settings.tabs.account')}</p>
+            <h2>{t('settings.account.title')}</h2>
+            <p>{t('settings.account.description')}</p>
+          </div>
+
+          <div slot="actions">
+            <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
+          </div>
+
+          <article class="account-card">
+            <div class="account-copy">
+              <p class="account-label">{t('settings.account.title')}</p>
+              <h3>{userName}</h3>
+              <p>{userEmail}</p>
+            </div>
+
+            <div class="account-side">
+              <div class="account-plan">
+                <span>{t('settings.account.title')}</span>
+                <Badge tone={plan === 'free' ? 'info' : 'success'} variant="soft" size="sm">{planLabel}</Badge>
+              </div>
+
+              <div class="actions">
+                <Button type="button" variant="secondary" size="sm" disabled title={t('common.comingSoon')}>
+                  {t('settings.account.actions.profile')}
+                </Button>
+                <Button type="button" variant="danger" size="sm" on:click={handleLogout} loading={loggingOut}>
+                  {loggingOut ? t('settings.account.actions.loggingOut') : t('settings.account.actions.logout')}
+                </Button>
+              </div>
+            </div>
+          </article>
+        </Section>
+      {/if}
     </div>
   </PageLayout>
 {/if}
@@ -166,6 +180,14 @@
     min-width: 0;
   }
 
+  .settings-tabs-wrap {
+    grid-column: 1 / -1;
+  }
+
+  :global(.settings-tabs) {
+    width: min(100%, 26rem);
+  }
+
   :global(.settings-section) {
     min-width: 0;
   }
@@ -173,10 +195,6 @@
   :global(.settings-section p) {
     margin: 0;
     color: var(--color-text-secondary);
-  }
-
-  :global(.settings-section-account) {
-    grid-column: 1 / -1;
   }
 
   .section-copy {
@@ -204,11 +222,6 @@
   .settings-block {
     display: grid;
     gap: 0.75rem;
-  }
-
-  :global(.hint-panel p) {
-    color: var(--muted-foreground);
-    font-size: var(--font-size-sm);
   }
 
   .theme-row {
@@ -305,6 +318,10 @@
   @media (max-width: 900px) {
     .settings-grid {
       grid-template-columns: 1fr;
+    }
+
+    :global(.settings-tabs) {
+      width: 100%;
     }
   }
 

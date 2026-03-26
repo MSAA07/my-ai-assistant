@@ -176,14 +176,14 @@
 
   function getFeatureDescription(featureKey) {
     if (featureKey === 'summary') {
-      return 'Get a comprehensive AI-generated summary of the key concepts and main points from your document.';
+      return t('document.hub.featureDescriptions.summary');
     }
 
     if (featureKey === 'flashcards') {
-      return 'Study with AI-generated flashcards that help you memorize important terms and concepts.';
+      return t('document.hub.featureDescriptions.flashcards');
     }
 
-    return 'Test your knowledge with a practice exam featuring multiple-choice and true/false questions based on the content.';
+    return t('document.hub.featureDescriptions.exam');
   }
 
   function getGenerationOptions(featureKey) {
@@ -261,7 +261,7 @@
     const language = normalizeString(document?.language).toLowerCase();
     if (!language) return null;
 
-    const label = language === 'arabic' ? 'Arabic' : 'English';
+    const label = language === 'arabic' ? t('language.arabic') : t('language.english');
     return { label: t('documentsPage.labels.language'), value: label };
   }
 
@@ -455,7 +455,7 @@
   <PageLayout class="document-hub" width="wide">
     <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
       <span slot="icon" aria-hidden="true">
-        <ArrowLeft />
+        <ArrowLeft class="rtl-flip" />
       </span>
       {t('document.hub.backToStudyHub')}
     </Button>

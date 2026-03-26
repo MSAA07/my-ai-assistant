@@ -124,12 +124,15 @@
     : examPhase === 'result'
       ? t('document.activity.exam.scoreLabel', { score: examScore, total: examQuestions.length })
       : examProgressLabel;
-  $: examChromeCurrentLabel = `Question ${examQuestions.length ? currentQuestionIndex + 1 : 0} / ${examQuestions.length}`;
+  $: examChromeCurrentLabel = t('document.activity.exam.currentLabel', {
+    current: examQuestions.length ? currentQuestionIndex + 1 : 0,
+    total: examQuestions.length,
+  });
   $: examChromeMetaLabel = examPhase === 'result'
     ? t('document.activity.exam.scoreLabel', { score: examScore, total: examQuestions.length })
     : examPhase === 'submitting'
       ? t('status.processing')
-      : `${examAnsweredCount} answered`;
+      : t('document.activity.exam.answeredInline', { answered: examAnsweredCount });
   $: examScorePercent = examQuestions.length ? Math.round((examScore / examQuestions.length) * 100) : 0;
 
   $: chromeStatus = extractionStatus === 'failed'
@@ -707,7 +710,9 @@
 
   function questionOptions(question) {
     const options = Array.isArray(question?.options) ? question.options.map((option) => text(option)).filter(Boolean) : [];
-    return questionType(question) === 'true_false' ? ['True', 'False'] : options;
+    return questionType(question) === 'true_false'
+      ? [t('document.activity.exam.boolean.true'), t('document.activity.exam.boolean.false')]
+      : options;
   }
 
   function setExamAnswer(answer) {
@@ -821,7 +826,7 @@
         on:click={goBackToHub}
       >
         <span slot="icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
+          <svg class="rtl-flip" viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
         </span>
         {t('document.activity.backToHub')}
       </Button>
@@ -1023,13 +1028,18 @@
           <section class="study-session__canvas study-session__canvas--flashcards">
             {#if flashcardsCompleted}
               <Card as="article" class="activity-frame study-session-panel study-session-panel--review flashcard-results-card" variant="base" padding="lg" border="strong">
-                <p class="flashcard-results-card__label">Flashcard results</p>
+                <p class="flashcard-results-card__label">{t('document.activity.flashcards.resultsTitle')}</p>
                 <p class="flashcard-results-card__value">{flashcardsCorrect} / {flashcards.length}</p>
-                <p class="flashcard-results-card__meta">{flashcardsIncorrect} incorrect &middot; {flashcardsUnanswered} unanswered</p>
+                <p class="flashcard-results-card__meta">
+                  {t('document.activity.flashcards.resultsMeta', {
+                    incorrect: flashcardsIncorrect,
+                    unanswered: flashcardsUnanswered,
+                  })}
+                </p>
               </Card>
 
               <div class="flashcard-review-head">
-                <h3>Review</h3>
+                <h3>{t('document.activity.exam.reviewTitle')}</h3>
               </div>
 
               <div class="stack stack-spacious flashcard-review-list">
@@ -1048,8 +1058,16 @@
                       </span>
                     </div>
                     <div class="review-copy">
-                      <p><strong>Result:</strong> {flashcardResults[index] === 'correct' ? 'Correct' : flashcardResults[index] === 'incorrect' ? 'Incorrect' : 'Not answered'}</p>
-                      <p><strong>Answer:</strong> {flashcard.answer}</p>
+                      <p>
+                        <strong>{t('document.activity.flashcards.resultLabel')}</strong>
+                        {' '}
+                        {flashcardResults[index] === 'correct'
+                          ? t('document.exam.reviewCorrect')
+                          : flashcardResults[index] === 'incorrect'
+                            ? t('document.exam.reviewIncorrect')
+                            : t('document.activity.exam.notAnswered')}
+                      </p>
+                      <p><strong>{t('document.activity.flashcards.answerLabel')}</strong> {flashcard.answer}</p>
                       {#if text(flashcard.explanation)}
                         <p>{flashcard.explanation}</p>
                       {/if}
@@ -1062,7 +1080,7 @@
                 <span slot="icon" aria-hidden="true">
                   <RotateCcw />
                 </span>
-                Restart flashcards
+                {t('document.activity.flashcards.restart')}
               </Button>
             {:else}
               <Card
@@ -1117,14 +1135,14 @@
                 <div class="study-session__nav controls controls-secondary flashcard-nav">
                   <Button type="button" variant="secondary" size="lg" className="flashcard-nav-button" on:click={previousFlashcard} disabled={flashcardIndex === 0}>
                     <span slot="icon" aria-hidden="true">
-                      <ChevronLeft />
+                      <ChevronLeft class="rtl-flip" />
                     </span>
                     {t('document.activity.actions.previous')}
                   </Button>
                 <Button type="button" variant="secondary" size="lg" className="flashcard-nav-button" on:click={nextFlashcard}>
-                    {flashcardIndex >= flashcards.length - 1 ? 'View results' : t('document.activity.actions.next')}
+                    {flashcardIndex >= flashcards.length - 1 ? t('document.activity.flashcards.viewResults') : t('document.activity.actions.next')}
                     <span slot="icon" aria-hidden="true">
-                      <ChevronRight />
+                      <ChevronRight class="rtl-flip" />
                     </span>
                   </Button>
                 </div>
@@ -1263,7 +1281,7 @@
               <div class="exam-progress">
                 <div class="exam-progress__meta">
                   <span>{examChromeCurrentLabel}</span>
-                  <span>{examAnsweredCount} answered</span>
+                  <span>{t('document.activity.exam.answeredInline', { answered: examAnsweredCount })}</span>
                 </div>
                 <ProgressBar
                   value={currentQuestionIndex + 1}
@@ -1291,7 +1309,7 @@
               <div class="study-session__nav controls controls-secondary exam-nav">
                 <Button type="button" variant="secondary" size="md" className="exam-nav-button" on:click={previousQuestion} disabled={currentQuestionIndex === 0}>
                   <span slot="icon" aria-hidden="true">
-                    <ChevronLeft />
+                    <ChevronLeft class="rtl-flip" />
                   </span>
                   {t('document.activity.actions.previous')}
                 </Button>
@@ -1299,14 +1317,14 @@
                   <Button type="button" variant="primary" size="md" className="exam-nav-button" on:click={nextQuestion} disabled={!text(examAnswers[currentQuestionIndex])}>
                     {t('document.activity.actions.next')}
                     <span slot="icon" aria-hidden="true">
-                      <ChevronRight />
+                      <ChevronRight class="rtl-flip" />
                     </span>
                   </Button>
                 {:else}
                   <Button type="button" variant="primary" size="md" className="exam-nav-button" on:click={submitExam} disabled={examSubmitting || !text(examAnswers[currentQuestionIndex])}>
                     {t('document.activity.actions.submitExam')}
                     <span slot="icon" aria-hidden="true">
-                      <ChevronRight />
+                      <ChevronRight class="rtl-flip" />
                     </span>
                   </Button>
                 {/if}

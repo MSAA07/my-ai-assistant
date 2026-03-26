@@ -1,495 +1,569 @@
-export default {
+import en from './en.js';
+
+function mergeDictionaries(base, overrides) {
+  if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides)) {
+    return overrides ?? base;
+  }
+
+  const next = { ...(base ?? {}) };
+
+  for (const [key, value] of Object.entries(overrides)) {
+    const current = base?.[key];
+    next[key] = value && typeof value === 'object' && !Array.isArray(value)
+      ? mergeDictionaries(current ?? {}, value)
+      : value;
+  }
+
+  return next;
+}
+
+const ar = {
   app: {
-    name: 'Ù…Ø³Ø§Ø¹Ø¯ Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ',
-    shortName: 'AI',
-    wordmark: 'Ø¯Ø±Ø§Ø³Ø©',
-    loadingSession: 'Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ø¬Ù„Ø³Ø©...'
+    name: 'مساعد الدراسة بالذكاء الاصطناعي',
+    wordmark: 'دراسة',
+    loadingSession: 'جارٍ تحميل الجلسة...'
   },
   access: {
-    deniedTitle: 'ØªÙ… Ø±ÙØ¶ Ø§Ù„ÙˆØµÙˆÙ„',
-    deniedMessage: 'Ù„ÙŠØ³ Ù„Ø¯ÙŠÙƒ ØµÙ„Ø§Ø­ÙŠØ© Ù„Ø¹Ø±Ø¶ Ù‡Ø°Ù‡ Ø§Ù„ØµÙØ­Ø©.',
-    backToDashboard: 'Ø§Ù„Ø¹ÙˆØ¯Ø© Ø¥Ù„Ù‰ Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©'
+    deniedTitle: 'تم رفض الوصول',
+    deniedMessage: 'ليس لديك صلاحية لعرض هذه الصفحة.',
+    backToDashboard: 'العودة إلى الرئيسية'
   },
   errors: {
-    notFoundTitle: 'Ø§Ù„ØµÙØ­Ø© ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©',
-    notFoundCta: 'Ø§Ù„Ø¹ÙˆØ¯Ø© Ø¥Ù„Ù‰ Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©'
+    notFoundTitle: 'الصفحة غير موجودة',
+    notFoundCta: 'العودة إلى الرئيسية'
   },
   language: {
-    english: 'Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠØ©',
-    arabic: 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
-    toggleLabel: 'ØªØºÙŠÙŠØ± Ø§Ù„Ù„ØºØ©',
-    sidebarLabel: 'Ù„ØºØ© Ø§Ù„ÙˆØ§Ø¬Ù‡Ø©',
-    sidebarDescription: 'ÙŠØªÙ… ØªØ·Ø¨ÙŠÙ‚ Ø§Ù„ØªØºÙŠÙŠØ± ÙÙˆØ±Ø§Ù‹ Ø¹Ù„Ù‰ ÙƒØ§Ù…Ù„ Ø§Ù„ÙˆØ§Ø¬Ù‡Ø©.'
+    english: 'الإنجليزية',
+    arabic: 'العربية',
+    toggleLabel: 'تغيير اللغة',
+    sidebarLabel: 'لغة الواجهة',
+    sidebarDescription: 'يتم تطبيق التغيير فورًا على كامل مساحة العمل.'
   },
   common: {
-    loading: 'Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„...',
-    close: 'Ø¥ØºÙ„Ø§Ù‚',
-    comingSoon: 'Ù‚Ø±ÙŠØ¨Ø§Ù‹',
-    comingSoonBadge: 'Ù‚Ø±ÙŠØ¨Ø§Ù‹',
-    comingSoonDetail: 'Ù†Ø¹Ù…Ù„ Ø­Ø§Ù„ÙŠØ§Ù‹ Ø¹Ù„Ù‰ Ø¥ÙƒÙ…Ø§Ù„ Ù‡Ø°Ù‡ Ø§Ù„Ù…ÙŠØ²Ø©.'
+    loading: 'جارٍ التحميل...',
+    close: 'إغلاق',
+    comingSoon: 'قريبًا',
+    comingSoonBadge: 'قريبًا',
+    comingSoonDetail: 'نعمل حاليًا على إكمال هذه التجربة.'
   },
   nav: {
-    home: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©',
-    dashboard: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©',
-    study: 'Ù…ÙƒØªØ¨Ø© Ù…Ø±ÙƒØ² Ø§Ù„Ø¯Ø±Ø§Ø³Ø©',
-    documents: 'Ø§Ù„Ù…ÙƒØªØ¨Ø©',
-    exams: 'Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª',
-    flashcards: 'Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ©',
-    adminPanel: 'Ù„ÙˆØ­Ø© Ø§Ù„Ø¥Ø¯Ø§Ø±Ø©',
-    settings: 'Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª',
-    plan: 'Ø®Ø·ØªÙŠ',
-    freeBadge: 'Ù…Ø¬Ø§Ù†ÙŠ',
-    proBadge: 'Ø§Ø­ØªØ±Ø§ÙÙŠ',
-    mobileLabel: 'Ø§Ù„ØªÙ†Ù‚Ù„ Ø§Ù„Ø£Ø³Ø§Ø³ÙŠ'
+    home: 'الرئيسية',
+    dashboard: 'الرئيسية',
+    study: 'مكتبة مركز الدراسة',
+    studyDetail: 'الدراسة',
+    documents: 'المكتبة',
+    exams: 'الاختبارات',
+    flashcards: 'البطاقات التعليمية',
+    adminPanel: 'لوحة الإدارة',
+    settings: 'الإعدادات',
+    plan: 'خطتي',
+    freeBadge: 'مجاني',
+    proBadge: 'احترافي',
+    mobileLabel: 'التنقل الأساسي'
   },
   topbar: {
-    defaultTitle: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©',
-    notifications: 'Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª',
-    notificationsComingSoon: 'Ø§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª (Ù‚Ø±ÙŠØ¨Ø§Ù‹)',
-    collapseSidebar: 'Ø·ÙŠ Ø§Ù„Ø´Ø±ÙŠØ· Ø§Ù„Ø¬Ø§Ù†Ø¨ÙŠ',
-    expandSidebar: 'ØªÙˆØ³ÙŠØ¹ Ø§Ù„Ø´Ø±ÙŠØ· Ø§Ù„Ø¬Ø§Ù†Ø¨ÙŠ',
-    profile: 'Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ',
-    logout: 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬'
+    defaultTitle: 'الرئيسية',
+    notifications: 'الإشعارات',
+    notificationsComingSoon: 'الإشعارات (قريبًا)',
+    collapseSidebar: 'طي الشريط الجانبي',
+    expandSidebar: 'توسيع الشريط الجانبي',
+    profile: 'الملف الشخصي',
+    logout: 'تسجيل الخروج'
   },
   status: {
-    processing: 'Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©',
-    ready: 'Ø¬Ø§Ù‡Ø²',
-    failed: 'ÙØ´Ù„',
-    info: 'Ù…Ø¹Ù„ÙˆÙ…Ø©'
+    processing: 'قيد المعالجة',
+    ready: 'جاهز',
+    failed: 'فشل',
+    info: 'معلومة'
   },
   emptyState: {
-    title: 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø¹Ù†Ø§ØµØ± Ø¨Ø¹Ø¯',
-    description: 'Ø¹Ù†Ø¯ Ø¥Ø¶Ø§ÙØ© Ù…Ø­ØªÙˆÙ‰ Ø¬Ø¯ÙŠØ¯ Ø³ÙŠØ¸Ù‡Ø± Ù‡Ù†Ø§.'
+    title: 'لا توجد عناصر بعد',
+    subtitle: 'عند إضافة محتوى جديد سيظهر هنا.',
+    description: 'عند إضافة محتوى جديد سيظهر هنا.'
   },
   confirmModal: {
-    title: 'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ØŸ',
-    description: 'Ù„Ø§ ÙŠÙ…ÙƒÙ† Ø§Ù„ØªØ±Ø§Ø¬Ø¹ Ø¹Ù† Ù‡Ø°Ù‡ Ø§Ù„Ø¹Ù…Ù„ÙŠØ©.',
-    confirm: 'ØªØ£ÙƒÙŠØ¯',
-    cancel: 'Ø¥Ù„ØºØ§Ø¡'
+    title: 'هل أنت متأكد؟',
+    description: 'لا يمكن التراجع عن هذا الإجراء.',
+    confirm: 'تأكيد',
+    cancel: 'إلغاء'
   },
   drawer: {
-    close: 'Ø¥ØºÙ„Ø§Ù‚'
+    close: 'إغلاق'
   },
   landing: {
-    title: 'Ù…Ø³Ø§Ø¹Ø¯ Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ',
-    subtitle: 'Ø±ÙÙŠÙ‚Ùƒ Ø§Ù„Ø°ÙƒÙŠ Ù„Ù„ØªØ¹Ù„Ù… ÙˆØ§Ù„Ø¨Ø­Ø«',
+    title: 'مساعد الدراسة بالذكاء الاصطناعي',
+    subtitle: 'رفيقك الذكي للتعلّم والبحث',
     features: {
       upload: {
-        title: 'Ø§Ø±ÙØ¹ Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª',
-        description: 'Ø§Ø³ØªÙˆØ±Ø¯ Ù…Ù„ÙØ§Øª PDF ÙˆWord ÙˆØ§Ù„Ø¹Ø±ÙˆØ¶ Ø§Ù„ØªÙ‚Ø¯ÙŠÙ…ÙŠØ© Ù„ØªØ­Ù„ÙŠÙ„Ù‡Ø§ ÙˆØ¯Ø±Ø§Ø³ØªÙ‡Ø§'
+        title: 'ارفع المستندات',
+        description: 'استورد ملفات PDF وWord والعروض التقديمية لتحليلها ودراستها'
       },
       analysis: {
-        title: 'ØªØ­Ù„ÙŠÙ„ Ù…Ø¯Ø¹ÙˆÙ… Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ',
-        description: 'Ø§Ø­ØµÙ„ Ø¹Ù„Ù‰ Ù…Ù„Ø®ØµØ§Øª ÙˆØ´Ø±ÙˆØ­Ø§Øª ÙˆØ±Ø¤Ù‰ Ù…Ù† Ù…ÙˆØ§Ø¯Ùƒ Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ©'
+        title: 'تحليل مدعوم بالذكاء الاصطناعي',
+        description: 'احصل على ملخصات وشروحات ورؤى من موادك التعليمية'
       },
       organize: {
-        title: 'ØªÙ†Ø¸ÙŠÙ… Ø°ÙƒÙŠ',
-        description: 'Ø­Ø§ÙØ¸ Ø¹Ù„Ù‰ Ø¬Ù…ÙŠØ¹ Ù…ÙˆØ§Ø¯Ùƒ Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ© ÙÙŠ Ù…ÙƒØ§Ù† ÙˆØ§Ø­Ø¯'
+        title: 'تنظيم ذكي',
+        description: 'حافظ على جميع موادك الدراسية في مكان واحد'
       }
     },
-    enterCta: 'Ø¯Ø®ÙˆÙ„'
+    enterCta: 'دخول'
   },
   home: {
-    heroTitle: 'Ù…Ø³Ø§Ø¹Ø¯ Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ',
-    heroSubtitle: 'Ø§Ø±ÙØ¹ Ù…ÙˆØ§Ø¯Ùƒ Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ© ÙˆØ§Ø­ØµÙ„ Ø¹Ù„Ù‰ Ù…Ù„Ø®ØµØ§Øª ÙˆØ¨Ø·Ø§Ù‚Ø§Øª ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙˆØ§Ø®ØªØ¨Ø§Ø±Ø§Øª ØªØ¯Ø±ÙŠØ¨ÙŠØ© Ù…Ø¯Ø¹ÙˆÙ…Ø© Ø¨Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ',
+    heroTitle: 'مساعد الدراسة بالذكاء الاصطناعي',
+    heroSubtitle: 'ارفع موادك الدراسية واحصل على ملخصات وبطاقات تعليمية واختبارات تدريبية مدعومة بالذكاء الاصطناعي',
     stats: {
-      documentsRemaining: 'Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª Ø§Ù„Ù…ØªØ¨Ù‚ÙŠØ©',
-      usedThisMonth: 'Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ù‡Ø°Ø§ Ø§Ù„Ø´Ù‡Ø±',
-      totalDocuments: 'Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª',
-      unlimited: 'ØºÙŠØ± Ù…Ø­Ø¯ÙˆØ¯'
+      documentsRemaining: 'المستندات المتبقية',
+      usedThisMonth: 'المستخدم هذا الشهر',
+      totalDocuments: 'إجمالي المستندات',
+      unlimited: 'غير محدود'
     },
     alerts: {
-      error: 'ÙØ´Ù„ ØªØ­Ù…ÙŠÙ„ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…. ÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ­Ø¯ÙŠØ«.'
+      error: 'تعذر تحميل بيانات المستخدم. يرجى إعادة المحاولة.'
     },
     quotaReached: {
-      title: 'ØªÙ… Ø§Ù„ÙˆØµÙˆÙ„ Ø¥Ù„Ù‰ Ø­Ø¯ Ø§Ù„Ø±ÙØ¹ Ø§Ù„Ø´Ù‡Ø±ÙŠ',
-      body: 'Ù„Ù‚Ø¯ Ø§Ø³ØªØ®Ø¯Ù…Øª Ø¬Ù…ÙŠØ¹ Ù…Ø±Ø§Øª Ø§Ù„Ø±ÙØ¹ Ø§Ù„Ù…ØªØ§Ø­Ø© ÙÙŠ Ø®Ø·ØªÙƒ Ø§Ù„Ø´Ù‡Ø±ÙŠØ© Ø§Ù„Ø­Ø§Ù„ÙŠØ©. ÙŠÙ…ÙƒÙ†Ùƒ Ø±ÙØ¹ Ø§Ù„Ù…Ø²ÙŠØ¯ Ù…Ù† Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª Ø¹Ù†Ø¯ Ø¥Ø¹Ø§Ø¯Ø© ØªØ¹ÙŠÙŠÙ† Ø­ØµØªÙƒ ÙÙŠ Ø§Ù„Ø´Ù‡Ø± Ø§Ù„Ù‚Ø§Ø¯Ù….',
-      upgradeHint: 'Ù‚Ù… Ø¨ØªØ±Ù‚ÙŠØ© Ø®Ø·ØªÙƒ Ø¥Ø°Ø§ ÙƒÙ†Øª ØªØ±ÙŠØ¯ Ø­Ø¯Ù‹Ø§ Ø´Ù‡Ø±ÙŠÙ‹Ø§ Ø£Ø¹Ù„Ù‰ Ù„Ø±ÙØ¹ Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª.'
+      title: 'تم الوصول إلى حد الرفع الشهري',
+      body: 'لقد استخدمت جميع عمليات الرفع المتاحة ضمن خطتك الشهرية الحالية. يمكنك رفع المزيد عند إعادة تعيين حصتك في الشهر القادم.',
+      upgradeHint: 'قم بترقية خطتك إذا كنت تريد حدًا شهريًا أعلى لرفع المستندات.'
     },
     uploadSection: {
-      title: 'Ø±ÙØ¹ Ù…Ø³ØªÙ†Ø¯ Ø¬Ø¯ÙŠØ¯',
-      modalTitle: 'Ø±ÙØ¹ Ø§Ù„Ù…Ù„ÙØ§Øª',
-      modalDescription: 'Ø£Ø¶Ù Ù…Ø³ØªÙ†Ø¯Ùƒ Ù‡Ù†Ø§',
-      dropzoneTitle: 'Ø§Ø³Ø­Ø¨ Ù…Ù„ÙÙƒ Ù„Ø¨Ø¯Ø¡ Ø§Ù„Ø±ÙØ¹',
-      dropzoneOr: 'Ø£Ùˆ',
-      browse: 'Ø§Ø³ØªØ¹Ø±Ø¶ Ø§Ù„Ù…Ù„ÙØ§Øª',
-      supportedFiles: 'ÙŠØ¯Ø¹Ù… PDF ÙˆDOCX ÙˆPPTX',
-      openModalCta: 'Ø±ÙØ¹ Ø§Ù„Ù…Ù„ÙØ§Øª',
-      cancel: 'Ø¥Ù„ØºØ§Ø¡',
-      next: 'Ø§Ù„ØªØ§Ù„ÙŠ',
-      removeFile: 'Ø­Ø°Ù Ø§Ù„Ù…Ù„Ù',
-      languageLabel: 'Ù„ØºØ© Ø§Ø³ØªØ¬Ø§Ø¨Ø© Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ',
-      englishOption: 'Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠØ©',
-      arabicOption: 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
-      filePlaceholder: 'Ø§Ù†Ù‚Ø± Ù„Ø§Ø®ØªÙŠØ§Ø± Ù…Ù„Ù (PDF, DOCX, PPTX)',
-      dragActive: 'Ø£ÙÙ„Øª Ø§Ù„Ù…Ù„Ù Ù‡Ù†Ø§',
-      fileSelected: 'ØªÙ… Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ù…Ù„Ù â€” Ø¬Ø§Ù‡Ø² Ù„Ù„Ø¥Ù†Ø´Ø§Ø¡',
-      constraints: 'PDF, DOCX, PPTX (Ø£Ù‚ØµÙ‰ Ø­Ø¬Ù… 25MB)',
+      title: 'رفع مستند جديد',
+      modalTitle: 'رفع الملفات',
+      modalDescription: 'أضف مستندك هنا',
+      dropzoneTitle: 'اسحب ملفك لبدء الرفع',
+      dropzoneOr: 'أو',
+      browse: 'استعراض الملفات',
+      supportedFiles: 'يدعم PDF وDOCX وPPTX',
+      openModalCta: 'رفع الملفات',
+      cancel: 'إلغاء',
+      next: 'التالي',
+      removeFile: 'حذف الملف',
+      languageLabel: 'لغة استجابة الذكاء الاصطناعي',
+      englishOption: 'الإنجليزية',
+      arabicOption: 'العربية',
+      filePlaceholder: 'انقر لاختيار ملف (PDF أو DOCX أو PPTX)',
+      dragActive: 'أفلت الملف هنا',
+      fileSelected: 'تم اختيار الملف وهو جاهز للإنشاء',
+      constraints: 'PDF وDOCX وPPTX (الحد الأقصى 25MB)',
       selectedFileLabel: '{name}',
-      fileInfo: 'Ø§Ù„Ø­Ø¯ Ø§Ù„Ø£Ù‚ØµÙ‰ Ù„Ø­Ø¬Ù… Ø§Ù„Ù…Ù„Ù: 25 Ù…ÙŠØºØ§Ø¨Ø§ÙŠØª',
-      submit: 'Ø±ÙØ¹ ÙˆØ¥Ù†Ø´Ø§Ø¡ Ù…ÙˆØ§Ø¯ Ø¯Ø±Ø§Ø³ÙŠØ©',
-      submitProcessing: 'Ø¬Ø§Ø±ÙŠ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©... (Ù‚Ø¯ ÙŠØ³ØªØºØ±Ù‚ 20-30 Ø«Ø§Ù†ÙŠØ©)',
+      fileInfo: 'الحد الأقصى لحجم الملف: 25 ميجابايت',
+      submit: 'رفع وإنشاء مواد دراسية',
+      submitProcessing: 'جارٍ المعالجة... (قد يستغرق ذلك 20 إلى 30 ثانية)',
       errors: {
-        selectFile: 'ÙŠØ±Ø¬Ù‰ Ø§Ø®ØªÙŠØ§Ø± Ù…Ù„Ù Ø£ÙˆÙ„Ø§Ù‹',
-        invalidType: 'Ù†ÙˆØ¹ Ø§Ù„Ù…Ù„Ù ØºÙŠØ± ØµØ§Ù„Ø­. ÙŠØ±Ø¬Ù‰ Ø±ÙØ¹ Ù…Ù„Ù PDF Ø£Ùˆ DOCX Ø£Ùˆ PPTX.',
-        fileTooLarge: 'Ø­Ø¬Ù… Ø§Ù„Ù…Ù„Ù ÙƒØ¨ÙŠØ± Ø¬Ø¯Ø§Ù‹. Ø§Ù„Ø­Ø¯ Ø§Ù„Ø£Ù‚ØµÙ‰ Ù‡Ùˆ 25 Ù…ÙŠØºØ§Ø¨Ø§ÙŠØª.',
-        maxFiles: 'ÙŠÙ…ÙƒÙ†Ùƒ Ø±ÙØ¹ Ø­ØªÙ‰ {max} Ù…Ù„ÙØ§Øª ÙÙŠ Ø§Ù„Ù…Ø±Ø© Ø§Ù„ÙˆØ§Ø­Ø¯Ø©.',
-        limitReached: 'Ù„Ù‚Ø¯ ÙˆØµÙ„Øª Ø¥Ù„Ù‰ Ø§Ù„Ø­Ø¯ Ø§Ù„Ø´Ù‡Ø±ÙŠ Ù„Ù„Ø±ÙØ¹',
-        uploadFailed: 'ÙØ´Ù„ Ø±ÙØ¹ Ø§Ù„Ù…Ø³ØªÙ†Ø¯. Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.',
-        network: 'Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø´Ø¨ÙƒØ©. Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'
+        selectFile: 'يرجى اختيار ملف أولًا',
+        invalidType: 'نوع الملف غير صالح. يرجى رفع ملف PDF أو DOCX أو PPTX.',
+        fileTooLarge: 'حجم الملف كبير جدًا. الحد الأقصى هو 25 ميجابايت.',
+        maxFiles: 'يمكنك رفع حتى {max} ملفات في المرة الواحدة.',
+        limitReached: 'لقد وصلت إلى حد الرفع الشهري',
+        uploadFailed: 'فشل رفع المستند. حاول مرة أخرى.',
+        network: 'خطأ في الشبكة. حاول مرة أخرى.'
       },
-      success: 'ØªÙ…Øª Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ù…Ø³ØªÙ†Ø¯ Ø¨Ù†Ø¬Ø§Ø­! ØªÙ… Ø¥Ù†Ø´Ø§Ø¡ {flashcards} Ø¨Ø·Ø§Ù‚Ø© ØªØ¹Ù„ÙŠÙ…ÙŠØ© Ùˆ{questions} Ø³Ø¤Ø§Ù„Ø§Ù‹ Ù„Ù„Ø§Ø®ØªØ¨Ø§Ø±.'
+      success: 'تمت معالجة المستند بنجاح. تم إنشاء {flashcards} بطاقة تعليمية و{questions} سؤالًا.'
     },
     documents: {
-      title: 'Ù…Ø³ØªÙ†Ø¯Ø§ØªÙŠ ({count})',
-      viewCta: 'Ø¹Ø±Ø¶ ÙˆØ¯Ø±Ø§Ø³Ø©',
-      deleteCta: 'Ø­Ø°Ù',
-      languageEnglish: 'Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠØ©',
-      languageArabic: 'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©',
-      flashcardCount: '{count} Ø¨Ø·Ø§Ù‚Ø© ØªØ¹Ù„ÙŠÙ…ÙŠØ©',
-      questionCount: '{count} Ø³Ø¤Ø§Ù„Ø§Ù‹',
-      deleteConfirm: 'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ø£Ù†Ùƒ ØªØ±ÙŠØ¯ Ø­Ø°Ù Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯ØŸ',
-      deleteSuccess: 'ØªÙ… Ø­Ø°Ù Ø§Ù„Ù…Ø³ØªÙ†Ø¯ Ø¨Ù†Ø¬Ø§Ø­',
-      deleteError: 'ÙØ´Ù„ Ø­Ø°Ù Ø§Ù„Ù…Ø³ØªÙ†Ø¯'
-    },
-    processing: {
-      title: 'Ø¬Ø§Ø±ÙŠ Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ù…Ø³ØªÙ†Ø¯',
-      stages: {
-        upload: 'Ø±ÙØ¹ Ø§Ù„Ù…Ù„Ù',
-        extract: 'Ø§Ø³ØªØ®Ø±Ø§Ø¬ Ø§Ù„Ù†Øµ',
-        generate: 'Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø°ÙƒÙŠ',
-        save: 'Ø­ÙØ¸ Ø§Ù„Ù†ØªØ§Ø¦Ø¬'
-      },
-      complete: 'Ø§ÙƒØªÙ…Ù„!'
+      title: 'مستنداتي ({count})',
+      viewCta: 'عرض ودراسة',
+      deleteCta: 'حذف',
+      languageEnglish: 'الإنجليزية',
+      languageArabic: 'العربية',
+      flashcardCount: '{count} بطاقة تعليمية',
+      questionCount: '{count} سؤالًا',
+      deleteConfirm: 'هل أنت متأكد من أنك تريد حذف هذا المستند؟',
+      deleteSuccess: 'تم حذف المستند بنجاح',
+      deleteError: 'فشل حذف المستند'
     }
   },
   document: {
-    loading: 'Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ø³ØªÙ†Ø¯...',
-    loadingError: 'ÙØ´Ù„ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ø³ØªÙ†Ø¯',
-    notFound: 'Ø§Ù„Ù…Ø³ØªÙ†Ø¯ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯',
-    processingFailedTitle: 'ØªØ¹Ø°Ø± Ø¥ÙƒÙ…Ø§Ù„ Ù…Ø¹Ø§Ù„Ø¬Ø© Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯.',
-    processingFailed: 'ÙØ´Ù„Øª Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ù…Ø³ØªÙ†Ø¯. ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.',
-    processingFailedHelp: 'ÙŠÙ…ÙƒÙ†Ùƒ Ø§Ù„Ø¹ÙˆØ¯Ø© Ø¥Ù„Ù‰ Ù…ÙƒØªØ¨Ø© Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ø£Ùˆ Ø±ÙØ¹ Ø§Ù„Ù…Ù„Ù Ù…Ø±Ø© Ø£Ø®Ø±Ù‰ Ù…Ù† Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©.',
-    extracting: 'Ø¬Ø§Ø±ÙŠ Ø§Ø³ØªØ®Ø±Ø§Ø¬ Ù†Øµ Ø§Ù„Ù…Ø³ØªÙ†Ø¯...',
-    extractingNote: 'ÙŠØ³ØªØºØ±Ù‚ Ø°Ù„Ùƒ Ø¹Ø§Ø¯Ø© Ø¨Ø¶Ø¹ Ø«ÙˆØ§Ù†Ù Ù‚Ø¨Ù„ Ø£Ù† ØªØµØ¨Ø­ Ø£Ø¯ÙˆØ§Øª Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ø¬Ø§Ù‡Ø²Ø© Ù„Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø¹Ù†Ø¯ Ø§Ù„Ø·Ù„Ø¨.',
-    aiGenerating: 'Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ ÙŠÙ‚ÙˆÙ… Ø¨Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù…ÙˆØ§Ø¯ Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ©...',
-    aiGeneratingNote: 'ÙŠØ³ØªØºØ±Ù‚ Ø°Ù„Ùƒ Ø¹Ø§Ø¯Ø© Ø­ÙˆØ§Ù„ÙŠ 20 Ø«Ø§Ù†ÙŠØ©.',
-    finalizing: 'Ø¬Ø§Ø±Ù Ø¥Ù†Ù‡Ø§Ø¡ ØªØ¬Ù‡ÙŠØ² Ø§Ù„Ù…Ø³ØªÙ†Ø¯...',
-    finalizingNote: 'Ø§Ù„Ù…ÙˆØ§Ø¯ Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠØ© Ø£ØµØ¨Ø­Øª Ø¬Ø§Ù‡Ø²Ø©. Ø¬Ø§Ø±Ù ØªØ­Ù…ÙŠÙ„ Ø¹Ø±Ø¶ Ø§Ù„Ù…Ø³ØªÙ†Ø¯ Ø§Ù„ÙƒØ§Ù…Ù„ Ø§Ù„Ø¢Ù†.',
-    processingProgress: 'Ø§Ù„ØªÙ‚Ø¯Ù… {progress}%',
-    jobStatusError: 'ØªØ¹Ø°Ø± Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø­Ø§Ù„Ø© Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©. ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.',
-    back: 'Ø±Ø¬ÙˆØ¹',
-    backToDocuments: 'Ø§Ù„Ø¹ÙˆØ¯Ø© Ø¥Ù„Ù‰ Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª',
-    backToDashboard: 'Ø§Ù„Ø¹ÙˆØ¯Ø© Ø¥Ù„Ù‰ Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©',
-    uploadAgain: 'Ø±ÙØ¹ Ù…Ù„Ù Ø¢Ø®Ø±',
+    loading: 'جارٍ تحميل المستند...',
+    loadingError: 'تعذر تحميل المستند',
+    notFound: 'المستند غير موجود',
+    processingFailedTitle: 'تعذر إكمال معالجة هذا المستند.',
+    processingFailed: 'فشلت معالجة المستند. يرجى المحاولة مرة أخرى.',
+    processingFailedHelp: 'يمكنك العودة إلى المكتبة أو رفع الملف مرة أخرى من الصفحة الرئيسية.',
+    extracting: 'جارٍ استخراج نص المستند...',
+    extractingNote: 'يستغرق ذلك عادة بضع ثوانٍ قبل أن تصبح أدوات الدراسة جاهزة للإنشاء عند الطلب.',
+    aiGenerating: 'يقوم الذكاء الاصطناعي بإنشاء المواد الدراسية...',
+    aiGeneratingNote: 'يستغرق ذلك عادة حوالي 20 ثانية.',
+    finalizing: 'جارٍ إنهاء تجهيز المستند...',
+    finalizingNote: 'أصبحت المواد الدراسية جاهزة. جارٍ تحميل عرض المستند الكامل الآن.',
+    processingProgress: 'التقدم {progress}%',
+    jobStatusError: 'تعذر التحقق من حالة المعالجة. يرجى المحاولة مرة أخرى.',
+    back: 'رجوع',
+    backToDocuments: 'العودة إلى المستندات',
+    backToDashboard: 'العودة إلى الرئيسية',
+    uploadAgain: 'رفع ملف آخر',
     actions: {
-      generate: 'Ø¥Ù†Ø´Ø§Ø¡',
-      regenerate: 'Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡',
-      retry: 'Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø©',
-      generating: 'Ø¬Ø§Ø±Ù Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡...'
+      generate: 'إنشاء',
+      regenerate: 'إعادة الإنشاء',
+      retry: 'إعادة المحاولة',
+      generating: 'جارٍ الإنشاء...'
     },
     options: {
-      summaryLength: 'Ø·ÙˆÙ„ Ø§Ù„Ù…Ù„Ø®Øµ',
-      short: 'Ù‚ØµÙŠØ±',
-      medium: 'Ù…ØªÙˆØ³Ø·',
-      long: 'Ø·ÙˆÙŠÙ„',
-      includeExplanations: 'ØªØ¶Ù…ÙŠÙ† Ø§Ù„Ø´Ø±ÙˆØ­Ø§Øª',
-      questionCount: 'Ø¹Ø¯Ø¯ Ø§Ù„Ø£Ø³Ø¦Ù„Ø©'
+      summaryLength: 'طول الملخص',
+      short: 'قصير',
+      medium: 'متوسط',
+      long: 'طويل',
+      includeExplanations: 'تضمين الشروحات',
+      questionCount: 'عدد الأسئلة'
     },
     generation: {
-      queuedNoContent: 'ØªÙ…Øª Ø¥Ø¶Ø§ÙØ© Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø¥Ù„Ù‰ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø± Ù„Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø¯Ø§Ø©.',
-      runningNoContent: 'Ø¬Ø§Ø±Ù Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø¢Ù†. Ø£Ø¹Ø¯ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ø¨Ø¹Ø¯ Ù‚Ù„ÙŠÙ„.',
-      regenerating: 'Ø¬Ø§Ø±Ù Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡. Ø³ÙŠØ¨Ù‚Ù‰ Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø­Ø§Ù„ÙŠ Ù…ØªØ§Ø­Ù‹Ø§ Ø­ØªÙ‰ ØªÙƒØªÙ…Ù„ Ø§Ù„Ù†Ø³Ø®Ø© Ø§Ù„Ø¬Ø¯ÙŠØ¯Ø©.',
-      failedNoContent: 'ÙØ´Ù„ Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡. Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.',
-      failedWithContent: 'ÙØ´Ù„Øª Ø¢Ø®Ø± Ø¹Ù…Ù„ÙŠØ© Ø¥Ù†Ø´Ø§Ø¡. ÙŠØªÙ… Ø¹Ø±Ø¶ Ø§Ù„Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ø³Ø§Ø¨Ù‚.',
-      missingContent: 'Ø§ÙƒØªÙ…Ù„Øª Ø¹Ù…Ù„ÙŠØ© Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡ ÙˆÙ„ÙƒÙ† Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù…Ø­ØªÙˆÙ‰ Ù…ØªØ§Ø­ Ø¨Ø¹Ø¯. Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.',
-      requestFailed: 'ØªØ¹Ø°Ø± Ø¨Ø¯Ø¡ Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡. ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'
+      queuedNoContent: 'تمت إضافة عملية الإنشاء إلى قائمة الانتظار لهذه الأداة.',
+      runningNoContent: 'الإنشاء قيد التنفيذ الآن. أعد المحاولة بعد قليل.',
+      regenerating: 'جارٍ إعادة الإنشاء. سيبقى المحتوى الحالي متاحًا حتى تكتمل النسخة الجديدة.',
+      failedNoContent: 'فشل الإنشاء. حاول مرة أخرى.',
+      failedWithContent: 'فشلت آخر عملية إنشاء. يتم عرض المحتوى السابق.',
+      missingContent: 'اكتمل الإنشاء لكن لا يوجد محتوى متاح بعد. حاول مرة أخرى.',
+      requestFailed: 'تعذر بدء الإنشاء. يرجى المحاولة مرة أخرى.'
     },
-    uploaded: 'ØªØ§Ø±ÙŠØ® Ø§Ù„Ø±ÙØ¹',
-    language: 'Ø§Ù„Ù„ØºØ©',
+    uploaded: 'تاريخ الرفع',
+    language: 'اللغة',
     tabs: {
-      summary: 'Ø§Ù„Ù…Ù„Ø®Øµ',
-      flashcards: 'Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ© ({count})',
-      exam: 'Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø± Ø§Ù„ØªØ¬Ø±ÙŠØ¨ÙŠ ({count})'
+      summary: 'الملخص',
+      flashcards: 'البطاقات التعليمية ({count})',
+      exam: 'الاختبار التجريبي ({count})'
     },
     hub: {
-      backToStudyHub: 'Ø§Ù„Ø¹ÙˆØ¯Ø© Ø¥Ù„Ù‰ Ù…Ø±ÙƒØ² Ø§Ù„Ø¯Ø±Ø§Ø³Ø©',
-      untitled: 'Ù…Ø³ØªÙ†Ø¯ Ø¨Ø¯ÙˆÙ† Ø¹Ù†ÙˆØ§Ù†',
-      featuresTitle: 'Ù…ÙŠØ²Ø§Øª Ø§Ù„Ø¯Ø±Ø§Ø³Ø©',
-      readyHint: 'ØªÙ… Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡ ÙˆÙ‡Ùˆ Ø¬Ø§Ù‡Ø² Ù„Ù„ÙØªØ­.',
+      backToStudyHub: 'العودة إلى مركز الدراسة',
+      untitled: 'مستند بدون عنوان',
+      featuresTitle: 'مواد الدراسة',
+      readyHint: 'تم الإنشاء وأصبح جاهزًا للفتح.',
+      featureDescriptions: {
+        summary: 'احصل على ملخص شامل يولده الذكاء الاصطناعي لأهم المفاهيم والنقاط الرئيسية في مستندك.',
+        flashcards: 'راجع باستخدام بطاقات تعليمية مولدة بالذكاء الاصطناعي تساعدك على حفظ المصطلحات والمفاهيم المهمة.',
+        exam: 'اختبر فهمك من خلال اختبار تدريبي يضم أسئلة اختيار من متعدد وصواب وخطأ مبنية على المحتوى.'
+      },
       features: {
-        summary: 'Ø§Ù„Ù…Ù„Ø®Øµ',
-        flashcards: 'Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ©',
-        exam: 'Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø± Ø§Ù„ØªØ¬Ø±ÙŠØ¨ÙŠ'
+        summary: 'الملخص',
+        flashcards: 'البطاقات التعليمية',
+        exam: 'الاختبار التجريبي'
       },
       states: {
-        notGenerated: 'ØºÙŠØ± Ù…ÙÙ†Ø´Ø£',
-        generating: 'Ø¬Ø§Ø±Ù Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡',
-        waitingForExtraction: 'Ø¨Ø§Ù†ØªØ¸Ø§Ø± Ø§ÙƒØªÙ…Ø§Ù„ Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„Ù…Ø³ØªÙ†Ø¯ Ù‚Ø¨Ù„ Ø¨Ø¯Ø¡ Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡.'
+        notGenerated: 'غير مُنشأ',
+        generating: 'جارٍ الإنشاء',
+        waitingForExtraction: 'بانتظار اكتمال معالجة المستند قبل أن يبدأ الإنشاء.'
       },
       actions: {
-        open: 'ÙØªØ­'
+        open: 'فتح'
       },
       meta: {
-        fileType: 'Ù†ÙˆØ¹ Ø§Ù„Ù…Ù„Ù'
+        fileType: 'نوع الملف'
       },
       processing: {
-        extractingTitle: 'Ø§Ù„Ù…Ø³ØªÙ†Ø¯ Ù…Ø§ Ø²Ø§Ù„ Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©',
-        extractingBody: 'Ù†Ù‚ÙˆÙ… Ø¨Ø§Ø³ØªØ®Ø±Ø§Ø¬ Ù…Ø­ØªÙˆÙ‰ Ø§Ù„Ù…Ø³ØªÙ†Ø¯ Ø­ØªÙ‰ ØªØµØ¨Ø­ Ù…ÙŠØ²Ø§Øª Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ù‚Ø§Ø¨Ù„Ø© Ù„Ù„Ø¥Ù†Ø´Ø§Ø¡.',
-        generatingTitle: 'Ø¥Ù†Ø´Ø§Ø¡ Ù…ÙˆØ§Ø¯ Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ù‚ÙŠØ¯ Ø§Ù„ØªÙ†ÙÙŠØ°',
-        generatingBody: 'Ù…ÙŠØ²Ø© Ø£Ùˆ Ø£ÙƒØ«Ø± Ù…Ù† Ù…ÙŠØ²Ø§Øª Ø§Ù„Ø¯Ø±Ø§Ø³Ø© Ù‚ÙŠØ¯ Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø¢Ù†.',
-        continues: 'ÙŠØ³ØªÙ…Ø± Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡ ÙÙŠ Ø§Ù„Ø®Ù„ÙÙŠØ© Ø­ØªÙ‰ Ø¥Ø°Ø§ ØºØ§Ø¯Ø±Øª Ù‡Ø°Ù‡ Ø§Ù„ØµÙØ­Ø©.'
-      },
-      statusTitle: '???? ???????',
-      statusSubtitle: '??? ???? ????????? ?? ???? ???????? ???? ?????? ????? ??????? ???? ????? ??? ???.',
-      generationRunning: '???? ????? ????? ????? ????. ??????? ?????? ???? ?????? ???????.',
-      generationFailed: '???? ??? ????? ?????. ????? ????? ???????? ?? ???? ??????? ???????.',
-      actionsTitle: '??????? ???????',
-      actionsSubtitleEmpty: '?? ???? ???? ?????? ????? ???. ???? ?????? ???? ?? ?????? ?? ??????.',
-      actionsSubtitleExisting: '????? ????? ???? ?? ?????? ?? ????? ??????? ?????? ?? ??? ???????.',
-      materialsTitle: '?????? ????????'
+        extractingTitle: 'المستند ما زال قيد المعالجة',
+        extractingBody: 'نقوم باستخراج محتوى المستند حتى تصبح ميزات الدراسة قابلة للإنشاء.',
+        generatingTitle: 'إنشاء مواد الدراسة قيد التنفيذ',
+        generatingBody: 'ميزة أو أكثر من ميزات الدراسة قيد الإنشاء الآن.',
+        continues: 'يستمر الإنشاء في الخلفية حتى إذا غادرت هذه الصفحة.'
+      }
     },
     source: {
-      title: '????? ??????',
-      description: '????? ??????? ?? ??????? ???????? ?? ????? ?????? ????????.',
-      count: '{count} ????',
-      loading: '???? ????? ????? ??????...',
-      loadError: '???? ????? ????? ??????.',
-      retry: '????? ????????',
-      empty: '?? ???? ????? ???? ????? ??????? ???? ??????? ???.',
-      page: '??????/??????? {page}',
-      loadMore: '????? ???? ?? ???????',
-      loadingMore: '???? ???????...',
-      slideText: '?? ???????',
-      speakerNote: '?????? ???????',
-      excerpt: '????'
+      title: 'المحتوى المصدر',
+      description: 'مقاطع مستخرجة من المستند تُستخدم في إنشاء مواد الدراسة. يمكنك المتابعة في القراءة أثناء توليد المواد.',
+      count: '{count} مقطع',
+      loading: 'جارٍ تحميل المقاطع المستخرجة...',
+      loadError: 'تعذر تحميل المقاطع المستخرجة.',
+      retry: 'إعادة المحاولة',
+      empty: 'لا توجد مقاطع قابلة للقراءة لهذا المستند بعد.',
+      page: 'الصفحة/الشريحة {page}',
+      loadMore: 'تحميل المزيد من المقاطع',
+      loadingMore: 'جارٍ تحميل المزيد...',
+      slideText: 'نص الشريحة',
+      speakerNote: 'ملاحظة المتحدث',
+      excerpt: 'مقتطف'
     },
     summary: {
-      generatePrompt: 'Ø£Ù†Ø´Ø¦ Ù…Ù„Ø®ØµÙ‹Ø§ Ø¹Ù†Ø¯Ù…Ø§ ØªÙƒÙˆÙ† Ù…Ø³ØªØ¹Ø¯Ù‹Ø§ Ù„Ø¯Ø±Ø§Ø³Ø© Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯.'
+      generatePrompt: 'أنشئ ملخصًا عندما تكون مستعدًا لدراسة هذا المستند.'
     },
     flashcards: {
-      shuffle: 'Ø¥Ø¹Ø§Ø¯Ø© ØªØ±ØªÙŠØ¨',
-      cardCounter: 'Ø§Ù„Ø¨Ø·Ø§Ù‚Ø© {current} Ù…Ù† {total}',
-      question: 'Ø§Ù„Ø³Ø¤Ø§Ù„',
-      answer: 'Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø©',
-      explanation: 'Ø§Ù„Ø´Ø±Ø­',
-      empty: 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨Ø·Ø§Ù‚Ø§Øª ØªØ¹Ù„ÙŠÙ…ÙŠØ© Ù…ØªØ§Ø­Ø© Ù„Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯.',
-      generatePrompt: 'Ø£Ù†Ø´Ø¦ Ø¨Ø·Ø§Ù‚Ø§Øª ØªØ¹Ù„ÙŠÙ…ÙŠØ© Ù„Ø¨Ø¯Ø¡ Ù…Ø±Ø§Ø¬Ø¹Ø© Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯.',
-      flipHint: 'Ø§Ù†Ù‚Ø± Ù„Ù„Ù‚Ù„Ø¨',
-      previous: 'Ø§Ù„Ø³Ø§Ø¨Ù‚',
-      next: 'Ø§Ù„ØªØ§Ù„ÙŠ'
+      shuffle: 'إعادة الترتيب',
+      cardCounter: 'البطاقة {current} من {total}',
+      question: 'السؤال',
+      answer: 'الإجابة',
+      explanation: 'الشرح',
+      empty: 'لا توجد بطاقات تعليمية متاحة لهذا المستند.',
+      generatePrompt: 'أنشئ بطاقات تعليمية لبدء مراجعة هذا المستند.',
+      flipHint: 'انقر للقلب',
+      previous: 'السابق',
+      next: 'التالي'
     },
     exam: {
-      generatePrompt: 'Ø£Ù†Ø´Ø¦ Ø§Ø®ØªØ¨Ø§Ø±Ù‹Ø§ ØªØ¬Ø±ÙŠØ¨ÙŠÙ‹Ø§ Ø¹Ù†Ø¯Ù…Ø§ ØªÙƒÙˆÙ† Ù…Ø³ØªØ¹Ø¯Ù‹Ø§ Ù„Ø§Ø®ØªØ¨Ø§Ø± Ù†ÙØ³Ùƒ.',
-      readyTitle: 'Ù‡Ù„ Ø£Ù†Øª Ù…Ø³ØªØ¹Ø¯ Ù„Ù„Ø§Ø®ØªØ¨Ø§Ø± Ø§Ù„ØªØ¬Ø±ÙŠØ¨ÙŠØŸ',
-      questionCount: 'ÙŠØ­ØªÙˆÙŠ Ù‡Ø°Ø§ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø± Ø¹Ù„Ù‰ {count} Ø³Ø¤Ø§Ù„Ø§Ù‹',
-      feedbackPrompt: 'ÙƒÙŠÙ ØªÙØ¶Ù„ Ø¹Ø±Ø¶ Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø§ØªØŸ',
-      instantTitle: 'ØªØºØ°ÙŠØ© Ø±Ø§Ø¬Ø¹Ø© ÙÙˆØ±ÙŠØ©',
-      instantDescription: 'Ø¹Ø±Ø¶ Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø© Ø§Ù„ØµØ­ÙŠØ­Ø© Ø¨Ø¹Ø¯ ÙƒÙ„ Ø³Ø¤Ø§Ù„',
-      endTitle: 'Ù…Ø­Ø§ÙƒØ§Ø© Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±',
-      endDescription: 'Ø¹Ø±Ø¶ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø§Øª ÙÙŠ Ø§Ù„Ù†Ù‡Ø§ÙŠØ©',
-      start: 'Ø§Ø¨Ø¯Ø£ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±',
-      questionNumber: 'Ø§Ù„Ø³Ø¤Ø§Ù„ {index}',
-      inputPlaceholder: 'Ø§ÙƒØªØ¨ Ø¥Ø¬Ø§Ø¨ØªÙƒ...',
-      previous: 'Ø§Ù„Ø³Ø§Ø¨Ù‚',
-      next: 'Ø§Ù„ØªØ§Ù„ÙŠ',
-      submit: 'Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±',
-      instantCorrect: 'Ø¥Ø¬Ø§Ø¨Ø© ØµØ­ÙŠØ­Ø©!',
-      instantIncorrect: 'Ø¥Ø¬Ø§Ø¨Ø© Ø®Ø§Ø·Ø¦Ø©',
-      instantAnswer: 'Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø© Ø§Ù„ØµØ­ÙŠØ­Ø©: {answer}',
+      generatePrompt: 'أنشئ اختبارًا تجريبيًا عندما تكون مستعدًا لاختبار نفسك.',
+      readyTitle: 'هل أنت مستعد للاختبار التجريبي؟',
+      questionCount: 'يحتوي هذا الاختبار على {count} سؤالًا',
+      feedbackPrompt: 'كيف تفضل مراجعة الإجابات؟',
+      instantTitle: 'تغذية راجعة فورية',
+      instantDescription: 'عرض الإجابة الصحيحة بعد كل سؤال',
+      endTitle: 'محاكاة الاختبار',
+      endDescription: 'عرض جميع الإجابات في النهاية',
+      start: 'ابدأ الاختبار',
+      questionNumber: 'السؤال {index}',
+      inputPlaceholder: 'اكتب إجابتك...',
+      previous: 'السابق',
+      next: 'التالي',
+      submit: 'إرسال الاختبار',
+      instantCorrect: 'إجابة صحيحة',
+      instantIncorrect: 'إجابة غير صحيحة',
+      instantAnswer: 'الإجابة الصحيحة: {answer}',
       instantExplanation: '{explanation}',
-      progress: 'Ø§Ù„Ø³Ø¤Ø§Ù„ {current} Ù…Ù† {total}',
-      completeTitle: 'Ø§ÙƒØªÙ…Ù„ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±!',
-      score: 'Ø­ØµÙ„Øª Ø¹Ù„Ù‰ {score} Ù…Ù† {total}',
-      reviewTitle: 'Ù…Ø±Ø§Ø¬Ø¹Ø© Ø¥Ø¬Ø§Ø¨Ø§ØªÙƒ',
-      reviewQuestion: 'Ø§Ù„Ø³Ø¤Ø§Ù„ {index}',
-      reviewYourAnswer: 'Ø¥Ø¬Ø§Ø¨ØªÙƒ: {answer}',
-      reviewCorrectAnswer: 'Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø© Ø§Ù„ØµØ­ÙŠØ­Ø©: {answer}',
-      reviewNotAnswered: 'Ù„Ù… ØªØªÙ… Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø©',
-      reviewCorrect: 'ØµØ­ÙŠØ­',
-      reviewIncorrect: 'Ø®Ø§Ø·Ø¦',
-      empty: 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø£Ø³Ø¦Ù„Ø© Ø§Ø®ØªØ¨Ø§Ø± Ù…ØªØ§Ø­Ø© Ù„Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯.',
-      retake: 'Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±'
+      progress: 'السؤال {current} من {total}',
+      completeTitle: 'اكتمل الاختبار',
+      score: 'حصلت على {score} من {total}',
+      reviewTitle: 'راجع إجاباتك',
+      reviewQuestion: 'السؤال {index}',
+      reviewYourAnswer: 'إجابتك: {answer}',
+      reviewCorrectAnswer: 'الإجابة الصحيحة: {answer}',
+      reviewNotAnswered: 'لم تتم الإجابة',
+      reviewCorrect: 'صحيح',
+      reviewIncorrect: 'غير صحيح',
+      empty: 'لا توجد أسئلة اختبار متاحة لهذا المستند.',
+      retake: 'إعادة الاختبار'
     },
     activity: {
-      backToHub: 'Back to document hub',
+      backToHub: 'العودة إلى مركز المستند',
       section: {
-        summary: 'Summary mode',
-        flashcards: 'Flashcards mode',
-        exam: 'Exam mode'
+        summary: 'وضع الملخص',
+        flashcards: 'وضع البطاقات التعليمية',
+        exam: 'وضع الاختبار'
       },
       subtitle: {
-        summary: 'Focused reading view for the generated summary.',
-        flashcards: 'Study one card at a time with quick confidence tracking.',
-        exam: 'Take the exam in a clean question flow.'
+        summary: 'عرض قراءة مركّز للملخص المُنشأ.',
+        flashcards: 'ادرس بطاقة واحدة في كل مرة مع تتبع سريع للثقة.',
+        exam: 'قدّم الاختبار ضمن تدفق أسئلة واضح ونظيف.'
       },
       states: {
-        extractionProcessing: 'Document extraction is still running',
-        generationProcessing: 'Generation is in progress',
-        processingContinues: 'Processing continues in the background if you leave this view.'
+        extractionProcessing: 'استخراج المستند ما زال قيد التشغيل',
+        generationProcessing: 'الإنشاء قيد التنفيذ',
+        processingContinues: 'تستمر المعالجة في الخلفية إذا غادرت هذا العرض.'
       },
       errors: {
-        exportPdfFailed: 'Could not export this PDF. Try again.'
+        exportPdfFailed: 'تعذر تصدير ملف PDF هذا. حاول مرة أخرى.'
       },
       actions: {
-        generateSummary: 'Generate summary',
-        generateFlashcards: 'Generate flashcards',
-        generateExam: 'Generate exam',
-        exportPdf: 'Export PDF',
-        exportingPdf: 'Exporting PDF...',
-        startFlashcards: 'Start flashcards',
-        revealAnswer: 'Reveal answer',
-        hideAnswer: 'Hide answer',
-        markCorrect: 'Mark correct',
-        markIncorrect: 'Mark incorrect',
-        previous: 'Previous',
-        next: 'Next',
-        startExam: 'Start exam',
-        submitExam: 'Submit exam',
-        retakeExam: 'Retake exam'
+        generateSummary: 'إنشاء ملخص',
+        generateFlashcards: 'إنشاء بطاقات تعليمية',
+        generateExam: 'إنشاء اختبار',
+        exportPdf: 'تصدير PDF',
+        exportingPdf: 'جارٍ التصدير...',
+        startFlashcards: 'بدء البطاقات التعليمية',
+        revealAnswer: 'إظهار الإجابة',
+        hideAnswer: 'إخفاء الإجابة',
+        markCorrect: 'تحديد كصحيح',
+        markIncorrect: 'تحديد كغير صحيح',
+        previous: 'السابق',
+        next: 'التالي',
+        startExam: 'بدء الاختبار',
+        submitExam: 'إرسال الاختبار',
+        retakeExam: 'إعادة الاختبار'
       },
       summary: {
-        title: 'Summary',
-        regenerating: 'Regenerating in the background. Your current summary remains visible.'
+        title: 'الملخص',
+        regenerating: 'تتم إعادة الإنشاء في الخلفية. سيبقى الملخص الحالي ظاهرًا.'
       },
       flashcards: {
-        cardCount: '{count} flashcards',
-        progressLabel: 'Card {current}/{total} · Correct {correct} · Incorrect {incorrect}',
-        questionLabel: 'Question',
-        answerLabel: 'Answer',
-        progressSaveError: 'Could not save flashcard progress. Try again.'
+        cardCount: '{count} بطاقة تعليمية',
+        progressLabel: 'البطاقة {current}/{total} · صحيح {correct} · غير صحيح {incorrect}',
+        questionLabel: 'السؤال',
+        answerLabel: 'الإجابة',
+        progressSaveError: 'تعذر حفظ تقدم البطاقات التعليمية. حاول مرة أخرى.',
+        resultsTitle: 'نتائج البطاقات التعليمية',
+        resultsMeta: '{incorrect} غير صحيح · {unanswered} بدون إجابة',
+        resultLabel: 'النتيجة:',
+        restart: 'إعادة البطاقات التعليمية',
+        viewResults: 'عرض النتائج'
       },
       exam: {
-        introTitle: 'Ready to start your exam?',
-        introDescription: 'This exam has {count} questions.',
-        questionLabel: 'Question {index}',
-        answeredCount: '{answered} answered out of {total}',
-        submittingTitle: 'Completing your exam',
-        submittingBody: 'Scoring your attempt and saving progress.',
-        resultsTitle: 'Exam results',
-        scoreLabel: 'Score: {score}/{total}',
-        reviewTitle: 'Review',
-        yourAnswer: 'Your answer: {answer}',
-        correctAnswer: 'Correct answer: {answer}',
-        notAnswered: 'Not answered',
-        saveAttemptError: 'Could not save this exam attempt.'
+        introTitle: 'هل أنت مستعد لبدء الاختبار؟',
+        introDescription: 'يحتوي هذا الاختبار على {count} أسئلة.',
+        questionLabel: 'السؤال {index}',
+        currentLabel: 'السؤال {current} / {total}',
+        answeredCount: '{answered} تمت الإجابة من أصل {total}',
+        answeredInline: '{answered} تمت الإجابة',
+        submittingTitle: 'جارٍ إنهاء الاختبار',
+        submittingBody: 'يتم الآن تصحيح المحاولة وحفظ التقدم.',
+        resultsTitle: 'نتائج الاختبار',
+        scoreLabel: 'النتيجة: {score}/{total}',
+        reviewTitle: 'المراجعة',
+        yourAnswer: 'إجابتك: {answer}',
+        correctAnswer: 'الإجابة الصحيحة: {answer}',
+        notAnswered: 'لم تتم الإجابة',
+        saveAttemptError: 'تعذر حفظ هذه المحاولة.',
+        boolean: {
+          true: 'صح',
+          false: 'خطأ'
+        }
       },
       regenerate: {
-        title: 'Regenerate with guidance',
-        description: 'Tell the assistant what should improve before regenerating.',
-        reasonLabel: 'Main reason',
-        customLabel: 'Optional instruction',
-        customPlaceholder: 'Example: focus more on formulas and worked examples.',
-        confirm: 'Regenerate',
-        cancel: 'Cancel',
-        running: 'Regenerating...',
+        title: 'إعادة الإنشاء مع توجيه',
+        description: 'أخبر المساعد بما يجب تحسينه قبل إعادة الإنشاء.',
+        reasonLabel: 'السبب الرئيسي',
+        customLabel: 'تعليمات إضافية',
+        customPlaceholder: 'مثال: ركز أكثر على القوانين والأمثلة المحلولة.',
+        confirm: 'إعادة الإنشاء',
+        cancel: 'إلغاء',
+        running: 'جارٍ إعادة الإنشاء...',
         reasons: {
-          missingParts: 'Missing parts',
-          notComprehensiveEnough: 'Not comprehensive enough',
-          tooShort: 'Too short',
-          tooGeneric: 'Too generic'
+          missingParts: 'أجزاء مفقودة',
+          notComprehensiveEnough: 'غير شامل بما يكفي',
+          tooShort: 'قصير جدًا',
+          tooGeneric: 'عام جدًا'
         }
       }
     }
   },
   documentsPage: {
-    eyebrow: 'Ù…Ø±ÙƒØ² Ø§Ù„Ø¯Ø±Ø§Ø³Ø©',
-    title: 'Ø§Ù„Ù…ÙƒØªØ¨Ø©',
-    description: 'ØªØµÙØ­ Ø§Ù„Ù…ÙˆØ§Ø¯ Ø§Ù„Ù…Ø±ÙÙˆØ¹Ø© ÙˆØ§ÙØªØ­ Ø£ÙŠ Ù…Ø³ØªÙ†Ø¯ Ù„Ù„Ù…ØªØ§Ø¨Ø¹Ø©.',
-    emptyTitle: 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù…Ø³ØªÙ†Ø¯Ø§Øª Ø¨Ø¹Ø¯',
-    emptyDescription: 'Ø§Ø±ÙØ¹ Ø£ÙˆÙ„ Ù…Ø³ØªÙ†Ø¯ Ù…Ù† Ø§Ù„ØµÙØ­Ø© Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ© Ù„Ø¨Ø¯Ø¡ Ù…ÙƒØªØ¨Ø© Ø§Ù„Ø¯Ø±Ø§Ø³Ø©.',
+    eyebrow: 'مركز الدراسة',
+    title: 'المكتبة',
+    description: 'تصفح المواد المرفوعة وافتح أي مستند لمتابعة الدراسة.',
+    emptyTitle: 'لا توجد مستندات بعد',
+    emptyDescription: 'ارفع أول مستند من الصفحة الرئيسية لبدء مكتبتك.',
     labels: {
-      uploaded: 'ØªØ§Ø±ÙŠØ® Ø§Ù„Ø±ÙØ¹',
-      language: 'Ø§Ù„Ù„ØºØ©'
+      uploaded: 'تاريخ الرفع',
+      language: 'اللغة'
     },
     columns: {
-      flashcards: 'Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ©',
-      exams: 'Ø£Ø³Ø¦Ù„Ø© Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±'
+      flashcards: 'البطاقات التعليمية',
+      exams: 'أسئلة الاختبار'
     },
     statuses: {
-      queued: 'Ù‚ÙŠØ¯ Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±',
-      processing: 'Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©',
-      running: 'Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©',
-      complete: 'Ø¬Ø§Ù‡Ø²',
-      failed: 'ÙØ´Ù„',
-      unknown: 'ØºÙŠØ± Ù…Ø¹Ø±ÙˆÙ'
+      queued: 'قيد الانتظار',
+      processing: 'قيد المعالجة',
+      running: 'قيد المعالجة',
+      complete: 'جاهز',
+      failed: 'فشل',
+      unknown: 'غير معروف'
     },
     actions: {
-      refresh: 'ØªØ­Ø¯ÙŠØ« Ø§Ù„Ù‚Ø§Ø¦Ù…Ø©',
-      uploadCta: 'Ø±ÙØ¹',
-      view: 'ÙØªØ­',
-      rename: 'Ø¥Ø¹Ø§Ø¯Ø© ØªØ³Ù…ÙŠØ©',
-      more: 'Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ©',
-      renamePrompt: 'Ø£Ø¹Ø¯ ØªØ³Ù…ÙŠØ© Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯',
-      delete: 'Ø­Ø°Ù',
-      deleting: 'Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø­Ø°Ù...'
+      refresh: 'تحديث القائمة',
+      uploadCta: 'رفع',
+      view: 'فتح',
+      rename: 'إعادة التسمية',
+      more: 'إجراءات إضافية',
+      renamePrompt: 'أعد تسمية هذا المستند',
+      delete: 'حذف',
+      deleting: 'جارٍ الحذف...'
     },
     errors: {
-      load: 'ØªØ¹Ø°Ø± ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ù…Ø³ØªÙ†Ø¯Ø§Øª Ø­Ø§Ù„ÙŠØ§Ù‹.',
-      rename: 'ÙØ´Ù„Øª Ø¥Ø¹Ø§Ø¯Ø© ØªØ³Ù…ÙŠØ© Ø§Ù„Ù…Ø³ØªÙ†Ø¯. Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.',
-      delete: 'ÙØ´Ù„ Ø­Ø°Ù Ø§Ù„Ù…Ø³ØªÙ†Ø¯. Ø­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'
+      load: 'تعذر تحميل مستنداتك الآن.',
+      rename: 'فشلت إعادة تسمية المستند. حاول مرة أخرى.',
+      delete: 'فشل حذف المستند. حاول مرة أخرى.'
     },
-    deleteConfirmTitle: 'Ø­Ø°Ù Ø§Ù„Ù…Ø³ØªÙ†Ø¯ØŸ',
-    deleteConfirmDescription: 'Ø³ÙŠØªÙ… Ø­Ø°Ù {name} ÙˆÙƒØ§ÙØ© Ø§Ù„Ù…ÙˆØ§Ø¯ Ø§Ù„Ù…ÙˆÙ„Ø¯Ø© Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹.',
-    deleteUnknown: 'Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³ØªÙ†Ø¯'
+    deleteConfirmTitle: 'حذف المستند؟',
+    deleteConfirmDescription: 'سيتم حذف {name} وكل المواد الدراسية التي أُنشئت له نهائيًا.',
+    deleteUnknown: 'هذا المستند'
   },
   examsPage: {
-    title: 'Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª ØªØ¯Ø±ÙŠØ¨ÙŠØ©',
-    description: 'Ù‚Ø±ÙŠØ¨Ø§Ù‹ Ø³ØªØªÙ…ÙƒÙ† Ù…Ù† Ø¥Ù†Ø´Ø§Ø¡ Ø§Ø®ØªØ¨Ø§Ø±Ø§Øª ØªÙƒÙŠÙÙŠØ© Ù„Ø£ÙŠ Ù…Ø³ØªÙ†Ø¯.',
+    title: 'اختبارات تدريبية',
+    description: 'قريبًا ستتمكن من إنشاء اختبارات تكيفية من أي مستند ترفعه.',
     features: {
       builder: {
-        title: 'Ù…Ù†Ø´Ø¦ ØªÙƒÙŠÙÙŠ',
-        description: 'Ø§Ø®ØªØ± Ø§Ù„Ù…ÙˆØ¶ÙˆØ¹ ÙˆØ§Ù„ØµØ¹ÙˆØ¨Ø© ÙˆØ§Ù„Ø²Ù…Ù† Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø± Ø§Ù„Ù…Ø«Ø§Ù„ÙŠ.'
+        title: 'منشئ تكيفي',
+        description: 'اختر الموضوع والصعوبة والوقت لإنشاء الاختبار الأنسب لك.'
       }
     },
     actions: {
-      primary: 'ØªØ±Ù‚Ø¨ÙˆØ§'
+      primary: 'ترقب'
     }
   },
   flashcardsPage: {
-    title: 'Ù…Ù†Ø·Ù‚Ø© Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ©',
-    description: 'Ù†Ø¸Ù… Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª ÙˆØ¬Ø¯ÙˆÙ„ Ø¬Ù„Ø³Ø§Øª Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø© Ø¨Ø§Ù„ØªÙƒØ±Ø§Ø± Ø§Ù„Ù…ØªØ¨Ø§Ø¹Ø¯.',
+    title: 'مساحة البطاقات التعليمية',
+    description: 'نظّم البطاقات وأعد تركيبها وجدول جلسات التكرار المتباعد لكل مادة.',
     features: {
       generator: {
-        title: 'Ù…Ù†Ø´Ø¦ Ø§Ù„Ø¨Ø·Ø§Ù‚Ø§Øª',
-        description: 'Ø§Ø®ØªØ± Ù…Ù‚Ø§Ø·Ø¹ Ù…Ù† Ø§Ù„Ù…Ø³ØªÙ†Ø¯ Ù„Ø¥Ù†Ø´Ø§Ø¡ Ø¨Ø·Ø§Ù‚Ø§Øª Ù…Ø±ÙƒØ²Ø© ÙÙˆØ±Ø§Ù‹.'
+        title: 'منشئ البطاقات',
+        description: 'اختر أقسامًا من المستند لإنشاء بطاقات مركزة فورًا.'
       },
       practice: {
-        title: 'Ø£ÙˆØ¶Ø§Ø¹ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©',
-        description: 'Ø£ÙˆØ¶Ø§Ø¹ Ø¯Ø±Ø§Ø³Ø© Ù…Ø¹ Ù…Ø¤Ù‚ØªØ§Øª ÙˆØªØ°ÙƒÙŠØ±Ø§Øª Ù„Ù„ØªÙƒØ±Ø§Ø± Ø§Ù„Ù…ØªØ¨Ø§Ø¹Ø¯.'
+        title: 'مراجعة موجهة',
+        description: 'أوضاع دراسة مع مؤقتات وسلاسل وتذكيرات للتكرار المتباعد.'
       }
     },
     actions: {
-      primary: 'Ø§Ø¨Ø¯Ø£ Ø§Ù„ØªØ¯Ø±ÙŠØ¨'
+      primary: 'ابدأ التدريب'
     }
   },
   settings: {
-    eyebrow: 'Ø§Ù„ØªÙØ¶ÙŠÙ„Ø§Øª',
-    title: 'Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª',
-    subtitle: 'Ø®ØµØµ Ø§Ù„ØªØ¬Ø±Ø¨Ø© Ø¨Ù…Ø§ ÙŠÙ†Ø§Ø³Ø¨ Ø£Ø³Ù„ÙˆØ¨Ùƒ Ø§Ù„Ø¯Ø±Ø§Ø³ÙŠ.',
+    eyebrow: 'التفضيلات',
+    title: 'الإعدادات',
+    subtitle: 'خصص التجربة بما يناسب طريقة دراستك.',
+    tabs: {
+      systems: 'الأنظمة',
+      account: 'الحساب'
+    },
     language: {
-      title: 'Ø§Ù„Ù„ØºØ©',
-      description: 'Ø¨Ø¯Ù‘Ù„ Ø¨ÙŠÙ† Ø§Ù„Ø¥Ù†Ø¬Ù„ÙŠØ²ÙŠØ© ÙˆØ§Ù„Ø¹Ø±Ø¨ÙŠØ© Ù…ØªÙ‰ Ø´Ø¦Øª.'
+      title: 'اللغة',
+      description: 'بدّل بين الإنجليزية والعربية في أي وقت.',
+      helper: 'يتم حفظ اللغة المختارة على هذا الجهاز وتُطبّق فورًا عبر الواجهة.',
+      disabled: 'دعم العربية غير متاح حاليًا.'
     },
     theme: {
-      title: 'Ø§Ù„Ø³Ù…Ø©',
-      description: 'Choose between light and dark appearance.',
-      current: 'Current theme: {theme}',
-      helper: 'Theme changes apply instantly across the app and are saved on this browser.',
-      ariaLabel: 'Theme mode',
-      dark: 'Dark',
-      light: 'Light'
+      title: 'السمة',
+      description: 'اختر بين المظهر الفاتح والداكن.',
+      current: 'السمة الحالية: {theme}',
+      helper: 'تُطبّق تغييرات السمة فورًا عبر التطبيق وتُحفظ على هذا المتصفح.',
+      ariaLabel: 'نمط السمة',
+      dark: 'داكن',
+      light: 'فاتح'
     },
     account: {
-      title: 'Ø§Ù„Ø­Ø³Ø§Ø¨',
-      description: 'Ø£Ø¯Ø± Ø¨ÙŠØ§Ù†Ø§ØªÙƒ ÙˆØ¬Ù„Ø³Ø© Ø§Ù„Ø¯Ø®ÙˆÙ„.',
-      anonymous: 'Ù…Ø³ØªØ®Ø¯Ù… Ø¨Ø¯ÙˆÙ† Ø§Ø³Ù…',
-      noEmail: 'Ø§Ù„Ø¨Ø±ÙŠØ¯ ØºÙŠØ± Ù…ØªÙˆÙØ±',
+      title: 'الحساب',
+      description: 'أدر هويتك وجلسة تسجيل الدخول.',
+      anonymous: 'مستخدم بدون اسم',
+      noEmail: 'البريد غير متوفر',
       actions: {
-        profile: 'Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ',
-        logout: 'ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬',
-        loggingOut: 'Ø¬Ø§Ø±ÙŠ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬...'
+        profile: 'الملف الشخصي',
+        logout: 'تسجيل الخروج',
+        loggingOut: 'جارٍ تسجيل الخروج...'
+      }
+    }
+  },
+  auth: {
+    fields: {
+      name: 'الاسم الكامل',
+      email: 'البريد الإلكتروني',
+      password: 'كلمة المرور'
+    },
+    signIn: {
+      eyebrow: 'تسجيل الدخول',
+      title: 'مرحبًا بعودتك',
+      subtitle: 'سجّل الدخول لمتابعة سير دراستك.',
+      placeholders: {
+        email: 'أدخل بريدك الإلكتروني',
+        password: 'أدخل كلمة المرور'
+      },
+      actions: {
+        submit: 'تسجيل الدخول',
+        loading: 'جارٍ تسجيل الدخول...'
+      },
+      switch: {
+        prompt: 'ليس لديك حساب؟',
+        action: 'إنشاء حساب'
+      },
+      errors: {
+        failed: 'فشل تسجيل الدخول'
+      }
+    },
+    signUp: {
+      eyebrow: 'إنشاء حساب',
+      title: 'إنشاء حساب',
+      subtitle: 'أنشئ ملفك الشخصي لبدء توليد المواد الدراسية.',
+      placeholders: {
+        name: 'أدخل اسمك',
+        email: 'أدخل بريدك الإلكتروني',
+        password: 'اختر كلمة مرور (8 أحرف على الأقل)'
+      },
+      actions: {
+        submit: 'إنشاء حساب',
+        loading: 'جارٍ إنشاء الحساب...'
+      },
+      switch: {
+        prompt: 'لديك حساب بالفعل؟',
+        action: 'تسجيل الدخول'
+      },
+      errors: {
+        failed: 'فشل إنشاء الحساب'
       }
     }
   }
 };
+
+export default mergeDictionaries(en, ar);
