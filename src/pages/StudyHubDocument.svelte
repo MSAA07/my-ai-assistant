@@ -52,7 +52,6 @@
   let plannedGeneration = featureMap(null);
   let displayedProgress = featureMap(0);
   let progressRuntime = createProgressRuntimeMap();
-  let completionFlashUntil = featureMap(0);
   let previousFeaturePhases = featureMap('not_requested');
   let progressAnimationFrame = null;
   let progressAnimationLastTime = 0;
@@ -87,7 +86,6 @@
     generationJobs;
     plannedGeneration;
     displayedProgress;
-    completionFlashUntil;
     featureCards = FEATURE_KEYS.map((featureKey) => buildFeatureCard(featureKey));
   }
   $: {
@@ -418,17 +416,10 @@
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
     const errorMessage = text(generationErrors?.[featureKey]) || text(documentData?.generationState?.[featureKey]?.errorMessage);
     const progress = getFeatureProgressState(featureKey);
-    const wasLoading = isLoadingPhase(previousFeaturePhases[featureKey]);
-    const isCompleting = phase === 'ready' && wasLoading && clampProgress(displayedProgress[featureKey]) < 100;
-    const completionVisible = (completionFlashUntil[featureKey] || 0) > nowMs();
-    const visualProgressValue = completionVisible ? 100 : clampProgress(displayedProgress[featureKey]);
-    const progressVisible = completionVisible || progress.visible || isCompleting;
-    const progressIndeterminate = completionVisible ? false : progress.indeterminate;
-    const progressText = completionVisible
-      ? formatProgressText(100)
-      : progressIndeterminate
-        ? ''
-        : formatProgressText(visualProgressValue, { precise: true });
+    const visualProgressValue = clampProgress(displayedProgress[featureKey]);
+    const progressVisible = progress.visible;
+    const progressIndeterminate = progress.indeterminate;
+    const progressText = progressIndeterminate ? '' : formatProgressText(visualProgressValue, { precise: true });
     return {
       key: featureKey,
       title: t(FEATURE_CONFIG[featureKey].titleKey),
@@ -437,7 +428,7 @@
       stateLabel: getFeatureStatusLabel(featureKey, phase),
       stateTone: getFeatureTone(phase),
       primaryLabel: getFeaturePrimaryLabel(featureKey, phase),
-      canPrimaryAction: !progressVisible && phase !== 'queued' && phase !== 'generating',
+      canPrimaryAction: !progress.visible && phase !== 'queued' && phase !== 'generating',
       shouldRegenerate: hasFeatureContent(featureKey) || generationStatus === 'complete',
       statusCopy: getFeatureStatusCopy(phase, errorMessage),
       errorMessage: phase === 'failed' ? errorMessage : '',
@@ -448,11 +439,7 @@
       progressValue: progressIndeterminate ? 0 : visualProgressValue,
       progressIndeterminate,
       progressText,
-      loadingLabel: completionVisible
-        ? t('status.ready')
-        : isCompleting
-          ? t('document.hub.loading.finalizing')
-          : getFeatureLoadingLabel(featureKey, phase, { extractionBlocked: progress.extractionBlocked, job: progress.job }),
+      loadingLabel: getFeatureLoadingLabel(featureKey, phase, { extractionBlocked: progress.extractionBlocked, job: progress.job }),
     };
   }
 
@@ -490,10 +477,8 @@
   function shouldAnimateFeatureProgress() {
     const now = nowMs();
     return FEATURE_KEYS.some((featureKey) => {
-      if ((completionFlashUntil[featureKey] || 0) > now) return true;
       const progressState = getFeatureProgressState(featureKey);
       if (progressState.visible) return true;
-      if (progressState.phase === 'ready' && isLoadingPhase(previousFeaturePhases[featureKey]) && (displayedProgress[featureKey] || 0) < 100) return true;
       const target = getFeatureVisualProgressTarget(featureKey, now);
       if (target === null) return false;
       return Math.abs((displayedProgress[featureKey] || 0) - target) > 0.2;
@@ -507,20 +492,9 @@
     const frameNow = nowMs();
 
     let nextProgress = displayedProgress;
-    let nextCompletion = completionFlashUntil;
     let active = false;
 
     for (const featureKey of FEATURE_KEYS) {
-      const holdUntil = completionFlashUntil[featureKey] || 0;
-      if (holdUntil > 0) {
-        if (holdUntil > nowMs()) {
-          active = true;
-          continue;
-        }
-        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
-        continue;
-      }
-
       const progressState = getFeatureProgressState(featureKey);
       const target = getFeatureVisualProgressTarget(featureKey, frameNow);
       if (target === null) continue;
@@ -544,7 +518,6 @@
     }
 
     displayedProgress = nextProgress;
-    completionFlashUntil = nextCompletion;
 
     if (active && typeof requestAnimationFrame === 'function') {
       progressAnimationFrame = requestAnimationFrame(runProgressAnimationFrame);
@@ -561,7 +534,6 @@
   function syncFeatureProgressVisuals() {
     const now = nowMs();
     let nextProgress = displayedProgress;
-    let nextCompletion = completionFlashUntil;
     let nextPreviousPhases = previousFeaturePhases;
     let nextRuntime = progressRuntime;
 
@@ -570,25 +542,16 @@
       const { phase } = progressState;
       const previousPhase = previousFeaturePhases[featureKey];
       const current = displayedProgress[featureKey] || 0;
-      const holdUntil = completionFlashUntil[featureKey] || 0;
       const currentRuntime = progressRuntime[featureKey] ?? createProgressRuntimeState();
       let nextFeatureRuntime = currentRuntime;
 
-      if (phase === 'ready' && !isLoadingPhase(previousPhase)) {
+      if (phase === 'ready') {
         if (current !== 100) {
           nextProgress = updateFeatureMapValue(nextProgress, featureKey, 100);
         }
-        if (holdUntil !== 0) {
-          nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
-        }
         nextFeatureRuntime = createProgressRuntimeState();
-      } else if (phase === 'ready' && current >= 99.8 && holdUntil === 0) {
-        nextProgress = updateFeatureMapValue(nextProgress, featureKey, 100);
-        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, now + 320);
-        nextFeatureRuntime = createProgressRuntimeState();
-      } else if ((phase === 'failed' || phase === 'not_requested') && (current > 0 || holdUntil > 0)) {
+      } else if ((phase === 'failed' || phase === 'not_requested') && current > 0) {
         nextProgress = updateFeatureMapValue(nextProgress, featureKey, 0);
-        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
         nextFeatureRuntime = createProgressRuntimeState();
       } else if (progressState.visible) {
         const isRestart = !isLoadingPhase(previousPhase);
@@ -602,7 +565,6 @@
             lastActualProgressAt: progressState.actualProgressPct > 0 ? now : 0,
           });
           nextProgress = updateFeatureMapValue(nextProgress, featureKey, 0);
-          nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
         } else {
           if (currentRuntime.visualPhase !== progressState.visualPhase) {
             nextFeatureRuntime = {
@@ -624,10 +586,6 @@
         }
       }
 
-      if (holdUntil > 0 && holdUntil <= now) {
-        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
-      }
-
       if (nextPreviousPhases[featureKey] !== phase) {
         nextPreviousPhases = updateFeatureMapValue(nextPreviousPhases, featureKey, phase);
       }
@@ -638,7 +596,6 @@
     }
 
     displayedProgress = nextProgress;
-    completionFlashUntil = nextCompletion;
     previousFeaturePhases = nextPreviousPhases;
     progressRuntime = nextRuntime;
 
@@ -704,7 +661,6 @@
     plannedGeneration = featureMap(null);
     displayedProgress = featureMap(0);
     progressRuntime = createProgressRuntimeMap();
-    completionFlashUntil = featureMap(0);
     previousFeaturePhases = featureMap('not_requested');
   }
 
