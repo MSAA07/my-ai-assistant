@@ -16,7 +16,6 @@
   import Button from "../lib/components/ui/Button.svelte";
   import Card from "../lib/components/ui/Card.svelte";
   import DashboardCardSkeleton from "../lib/components/ui/DashboardCardSkeleton.svelte";
-  import FieldShell from "../lib/components/ui/FieldShell.svelte";
   import PageHeader from "../lib/components/ui/PageHeader.svelte";
   import ProgressBar from "../lib/components/ui/ProgressBar.svelte";
   import StudyActionCard from "../lib/components/ui/StudyActionCard.svelte";
@@ -76,7 +75,6 @@
   let user = null;
   let documents = [];
   let selectedFiles = [];
-  let responseLanguage = "english";
   let errorKey = "";
   let errorArgs = {};
   let uploading = false;
@@ -353,7 +351,6 @@
   async function uploadSingleFile(file) {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("language", responseLanguage);
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -815,15 +812,6 @@
         on:filesSelected={handleFilesSelected}
         on:removeFile={handleRemoveSelectedFile}
       />
-
-      <Card class="upload-settings-card" variant="secondary" padding="md" border="default">
-        <FieldShell label={t("home.uploadSection.languageLabel")} forId="home-response-language">
-          <select id="home-response-language" bind:value={responseLanguage} disabled={uploading}>
-            <option value="english">{t("home.uploadSection.englishOption")}</option>
-            <option value="arabic">{t("home.uploadSection.arabicOption")}</option>
-          </select>
-        </FieldShell>
-      </Card>
     </section>
   {/if}
 
@@ -1093,10 +1081,6 @@
     display: grid;
     gap: var(--study-flow-card-gap);
     min-width: 0;
-  }
-
-  :global(.upload-settings-card) {
-    box-shadow: none;
   }
 
   .guided-hero,
