@@ -166,6 +166,7 @@
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
     if (generationStatus === 'failed') return 'failed';
     if (hasFeatureContent(featureKey) || generationStatus === 'complete') return 'ready';
+    if (extractionStatus === 'failed') return 'failed';
     if (pendingGeneration[featureKey] || generationStatus === 'running') return 'generating';
     if (generationStatus === 'queued' || plannedGeneration[featureKey]) return 'queued';
     return 'not_requested';
@@ -200,7 +201,7 @@
   }
 
   function getFeatureStatusCopy(phase, errorMessage) {
-    if (phase === 'failed') return errorMessage || t('document.generation.failedNoContent');
+    if (phase === 'failed') return errorMessage || text(documentData?.processingError) || t('document.generation.failedNoContent');
     if (phase === 'queued' && extractionStatus !== 'complete') return t('document.hub.states.waitingForExtraction');
     if (phase === 'queued') return t('document.hub.progress.featureQueued');
     if (phase === 'generating') return t('document.hub.progress.featureGenerating');
