@@ -303,10 +303,25 @@ const ar = {
       },
       states: {
         notGenerated: 'غير مُنشأ',
+        notRequested: 'لم يُطلب بعد',
         readyToGenerate: 'جاهز للإنشاء',
         preparing: 'جارٍ تجهيز المستند',
         generating: 'جارٍ الإنشاء',
         waitingForExtraction: 'بانتظار اكتمال معالجة المستند قبل أن يبدأ الإنشاء.'
+      },
+      loading: {
+        preparing: 'جارٍ التجهيز',
+        preparingDocument: 'جارٍ تجهيز المستند',
+        preparingDocumentHint: 'نجهز هذا المستند حتى يبدأ الإنشاء بشكل واضح ونظيف.',
+        preparingFeature: 'جارٍ تجهيز {feature}',
+        preparingFeatureHint: 'هذه الأداة التعليمية في قائمة البدء وستبدأ بعد قليل.',
+        extractingDocument: 'جارٍ استخراج المستند',
+        generatingSelected: 'جارٍ إنشاء المواد المحددة',
+        generatingFeature: 'جارٍ إنشاء {feature}',
+        generatingHint: 'الإنشاء قيد التنفيذ الآن.',
+        finalizing: 'جارٍ الإنهاء',
+        finalizingFeature: 'جارٍ إنهاء {feature}',
+        selectedFeatures: 'المحدد: {features}'
       },
       actions: {
         open: 'فتح'

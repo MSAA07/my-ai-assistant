@@ -302,6 +302,20 @@ export default {
         generating: 'Generating',
         waitingForExtraction: 'Waiting for document processing to finish before generation can start.'
       },
+      loading: {
+        preparing: 'Preparing',
+        preparingDocument: 'Preparing document',
+        preparingDocumentHint: 'Preparing this document so generation can start cleanly.',
+        preparingFeature: 'Preparing {feature}',
+        preparingFeatureHint: 'This study tool is queued and about to start.',
+        extractingDocument: 'Extracting document',
+        generatingSelected: 'Generating selected materials',
+        generatingFeature: 'Generating {feature}',
+        generatingHint: 'Generation is running now.',
+        finalizing: 'Finalizing',
+        finalizingFeature: 'Finalizing {feature}',
+        selectedFeatures: 'Selected: {features}'
+      },
       actions: {
         open: 'Open'
       },
