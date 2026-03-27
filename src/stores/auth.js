@@ -38,7 +38,7 @@ const toResult = async (response) => {
 
 const request = async (path, { method = "GET", body } = {}) => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT_MS);
+  let timeoutId = null;
   const init = {
     method,
     credentials: "include",
@@ -52,8 +52,10 @@ const request = async (path, { method = "GET", body } = {}) => {
   }
 
   try {
+    timeoutId = setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT_MS);
     const response = await fetch(`${AUTH_BASE}${path}`, init);
-    return toResult(response);
+    const result = await toResult(response);
+    return result;
   } catch (error) {
     const isTimeout = error?.name === "AbortError";
     return {
