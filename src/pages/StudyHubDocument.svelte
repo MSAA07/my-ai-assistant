@@ -44,6 +44,21 @@
   let generationJobs = featureMap(null);
   let plannedGeneration = featureMap(null);
   let lastRouteKey = '';
+  let normalizedStudyTab = '';
+  let isActivityRoute = false;
+  let routeKey = '';
+  let extractionStatus = 'failed';
+  let plannedFeatureKeys = [];
+  let featureCards = [];
+  let hasRequestedGeneration = false;
+  let hasActiveGeneration = false;
+  let showProgressExperience = false;
+  let progressOverview = { title: '', copy: '', status: 'ready', statusLabel: '', progressValue: 100, indeterminate: false, progressText: '', rows: [] };
+  let documentTitle = '';
+  let fileTypeBadge = '';
+  let languageMeta = null;
+  let uploadedMeta = null;
+  let documentSubtitle = '';
 
   $: normalizedStudyTab = text(studyTab).toLowerCase();
   $: isActivityRoute = ACTIVITY_TABS.has(normalizedStudyTab);
