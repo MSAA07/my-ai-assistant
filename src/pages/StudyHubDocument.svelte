@@ -15,7 +15,7 @@
   import { getDocument, getJob, requestGeneration } from '../lib/api/studyHub.js';
   import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { getDocumentDisplayName } from '../lib/utils/documentName.js';
-  import { clearStudyGenerationPlan, readStudyGenerationPlan } from '../lib/utils/studyGenerationPlan.js';
+  import { clearStudyGenerationPlan, readStudyGenerationPlan, writeStudyGenerationPlan } from '../lib/utils/studyGenerationPlan.js';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   export let documentId = '';
