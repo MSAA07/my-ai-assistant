@@ -7,7 +7,6 @@
     FolderOpen,
     Infinity as InfinityIcon,
     Layers3,
-    Sparkles,
   } from "@lucide/svelte";
   import { formatNumber, t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
@@ -132,12 +131,14 @@
   $: selectedFeatureLabels = selectedFeatureKeys.map((featureKey) => t(FEATURE_CONFIG[featureKey].titleKey));
   $: extractionStatus = normalizeDocumentStatus(latestDocument?.processingStatus || uploadedDocument?.processingStatus);
   $: uploadedDocumentName = normalizeString(uploadedDocument?.name || latestDocument?.originalName || latestDocument?.filename);
+  $: showDashboardChrome = !showGuidedSelection;
   $: selectionStatusLabel = getSelectionStatusLabel();
   $: selectionStatusTone = getSelectionStatusTone();
   $: featureSelectionCards = FEATURE_ORDER.map((featureKey) => ({
     key: featureKey,
     title: t(FEATURE_CONFIG[featureKey].titleKey),
     description: t(FEATURE_CONFIG[featureKey].descriptionKey),
+    supportLabel: t(`home.guided.supportLabels.${featureKey}`),
     selected: Boolean(selectedFeatures[featureKey]),
     error: generationErrors[featureKey],
     icon: FEATURE_CONFIG[featureKey].icon,
@@ -221,12 +222,12 @@
 
   function getSelectionStatusLabel() {
     if (extractionStatus === "failed") {
-      return t("documentsPage.statuses.failed");
+      return t("home.guided.statusFailed");
     }
     if (extractionStatus === "queued" || extractionStatus === "processing") {
-      return t("documentsPage.statuses.processingUpload");
+      return t("home.guided.statusPreparing");
     }
-    return t("documentsPage.statuses.readyToGenerate");
+    return t("home.guided.statusReady");
   }
 
   function getSelectionStatusTone() {
@@ -739,22 +740,24 @@
   }
 </script>
 
-<PageLayout class="home-page" width="wide" gap="spacious">
-  <PageHeader
-    className="home-header"
-    eyebrow={t("nav.home")}
-    title={t("home.heroTitle")}
-    subtitle={t("home.heroSubtitle")}
-    aria-busy={isRefreshingDashboard}
-  />
+<PageLayout class={`home-page ${showGuidedSelection ? "home-page--selection-mode" : ""}`.trim()} width="wide" gap="spacious">
+  {#if showDashboardChrome}
+    <PageHeader
+      className="home-header"
+      eyebrow={t("nav.home")}
+      title={t("home.heroTitle")}
+      subtitle={t("home.heroSubtitle")}
+      aria-busy={isRefreshingDashboard}
+    />
+  {/if}
 
-  {#if isLoadingDashboard}
+  {#if showDashboardChrome && isLoadingDashboard}
     <section class="stats-grid" aria-label={t("nav.home")}>
       <DashboardCardSkeleton />
       <DashboardCardSkeleton />
       <DashboardCardSkeleton />
     </section>
-  {:else if user}
+  {:else if showDashboardChrome && user}
     <section class="stats-grid" aria-label={t("nav.home")}>
       {#each homeStats as stat (stat.key)}
         {@const Icon = stat.icon}
@@ -817,103 +820,112 @@
 
   {#if showGuidedSelection}
     <section class="guided-panel" aria-label={t("home.guided.title")}>
-      <Card class="guided-hero" variant="standard" padding="lg" border="default">
-        <div class="guided-hero__top">
-          <div class="guided-hero__copy">
-            <p class="guided-hero__eyebrow">{t("home.guided.eyebrow")}</p>
-            <h2>{t("home.guided.title")}</h2>
-            <p>{t("home.guided.subtitle", { name: uploadedDocumentName })}</p>
-          </div>
-          <Badge tone={selectionStatusTone} variant="outline" size="sm" className="guided-hero__badge">
-            {selectionStatusLabel}
-          </Badge>
-        </div>
-
-        <div class="guided-hero__meta">
-          <span class="guided-hero__document">{uploadedDocumentName}</span>
-          {#if extractionStatus === "queued" || extractionStatus === "processing"}
-            <p>{t("home.guided.processingHint")}</p>
-          {:else}
-            <p>{t("home.guided.readyHint")}</p>
-          {/if}
-        </div>
-      </Card>
-
-      {#if postUploadError}
-        <Card class="home-alert home-alert-error" variant="soft" border="strong" padding="sm">{postUploadError}</Card>
-      {/if}
-
-      <div class="guided-feature-grid">
-        {#each featureSelectionCards as card (card.key)}
-          {@const Icon = card.icon}
-          <StudyActionCard
-            class={`guided-feature-card ${card.selected ? "guided-feature-card--selected" : ""}`.trim()}
-            title={card.title}
-            status={card.selected ? "ready" : "info"}
-            statusLabel={card.selected ? t("home.guided.featureSelected") : t("home.guided.featureOptional")}
-            role="button"
-            tabindex="0"
-            on:click={() => toggleFeature(card.key)}
-            on:keydown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                toggleFeature(card.key);
-              }
-            }}
-          >
-            <div slot="icon">
-              <Icon />
+      <Card class="guided-shell" variant="standard" padding="lg" border="default">
+        <div class="guided-step-header">
+          <div class="guided-step-header__copy">
+            <p class="guided-step-header__eyebrow">{t("home.guided.eyebrow")}</p>
+            <div class="guided-step-header__title-row">
+              <h2>{t("home.guided.title")}</h2>
+              <Badge tone={selectionStatusTone} variant="outline" size="sm" className="guided-step-header__badge">
+                {selectionStatusLabel}
+              </Badge>
             </div>
-
-            <svelte:fragment slot="description">
-              <p>{card.description}</p>
-              {#if card.error}
-                <p class="guided-feature-card__error">{card.error}</p>
+            <p class="guided-step-header__helper">
+              {#if extractionStatus === "queued" || extractionStatus === "processing"}
+                {t("home.guided.processingHint")}
+              {:else}
+                {t("home.guided.readyHint")}
               {/if}
-            </svelte:fragment>
+            </p>
+          </div>
+        </div>
 
-            <div slot="actions" class="guided-feature-card__actions">
-              <Button
-                type="button"
-                variant={card.selected ? "primary" : "secondary"}
-                on:click={(event) => {
-                  event.stopPropagation();
+        <div class="guided-file-header">
+          <div class="guided-file-header__meta">
+            <span class="guided-file-header__label">{t("home.guided.fileLabel")}</span>
+            <span class="guided-file-header__name">{uploadedDocumentName}</span>
+          </div>
+          <span class="guided-file-header__caption">{t("home.guided.subtitle", { name: uploadedDocumentName })}</span>
+        </div>
+
+        {#if postUploadError}
+          <Card class="home-alert home-alert-error" variant="soft" border="strong" padding="sm">{postUploadError}</Card>
+        {/if}
+
+        <div class="guided-feature-grid">
+          {#each featureSelectionCards as card (card.key)}
+            {@const Icon = card.icon}
+            <StudyActionCard
+              class={`guided-feature-card ${card.selected ? "guided-feature-card--selected" : ""}`.trim()}
+              title={card.title}
+              status={card.selected ? "ready" : "info"}
+              statusLabel={card.supportLabel}
+              role="button"
+              tabindex="0"
+              aria-pressed={card.selected}
+              on:click={() => toggleFeature(card.key)}
+              on:keydown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
                   toggleFeature(card.key);
-                }}
-              >
-                <span slot="icon" aria-hidden="true">
+                }
+              }}
+            >
+              <div slot="icon">
+                <Icon />
+              </div>
+
+              <svelte:fragment slot="description">
+                <p>{card.description}</p>
+                {#if card.error}
+                  <p class="guided-feature-card__error">{card.error}</p>
+                {/if}
+              </svelte:fragment>
+
+              <div class="guided-feature-card__footer">
+                <span class={`guided-feature-card__state ${card.selected ? "guided-feature-card__state--selected" : ""}`.trim()}>
                   {#if card.selected}
-                    <Check />
+                    {t("home.guided.featureSelected")}
                   {:else}
-                    <Sparkles />
+                    {t("home.guided.featureOptional")}
                   {/if}
                 </span>
-                {card.selected ? t("home.guided.removeFeature") : t("home.guided.addFeature")}
-              </Button>
-            </div>
-          </StudyActionCard>
-        {/each}
-      </div>
-
-      <Card class="guided-footer" variant="secondary" padding="md" border="default">
-        <div class="guided-footer__copy">
-          <h3>{selectedFeatureKeys.length > 0 ? t("home.guided.selectedTitle") : t("home.guided.emptyTitle")}</h3>
-          <p>
-            {#if selectedFeatureKeys.length > 0}
-              {t("home.guided.selectedBody")}
-            {:else}
-              {t("home.guided.emptyBody")}
-            {/if}
-          </p>
+                <span class={`guided-feature-card__check ${card.selected ? "guided-feature-card__check--selected" : ""}`.trim()} aria-hidden="true">
+                  {#if card.selected}
+                    <Check />
+                  {/if}
+                </span>
+              </div>
+            </StudyActionCard>
+          {/each}
         </div>
 
-        <div class="guided-footer__actions">
-          <Button type="button" variant="outline" on:click={handleSkipForNow} disabled={orchestrationBusy}>
-            {t("home.guided.skip")}
-          </Button>
-          <Button type="button" variant="primary" on:click={handleGenerateSelected} disabled={selectedFeatureKeys.length === 0} loading={orchestrationBusy}>
-            {t("home.guided.generateSelected")}
-          </Button>
+        <div class="guided-action-bar">
+          <div class="guided-action-bar__copy">
+            <p class="guided-action-bar__count">
+              {#if selectedFeatureKeys.length > 0}
+                {t("home.guided.selectionCount", { count: selectedFeatureKeys.length })}
+              {:else}
+                {t("home.guided.emptyTitle")}
+              {/if}
+            </p>
+            <p class="guided-action-bar__hint">
+              {#if selectedFeatureKeys.length > 0}
+                {t("home.guided.selectedBody")}
+              {:else}
+                {t("home.guided.emptyBody")}
+              {/if}
+            </p>
+          </div>
+
+          <div class="guided-action-bar__actions">
+            <Button type="button" variant="outline" on:click={handleSkipForNow} disabled={orchestrationBusy}>
+              {t("home.guided.skip")}
+            </Button>
+            <Button type="button" variant="primary" on:click={handleGenerateSelected} disabled={selectedFeatureKeys.length === 0} loading={orchestrationBusy}>
+              {t("home.guided.generateSelected")}
+            </Button>
+          </div>
         </div>
       </Card>
     </section>
@@ -1083,14 +1095,20 @@
     min-width: 0;
   }
 
-  .guided-hero,
+  .guided-panel {
+    width: 100%;
+    max-width: 1040px;
+    margin-inline: auto;
+  }
+
+  .guided-shell,
   .progress-hero {
     gap: var(--study-flow-card-gap);
   }
 
-  .guided-hero__top,
+  .guided-step-header__title-row,
   .progress-hero__meta,
-  .guided-footer {
+  .guided-action-bar {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -1098,93 +1116,202 @@
     flex-wrap: wrap;
   }
 
-  .guided-hero__copy,
+  .guided-step-header__copy,
   .progress-hero__copy,
-  .guided-footer__copy {
+  .guided-action-bar__copy {
     display: grid;
-    gap: 0.55rem;
+    gap: 0.35rem;
     min-width: 0;
   }
 
+  .guided-step-header__eyebrow,
   .guided-hero__eyebrow {
     margin: 0;
     color: var(--ui-text-muted);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
-  .guided-hero__copy h2,
+  .guided-step-header__copy h2,
   .progress-hero__copy h2,
-  .guided-footer__copy h3 {
+  .guided-action-bar__count {
     margin: 0;
     color: var(--ui-text-primary);
     letter-spacing: -0.03em;
   }
 
-  .guided-hero__copy h2,
+  .guided-step-header__copy h2,
   .progress-hero__copy h2 {
-    font-size: clamp(1.55rem, 1.25rem + 0.85vw, 2rem);
-    line-height: 1.06;
+    font-size: clamp(1.4rem, 1.18rem + 0.55vw, 1.8rem);
+    line-height: 1.08;
   }
 
-  .guided-footer__copy h3 {
-    font-size: 1rem;
-    line-height: 1.2;
-  }
-
-  .guided-hero__copy p:last-child,
+  .guided-step-header__helper,
+  .guided-file-header__caption,
+  .guided-action-bar__hint,
   .progress-hero__copy p:last-child,
-  .guided-footer__copy p,
-  .guided-hero__meta p {
+  .progress-hero__meta p {
     margin: 0;
     color: var(--ui-text-secondary);
-    line-height: 1.6;
-    font-size: 0.92rem;
+    line-height: 1.55;
+    font-size: 0.9rem;
   }
 
-  .guided-hero__badge {
+  .guided-step-header__badge {
     min-height: 1.75rem;
   }
 
-  .guided-hero__meta,
+  .guided-file-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    padding: 0.9rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--ui-border-default) 82%, var(--ui-text-primary) 18%);
+    border-radius: calc(var(--study-flow-card-radius) - 0.2rem);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--ui-surface-card) 92%, transparent) 0%, color-mix(in srgb, var(--ui-surface-secondary) 88%, transparent) 100%);
+  }
+
+  .guided-file-header__meta {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .guided-file-header__label {
+    color: var(--ui-text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .guided-file-header__name,
+  .progress-hero__document {
+    color: var(--ui-text-primary);
+    font-size: 0.95rem;
+    font-weight: 650;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .guided-file-header__caption {
+    max-width: 28rem;
+  }
+
   .progress-hero__meta {
     align-items: center;
   }
 
-  .guided-hero__document,
-  .progress-hero__document {
-    color: var(--ui-text-primary);
-    font-size: 0.95rem;
-    font-weight: 600;
-    line-height: 1.4;
-  }
-
   .guided-feature-grid {
     display: grid;
-    gap: var(--study-flow-card-gap);
+    gap: 0.95rem;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   :global(.guided-feature-card) {
     min-height: 0;
     box-shadow: none;
+    cursor: pointer;
+    gap: 0.9rem;
+    border-width: 1px;
+    border-color: color-mix(in srgb, var(--ui-border-default) 84%, var(--ui-surface-secondary) 16%);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 96%, transparent) 0%, color-mix(in srgb, var(--ui-surface-secondary) 82%, transparent) 100%);
     transition: border-color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard),
-      transform var(--motion-fast) var(--ease-standard);
+      transform var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard);
   }
 
-  :global(.guided-feature-card:hover) {
+  :global(.guided-feature-card:hover),
+  :global(.guided-feature-card:focus-visible) {
     transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 20%, var(--ui-border-default) 80%);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
   }
 
   :global(.guided-feature-card--selected) {
-    border-color: color-mix(in srgb, var(--ui-text-primary) 24%, var(--ui-border-default) 76%);
-    background: color-mix(in srgb, var(--ui-surface-card) 84%, var(--ui-surface-secondary) 16%);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 34%, var(--ui-border-default) 66%);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 92%, transparent) 0%, color-mix(in srgb, var(--ui-surface-secondary) 72%, transparent) 100%);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 16%, transparent),
+      0 16px 32px rgba(0, 0, 0, 0.14);
   }
 
-  .guided-feature-card__actions :global(.ui-button .ui-button__icon svg) {
+  :global(.guided-feature-card .ui-study-action-card__header) {
+    align-items: flex-start;
+    gap: 0.65rem;
+  }
+
+  :global(.guided-feature-card .ui-study-action-card__hero) {
+    gap: 0.75rem;
+  }
+
+  :global(.guided-feature-card .ui-study-action-card__copy h2) {
+    font-size: 1.02rem;
+    font-weight: 600;
+  }
+
+  :global(.guided-feature-card .ui-study-action-card__description) {
+    color: var(--ui-text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  :global(.guided-feature-card .ui-study-action-card__status) {
+    background: color-mix(in srgb, var(--ui-surface-secondary) 78%, transparent);
+  }
+
+  .guided-feature-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: auto;
+  }
+
+  .guided-feature-card__state {
+    color: var(--ui-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .guided-feature-card__state--selected {
+    color: var(--ui-text-primary);
+  }
+
+  .guided-feature-card__check {
+    width: 1.7rem;
+    height: 1.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--ui-border-default);
+    color: transparent;
+    background: color-mix(in srgb, var(--ui-surface-secondary) 76%, transparent);
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .guided-feature-card__check--selected {
+    border-color: color-mix(in srgb, var(--ui-text-primary) 28%, var(--ui-border-default) 72%);
+    background: color-mix(in srgb, var(--ui-text-primary) 12%, var(--ui-surface-card) 88%);
+    color: var(--ui-text-primary);
+  }
+
+  .guided-feature-card__check :global(svg) {
+    width: 0.9rem;
+    height: 0.9rem;
     fill: none;
     stroke: currentColor;
     stroke-width: 2;
@@ -1196,14 +1323,24 @@
     font-size: 0.8125rem;
   }
 
-  .guided-footer {
+  .guided-action-bar {
     align-items: center;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--ui-border-default) 84%, transparent);
   }
 
-  .guided-footer__actions {
+  .guided-action-bar__count {
+    font-size: 1rem;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .guided-action-bar__actions {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
+    flex: 0 0 auto;
   }
 
   .progress-hero__features {
@@ -1365,12 +1502,14 @@
   }
 
   @media (max-width: 640px) {
-    .guided-footer__actions,
+    .guided-step-header__title-row,
+    .guided-action-bar,
+    .guided-action-bar__actions,
     .progress-hero__features {
       width: 100%;
     }
 
-    .guided-footer__actions :global(.ui-button) {
+    .guided-action-bar__actions :global(.ui-button) {
       flex: 1 1 0;
       min-width: 0;
     }
