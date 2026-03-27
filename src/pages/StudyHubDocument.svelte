@@ -32,11 +32,11 @@
   };
   const FEATURE_KEYS = Object.keys(FEATURE_CONFIG);
   const VISUAL_PROGRESS_PHASES = {
-    queued: { seed: 2, cap: 9, velocity: 1.35, easing: 0.1, minStep: 0.08, maxStep: 0.22 },
-    preparing: { seed: 6, cap: 24, velocity: 1.2, easing: 0.09, minStep: 0.1, maxStep: 0.28 },
-    generating: { seed: 18, cap: 92, velocity: 1.45, easing: 0.07, minStep: 0.12, maxStep: 0.42 },
-    finalizing: { seed: 90, cap: 96, velocity: 0.85, easing: 0.14, minStep: 0.08, maxStep: 0.24 },
-    completed: { seed: 100, cap: 100, velocity: 0, easing: 0.3, minStep: 0.7, maxStep: 1.4 },
+    preparing: { start: 0, cap: 10, velocity: 4.6, easing: 0.11, minStep: 0.06, maxStep: 0.18 },
+    extracting: { start: 10, cap: 40, velocity: 6.8, easing: 0.1, minStep: 0.08, maxStep: 0.24 },
+    generating: { start: 40, cap: 90, velocity: 5.8, easing: 0.085, minStep: 0.09, maxStep: 0.28 },
+    finalizing: { start: 90, cap: 95, velocity: 1.3, easing: 0.12, minStep: 0.05, maxStep: 0.14 },
+    completed: { start: 100, cap: 100, velocity: 0, easing: 0.24, minStep: 0.7, maxStep: 1.8 },
   };
 
   let currentDocumentId = '';
@@ -313,9 +313,10 @@
   function getFeatureVisualPhase(featureKey, phase = getFeaturePhase(featureKey), { extractionBlocked = extractionStatus !== 'complete', job = generationJobs[featureKey] } = {}) {
     if (phase === 'ready') return 'completed';
     if (!isLoadingPhase(phase)) return 'idle';
-    if (extractionBlocked) return 'preparing';
+    if (extractionBlocked) {
+      return normalizeDocumentStatus(documentData?.processingStatus) === 'processing' ? 'extracting' : 'preparing';
+    }
     if (isFinalizingJob(job)) return 'finalizing';
-    if (phase === 'queued') return 'queued';
     return 'generating';
   }
 
@@ -337,8 +338,8 @@
     const job = generationJobs[featureKey];
     const visualPhase = getFeatureVisualPhase(featureKey, phase, { extractionBlocked, job });
     const actualProgressPct = isLoadingPhase(phase) ? clampProgress(job?.progressPct) : phase === 'ready' ? 100 : 0;
-    const hasReliableProgress = actualProgressPct > 0 || visualPhase === 'preparing' || visualPhase === 'generating' || visualPhase === 'finalizing';
-    const safeVisualCapByPhase = (VISUAL_PROGRESS_PHASES[visualPhase] ?? VISUAL_PROGRESS_PHASES.queued).cap;
+    const hasReliableProgress = actualProgressPct > 0 || ['preparing', 'extracting', 'generating', 'finalizing'].includes(visualPhase);
+    const safeVisualCapByPhase = (VISUAL_PROGRESS_PHASES[visualPhase] ?? VISUAL_PROGRESS_PHASES.preparing).cap;
     return {
       phase,
       visible: isLoadingPhase(phase),
@@ -354,15 +355,9 @@
     };
   }
 
-  function getFeatureProgressSeed(progressState) {
-    const phaseConfig = VISUAL_PROGRESS_PHASES[progressState.visualPhase] ?? VISUAL_PROGRESS_PHASES.queued;
-    if (progressState.actualProgressPct > 0) {
-      const safeActualFloor = progressState.phase === 'ready'
-        ? 100
-        : Math.min(progressState.actualProgressPct, progressState.safeVisualCapByPhase);
-      return safeActualFloor;
-    }
-    return Math.min(phaseConfig.seed, progressState.safeVisualCapByPhase);
+  function getSafeActualProgressTarget(progressState) {
+    if (progressState.phase === 'ready') return 100;
+    return Math.min(progressState.actualProgressPct, progressState.safeVisualCapByPhase);
   }
 
   function getFeatureVisualProgressTarget(featureKey, timestamp = nowMs()) {
@@ -370,20 +365,20 @@
     if (!progressState.visible || progressState.indeterminate) return null;
     if (progressState.phase === 'ready') return 100;
 
-    const phaseConfig = VISUAL_PROGRESS_PHASES[progressState.visualPhase] ?? VISUAL_PROGRESS_PHASES.queued;
+    const phaseConfig = VISUAL_PROGRESS_PHASES[progressState.visualPhase] ?? VISUAL_PROGRESS_PHASES.preparing;
     const runtime = progressRuntime[featureKey] ?? createProgressRuntimeState();
-    const runElapsedSeconds = runtime.startedAt > 0 ? Math.max(0, (timestamp - runtime.startedAt) / 1000) : 0;
-    const phaseElapsedSeconds = runtime.phaseEnteredAt > 0 ? Math.max(0, (timestamp - runtime.phaseEnteredAt) / 1000) : runElapsedSeconds;
-    const safeActualFloor = progressState.phase === 'ready'
-      ? 100
-      : Math.min(progressState.actualProgressPct, progressState.safeVisualCapByPhase);
+    const phaseElapsedSeconds = runtime.phaseEnteredAt > 0 ? Math.max(0, (timestamp - runtime.phaseEnteredAt) / 1000) : 0;
+    const safeActualTarget = getSafeActualProgressTarget(progressState);
+    const simulatedTarget = Math.min(
+      phaseConfig.start + phaseElapsedSeconds * phaseConfig.velocity,
+      progressState.safeVisualCapByPhase,
+    );
+    const currentDisplay = clampProgress(displayedProgress[featureKey]);
 
-    let target = Math.max(safeActualFloor, phaseConfig.seed + runElapsedSeconds * phaseConfig.velocity);
-    if (progressState.visualPhase === 'finalizing') {
-      target = Math.max(target, phaseConfig.seed + phaseElapsedSeconds * phaseConfig.velocity);
-    }
-
-    return Math.min(Math.max(target, safeActualFloor), progressState.safeVisualCapByPhase);
+    return Math.min(
+      Math.max(currentDisplay, safeActualTarget, simulatedTarget),
+      progressState.safeVisualCapByPhase,
+    );
   }
 
   function getFeatureLoadingLabel(featureKey, phase, { compact = false, extractionBlocked = extractionStatus !== 'complete', job = generationJobs[featureKey] } = {}) {
@@ -486,6 +481,8 @@
     const now = nowMs();
     return FEATURE_KEYS.some((featureKey) => {
       if ((completionFlashUntil[featureKey] || 0) > now) return true;
+      const progressState = getFeatureProgressState(featureKey);
+      if (progressState.visible) return true;
       const target = getFeatureVisualProgressTarget(featureKey, now);
       if (target === null) return false;
       return Math.abs((displayedProgress[featureKey] || 0) - target) > 0.2;
@@ -585,7 +582,7 @@
             lastActualProgress: progressState.actualProgressPct,
             lastActualProgressAt: progressState.actualProgressPct > 0 ? now : 0,
           });
-          nextProgress = updateFeatureMapValue(nextProgress, featureKey, getFeatureProgressSeed(progressState));
+          nextProgress = updateFeatureMapValue(nextProgress, featureKey, 0);
           nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
         } else {
           if (currentRuntime.visualPhase !== progressState.visualPhase) {
@@ -604,12 +601,6 @@
               lastActualProgress: progressState.actualProgressPct,
               lastActualProgressAt: now,
             };
-          }
-          if (progressState.actualProgressPct > current) {
-            const safeActualFloor = progressState.phase === 'ready'
-              ? 100
-              : Math.min(progressState.actualProgressPct, progressState.safeVisualCapByPhase);
-            nextProgress = updateFeatureMapValue(nextProgress, featureKey, safeActualFloor);
           }
         }
       }
