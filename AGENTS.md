@@ -35,4 +35,11 @@ Update docs when:
 - primitive guidance changes: `PRIMITIVES.md`
 - agent workflow changes: `AGENTS.md` / `agent.md`
 
+## Study Hub UI Invariants
+
+- Only the actively generating feature card may show live generating or progress UI.
+- Completed feature cards must remain visually stable and keep their ready/open CTA while a different feature is generating.
+- English and Arabic must use the same lifecycle semantics and labels for Study Hub progress states: `Queued`, `Preparing`, `Generating`, `Ready`, `Failed`.
+- Localization must not fork progress smoothing, lifecycle transitions, or feature-card state rules; only copy and layout direction may differ.
+
 Last Updated: March 23, 2026

@@ -209,7 +209,7 @@
       return `${formatNumber(Math.round(pct))}%`;
     }
     const rounded = Math.round(pct * 10) / 10;
-    return `${rounded.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+    return `${formatNumber(rounded, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
   }
 
   function normalizeJob(job) {
@@ -274,11 +274,11 @@
 
   function getFeaturePhase(featureKey) {
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
+    if (pendingGeneration[featureKey] || generationStatus === 'running') return 'generating';
+    if (generationStatus === 'queued' || plannedGeneration[featureKey]) return 'queued';
     if (hasFeatureContent(featureKey) || generationStatus === 'complete') return 'ready';
     if (generationStatus === 'failed') return 'failed';
     if (extractionStatus === 'failed') return 'failed';
-    if (pendingGeneration[featureKey] || generationStatus === 'running') return 'generating';
-    if (generationStatus === 'queued' || plannedGeneration[featureKey]) return 'queued';
     return 'not_requested';
   }
 
@@ -418,7 +418,8 @@
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
     const errorMessage = text(generationErrors?.[featureKey]) || text(documentData?.generationState?.[featureKey]?.errorMessage);
     const progress = getFeatureProgressState(featureKey);
-    const isCompleting = phase === 'ready' && clampProgress(displayedProgress[featureKey]) < 100;
+    const wasLoading = isLoadingPhase(previousFeaturePhases[featureKey]);
+    const isCompleting = phase === 'ready' && wasLoading && clampProgress(displayedProgress[featureKey]) < 100;
     const completionVisible = (completionFlashUntil[featureKey] || 0) > nowMs();
     const visualProgressValue = completionVisible ? 100 : clampProgress(displayedProgress[featureKey]);
     const progressVisible = completionVisible || progress.visible || isCompleting;
@@ -491,7 +492,8 @@
     return FEATURE_KEYS.some((featureKey) => {
       if ((completionFlashUntil[featureKey] || 0) > now) return true;
       const progressState = getFeatureProgressState(featureKey);
-      if (progressState.visible || (progressState.phase === 'ready' && (displayedProgress[featureKey] || 0) < 100)) return true;
+      if (progressState.visible) return true;
+      if (progressState.phase === 'ready' && isLoadingPhase(previousFeaturePhases[featureKey]) && (displayedProgress[featureKey] || 0) < 100) return true;
       const target = getFeatureVisualProgressTarget(featureKey, now);
       if (target === null) return false;
       return Math.abs((displayedProgress[featureKey] || 0) - target) > 0.2;
@@ -572,7 +574,15 @@
       const currentRuntime = progressRuntime[featureKey] ?? createProgressRuntimeState();
       let nextFeatureRuntime = currentRuntime;
 
-      if (phase === 'ready' && current >= 99.8 && holdUntil === 0) {
+      if (phase === 'ready' && !isLoadingPhase(previousPhase)) {
+        if (current !== 100) {
+          nextProgress = updateFeatureMapValue(nextProgress, featureKey, 100);
+        }
+        if (holdUntil !== 0) {
+          nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
+        }
+        nextFeatureRuntime = createProgressRuntimeState();
+      } else if (phase === 'ready' && current >= 99.8 && holdUntil === 0) {
         nextProgress = updateFeatureMapValue(nextProgress, featureKey, 100);
         nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, now + 320);
         nextFeatureRuntime = createProgressRuntimeState();

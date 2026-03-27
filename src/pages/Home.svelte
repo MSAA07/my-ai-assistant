@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import {
     Check,
     ClipboardCheck,
@@ -93,6 +93,9 @@
   let postUploadError = "";
   let progressError = "";
   let handoffPending = false;
+  let displayedGuidedProgress = 0;
+  let guidedProgressFrame = null;
+  let guidedProgressLastTime = 0;
   $: _lang = $languageStore;
 
   $: translatedError = errorKey ? t(errorKey, errorArgs) : "";
@@ -152,8 +155,14 @@
     });
   $: progressHeadline = getProgressHeadline();
   $: progressBody = getProgressBody();
-  $: progressValue = getProgressValue();
+  $: rawProgressValue = getProgressValue();
+  $: progressValue = Math.round(displayedGuidedProgress);
   $: progressSteps = buildProgressSteps();
+  $: {
+    showGuidedProgress;
+    rawProgressValue;
+    syncGuidedProgressDisplay();
+  }
 
   $: if (!canUploadDocuments) {
     selectedFiles = [];
@@ -173,6 +182,10 @@
     }
 
     void fetchUserData({ background: hasCachedData });
+  });
+
+  onDestroy(() => {
+    stopGuidedProgressAnimation();
   });
 
   function createFeatureMap(initialValue) {
@@ -215,6 +228,65 @@
       return normalized;
     }
     return "";
+  }
+
+  function stopGuidedProgressAnimation() {
+    if (guidedProgressFrame && typeof cancelAnimationFrame === "function") {
+      cancelAnimationFrame(guidedProgressFrame);
+    }
+    guidedProgressFrame = null;
+    guidedProgressLastTime = 0;
+  }
+
+  function runGuidedProgressAnimation(timestamp) {
+    guidedProgressFrame = null;
+    const target = Math.max(0, Math.min(Number(rawProgressValue) || 0, 100));
+    const deltaMs = guidedProgressLastTime ? Math.min(timestamp - guidedProgressLastTime, 64) : 16;
+    guidedProgressLastTime = timestamp;
+
+    if (!showGuidedProgress) {
+      displayedGuidedProgress = 0;
+      guidedProgressLastTime = 0;
+      return;
+    }
+
+    if (displayedGuidedProgress >= target - 0.2) {
+      displayedGuidedProgress = target;
+      guidedProgressLastTime = 0;
+      return;
+    }
+
+    const scaledFrame = deltaMs / 16.67;
+    const distance = target - displayedGuidedProgress;
+    const step = Math.min(Math.max(distance * 0.14 * scaledFrame, 0.45 * scaledFrame), 2.8 * scaledFrame);
+    displayedGuidedProgress = Math.min(displayedGuidedProgress + step, target);
+
+    if (typeof requestAnimationFrame === "function") {
+      guidedProgressFrame = requestAnimationFrame(runGuidedProgressAnimation);
+    }
+  }
+
+  function startGuidedProgressAnimation() {
+    if (guidedProgressFrame || typeof requestAnimationFrame !== "function") return;
+    guidedProgressFrame = requestAnimationFrame(runGuidedProgressAnimation);
+  }
+
+  function syncGuidedProgressDisplay() {
+    const target = Math.max(0, Math.min(Number(rawProgressValue) || 0, 100));
+    if (!showGuidedProgress) {
+      displayedGuidedProgress = 0;
+      stopGuidedProgressAnimation();
+      return;
+    }
+    if (displayedGuidedProgress > target || target <= 0) {
+      displayedGuidedProgress = target;
+    }
+    if (Math.abs(target - displayedGuidedProgress) <= 0.2) {
+      displayedGuidedProgress = target;
+      stopGuidedProgressAnimation();
+      return;
+    }
+    startGuidedProgressAnimation();
   }
 
   function getGenerationStatus(document, featureKey) {
@@ -912,7 +984,7 @@
 
         <div class="progress-rail">
           <ProgressBar value={progressValue} max={100} ariaLabel={t("home.guided.progress.ariaLabel")} className="progress-rail__bar" />
-          <span class="progress-rail__value">{progressValue}%</span>
+          <span class="progress-rail__value">{formatNumber(progressValue)}%</span>
         </div>
       </Card>
 
