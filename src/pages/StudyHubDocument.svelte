@@ -43,6 +43,11 @@
   let generationErrors = featureMap('');
   let generationJobs = featureMap(null);
   let plannedGeneration = featureMap(null);
+  let displayedProgress = featureMap(0);
+  let completionFlashUntil = featureMap(0);
+  let previousFeaturePhases = featureMap('not_requested');
+  let progressAnimationFrame = null;
+  let progressAnimationLastTime = 0;
   let lastRouteKey = '';
   let normalizedStudyTab = '';
   let isActivityRoute = false;
@@ -52,8 +57,6 @@
   let featureCards = [];
   let hasRequestedGeneration = false;
   let hasActiveGeneration = false;
-  let showProgressExperience = false;
-  let compactProgress = { active: false, title: '', helper: '', progressValue: 0, indeterminate: true, progressText: '', selectedFeatures: [] };
   let documentTitle = '';
   let fileTypeBadge = '';
   let languageMeta = null;
@@ -75,6 +78,8 @@
     generationErrors;
     generationJobs;
     plannedGeneration;
+    displayedProgress;
+    completionFlashUntil;
     featureCards = FEATURE_KEYS.map((featureKey) => buildFeatureCard(featureKey));
   }
   $: {
@@ -83,14 +88,14 @@
     hasRequestedGeneration = FEATURE_KEYS.some((featureKey) => normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status) !== 'not_requested') || plannedFeatureKeys.length > 0;
   }
   $: hasActiveGeneration = featureCards.some((card) => card.phase === 'queued' || card.phase === 'generating');
-  $: showProgressExperience = Boolean(documentData) && (extractionStatus === 'queued' || extractionStatus === 'processing' || hasActiveGeneration || plannedFeatureKeys.length > 0);
-  $: {
+  $: hasFailedGeneration = featureCards.some((card) => card.phase === 'failed' && card.errorMessage);
+  $: if (!isActivityRoute) {
     documentData;
     extractionStatus;
-    extractionJob;
-    featureCards;
+    pendingGeneration;
+    generationJobs;
     plannedGeneration;
-    compactProgress = buildCompactProgress();
+    syncFeatureProgressVisuals();
   }
   $: documentTitle = getDocumentDisplayName(documentData, t('document.hub.untitled'));
   $: fileTypeBadge = getDocumentFileTypeLabel(documentData);
@@ -98,9 +103,13 @@
   $: uploadedMeta = getUploadedMeta(documentData);
   $: documentSubtitle = extractionStatus === 'failed'
     ? text(documentData?.processingError) || t('document.processingFailed')
-    : showProgressExperience
-      ? compactProgress.helper
-      : !hasRequestedGeneration
+    : isExtractionActive(extractionStatus)
+      ? t('document.hub.processing.extractingBody')
+      : hasActiveGeneration
+        ? t('document.hub.generationRunning')
+        : hasFailedGeneration
+          ? t('document.hub.generationFailed')
+          : !hasRequestedGeneration
         ? t('document.hub.readyToGenerateHint')
         : t('document.hub.readyHint');
 
@@ -133,7 +142,10 @@
     void maybeStartPlannedGeneration();
   }
 
-  onDestroy(clearPollTimer);
+  onDestroy(() => {
+    clearPollTimer();
+    stopProgressAnimation();
+  });
 
   function featureMap(initialValue) {
     return { summary: initialValue, flashcards: initialValue, exam: initialValue };
@@ -170,6 +182,10 @@
 
   function normalizeJob(job) {
     return job?.id ? { id: job.id, status: normalizeJobStatus(job.status), progressPct: clampProgress(job.progressPct), errorMessage: text(job.errorMessage) } : null;
+  }
+
+  function nowMs() {
+    return Date.now();
   }
 
   function isLoadingPhase(phase) {
@@ -234,9 +250,17 @@
     return 'not_requested';
   }
 
-  function getFeatureStatusLabel(phase) {
+  function isExtractionActive(status) {
+    return status === 'queued' || status === 'processing';
+  }
+
+  function getFeatureStatusLabel(featureKey, phase) {
     if (phase === 'ready') return t('status.ready');
-    if (phase === 'queued') return t('document.hub.loading.preparing');
+    if (phase === 'queued') {
+      return extractionStatus === 'complete' && normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status) === 'queued'
+        ? t('status.queued')
+        : t('document.hub.states.preparing');
+    }
     if (phase === 'generating') return t('document.hub.states.generating');
     if (phase === 'failed') return t('status.failed');
     return t('document.hub.states.notRequested');
@@ -262,7 +286,7 @@
 
   function getFeatureLoadingLabel(featureKey, phase, { compact = false, extractionBlocked = extractionStatus !== 'complete', job = generationJobs[featureKey] } = {}) {
     if (!isLoadingPhase(phase)) return '';
-    if (extractionBlocked) return compact ? t('document.hub.loading.preparingDocument') : t('document.hub.loading.preparing');
+    if (extractionBlocked) return compact ? t('document.hub.loading.preparingDocument') : t('document.hub.states.preparing');
     if (isFinalizingJob(job)) {
       return compact
         ? t('document.hub.loading.finalizingFeature', { feature: t(FEATURE_CONFIG[featureKey].titleKey) })
@@ -271,7 +295,7 @@
     if (phase === 'queued') {
       return compact
         ? t('document.hub.loading.preparingFeature', { feature: t(FEATURE_CONFIG[featureKey].titleKey) })
-        : t('document.hub.loading.preparing');
+        : t('status.queued');
     }
     return compact
       ? t('document.hub.loading.generatingFeature', { feature: t(FEATURE_CONFIG[featureKey].titleKey) })
@@ -293,68 +317,28 @@
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
     const errorMessage = text(generationErrors?.[featureKey]) || text(documentData?.generationState?.[featureKey]?.errorMessage);
     const progress = getFeatureProgress(phase, generationJobs[featureKey], extractionStatus !== 'complete');
+    const completionVisible = (completionFlashUntil[featureKey] || 0) > nowMs();
+    const visualProgressValue = completionVisible ? 100 : clampProgress(displayedProgress[featureKey]);
+    const progressVisible = completionVisible || progress.visible;
+    const progressIndeterminate = completionVisible ? false : progress.indeterminate;
+    const progressText = completionVisible ? formatProgressText(100) : progressIndeterminate ? '' : formatProgressText(visualProgressValue || progress.value);
     return {
       key: featureKey,
       title: t(FEATURE_CONFIG[featureKey].titleKey),
       description: t(FEATURE_CONFIG[featureKey].descriptionKey),
       phase,
-      stateLabel: getFeatureStatusLabel(phase),
+      stateLabel: getFeatureStatusLabel(featureKey, phase),
       stateTone: getFeatureTone(phase),
       primaryLabel: getFeaturePrimaryLabel(featureKey, phase),
-      canPrimaryAction: phase !== 'queued' && phase !== 'generating',
+      canPrimaryAction: !progressVisible && phase !== 'queued' && phase !== 'generating',
       shouldRegenerate: hasFeatureContent(featureKey) || generationStatus === 'complete',
       statusCopy: getFeatureStatusCopy(phase, errorMessage),
       errorMessage: phase === 'failed' ? errorMessage : '',
-      progressVisible: progress.visible,
-      progressValue: progress.value,
-      progressIndeterminate: progress.indeterminate,
-      progressText: progress.text,
-      loadingLabel: getFeatureLoadingLabel(featureKey, phase),
-    };
-  }
-
-  function buildCompactProgress() {
-    const inactive = { active: false, title: '', helper: '', progressValue: 0, indeterminate: true, progressText: '', selectedFeatures: [] };
-    if (!documentData || extractionStatus === 'failed') return inactive;
-
-    const selectedFeatures = FEATURE_KEYS
-      .filter((featureKey) => plannedGeneration[featureKey] || isLoadingPhase(getFeaturePhase(featureKey)))
-      .map((featureKey) => ({
-        key: featureKey,
-        title: t(FEATURE_CONFIG[featureKey].titleKey),
-        phase: getFeaturePhase(featureKey),
-      }));
-
-    if (extractionStatus === 'queued' || extractionStatus === 'processing') {
-      const progressPct = clampProgress(extractionJob?.progressPct);
-      const finalizing = isFinalizingJob(extractionJob) && extractionStatus !== 'complete';
-      return {
-        active: true,
-        title: finalizing ? t('document.hub.loading.finalizing') : t('document.hub.loading.extractingDocument'),
-        helper: selectedFeatures.length > 0
-          ? t('document.hub.loading.selectedFeatures', { features: selectedFeatures.map((feature) => feature.title).join(' / ') })
-          : t('document.hub.processing.extractingBody'),
-        progressValue: progressPct || 14,
-        indeterminate: progressPct === 0,
-        progressText: formatProgressText(progressPct),
-        selectedFeatures,
-      };
-    }
-
-    const activeFeatures = featureCards.filter((card) => isLoadingPhase(card.phase));
-    if (activeFeatures.length === 0) return inactive;
-
-    const leadFeature = activeFeatures.find((card) => card.phase === 'generating') || activeFeatures[0];
-    return {
-      active: true,
-      title: activeFeatures.length === 1
-        ? getFeatureLoadingLabel(leadFeature.key, leadFeature.phase, { compact: true })
-        : t('document.hub.loading.generatingSelected'),
-      helper: t('document.hub.loading.selectedFeatures', { features: activeFeatures.map((card) => card.title).join(' / ') }),
-      progressValue: leadFeature.progressValue,
-      indeterminate: leadFeature.progressIndeterminate,
-      progressText: leadFeature.progressText,
-      selectedFeatures: activeFeatures.map((card) => ({ key: card.key, title: card.title, phase: card.phase })),
+      progressVisible,
+      progressValue: progressIndeterminate ? 0 : (visualProgressValue || progress.value),
+      progressIndeterminate,
+      progressText,
+      loadingLabel: completionVisible ? t('status.ready') : getFeatureLoadingLabel(featureKey, phase),
     };
   }
 
@@ -374,6 +358,137 @@
     if (featureKey === 'summary') return FileText;
     if (featureKey === 'flashcards') return Layers3;
     return ClipboardCheck;
+  }
+
+  function stopProgressAnimation() {
+    if (progressAnimationFrame && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(progressAnimationFrame);
+    }
+    progressAnimationFrame = null;
+    progressAnimationLastTime = 0;
+  }
+
+  function updateFeatureMapValue(source, featureKey, value) {
+    if (source[featureKey] === value) return source;
+    return { ...source, [featureKey]: value };
+  }
+
+  function getVisualProgressTarget(featureKey) {
+    const phase = getFeaturePhase(featureKey);
+    const progress = getFeatureProgress(phase, generationJobs[featureKey], extractionStatus !== 'complete');
+    if (!progress.visible || progress.indeterminate) return null;
+    if (phase === 'ready') return 100;
+    return Math.min(clampProgress(progress.value), 99);
+  }
+
+  function shouldAnimateFeatureProgress() {
+    const now = nowMs();
+    return FEATURE_KEYS.some((featureKey) => {
+      if ((completionFlashUntil[featureKey] || 0) > now) return true;
+      const target = getVisualProgressTarget(featureKey);
+      if (target === null) return false;
+      return Math.abs((displayedProgress[featureKey] || 0) - target) > 0.2;
+    });
+  }
+
+  function runProgressAnimationFrame(timestamp) {
+    progressAnimationFrame = null;
+    const frameDelta = progressAnimationLastTime ? Math.min(timestamp - progressAnimationLastTime, 64) : 16;
+    progressAnimationLastTime = timestamp;
+
+    let nextProgress = displayedProgress;
+    let nextCompletion = completionFlashUntil;
+    let active = false;
+
+    for (const featureKey of FEATURE_KEYS) {
+      const holdUntil = completionFlashUntil[featureKey] || 0;
+      if (holdUntil > 0) {
+        if (holdUntil > nowMs()) {
+          active = true;
+          continue;
+        }
+        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
+        continue;
+      }
+
+      const target = getVisualProgressTarget(featureKey);
+      if (target === null) continue;
+
+      const current = displayedProgress[featureKey] || 0;
+      if (Math.abs(target - current) <= 0.2) {
+        nextProgress = updateFeatureMapValue(nextProgress, featureKey, target);
+        continue;
+      }
+
+      const easing = Math.min(1, frameDelta / 420);
+      const minStep = (target >= 100 ? 0.8 : 0.3) * (frameDelta / 16.67);
+      let nextValue = current + Math.sign(target - current) * Math.max(Math.abs(target - current) * easing, minStep);
+      nextValue = target > current ? Math.min(nextValue, target) : Math.max(nextValue, target);
+      if (target < 100) nextValue = Math.min(nextValue, 99);
+      nextProgress = updateFeatureMapValue(nextProgress, featureKey, clampProgress(nextValue));
+      active = true;
+    }
+
+    displayedProgress = nextProgress;
+    completionFlashUntil = nextCompletion;
+
+    if (active && typeof requestAnimationFrame === 'function') {
+      progressAnimationFrame = requestAnimationFrame(runProgressAnimationFrame);
+    } else {
+      progressAnimationLastTime = 0;
+    }
+  }
+
+  function startProgressAnimation() {
+    if (progressAnimationFrame || typeof requestAnimationFrame !== 'function' || !shouldAnimateFeatureProgress()) return;
+    progressAnimationFrame = requestAnimationFrame(runProgressAnimationFrame);
+  }
+
+  function syncFeatureProgressVisuals() {
+    const now = nowMs();
+    let nextProgress = displayedProgress;
+    let nextCompletion = completionFlashUntil;
+    let nextPreviousPhases = previousFeaturePhases;
+
+    for (const featureKey of FEATURE_KEYS) {
+      const phase = getFeaturePhase(featureKey);
+      const previousPhase = previousFeaturePhases[featureKey];
+      const target = getVisualProgressTarget(featureKey);
+      const current = displayedProgress[featureKey] || 0;
+      const holdUntil = completionFlashUntil[featureKey] || 0;
+
+      if (phase === 'ready' && isLoadingPhase(previousPhase) && current > 0 && holdUntil === 0) {
+        nextProgress = updateFeatureMapValue(nextProgress, featureKey, 100);
+        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, now + 280);
+      } else if ((phase === 'failed' || phase === 'not_requested') && (current > 0 || holdUntil > 0)) {
+        nextProgress = updateFeatureMapValue(nextProgress, featureKey, 0);
+        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
+      } else if (target !== null) {
+        if (!isLoadingPhase(previousPhase) && !pendingGeneration[featureKey]) {
+          nextProgress = updateFeatureMapValue(nextProgress, featureKey, target);
+        } else if (current > target) {
+          nextProgress = updateFeatureMapValue(nextProgress, featureKey, target);
+        }
+      }
+
+      if (holdUntil > 0 && holdUntil <= now) {
+        nextCompletion = updateFeatureMapValue(nextCompletion, featureKey, 0);
+      }
+
+      if (nextPreviousPhases[featureKey] !== phase) {
+        nextPreviousPhases = updateFeatureMapValue(nextPreviousPhases, featureKey, phase);
+      }
+    }
+
+    displayedProgress = nextProgress;
+    completionFlashUntil = nextCompletion;
+    previousFeaturePhases = nextPreviousPhases;
+
+    if (shouldAnimateFeatureProgress()) {
+      startProgressAnimation();
+    } else {
+      stopProgressAnimation();
+    }
   }
 
   function clearPollTimer() {
@@ -418,6 +533,7 @@
 
   function resetState() {
     clearPollTimer();
+    stopProgressAnimation();
     lastRouteKey = '';
     documentData = null;
     loading = true;
@@ -428,6 +544,9 @@
     generationErrors = featureMap('');
     generationJobs = featureMap(null);
     plannedGeneration = featureMap(null);
+    displayedProgress = featureMap(0);
+    completionFlashUntil = featureMap(0);
+    previousFeaturePhases = featureMap('not_requested');
   }
 
   function getCachedDocumentState(documentId) {
@@ -630,37 +749,6 @@
           <p>{text(documentData?.processingError) || t('document.processingFailed')}</p>
           <p>{t('document.hub.processing.continues')}</p>
         </Card>
-      {:else if compactProgress.active}
-        <Card as="section" class="generation-strip" variant="standard" padding="md" border="default">
-          <div class="generation-strip__summary" aria-live="polite">
-            <p class="generation-strip__eyebrow">{t('document.hub.statusTitle')}</p>
-            <div class="generation-strip__headline">
-              <h2>{compactProgress.title}</h2>
-              {#if compactProgress.progressText}
-                <span class="generation-strip__percent">{compactProgress.progressText}</span>
-              {/if}
-            </div>
-            {#if compactProgress.helper}
-              <p class="generation-strip__helper">{compactProgress.helper}</p>
-            {/if}
-          </div>
-
-          <ProgressBar
-            value={compactProgress.progressValue}
-            max={100}
-            indeterminate={compactProgress.indeterminate}
-            ariaLabel={compactProgress.title}
-            className="generation-strip__bar"
-          />
-
-          {#if compactProgress.selectedFeatures.length > 0}
-            <div class="generation-strip__chips" aria-label={t('document.hub.featuresTitle')}>
-              {#each compactProgress.selectedFeatures as feature (feature.key)}
-                <span class={`generation-strip__chip generation-strip__chip--${feature.phase}`.trim()}>{feature.title}</span>
-              {/each}
-            </div>
-          {/if}
-        </Card>
       {/if}
 
       <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
@@ -725,21 +813,7 @@
   :global(.document-hub .state-panel p){color:var(--muted-foreground);line-height:1.45;font-size:var(--font-size-sm)}
   :global(.document-hub .state-panel-error){border-color:color-mix(in srgb,var(--destructive) 35%,var(--ui-border-default) 65%)}
   .row{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3);flex-wrap:wrap}
-  .generation-strip{
-    display:grid;
-    gap:.8rem;
-    border-color:color-mix(in srgb,var(--ui-text-primary) 10%,var(--ui-border-default) 90%);
-    background:linear-gradient(180deg,color-mix(in srgb,var(--ui-surface-card) 94%,transparent),color-mix(in srgb,var(--ui-surface-secondary) 78%,transparent));
-    box-shadow:none;
-    --ui-progress-track:color-mix(in srgb,var(--ui-surface-secondary) 78%,black 22%);
-    --ui-progress-fill:linear-gradient(90deg,rgba(255,255,255,.96),rgba(209,213,219,.84),rgba(255,255,255,.96));
-  }
-  .generation-strip__summary{display:grid;gap:.35rem;min-width:0}
-  .generation-strip__eyebrow{margin:0;color:var(--ui-text-muted);font-size:.72rem;font-weight:650;letter-spacing:.1em;text-transform:uppercase}
-  .generation-strip__headline{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
-  .generation-strip__headline h2{font-size:1rem}
-  .generation-strip__helper,.feature-support-copy{margin:0;color:var(--ui-text-secondary);line-height:1.5;font-size:.88rem}
-  .generation-strip__percent,
+  .feature-support-copy{margin:0;color:var(--ui-text-secondary);line-height:1.5;font-size:.88rem}
   .feature-action-loading__value{
     color:var(--ui-text-primary);
     font-size:.82rem;
@@ -748,23 +822,6 @@
     direction:ltr;
     unicode-bidi:plaintext;
   }
-  :global(.generation-strip__bar){height:.42rem}
-  .generation-strip__chips{display:flex;flex-wrap:wrap;gap:.45rem}
-  .generation-strip__chip{
-    display:inline-flex;
-    align-items:center;
-    min-height:1.65rem;
-    padding:0 .65rem;
-    border-radius:999px;
-    border:1px solid color-mix(in srgb,var(--ui-text-primary) 10%,var(--ui-border-default) 90%);
-    background:color-mix(in srgb,var(--ui-surface-card) 90%,var(--ui-surface-secondary) 10%);
-    color:var(--ui-text-secondary);
-    font-size:.75rem;
-    font-weight:600;
-    letter-spacing:.01em;
-  }
-  .generation-strip__chip--generating,
-  .generation-strip__chip--queued{color:var(--ui-text-primary);border-color:color-mix(in srgb,var(--ui-text-primary) 14%,var(--ui-border-default) 86%)}
   .features-grid{display:grid;gap:var(--study-flow-card-gap);grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
   :global(.feature-card){min-height:0}
   .feature-inline-error,:global(.inline-error){color:var(--destructive)}
@@ -807,13 +864,11 @@
     0%,100%{border-color:color-mix(in srgb,var(--ui-text-primary) 10%,var(--ui-border-default) 90%);background:color-mix(in srgb,var(--ui-surface-secondary) 82%,black 18%)}
     50%{border-color:color-mix(in srgb,var(--ui-text-primary) 16%,var(--ui-border-default) 84%);background:color-mix(in srgb,var(--ui-surface-secondary) 88%,black 12%)}
   }
-  :global(html[dir='rtl']) .generation-strip__headline,
   :global(html[dir='rtl']) .feature-action-loading__meta{align-items:flex-start}
   @media (max-width:1024px){.features-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media (max-width:640px){
     .features-grid{grid-template-columns:1fr}
     .document-meta{align-items:stretch}
-    .generation-strip__headline,
     .feature-action-loading__meta{flex-direction:column;align-items:flex-start}
   }
 </style>
