@@ -19,7 +19,9 @@
   import ProgressBar from "../lib/components/ui/ProgressBar.svelte";
   import StudyActionCard from "../lib/components/ui/StudyActionCard.svelte";
   import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
-  import { getDocument, getJob, requestGeneration } from "../lib/api/studyHub.js";
+  import { getDocument, getJob } from "../lib/api/studyHub.js";
+  import { getDocumentDisplayName } from "../lib/utils/documentName.js";
+  import { writeStudyGenerationPlan } from "../lib/utils/studyGenerationPlan.js";
   import { readPageCache, writePageCache } from "../stores/pageCache.js";
   import { API_BASE } from "../config.js";
 
@@ -36,7 +38,6 @@
   const FLOW_STAGE = Object.freeze({
     upload: "upload",
     select: "select",
-    progress: "progress",
   });
   const FEATURE_ORDER = ["summary", "flashcards", "exam"];
   const MAX_UPLOAD_FILES = 1;
@@ -103,7 +104,7 @@
   $: showQuotaReachedMessage = !isLoadingDashboard && !!user && !canUploadDocuments;
   $: showUploadSection = !isLoadingDashboard && !!user && canUploadDocuments && flowStage === FLOW_STAGE.upload;
   $: showGuidedSelection = flowStage === FLOW_STAGE.select && !!uploadedDocument;
-  $: showGuidedProgress = flowStage === FLOW_STAGE.progress && !!uploadedDocument;
+  $: showGuidedProgress = false;
   $: usedThisMonthValue = user?.documentsUsed ?? user?.usedThisMonth ?? 0;
   $: monthlyLimitValue = user?.monthlyLimit ?? 0;
   $: totalDocumentsValue = Array.isArray(documents) ? documents.length : 0;
@@ -130,7 +131,7 @@
   $: selectedFeatureKeys = FEATURE_ORDER.filter((featureKey) => selectedFeatures[featureKey]);
   $: selectedFeatureLabels = selectedFeatureKeys.map((featureKey) => t(FEATURE_CONFIG[featureKey].titleKey));
   $: extractionStatus = normalizeDocumentStatus(latestDocument?.processingStatus || uploadedDocument?.processingStatus);
-  $: uploadedDocumentName = normalizeString(uploadedDocument?.name || latestDocument?.originalName || latestDocument?.filename);
+  $: uploadedDocumentName = getDocumentDisplayName(latestDocument || uploadedDocument);
   $: showDashboardChrome = !showGuidedSelection;
   $: selectionStatusLabel = getSelectionStatusLabel();
   $: selectionStatusTone = getSelectionStatusTone();
@@ -427,7 +428,7 @@
       latestDocument = data?.document ?? null;
       uploadedDocument = {
         id: documentId,
-        name: normalizeString(data?.document?.originalName || file.name),
+        name: getDocumentDisplayName(data?.document, file.name),
         jobId: normalizeString(data?.jobId || data?.document?.processingJobId),
         processingStatus: normalizeDocumentStatus(data?.document?.processingStatus),
       };
@@ -555,65 +556,25 @@
     }
 
     orchestrationBusy = true;
-    progressError = "";
     postUploadError = "";
-    handoffPending = false;
-    generationJobs = createFeatureMap(null);
-    generationErrors = createFeatureMap("");
-    flowStage = FLOW_STAGE.progress;
 
     try {
       const documentId = uploadedDocument.id;
-      const extractionJobId = normalizeString(uploadedDocument.jobId || extractionJob?.id);
-      const document = await refreshDocument(documentId).catch(() => latestDocument);
-      const currentExtractionStatus = normalizeDocumentStatus(document?.processingStatus || latestDocument?.processingStatus);
-
-      if (currentExtractionStatus !== "complete") {
-        await waitForExtractionReady(documentId, extractionJobId);
-      }
-
-      let generationRequestFailed = false;
-
-      for (const featureKey of selectedFeatureKeys) {
-        try {
-          const response = await requestGeneration(documentId, {
+      writeStudyGenerationPlan(documentId, {
+        features: selectedFeatureKeys.reduce((accumulator, featureKey) => {
+          accumulator[featureKey] = {
             type: featureKey,
             options: FEATURE_CONFIG[featureKey].options,
-          });
-
-          const jobId = normalizeString(response?.jobId || response?.generation?.jobId);
-          generationJobs = {
-            ...generationJobs,
-            [featureKey]: {
-              id: jobId,
-              status: normalizeJobStatus(response?.generationStatus || response?.generation?.status || "queued"),
-              progressPct: 0,
-            },
           };
-        } catch (requestError) {
-          generationRequestFailed = true;
-          generationErrors = {
-            ...generationErrors,
-            [featureKey]: normalizeString(requestError?.message) || t("document.generation.requestFailed"),
-          };
-        }
-      }
-
-      if (generationRequestFailed) {
-        throw new Error(t("home.guided.errors.generationRequest"));
-      }
-
-      await waitForGenerationKickoff(documentId, selectedFeatureKeys);
-      handoffPending = true;
-      await wait(500);
+          return accumulator;
+        }, {}),
+      });
+      await fetchUserData({ background: true });
       window.location.hash = `/study/${encodeURIComponent(documentId)}`;
     } catch (err) {
-      console.error("Post-upload generation flow failed:", err);
-      const message = normalizeString(err?.message) || t("home.guided.errors.progress");
-      progressError = message;
+      console.error("Failed to hand off document generation:", err);
+      const message = normalizeString(err?.message) || t("home.guided.errors.generationRequest");
       postUploadError = message;
-      flowStage = FLOW_STAGE.select;
-      handoffPending = false;
     } finally {
       orchestrationBusy = false;
     }

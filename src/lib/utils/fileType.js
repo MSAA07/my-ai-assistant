@@ -1,3 +1,5 @@
+import { getDocumentDisplayName } from './documentName.js';
+
 const MIME_TYPE_LABELS = {
   'application/pdf': 'PDF',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'DOCX',
@@ -9,7 +11,7 @@ function normalizeString(value) {
 }
 
 export function getDocumentFileTypeLabel(document, { fallback = '' } = {}) {
-  const fileName = normalizeString(document?.originalName || document?.title);
+  const fileName = getDocumentDisplayName(document);
   if (fileName.includes('.')) {
     const extension = normalizeString(fileName.split('.').pop());
     if (extension) {

@@ -15,6 +15,7 @@
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
   import PromptModal from '../lib/components/ui/PromptModal.svelte';
   import DocumentListSkeleton from '../lib/components/ui/DocumentListSkeleton.svelte';
+  import { getDocumentDisplayName } from '../lib/utils/documentName.js';
   import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
@@ -37,11 +38,11 @@
   $: highlightDocumentId = typeof $routeParams?.highlight === 'string' ? $routeParams.highlight : '';
   $: deleteTitle = t('documentsPage.deleteConfirmTitle');
   $: deleteDescription = t('documentsPage.deleteConfirmDescription', {
-    name: pendingDeleteDoc?.originalName ?? t('documentsPage.deleteUnknown')
+    name: getDocumentDisplayName(pendingDeleteDoc, t('documentsPage.deleteUnknown'))
   });
   $: renameTitle = t('documentsPage.actions.renamePrompt');
-  $: renameDescription = pendingRenameDoc?.originalName ?? '';
-  $: renameDisabled = !pendingRenameDoc?.id || !renameValue.trim() || renameValue.trim() === (pendingRenameDoc?.originalName ?? '').trim();
+  $: renameDescription = getDocumentDisplayName(pendingRenameDoc);
+  $: renameDisabled = !pendingRenameDoc?.id || !renameValue.trim() || renameValue.trim() === getDocumentDisplayName(pendingRenameDoc).trim();
   $: deleteLabel = t('documentsPage.actions.delete');
   $: cancelLabel = t('confirmModal.cancel');
 
@@ -231,7 +232,7 @@
 
   function openRenameModal(doc) {
     openMenuId = '';
-    const currentName = typeof doc?.originalName === 'string' ? doc.originalName.trim() : '';
+    const currentName = getDocumentDisplayName(doc).trim();
     if (!currentName) return;
 
     pendingRenameDoc = doc;
@@ -246,7 +247,7 @@
   }
 
   async function renameDocument() {
-    const currentName = typeof pendingRenameDoc?.originalName === 'string' ? pendingRenameDoc.originalName.trim() : '';
+    const currentName = getDocumentDisplayName(pendingRenameDoc).trim();
     const nextName = renameValue.trim();
     if (!pendingRenameDoc?.id || !nextName || nextName === currentName) {
       return;
@@ -372,8 +373,8 @@
             class="document-card"
             role="link"
             tabindex="0"
-            aria-label={doc.originalName}
-            title={doc.originalName}
+            aria-label={getDocumentDisplayName(doc)}
+            title={getDocumentDisplayName(doc)}
             meta={`${t('documentsPage.labels.uploaded')}: ${formatDocumentDate(doc.uploadDate)}`}
             badgeLabel={getFileType(doc)}
             badgeTone={getFileBadgeTone(doc)}
@@ -436,7 +437,7 @@
     description={renameDescription}
     label={t('documentsPage.actions.rename')}
     value={renameValue}
-    placeholder={pendingRenameDoc?.originalName ?? ''}
+    placeholder={getDocumentDisplayName(pendingRenameDoc)}
     confirmLabel={t('documentsPage.actions.rename')}
     cancelLabel={cancelLabel}
     confirmDisabled={renameDisabled}

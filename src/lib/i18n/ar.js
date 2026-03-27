@@ -644,4 +644,27 @@ const ar = {
   }
 };
 
+ar.status = {
+  ...(ar.status ?? {}),
+  queued: 'في الانتظار',
+};
+
+ar.document = {
+  ...(ar.document ?? {}),
+  hub: {
+    ...(ar.document?.hub ?? {}),
+    states: {
+      ...(ar.document?.hub?.states ?? {}),
+      notRequested: 'لم يُطلب بعد',
+    },
+    progress: {
+      ...(ar.document?.hub?.progress ?? {}),
+      extraction: 'استخراج المستند',
+      inProgress: 'جارٍ العمل',
+      featureQueued: 'تمت إضافته إلى الطابور وبانتظار بدء العمل.',
+      featureGenerating: 'الإنشاء قيد التنفيذ الآن.',
+    },
+  },
+};
+
 export default mergeDictionaries(en, ar);

@@ -54,6 +54,7 @@ export default {
   },
   status: {
     processing: 'Processing',
+    queued: 'Queued',
     ready: 'Ready',
     failed: 'Failed',
     info: 'Info'
@@ -295,6 +296,7 @@ export default {
       },
       states: {
         notGenerated: 'Not generated',
+        notRequested: 'Not requested',
         readyToGenerate: 'Ready to generate',
         preparing: 'Preparing document',
         generating: 'Generating',
@@ -312,6 +314,12 @@ export default {
         generatingTitle: 'Study generation in progress',
         generatingBody: 'One or more study features are currently generating.',
         continues: 'Generation continues in the background even if you leave this page.'
+      },
+      progress: {
+        extraction: 'Document extraction',
+        inProgress: 'In progress',
+        featureQueued: 'Queued and waiting for a worker to start.',
+        featureGenerating: 'Generation is actively running.'
       },
       statusTitle: 'Document lifecycle',
       statusSubtitle: 'Extraction status comes from the document lifecycle and generation runs per study tool.',

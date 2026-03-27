@@ -10,6 +10,7 @@
   import GuidedRegenerateModal from '../ui/GuidedRegenerateModal.svelte';
   import DocumentDetailSkeleton from '../ui/DocumentDetailSkeleton.svelte';
   import StudyActivityShell from './StudyActivityShell.svelte';
+  import { getDocumentDisplayName } from '../../utils/documentName.js';
   import { getDocumentFileTypeLabel } from '../../utils/fileType.js';
   import { readPageCache, writePageCache } from '../../../stores/pageCache.js';
   import {
@@ -66,7 +67,7 @@
   $: activeFeatureKey = mode === 'flashcards' ? 'flashcards' : mode === 'exam' ? 'exam' : 'summary';
   $: extractionStatus = normalizeDocumentStatus(docData?.processingStatus);
   $: showProcessingBanner = Boolean(docData) && (isExtractionActive(extractionStatus) || hasActiveGeneration(docData, pendingGeneration));
-  $: title = text(docData?.originalName) || text(docData?.title) || t('document.hub.untitled');
+  $: title = getDocumentDisplayName(docData, t('document.hub.untitled'));
   $: fileTypeBadge = getFileType(docData);
 
   $: summaryFeature = featureState('summary', { document: docData, extractionStatus, pendingGeneration, generationErrors });
