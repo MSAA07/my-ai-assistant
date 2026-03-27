@@ -26,6 +26,8 @@
   padding="md"
   border="default"
   className={['ui-study-action-card', className, $$props.class ?? ''].filter(Boolean).join(' ')}
+  on:click
+  on:keydown
 >
   <div class="ui-study-action-card__header">
     <div class="ui-study-action-card__hero">
