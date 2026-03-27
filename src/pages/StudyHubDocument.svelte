@@ -22,6 +22,7 @@
   export let studyTab = '';
 
   const POLL_INTERVAL_MS = 2500;
+  const DOCUMENT_CACHE_TTL_MS = 5000;
   const DOCUMENT_CACHE_KEY = (id) => `page:study-document:${id}`;
   const ACTIVITY_TABS = new Set(['summary', 'flashcards', 'exam', 'exams']);
   const FEATURE_CONFIG = {
@@ -70,7 +71,7 @@
     currentDocumentId = documentId;
     resetState();
     hydrateGenerationPlan(documentId);
-    const cached = readPageCache(DOCUMENT_CACHE_KEY(documentId));
+    const cached = getCachedDocumentState(documentId);
     if (cached?.loaded && cached?.documentData) {
       documentData = cached.documentData;
       pendingGeneration = cached.pendingGeneration ?? featureMap(false);
@@ -234,7 +235,7 @@
       stateLabel: getFeatureStatusLabel(phase),
       stateTone: getFeatureTone(phase),
       primaryLabel: getFeaturePrimaryLabel(featureKey, phase),
-      canPrimaryAction: phase === 'ready' || (extractionStatus === 'complete' && (phase === 'not_requested' || phase === 'failed')),
+      canPrimaryAction: phase !== 'queued' && phase !== 'generating',
       shouldRegenerate: hasFeatureContent(featureKey) || generationStatus === 'complete',
       statusCopy: getFeatureStatusCopy(phase, errorMessage),
       errorMessage: phase === 'failed' ? errorMessage : '',
@@ -361,6 +362,16 @@
     plannedGeneration = featureMap(null);
   }
 
+  function getCachedDocumentState(documentId) {
+    const cached = readPageCache(DOCUMENT_CACHE_KEY(documentId));
+    if (!cached?.loaded || !cached?.documentData) return null;
+    const cachedAt = Number(cached.cachedAt || 0);
+    if (!Number.isFinite(cachedAt) || (Date.now() - cachedAt) > DOCUMENT_CACHE_TTL_MS) {
+      return null;
+    }
+    return cached;
+  }
+
   async function refreshLiveJobs(nextDocument) {
     const jobs = [];
     const keys = [];
@@ -441,7 +452,7 @@
   }
 
   async function generateFeature(featureKey, { regenerate = false, options = null } = {}) {
-    if (!currentDocumentId || extractionStatus !== 'complete') return false;
+    if (!currentDocumentId || normalizeDocumentStatus(documentData?.processingStatus) !== 'complete') return false;
 
     setFeatureError(featureKey, '');
     setFeaturePending(featureKey, true);
@@ -492,6 +503,18 @@
       return;
     }
     if (card.phase === 'not_requested' || card.phase === 'failed') {
+      if (normalizeDocumentStatus(documentData?.processingStatus) !== 'complete') {
+        await fetchDocumentState({ background: Boolean(documentData) });
+        if (normalizeDocumentStatus(documentData?.processingStatus) !== 'complete') {
+          setFeatureError(
+            card.key,
+            normalizeDocumentStatus(documentData?.processingStatus) === 'failed'
+              ? text(documentData?.processingError) || t('document.processingFailed')
+              : t('document.hub.states.waitingForExtraction'),
+          );
+          return;
+        }
+      }
       await generateFeature(card.key, { regenerate: card.shouldRegenerate });
     }
   }

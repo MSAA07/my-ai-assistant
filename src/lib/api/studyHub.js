@@ -3,6 +3,7 @@ import { API_BASE } from '../../config.js';
 async function requestJson(path, { method = 'GET', body } = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     method,
+    cache: 'no-store',
     credentials: 'include',
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined

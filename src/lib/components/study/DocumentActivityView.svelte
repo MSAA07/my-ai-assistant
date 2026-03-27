@@ -22,6 +22,7 @@
   } from '../../api/studyHub.js';
 
   const POLL_INTERVAL_MS = 2500;
+  const DOCUMENT_CACHE_TTL_MS = 5000;
   const DOCUMENT_CACHE_KEY = (id) => `page:document-view:${id}`;
   const FEATURES = ['summary', 'flashcards', 'exam'];
   const BASE_OPTIONS = {
@@ -170,7 +171,7 @@
   $: if (documentId && documentId !== currentDocumentId) {
     currentDocumentId = documentId;
     resetState();
-    const cached = readPageCache(DOCUMENT_CACHE_KEY(documentId));
+    const cached = getCachedDocumentState(documentId);
     if (cached?.loaded && cached?.docData) {
       docData = cached.docData;
       pendingGeneration = cached.pendingGeneration ?? mapByFeature(false);
@@ -314,8 +315,8 @@
       status,
       busy,
       hasContent,
-      canGenerate: currentExtractionStatus === 'complete' && !busy,
-      canRegenerate: currentExtractionStatus === 'complete' && hasContent && !busy,
+      canGenerate: !busy,
+      canRegenerate: hasContent && !busy,
       shouldRegenerate: hasContent || status === 'complete',
       errorMessage,
     };
@@ -495,6 +496,16 @@
     return hasActiveGeneration(document);
   }
 
+  function getCachedDocumentState(documentId) {
+    const cached = readPageCache(DOCUMENT_CACHE_KEY(documentId));
+    if (!cached?.loaded || !cached?.docData) return null;
+    const cachedAt = Number(cached.cachedAt || 0);
+    if (!Number.isFinite(cachedAt) || (Date.now() - cachedAt) > DOCUMENT_CACHE_TTL_MS) {
+      return null;
+    }
+    return cached;
+  }
+
   async function fetchDocumentState({ background = false } = {}) {
     if (!currentDocumentId) return;
 
@@ -560,9 +571,21 @@
   }
 
   async function queueGeneration(featureState, { regenerate = false, guidance = null } = {}) {
-    if (!featureState || !currentDocumentId || extractionStatus !== 'complete') return false;
+    if (!featureState || !currentDocumentId) return false;
     if (regenerate && !featureState.canRegenerate) return false;
     if (!regenerate && !featureState.canGenerate) return false;
+    if (normalizeDocumentStatus(docData?.processingStatus) !== 'complete') {
+      await fetchDocumentState({ background: Boolean(docData) });
+      if (normalizeDocumentStatus(docData?.processingStatus) !== 'complete') {
+        setFeatureError(
+          featureState.key,
+          normalizeDocumentStatus(docData?.processingStatus) === 'failed'
+            ? text(docData?.processingError) || t('document.processingFailed')
+            : t('document.hub.states.waitingForExtraction'),
+        );
+        return false;
+      }
+    }
 
     setFeatureError(featureState.key, '');
     setFeaturePending(featureState.key, true);
