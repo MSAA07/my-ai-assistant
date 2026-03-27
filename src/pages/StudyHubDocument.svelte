@@ -42,9 +42,11 @@
   let generationErrors = featureMap('');
   let generationJobs = featureMap(null);
   let plannedGeneration = featureMap(null);
+  let lastRouteKey = '';
 
   $: normalizedStudyTab = text(studyTab).toLowerCase();
   $: isActivityRoute = ACTIVITY_TABS.has(normalizedStudyTab);
+  $: routeKey = `${documentId}:${normalizedStudyTab || 'hub'}`;
   $: extractionStatus = normalizeDocumentStatus(documentData?.processingStatus);
   $: plannedFeatureKeys = FEATURE_KEYS.filter((featureKey) => Boolean(plannedGeneration[featureKey]));
   $: featureCards = FEATURE_KEYS.map((featureKey) => buildFeatureCard(featureKey));
@@ -78,6 +80,15 @@
       loading = false;
     }
     void fetchDocumentState({ background: Boolean(cached?.loaded && cached?.documentData) });
+  }
+
+  $: if (documentId && routeKey !== lastRouteKey) {
+    const previousRouteKey = lastRouteKey;
+    lastRouteKey = routeKey;
+    if (previousRouteKey && !isActivityRoute && documentId === currentDocumentId) {
+      error = '';
+      void fetchDocumentState({ background: Boolean(documentData) });
+    }
   }
 
   $: if (!isActivityRoute && currentDocumentId && documentData && plannedFeatureKeys.length > 0) {
@@ -338,6 +349,7 @@
 
   function resetState() {
     clearPollTimer();
+    lastRouteKey = '';
     documentData = null;
     loading = true;
     error = '';
