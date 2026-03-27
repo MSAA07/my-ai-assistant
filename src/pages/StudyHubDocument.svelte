@@ -175,8 +175,8 @@
 
   function getFeaturePhase(featureKey) {
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
-    if (generationStatus === 'failed') return 'failed';
     if (hasFeatureContent(featureKey) || generationStatus === 'complete') return 'ready';
+    if (generationStatus === 'failed') return 'failed';
     if (extractionStatus === 'failed') return 'failed';
     if (pendingGeneration[featureKey] || generationStatus === 'running') return 'generating';
     if (generationStatus === 'queued' || plannedGeneration[featureKey]) return 'queued';
