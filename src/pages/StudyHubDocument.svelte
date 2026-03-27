@@ -49,12 +49,33 @@
   $: isActivityRoute = ACTIVITY_TABS.has(normalizedStudyTab);
   $: routeKey = `${documentId}:${normalizedStudyTab || 'hub'}`;
   $: extractionStatus = normalizeDocumentStatus(documentData?.processingStatus);
-  $: plannedFeatureKeys = FEATURE_KEYS.filter((featureKey) => Boolean(plannedGeneration[featureKey]));
-  $: featureCards = FEATURE_KEYS.map((featureKey) => buildFeatureCard(featureKey));
-  $: hasRequestedGeneration = FEATURE_KEYS.some((featureKey) => normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status) !== 'not_requested') || plannedFeatureKeys.length > 0;
+  $: {
+    plannedGeneration;
+    plannedFeatureKeys = FEATURE_KEYS.filter((featureKey) => Boolean(plannedGeneration[featureKey]));
+  }
+  $: {
+    documentData;
+    extractionStatus;
+    pendingGeneration;
+    generationErrors;
+    generationJobs;
+    plannedGeneration;
+    featureCards = FEATURE_KEYS.map((featureKey) => buildFeatureCard(featureKey));
+  }
+  $: {
+    documentData;
+    plannedFeatureKeys;
+    hasRequestedGeneration = FEATURE_KEYS.some((featureKey) => normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status) !== 'not_requested') || plannedFeatureKeys.length > 0;
+  }
   $: hasActiveGeneration = featureCards.some((card) => card.phase === 'queued' || card.phase === 'generating');
   $: showProgressExperience = Boolean(documentData) && (extractionStatus === 'queued' || extractionStatus === 'processing' || hasActiveGeneration || plannedFeatureKeys.length > 0);
-  $: progressOverview = buildProgressOverview();
+  $: {
+    documentData;
+    extractionStatus;
+    extractionJob;
+    featureCards;
+    progressOverview = buildProgressOverview();
+  }
   $: documentTitle = getDocumentDisplayName(documentData, t('document.hub.untitled'));
   $: fileTypeBadge = getDocumentFileTypeLabel(documentData);
   $: languageMeta = getLanguageMeta(documentData);
