@@ -32,11 +32,11 @@
   };
   const FEATURE_KEYS = Object.keys(FEATURE_CONFIG);
   const VISUAL_PROGRESS_PHASES = {
-    queued: { seed: 2, cap: 9, velocity: 1.35, easing: 0.1, minStep: 0.08 },
-    preparing: { seed: 6, cap: 24, velocity: 1.2, easing: 0.09, minStep: 0.1 },
-    generating: { seed: 18, cap: 92, velocity: 1.45, easing: 0.07, minStep: 0.12 },
-    finalizing: { seed: 90, cap: 96, velocity: 0.85, easing: 0.14, minStep: 0.08 },
-    completed: { seed: 100, cap: 100, velocity: 0, easing: 0.3, minStep: 0.7 },
+    queued: { seed: 2, cap: 9, velocity: 1.35, easing: 0.1, minStep: 0.08, maxStep: 0.22 },
+    preparing: { seed: 6, cap: 24, velocity: 1.2, easing: 0.09, minStep: 0.1, maxStep: 0.28 },
+    generating: { seed: 18, cap: 92, velocity: 1.45, easing: 0.07, minStep: 0.12, maxStep: 0.42 },
+    finalizing: { seed: 90, cap: 96, velocity: 0.85, easing: 0.14, minStep: 0.08, maxStep: 0.24 },
+    completed: { seed: 100, cap: 100, velocity: 0, easing: 0.3, minStep: 0.7, maxStep: 1.4 },
   };
 
   let currentDocumentId = '';
@@ -202,9 +202,14 @@
     return Number.isFinite(parsed) ? Math.max(0, Math.min(parsed, 100)) : 0;
   }
 
-  function formatProgressText(value) {
-    const pct = Math.round(clampProgress(value));
-    return pct > 0 ? `${formatNumber(pct)}%` : '';
+  function formatProgressText(value, { precise = false } = {}) {
+    const pct = clampProgress(value);
+    if (pct <= 0) return '';
+    if (!precise || pct >= 100) {
+      return `${formatNumber(Math.round(pct))}%`;
+    }
+    const rounded = Math.round(pct * 10) / 10;
+    return `${rounded.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
   }
 
   function normalizeJob(job) {
@@ -418,7 +423,11 @@
     const visualProgressValue = completionVisible ? 100 : clampProgress(displayedProgress[featureKey]);
     const progressVisible = completionVisible || progress.visible;
     const progressIndeterminate = completionVisible ? false : progress.indeterminate;
-    const progressText = completionVisible ? formatProgressText(100) : progressIndeterminate ? '' : formatProgressText(visualProgressValue);
+    const progressText = completionVisible
+      ? formatProgressText(100)
+      : progressIndeterminate
+        ? ''
+        : formatProgressText(visualProgressValue, { precise: true });
     return {
       key: featureKey,
       title: t(FEATURE_CONFIG[featureKey].titleKey),
@@ -517,7 +526,10 @@
       const phaseConfig = VISUAL_PROGRESS_PHASES[progressState.visualPhase] ?? VISUAL_PROGRESS_PHASES.generating;
       const scaledFrame = frameDelta / 16.67;
       const distance = target - current;
-      const step = Math.max(distance * phaseConfig.easing * scaledFrame, phaseConfig.minStep * scaledFrame);
+      const step = Math.min(
+        Math.max(distance * phaseConfig.easing * scaledFrame, phaseConfig.minStep * scaledFrame),
+        phaseConfig.maxStep * scaledFrame,
+      );
       const nextValue = Math.min(current + step, target);
       nextProgress = updateFeatureMapValue(nextProgress, featureKey, clampProgress(nextValue));
       active = true;
