@@ -2,6 +2,7 @@ import { writable } from "svelte/store";
 import { API_BASE } from "../config.js";
 
 const AUTH_BASE = `${API_BASE}/api/auth`;
+const AUTH_REQUEST_TIMEOUT_MS = 12000;
 
 const jsonHeaders = {
   "Content-Type": "application/json",
@@ -36,18 +37,35 @@ const toResult = async (response) => {
 };
 
 const request = async (path, { method = "GET", body } = {}) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT_MS);
   const init = {
     method,
     credentials: "include",
-    headers: jsonHeaders
+    headers: jsonHeaders,
+    cache: "no-store",
+    signal: controller.signal
   };
 
   if (body && method !== "GET") {
     init.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${AUTH_BASE}${path}`, init);
-  return toResult(response);
+  try {
+    const response = await fetch(`${AUTH_BASE}${path}`, init);
+    return toResult(response);
+  } catch (error) {
+    const isTimeout = error?.name === "AbortError";
+    return {
+      data: null,
+      error: {
+        status: 0,
+        message: isTimeout ? "Authentication request timed out" : (error?.message || "Request failed")
+      }
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 export const session = writable(null);
