@@ -504,7 +504,7 @@
   }
 
   :global(.library-page .card-menu-button) {
-    opacity: 0;
+    opacity: 1;
     width: 1.75rem;
     height: 1.75rem;
     transition: opacity var(--motion-fast) var(--ease-standard);
@@ -514,12 +514,6 @@
     fill: none;
     stroke: currentColor;
     stroke-width: 2;
-  }
-
-  :global(.library-page .document-card:hover .card-menu-button),
-  :global(.library-page .document-card:focus-within .card-menu-button),
-  :global(.library-page .card-menu-button[aria-expanded='true']) {
-    opacity: 1;
   }
 
   :global(.library-page .library-menu) {
