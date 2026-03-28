@@ -18,6 +18,10 @@ For primitive usage:
 
 - see `src/lib/components/ui/PRIMITIVES.md`
 
+For current UI rollout status:
+
+- see `UI_POST_ROLLOUT.md`
+
 ## UI System Expectations
 
 - Use primitives in `src/lib/components/ui/*` before creating local one-off controls.
@@ -47,4 +51,4 @@ Update docs when any of these change:
 - rollout status/history: update `UI_POST_ROLLOUT.md` or archival docs
 - agent workflow rules: update `agent.md` / `AGENTS.md`
 
-Last Updated: March 23, 2026
+Last Updated: March 28, 2026

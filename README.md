@@ -19,6 +19,9 @@ Current frontend for the AI Study Assistant Study Hub.
 - `DocumentView.svelte` remains the legacy activity route surface
 - tokens live in `src/lib/styles/tokens.css`
 - shared primitives live in `src/lib/components/ui/*`
+- the backend AI prompt-engineering rollout is complete without requiring new frontend route or contract changes
+- free, pro, and premium behavior stays behind the same backend generation endpoints
+- prompt-version, routing, and benchmark metadata remain internal backend concerns and do not change the frontend API envelope
 
 ## Development
 
@@ -48,4 +51,4 @@ Host-derived backend mapping in `src/config.js`:
 - `src/lib/components/ui/PRIMITIVES.md`: primitive usage guidance
 - `src/lib/components/ui/DATA_SURFACE_PATTERN.md`: dense admin/data-surface guidance
 
-Last Updated: March 23, 2026
+Last Updated: March 28, 2026

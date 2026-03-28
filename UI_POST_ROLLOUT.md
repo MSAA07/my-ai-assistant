@@ -20,6 +20,8 @@ Route ownership and lifecycle behavior are documented in `SYSTEM_OVERVIEW.md`.
 - Major authenticated screens use the shared shell and shared page header pattern.
 - Dense admin views use `DataSurface`.
 - Tokens and primitives, not page-local one-off styles, are the default design contract.
+- The completed backend prompt-engineering rollout did not require new frontend screens, route changes, or contract-specific UI branches.
+- Study Hub still relies on the existing document, generation, and job lifecycle surfaces: `Document.processingStatus`, `document.generationState`, and `/api/jobs/:id`.
 
 ## Remaining Verified Deferred Items
 
@@ -27,4 +29,4 @@ Route ownership and lifecycle behavior are documented in `SYSTEM_OVERVIEW.md`.
 - Visual regression screenshot automation is not present in the repo.
 - The legacy non-default shell path still exists through `AppHeader.svelte` when `VITE_FEATURE_APPSHELL=false`.
 
-Last Updated: March 23, 2026
+Last Updated: March 28, 2026

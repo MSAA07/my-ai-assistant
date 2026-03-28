@@ -101,6 +101,8 @@ Study Hub Document:
 - when extraction or generation is active, it polls the same document endpoint
 - it queues generation via `POST /api/document/:id/generations`
 - it uses `generationState` plus compatibility mirror content to determine feature readiness
+- the completed backend prompt-engineering rollout did not change the frontend route model or generation request shape
+- prompt-version metadata, routing metadata, and benchmark linkage stay internal to backend job and usage metadata and are not required for page rendering
 
 Study activities:
 
@@ -171,5 +173,6 @@ Update this file when any of these change:
 - page ownership between `StudyHubIndex`, `StudyHubDocument`, `DocumentView`, and `DocumentActivityView`
 - shared UI primitive or token ownership
 - host-derived API base mapping
+- frontend-visible generation contracts or lifecycle semantics
 
-Last Updated: March 27, 2026
+Last Updated: March 28, 2026

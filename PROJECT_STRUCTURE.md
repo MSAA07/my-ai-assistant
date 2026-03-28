@@ -108,6 +108,7 @@ Data and integration:
 - `stores/theme.js`: theme persistence and DOM sync
 - `stores/pageCache.js`: page-level caching helpers
 - `lib/api/studyHub.js`: wrappers for canonical and legacy study APIs plus guided upload polling helpers for `/api/document/:id` and `/api/jobs/:id`
+- backend prompt/routing rollout metadata does not require new frontend API wrappers or route branching
 
 ## Notes on Legacy Files
 
@@ -123,4 +124,4 @@ Data and integration:
 - `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`: archival phase-1 audit/spec
 - `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`: archival rollout checklist
 
-Last Updated: March 27, 2026
+Last Updated: March 28, 2026
