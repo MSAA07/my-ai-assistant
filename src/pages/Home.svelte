@@ -773,7 +773,7 @@
   }
 </script>
 
-<PageLayout class={`home-page ${showGuidedSelection ? "home-page--selection-mode" : ""}`.trim()} width="wide" gap="spacious">
+<PageLayout class={`home-page ${showGuidedSelection ? "home-page--selection-mode" : ""}`.trim()} width="wide" gap="compact">
   {#if showDashboardChrome}
     <PageHeader
       className="home-header"
@@ -794,7 +794,7 @@
     <section class="stats-grid" aria-label={t("nav.home")}>
       {#each homeStats as stat (stat.key)}
         {@const Icon = stat.icon}
-        <Card as="article" class="home-stat-card" variant="base" padding="md" border="subtle">
+        <Card as="article" class="home-stat-card" variant="base" padding="sm" border="subtle">
           <div class="home-stat-card__content">
             <div class="home-stat-card__copy">
               <p class={`home-stat-card__value ${stat.key === "remaining" && normalizedRole === "admin" ? "home-stat-card__value--compact" : ""}`.trim()}>
@@ -831,9 +831,19 @@
         files={selectedFiles}
         accept={VALID_EXTENSIONS.join(",")}
         multiple={false}
-        title={t("home.uploadSection.modalTitle")}
-        description={t("home.uploadSection.modalDescriptionSingle")}
+        variant="hero"
+        eyebrow={t("home.uploadSection.heroEyebrow")}
+        title={t("home.uploadSection.heroTitle")}
+        description={t("home.uploadSection.heroDescription")}
+        supportTitle={t("home.uploadSection.heroSupport")}
+        benefitLabel={t("home.uploadSection.heroBenefitsLabel")}
+        benefitItems={[
+          t("home.uploadSection.heroBenefits.summary"),
+          t("home.uploadSection.heroBenefits.flashcards"),
+          t("home.uploadSection.heroBenefits.exams"),
+        ]}
         dropzoneTitle={t("home.uploadSection.dropzoneTitle")}
+        dropzoneDescription={t("home.uploadSection.dropzoneDescription")}
         dropzoneOr={t("home.uploadSection.dropzoneOr")}
         browseLabel={t("home.uploadSection.browse")}
         supportLabel={t("home.uploadSection.supportedFilesSingle")}
@@ -1017,6 +1027,10 @@
     min-width: 0;
   }
 
+  :global(.home-page .home-header) {
+    padding-top: 0;
+  }
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1036,33 +1050,33 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--ui-space-3);
   }
 
   .home-stat-card__copy {
     display: grid;
-    gap: 0.25rem;
+    gap: var(--ui-space-1);
     min-width: 0;
   }
 
   :global(.home-stat-card__value) {
     margin: 0;
     color: var(--ui-text-primary);
-    font-size: clamp(1.7rem, 1.45rem + 0.7vw, 2rem);
+    font-size: clamp(1.45rem, 1.28rem + 0.45vw, 1.75rem);
     font-weight: 600;
-    line-height: 1.05;
+    line-height: 1;
     letter-spacing: -0.04em;
   }
 
   :global(.home-stat-card__value--compact) {
-    font-size: clamp(1.55rem, 1.35rem + 0.55vw, 1.8rem);
+    font-size: clamp(1.35rem, 1.2rem + 0.35vw, 1.55rem);
   }
 
   .home-stat-card__subtitle {
     margin: 0;
     color: var(--ui-text-secondary);
-    font-size: 0.875rem;
-    line-height: 1.45;
+    font-size: var(--font-size-sm);
+    line-height: 1.35;
   }
 
   .home-stat-card__icon {
@@ -1126,6 +1140,31 @@
     display: grid;
     gap: var(--study-flow-card-gap);
     min-width: 0;
+  }
+
+  .upload-stack {
+    width: min(100%, 760px);
+    margin-inline: auto;
+  }
+
+  :global(.home-page .upload-panel-shell .empty-state--hero) {
+    --card-gap: var(--ui-space-3);
+  }
+
+  :global(.home-page .upload-panel-shell .empty-state__inner) {
+    gap: var(--ui-space-2);
+  }
+
+  :global(.home-page .upload-panel-shell .empty-state__copy) {
+    gap: var(--ui-space-1);
+  }
+
+  :global(.home-page .upload-panel-shell .empty-state__support) {
+    gap: var(--ui-space-2);
+  }
+
+  :global(.home-page .upload-panel-shell .empty-state__support .upload-panel__hero-support-copy) {
+    max-width: 38ch;
   }
 
   .guided-panel {

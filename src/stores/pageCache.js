@@ -14,3 +14,7 @@ export function writePageCache(key, value) {
 export function clearPageCache(key) {
   cache.delete(key);
 }
+
+export function clearAllPageCache() {
+  cache.clear();
+}

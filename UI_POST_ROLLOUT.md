@@ -20,6 +20,12 @@ Route ownership and lifecycle behavior are documented in `SYSTEM_OVERVIEW.md`.
 - Major authenticated screens use the shared shell and shared page header pattern.
 - Dense admin views use `DataSurface`.
 - Tokens and primitives, not page-local one-off styles, are the default design contract.
+- Auth is route-driven through `#/sign-in` and `#/sign-up`; `#/` remains landing-only.
+- Auth validation is field-local and blocks invalid submit for required fields, email format, password minimum length, and sign-up password confirmation.
+- Auth requests expose explicit loading and disabled states to prevent duplicate submission.
+- Session bootstrap gates protected rendering, so protected content does not flash before restore resolves.
+- Logout clears frontend auth state and session-dependent page cache before redirecting to `#/sign-in`.
+- Redirect handling only accepts safe internal app paths and rejects auth-page loops and external targets.
 - The completed backend prompt-engineering rollout did not require new frontend screens, route changes, or contract-specific UI branches.
 - Study Hub still relies on the existing document, generation, and job lifecycle surfaces: `Document.processingStatus`, `document.generationState`, and `/api/jobs/:id`.
 
@@ -29,4 +35,4 @@ Route ownership and lifecycle behavior are documented in `SYSTEM_OVERVIEW.md`.
 - Visual regression screenshot automation is not present in the repo.
 - The legacy non-default shell path still exists through `AppHeader.svelte` when `VITE_FEATURE_APPSHELL=false`.
 
-Last Updated: March 28, 2026
+Last Updated: March 29, 2026

@@ -92,7 +92,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: var(--ui-space-5);
+    gap: var(--ui-space-4);
     flex-wrap: wrap;
   }
 
@@ -105,31 +105,31 @@
 
   .ui-page-header__heading {
     display: grid;
-    gap: var(--ui-space-2);
+    gap: var(--ui-space-1);
     min-width: 0;
   }
 
   .ui-page-header__heading h1 {
     margin: 0;
     color: var(--ui-text-primary);
-    font-size: var(--ui-type-title-md);
-    line-height: 1.05;
+    font-size: var(--study-flow-title-size);
+    line-height: 1.08;
     letter-spacing: -0.04em;
     text-wrap: balance;
   }
 
   .ui-page-header__heading p {
     margin: 0;
-    max-width: 56ch;
+    max-width: 54ch;
     color: var(--ui-text-secondary);
-    font-size: var(--ui-type-body-md);
-    line-height: 1.6;
+    font-size: var(--study-flow-subtitle-size);
+    line-height: 1.55;
   }
 
   .ui-page-header__actions {
     display: inline-flex;
     align-items: center;
-    gap: var(--ui-space-3);
+    gap: var(--ui-space-2);
     flex-wrap: wrap;
   }
 

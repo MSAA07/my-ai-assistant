@@ -26,7 +26,6 @@
     loggingOut = true;
     try {
       await signOut();
-      window.location.hash = '/';
     } finally {
       loggingOut = false;
     }
@@ -40,7 +39,7 @@
 {#if !$session}
   <SettingsPanelSkeleton />
 {:else}
-  <PageLayout class="settings-page" width="wide" gap="spacious">
+  <PageLayout class="settings-page" width="wide" gap="compact">
     <PageHeader
       className="settings-header"
       eyebrow={t('settings.eyebrow')}
@@ -144,13 +143,13 @@
 
   .hero-meta {
     display: grid;
-    gap: var(--ui-space-3);
+    gap: var(--ui-space-2);
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 
   .settings-grid {
     display: grid;
-    gap: var(--ui-space-4);
+    gap: var(--ui-space-3);
     grid-template-columns: minmax(0, 1fr);
     min-width: 0;
   }
@@ -188,12 +187,12 @@
 
   .settings-block {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--ui-space-2);
   }
 
   .theme-row {
     display: grid;
-    gap: 1rem;
+    gap: var(--ui-space-3);
     max-width: 34rem;
   }
 
@@ -207,8 +206,8 @@
 
   .theme-summary {
     display: grid;
-    gap: 0.45rem;
-    padding: 1rem;
+    gap: var(--ui-space-1);
+    padding: var(--ui-space-3);
     border: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
     border-radius: 0.9rem;
     background: color-mix(in srgb, var(--muted) 72%, transparent);
@@ -223,12 +222,12 @@
   .account-card {
     border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     border-radius: 1rem;
-    padding: 1.25rem;
+    padding: var(--ui-space-4);
     background: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--ui-space-3);
     box-shadow: var(--shadow-inline-control);
   }
 
@@ -260,7 +259,7 @@
 
   .account-side {
     display: grid;
-    gap: 0.9rem;
+    gap: var(--ui-space-3);
     min-width: min(100%, 280px);
   }
 
@@ -278,7 +277,7 @@
 
   :global(.signout-button.ui-button) {
     width: 100%;
-    min-height: 2.75rem;
+    min-height: var(--ui-control-height-sm);
     box-shadow: none;
   }
 

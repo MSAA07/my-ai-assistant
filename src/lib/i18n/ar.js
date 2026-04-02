@@ -131,9 +131,20 @@ const ar = {
       modalTitle: 'رفع الملفات',
       modalDescription: 'أضف مستندك هنا',
       modalDescriptionSingle: 'ارفع مستندًا واحدًا ثم اختر ما تريد إنشاءه بعد ذلك.',
-      dropzoneTitle: 'اسحب ملفك لبدء الرفع',
+      heroEyebrow: 'أول رفع',
+      heroTitle: 'ابدأ مكتبتك الدراسية بمستند واحد',
+      heroDescription: 'ارفع ملف PDF أو DOCX أو PPTX لبدء تجربة دراسة أكثر ترتيبًا، مع الملخصات والبطاقات التعليمية وأسئلة الاختبار من نفس المساحة.',
+      heroSupport: 'سيكون رفعك الأول نقطة البداية لكل ما ستراجعه بعد ذلك.',
+      heroBenefitsLabel: 'ما يمكنك إنشاؤه',
+      heroBenefits: {
+        summary: 'ملخص',
+        flashcards: 'بطاقات تعليمية',
+        exams: 'أسئلة الاختبار'
+      },
+      dropzoneTitle: 'أفلت مستندك هنا أو استعرض الملفات للبدء',
+      dropzoneDescription: 'ما زال السحب والإفلات مدعومًا، لكن أسرع طريق هو اختيار ملف واحد ثم المتابعة.',
       dropzoneOr: 'أو',
-      browse: 'استعراض الملفات',
+      browse: 'استعرض الملفات',
       supportedFiles: 'يدعم PDF وDOCX وPPTX',
       supportedFilesSingle: 'يدعم PDF وDOCX وPPTX. مستند واحد في كل مرة.',
       openModalCta: 'رفع الملفات',
@@ -497,6 +508,15 @@ const ar = {
     description: 'تصفح المواد المرفوعة وافتح أي مستند لمتابعة الدراسة.',
     emptyTitle: 'لا توجد مستندات بعد',
     emptyDescription: 'ارفع أول مستند من الصفحة الرئيسية لبدء مكتبتك.',
+    libraryEmptyEyebrow: 'أول رفع',
+    libraryEmptyTitle: 'تبدأ مكتبة Study Hub هنا',
+    libraryEmptyDescription: 'ارفع مستندًا واحدًا واحتفظ بكل ما تدرسه في مكان واحد، جاهزًا للملخصات والبطاقات التعليمية وأسئلة الاختبار.',
+    libraryEmptySupport: 'بعد الرفع، افتح المستند هنا لإنشاء المواد الدراسية عند الحاجة.',
+    libraryEmptyBenefitsLabel: 'أدوات الدراسة المتاحة',
+    libraryEmptySummary: 'ملخص',
+    libraryEmptyFlashcards: 'بطاقات تعليمية',
+    libraryEmptyExams: 'أسئلة الاختبار',
+    libraryEmptyUploadCta: 'ارفع مستندك الأول',
     labels: {
       uploaded: 'تاريخ الرفع',
       language: 'اللغة'
@@ -613,7 +633,39 @@ const ar = {
     fields: {
       name: 'الاسم الكامل',
       email: 'البريد الإلكتروني',
-      password: 'كلمة المرور'
+      password: 'كلمة المرور',
+      confirmPassword: 'تأكيد كلمة المرور'
+    },
+    actions: {
+      showPassword: 'إظهار',
+      hidePassword: 'إخفاء'
+    },
+    notices: {
+      signedOut: 'تم تسجيل خروجك.',
+      sessionExpired: 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.'
+    },
+    validation: {
+      nameRequired: 'أدخل اسمك الكامل.',
+      emailRequired: 'أدخل بريدك الإلكتروني.',
+      emailInvalid: 'أدخل بريدًا إلكترونيًا صالحًا.',
+      passwordRequired: 'أدخل كلمة المرور.',
+      passwordMin: 'استخدم {count} أحرف على الأقل.',
+      passwordHint: 'استخدم 8 أحرف على الأقل.',
+      confirmPasswordRequired: 'أكّد كلمة المرور.',
+      confirmPasswordMismatch: 'كلمتا المرور غير متطابقتين.'
+    },
+    errors: {
+      invalidCredentials: 'تحقق من البريد الإلكتروني وكلمة المرور ثم حاول مرة أخرى.',
+      duplicateEmail: 'يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل.',
+      weakPassword: 'اختر كلمة مرور أقوى مكونة من 8 أحرف على الأقل.',
+      networkTimeout: 'استغرق الطلب وقتًا طويلًا. حاول مرة أخرى.',
+      networkFailure: 'حدث خطأ في الشبكة. تحقق من الاتصال ثم حاول مرة أخرى.',
+      serverFailure: 'حدث خطأ في الخادم. حاول مرة أخرى بعد قليل.',
+      sessionExpired: 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.',
+      sessionRestoreFailed: 'اكتمل تسجيل الدخول، لكن تعذر استعادة الجلسة. حاول مرة أخرى.',
+      blockedAccess: 'لا يمكن لهذا الحساب الوصول إلى التطبيق حاليًا.',
+      malformedResponse: 'تعذر إكمال المصادقة. حاول مرة أخرى.',
+      genericFailure: 'تعذر إكمال الطلب. حاول مرة أخرى.'
     },
     signIn: {
       eyebrow: 'تسجيل الدخول',

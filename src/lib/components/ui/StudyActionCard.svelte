@@ -23,7 +23,7 @@
   {...$$restProps}
   as="article"
   variant="standard"
-  padding="md"
+  padding="sm"
   border="default"
   className={['ui-study-action-card', className, $$props.class ?? ''].filter(Boolean).join(' ')}
   on:click
@@ -91,12 +91,12 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: var(--ui-space-3);
   }
 
   .ui-study-action-card__hero {
     display: grid;
-    gap: var(--study-flow-card-gap);
+    gap: var(--ui-space-3);
   }
 
   .ui-study-action-card__icon {
@@ -117,12 +117,12 @@
 
   .ui-study-action-card__copy {
     display: grid;
-    gap: var(--ui-space-1);
+    gap: 0;
   }
 
   .ui-study-action-card__copy h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--ui-text-primary);
     line-height: 1.3;
     letter-spacing: -0.02em;
@@ -171,7 +171,7 @@
   .ui-study-action-card__description {
     color: var(--ui-text-muted);
     font-size: 0.875rem;
-    line-height: 1.65;
+    line-height: 1.55;
   }
 
   .ui-study-action-card__body {
@@ -186,7 +186,7 @@
 
   .ui-study-action-card__actions :global(.ui-button) {
     width: 100%;
-    min-height: var(--ui-control-height-md);
+    min-height: var(--ui-control-height-sm);
     font-size: 0.875rem;
     border-radius: var(--ui-radius-sm);
     box-shadow: none;

@@ -10,8 +10,24 @@ function createRouter() {
     return { path, params: Object.fromEntries(params) };
   }
 
-  function navigate(path) {
+  function updateHash(path, { replace = false } = {}) {
+    const nextHash = `#${path}`;
+    if (replace) {
+      const { pathname, search } = window.location;
+      window.history.replaceState(null, '', `${pathname}${search}${nextHash}`);
+      set(parseHash());
+      return;
+    }
+
     window.location.hash = path;
+  }
+
+  function navigate(path, options) {
+    updateHash(path, options);
+  }
+
+  function replace(path) {
+    updateHash(path, { replace: true });
   }
 
   window.addEventListener('hashchange', () => {
@@ -21,6 +37,7 @@ function createRouter() {
   return {
     subscribe,
     navigate,
+    replace,
   };
 }
 

@@ -6,6 +6,11 @@ import StudyHubIndex from './pages/StudyHubIndex.svelte';
 import StudyHubDocument from './pages/StudyHubDocument.svelte';
 
 export const DEFAULT_AUTH_PATH = '/home';
+export const LANDING_PATH = '/';
+export const SIGN_IN_PATH = '/sign-in';
+export const SIGN_UP_PATH = '/sign-up';
+export const PUBLIC_ROUTE_PATHS = new Set([LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH]);
+export const AUTH_ROUTE_PATHS = new Set([SIGN_IN_PATH, SIGN_UP_PATH]);
 
 const LEGACY_REDIRECTS = new Map([
   ['/app', DEFAULT_AUTH_PATH],
@@ -187,6 +192,34 @@ export function resolveRoute(path) {
     if (match) {
       return { route: dynamicRoute, params: match.params ?? {} };
     }
+  }
+
+  return null;
+}
+
+export function isPublicRoutePath(path) {
+  return PUBLIC_ROUTE_PATHS.has(normalizeAppPath(path));
+}
+
+export function isAuthRoutePath(path) {
+  return AUTH_ROUTE_PATHS.has(normalizeAppPath(path));
+}
+
+export function sanitizeRedirectPath(path) {
+  if (typeof path !== 'string') return null;
+
+  const trimmed = path.trim();
+  if (!trimmed || !trimmed.startsWith('/')) return null;
+  if (trimmed.startsWith('//')) return null;
+  if (/^[a-z]+:/i.test(trimmed)) return null;
+  if (/[\u0000-\u001f\u007f]/.test(trimmed)) return null;
+
+  const [candidatePath] = trimmed.split('?');
+  const normalized = normalizeAppPath(candidatePath);
+  if (isAuthRoutePath(normalized)) return null;
+
+  if (normalized === LANDING_PATH || resolveRoute(normalized)) {
+    return normalized;
   }
 
   return null;

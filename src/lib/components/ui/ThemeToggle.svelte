@@ -63,7 +63,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--ui-space-1);
-    padding: 0.22rem;
+    padding: 0.18rem;
     border: 1px solid var(--ui-border-default);
     border-radius: var(--ui-radius-md);
     background: color-mix(in srgb, var(--ui-surface-secondary) 70%, transparent);
@@ -71,8 +71,8 @@
   }
 
   .option {
-    min-height: var(--ui-control-height-md);
-    min-width: 88px;
+    min-height: var(--ui-control-height-sm);
+    min-width: 80px;
     border: 1px solid transparent;
     border-radius: var(--ui-radius-sm);
     background: transparent;

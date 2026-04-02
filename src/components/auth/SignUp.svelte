@@ -1,24 +1,77 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import { t } from '../../lib/i18n/t.js';
-  import { signUp } from '../../stores/auth';
+  import { signUp } from '../../stores/auth.js';
+  import { router } from '../../stores/router.js';
+  import {
+    validateEmail,
+    validatePassword,
+    validateName,
+    validateConfirmPassword,
+  } from './validation.js';
 
-  const dispatch = createEventDispatcher();
+  export let notice = '';
+  export let redirectTarget = '/home';
 
   let name = '';
   let email = '';
   let password = '';
+  let confirmPassword = '';
   let error = '';
   let loading = false;
+  let showPassword = false;
+  let showConfirmPassword = false;
+  let touched = {
+    name: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  };
+
+  $: fieldErrors = {
+    name: touched.name ? validateName(name, t) : '',
+    email: touched.email ? validateEmail(email, t) : '',
+    password: touched.password ? validatePassword(password, t) : '',
+    confirmPassword: touched.confirmPassword ? validateConfirmPassword(password, confirmPassword, t) : '',
+  };
+
+  $: hasFieldErrors = Boolean(
+    fieldErrors.name
+      || fieldErrors.email
+      || fieldErrors.password
+      || fieldErrors.confirmPassword
+  );
+
+  function markAllTouched() {
+    touched = {
+      name: true,
+      email: true,
+      password: true,
+      confirmPassword: true,
+    };
+  }
 
   async function handleSubmit() {
-    loading = true;
+    if (loading) return;
+
+    markAllTouched();
     error = '';
 
-    const res = await signUp(email, password, name);
+    const nextErrors = {
+      name: validateName(name, t),
+      email: validateEmail(email, t),
+      password: validatePassword(password, t),
+      confirmPassword: validateConfirmPassword(password, confirmPassword, t),
+    };
+
+    if (Object.values(nextErrors).some(Boolean)) {
+      return;
+    }
+
+    loading = true;
+    const res = await signUp(email.trim(), password, name.trim());
     loading = false;
 
     if (res.error) {
@@ -26,7 +79,16 @@
       return;
     }
 
-    dispatch('success');
+  }
+
+  function goToSignIn() {
+    const params = new URLSearchParams();
+    if (redirectTarget && redirectTarget !== '/home') {
+      params.set('redirect', redirectTarget);
+    }
+
+    const query = params.toString();
+    router.navigate(`/sign-in${query ? `?${query}` : ''}`);
   }
 </script>
 
@@ -37,31 +99,113 @@
     <p>{t('auth.signUp.subtitle')}</p>
   </header>
 
-  <form class="auth-form" on:submit|preventDefault={handleSubmit}>
-    <FieldShell label={t('auth.fields.name')} forId="name">
-      <input id="name" type="text" bind:value={name} required placeholder={t('auth.signUp.placeholders.name')} />
+  {#if notice}
+    <p class="auth-notice">{notice}</p>
+  {/if}
+
+  <form class="auth-form" on:submit|preventDefault={handleSubmit} novalidate>
+    <FieldShell
+      label={t('auth.fields.name')}
+      forId="name"
+      required
+      error={fieldErrors.name}
+    >
+      <input
+        id="name"
+        type="text"
+        bind:value={name}
+        autocomplete="name"
+        placeholder={t('auth.signUp.placeholders.name')}
+        aria-invalid={fieldErrors.name ? 'true' : 'false'}
+        on:blur={() => (touched = { ...touched, name: true })}
+      />
     </FieldShell>
 
-    <FieldShell label={t('auth.fields.email')} forId="email">
-      <input id="email" type="email" bind:value={email} required placeholder={t('auth.signUp.placeholders.email')} />
+    <FieldShell
+      label={t('auth.fields.email')}
+      forId="email"
+      required
+      error={fieldErrors.email}
+    >
+      <input
+        id="email"
+        type="email"
+        bind:value={email}
+        inputmode="email"
+        autocomplete="email"
+        placeholder={t('auth.signUp.placeholders.email')}
+        aria-invalid={fieldErrors.email ? 'true' : 'false'}
+        on:blur={() => (touched = { ...touched, email: true })}
+      />
     </FieldShell>
 
-    <FieldShell label={t('auth.fields.password')} forId="password">
-      <input id="password" type="password" bind:value={password} required placeholder={t('auth.signUp.placeholders.password')} minlength="8" />
+    <FieldShell
+      label={t('auth.fields.password')}
+      forId="password"
+      required
+      error={fieldErrors.password}
+      hint={t('auth.validation.passwordHint')}
+    >
+      <div class="password-field">
+        <input
+          id="password"
+          type={showPassword ? 'text' : 'password'}
+          bind:value={password}
+          autocomplete="new-password"
+          placeholder={t('auth.signUp.placeholders.password')}
+          aria-invalid={fieldErrors.password ? 'true' : 'false'}
+          on:blur={() => (touched = { ...touched, password: true })}
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          aria-label={showPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+          on:click={() => (showPassword = !showPassword)}
+        >
+          {showPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+        </button>
+      </div>
+    </FieldShell>
+
+    <FieldShell
+      label={t('auth.fields.confirmPassword')}
+      forId="confirm-password"
+      required
+      error={fieldErrors.confirmPassword}
+    >
+      <div class="password-field">
+        <input
+          id="confirm-password"
+          type={showConfirmPassword ? 'text' : 'password'}
+          bind:value={confirmPassword}
+          autocomplete="new-password"
+          placeholder={t('auth.signUp.placeholders.confirmPassword')}
+          aria-invalid={fieldErrors.confirmPassword ? 'true' : 'false'}
+          on:blur={() => (touched = { ...touched, confirmPassword: true })}
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          aria-label={showConfirmPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+          on:click={() => (showConfirmPassword = !showConfirmPassword)}
+        >
+          {showConfirmPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+        </button>
+      </div>
     </FieldShell>
 
     {#if error}
-      <p class="auth-error">{error}</p>
+      <p class="auth-error" role="alert">{error}</p>
     {/if}
 
-    <Button type="submit" variant="primary" loading={loading} block>
+    <Button type="submit" variant="primary" loading={loading} disabled={loading || hasFieldErrors} block>
       {loading ? t('auth.signUp.actions.loading') : t('auth.signUp.actions.submit')}
     </Button>
   </form>
 
   <p class="toggle-text">
     {t('auth.signUp.switch.prompt')}
-    <Button type="button" variant="ghost" size="sm" className="link-btn" on:click={() => dispatch('toggle')}>
+    <Button type="button" variant="ghost" size="sm" className="link-btn" on:click={goToSignIn}>
       {t('auth.signUp.switch.action')}
     </Button>
   </p>
@@ -105,14 +249,42 @@
     gap: var(--space-3);
   }
 
+  .auth-notice,
   .auth-error {
     margin: 0;
     border: 1px solid var(--color-danger-border);
     border-radius: var(--ui-radius-md);
-    background: var(--color-danger-surface);
-    color: var(--color-danger-soft);
     padding: 0.65rem 0.8rem;
     font-size: var(--font-size-sm);
+  }
+
+  .auth-notice {
+    border-color: color-mix(in srgb, var(--ui-border-accent) 55%, var(--ui-border-subtle) 45%);
+    background: color-mix(in srgb, var(--ui-surface-card) 84%, var(--ui-surface-secondary) 16%);
+    color: var(--color-text-secondary);
+  }
+
+  .auth-error {
+    background: var(--color-danger-surface);
+    color: var(--color-danger-soft);
+  }
+
+  .password-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .password-toggle {
+    flex: 0 0 auto;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    padding-inline-end: 0.7rem;
   }
 
   .toggle-text {

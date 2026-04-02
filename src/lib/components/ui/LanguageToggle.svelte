@@ -26,7 +26,7 @@
     <Button
       type="button"
       variant={currentLanguage === lang.code ? 'primary' : 'outline'}
-      size="md"
+      size="sm"
       className={`language-toggle__button ${currentLanguage === lang.code ? 'language-toggle__button--active' : ''}`}
       on:click={() => select(lang.code)}
       aria-pressed={currentLanguage === lang.code}
@@ -40,7 +40,7 @@
 <style>
   .language-toggle {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--ui-space-2);
     flex-wrap: wrap;
     min-width: 200px;
   }
@@ -48,7 +48,7 @@
   :global(.language-toggle__button.ui-button) {
     min-width: 0;
     box-shadow: none;
-    padding-inline: 1rem;
+    padding-inline: var(--ui-space-3);
   }
 
   :global(.language-toggle__button--active.ui-button) {

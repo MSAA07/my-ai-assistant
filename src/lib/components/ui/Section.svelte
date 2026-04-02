@@ -51,12 +51,12 @@
     background: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
     box-shadow: var(--ui-shadow-1);
     display: grid;
-    gap: var(--ui-space-4);
+    gap: var(--ui-space-3);
     min-width: 0;
   }
 
   .ui-section--padded {
-    padding: var(--ui-space-5);
+    padding: var(--ui-space-4);
   }
 
   .ui-section__header {
@@ -64,8 +64,8 @@
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--ui-space-4);
-    padding-bottom: var(--ui-space-4);
+    gap: var(--ui-space-3);
+    padding-bottom: var(--ui-space-3);
     border-bottom: 1px solid var(--ui-divider);
   }
 

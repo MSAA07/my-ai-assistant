@@ -1,6 +1,8 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import Badge from './Badge.svelte';
   import Button from './Button.svelte';
+  import EmptyState from './EmptyState.svelte';
   import UploadDropzone from './UploadDropzone.svelte';
   import UploadFileRow from './UploadFileRow.svelte';
 
@@ -15,10 +17,16 @@
 
   export let title = '';
   export let description = '';
+  export let eyebrow = '';
+  export let variant = 'default';
   export let dropzoneTitle = '';
+  export let dropzoneDescription = '';
   export let dropzoneOr = 'OR';
   export let browseLabel = '';
   export let supportLabel = '';
+  export let supportTitle = '';
+  export let benefitLabel = '';
+  export let benefitItems = [];
   export let showCounter = true;
   export let cancelLabel = '';
   export let submitLabel = '';
@@ -28,6 +36,7 @@
 
   $: canSubmit = Array.isArray(files) && files.length > 0 && !busy;
   $: showFooter = busy || files.length > 0 || showCounter;
+  $: isHero = variant === 'hero';
 
   function handleSubmit() {
     dispatch('submit');
@@ -47,75 +56,165 @@
   }
 </script>
 
-<section
-  class={['upload-panel', className, $$props.class ?? ''].filter(Boolean).join(' ')}
-  aria-label={title}
->
-  <div class="upload-panel__header">
-    <div class="upload-panel__titles">
-      <h2>{title}</h2>
-      <p>{description}</p>
-    </div>
-  </div>
+<section class={['upload-panel-shell', className, $$props.class ?? ''].filter(Boolean).join(' ')} aria-label={title}>
+  {#if isHero}
+    <EmptyState variant="hero" {eyebrow} {title} {description}>
+      <div slot="support" class="upload-panel__hero-support">
+        {#if supportTitle}
+          <p class="upload-panel__hero-support-copy">{supportTitle}</p>
+        {/if}
+        {#if benefitItems.length > 0}
+          <div class="upload-panel__hero-chips" aria-label={benefitLabel}>
+            {#each benefitItems as item (item)}
+              <Badge tone="neutral" variant="outline" size="sm">{item}</Badge>
+            {/each}
+          </div>
+        {/if}
 
-  <UploadDropzone
-    id="upload-panel-input"
-    {accept}
-    {multiple}
-    disabled={busy}
-    isBusy={busy}
-    title={dropzoneTitle}
-    orLabel={dropzoneOr}
-    {browseLabel}
-    on:filesSelected={handleFilesSelected}
-  />
-
-  <p class="upload-panel__support">{supportLabel}</p>
-
-  {#if errorMessage}
-    <p class="upload-panel__error" role="alert">{errorMessage}</p>
-  {/if}
-
-  {#if files.length > 0}
-    <div class="upload-panel__files" role="list" aria-label="Selected files">
-      {#each files as file, index (file.name + file.size + index)}
-        <div role="listitem">
-          <UploadFileRow
-            {file}
+        <div class="upload-panel upload-panel--hero">
+          <UploadDropzone
+            id="upload-panel-input"
+            {accept}
+            {multiple}
             disabled={busy}
-            removeLabel={removeFileLabel}
-            on:remove={() => removeFile(index)}
+            isBusy={busy}
+            title={dropzoneTitle}
+            description={dropzoneDescription}
+            orLabel={dropzoneOr}
+            {browseLabel}
+            variant="hero"
+            on:filesSelected={handleFilesSelected}
           />
+
+          <p class="upload-panel__support">{supportLabel}</p>
+
+          {#if errorMessage}
+            <p class="upload-panel__error" role="alert">{errorMessage}</p>
+          {/if}
+
+          {#if files.length > 0}
+            <div class="upload-panel__files" role="list" aria-label="Selected files">
+              {#each files as file, index (file.name + file.size + index)}
+                <div role="listitem">
+                  <UploadFileRow
+                    {file}
+                    disabled={busy}
+                    removeLabel={removeFileLabel}
+                    on:remove={() => removeFile(index)}
+                  />
+                </div>
+              {/each}
+            </div>
+          {/if}
+
+          {#if showFooter}
+            <footer class="upload-panel__footer">
+              {#if showCounter}
+                <p class="upload-panel__counter">{files.length}/{maxFiles}</p>
+              {/if}
+              <div class="upload-panel__actions">
+                <Button type="button" variant="outline" class="upload-panel__cancel" on:click={handleCancel} disabled={busy}>
+                  {cancelLabel}
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  class="upload-panel__submit"
+                  on:click={handleSubmit}
+                  disabled={!canSubmit}
+                  loading={busy}
+                >
+                  {busy ? submitBusyLabel : submitLabel}
+                </Button>
+              </div>
+            </footer>
+          {/if}
         </div>
-      {/each}
+      </div>
+      <span slot="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 15V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <path d="M8.5 10.5L12 7l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M6 17.5h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </span>
+    </EmptyState>
+  {:else}
+    <div class="upload-panel upload-panel--default">
+      <div class="upload-panel__header">
+        <div class="upload-panel__titles">
+          <h2>{title}</h2>
+          <p>{description}</p>
+        </div>
+      </div>
+
+      <UploadDropzone
+        id="upload-panel-input"
+        {accept}
+        {multiple}
+        disabled={busy}
+        isBusy={busy}
+        title={dropzoneTitle}
+        description={dropzoneDescription}
+        orLabel={dropzoneOr}
+        {browseLabel}
+        on:filesSelected={handleFilesSelected}
+      />
+
+      <p class="upload-panel__support">{supportLabel}</p>
+
+      {#if errorMessage}
+        <p class="upload-panel__error" role="alert">{errorMessage}</p>
+      {/if}
+
+      {#if files.length > 0}
+        <div class="upload-panel__files" role="list" aria-label="Selected files">
+          {#each files as file, index (file.name + file.size + index)}
+            <div role="listitem">
+              <UploadFileRow
+                {file}
+                disabled={busy}
+                removeLabel={removeFileLabel}
+                on:remove={() => removeFile(index)}
+              />
+            </div>
+          {/each}
+        </div>
+      {/if}
+
+      {#if showFooter}
+        <footer class="upload-panel__footer">
+          {#if showCounter}
+            <p class="upload-panel__counter">{files.length}/{maxFiles}</p>
+          {/if}
+          <div class="upload-panel__actions">
+            <Button type="button" variant="outline" class="upload-panel__cancel" on:click={handleCancel} disabled={busy}>
+              {cancelLabel}
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              class="upload-panel__submit"
+              on:click={handleSubmit}
+              disabled={!canSubmit}
+              loading={busy}
+            >
+              {busy ? submitBusyLabel : submitLabel}
+            </Button>
+          </div>
+        </footer>
+      {/if}
     </div>
   {/if}
 
-  {#if showFooter}
-    <footer class="upload-panel__footer">
-      {#if showCounter}
-        <p class="upload-panel__counter">{files.length}/{maxFiles}</p>
-      {/if}
-      <div class="upload-panel__actions">
-        <Button type="button" variant="outline" class="upload-panel__cancel" on:click={handleCancel} disabled={busy}>
-          {cancelLabel}
-        </Button>
-        <Button
-          type="button"
-          variant="primary"
-          class="upload-panel__submit"
-          on:click={handleSubmit}
-          disabled={!canSubmit}
-          loading={busy}
-        >
-          {busy ? submitBusyLabel : submitLabel}
-        </Button>
-      </div>
-    </footer>
-  {/if}
 </section>
 
 <style>
+  .upload-panel-shell {
+    display: grid;
+    gap: var(--upload-panel-gap);
+  }
+
   .upload-panel {
     display: grid;
     gap: var(--upload-panel-gap);
@@ -126,9 +225,42 @@
     box-shadow: var(--upload-panel-shadow);
   }
 
+  .upload-panel--hero {
+    gap: var(--ui-space-3);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
   .upload-panel__header {
     display: grid;
     gap: var(--ui-space-1);
+  }
+
+  .upload-panel__hero-support {
+    display: grid;
+    gap: var(--ui-space-2);
+    justify-items: center;
+    width: 100%;
+  }
+
+  .upload-panel__hero-support-copy {
+    margin: 0;
+    max-width: 40ch;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.55;
+    text-align: center;
+  }
+
+  .upload-panel__hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ui-space-2);
   }
 
   .upload-panel__titles {
@@ -154,13 +286,14 @@
     max-width: 32rem;
     color: var(--upload-panel-description);
     font-size: var(--font-size-sm);
-    line-height: 1.5;
+    line-height: 1.45;
   }
 
   .upload-panel__support {
-    margin-top: -0.125rem;
     color: var(--upload-panel-support);
     font-size: var(--font-size-xs);
+    text-align: center;
+    line-height: 1.4;
   }
 
   .upload-panel__error {
@@ -172,16 +305,24 @@
 
   .upload-panel__files {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--ui-space-2);
+  }
+
+  :global(.upload-panel-shell .empty-state) {
+    width: 100%;
+  }
+
+  :global(.upload-panel-shell .upload-dropzone--hero) {
+    margin-top: 0;
   }
 
   .upload-panel__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: var(--ui-space-3);
     border-top: 1px solid var(--upload-footer-border);
-    padding-top: var(--ui-space-4);
+    padding-top: var(--ui-space-3);
   }
 
   .upload-panel__counter {
@@ -191,7 +332,7 @@
 
   .upload-panel__actions {
     display: flex;
-    gap: 0.75rem;
+    gap: var(--ui-space-2);
   }
 
   :global(.upload-panel__cancel.ui-button) {
@@ -201,6 +342,15 @@
   :global(.upload-panel__submit.ui-button) {
     min-width: 6.5rem;
     box-shadow: none;
+  }
+
+  :global(.upload-panel-shell .upload-panel__submit.ui-button) {
+    min-width: 9rem;
+    border-radius: 999px;
+  }
+
+  :global(.upload-panel-shell .upload-panel__cancel.ui-button) {
+    border-radius: 999px;
   }
 
   @media (max-width: 720px) {

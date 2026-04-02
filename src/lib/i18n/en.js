@@ -114,7 +114,18 @@ export default {
       modalTitle: 'Media Upload',
       modalDescription: 'Add your document here',
       modalDescriptionSingle: 'Upload one document, then choose what you want to generate next.',
-      dropzoneTitle: 'Drag your file to start uploading',
+      heroEyebrow: 'First upload',
+      heroTitle: 'Start your study library with one document',
+      heroDescription: 'Upload a PDF, DOCX, or PPTX to begin a cleaner study flow with summaries, flashcards, and exam questions ready from the same workspace.',
+      heroSupport: 'Your first upload becomes the starting point for everything you review next.',
+      heroBenefitsLabel: 'What you can generate',
+      heroBenefits: {
+        summary: 'Summary',
+        flashcards: 'Flashcards',
+        exams: 'Exam questions'
+      },
+      dropzoneTitle: 'Drop your document here or browse to get started',
+      dropzoneDescription: 'Drag and drop still works, but the fastest path is to choose one file and continue.',
       dropzoneOr: 'OR',
       browse: 'Browse files',
       supportedFiles: 'Supports PDF, DOCX, and PPTX',
@@ -504,6 +515,15 @@ export default {
     description: 'Browse your uploaded materials and open one to continue studying.',
     emptyTitle: 'No documents yet',
     emptyDescription: 'Upload your first document from home to start your library.',
+    libraryEmptyEyebrow: 'First upload',
+    libraryEmptyTitle: 'Your Study Hub library starts here',
+    libraryEmptyDescription: 'Upload one document and keep everything you study in one place, ready for summaries, flashcards, and exam questions.',
+    libraryEmptySupport: 'After upload, open the document here to generate study materials when you need them.',
+    libraryEmptyBenefitsLabel: 'Available study tools',
+    libraryEmptySummary: 'Summary',
+    libraryEmptyFlashcards: 'Flashcards',
+    libraryEmptyExams: 'Exam questions',
+    libraryEmptyUploadCta: 'Upload your first document',
     labels: {
       uploaded: 'Uploaded',
       language: 'Language'
@@ -620,7 +640,39 @@ export default {
     fields: {
       name: 'Full name',
       email: 'Email',
-      password: 'Password'
+      password: 'Password',
+      confirmPassword: 'Confirm password'
+    },
+    actions: {
+      showPassword: 'Show',
+      hidePassword: 'Hide'
+    },
+    notices: {
+      signedOut: 'You have been signed out.',
+      sessionExpired: 'Your session expired. Please sign in again.'
+    },
+    validation: {
+      nameRequired: 'Enter your full name.',
+      emailRequired: 'Enter your email address.',
+      emailInvalid: 'Enter a valid email address.',
+      passwordRequired: 'Enter your password.',
+      passwordMin: 'Use at least {count} characters.',
+      passwordHint: 'Use at least 8 characters.',
+      confirmPasswordRequired: 'Confirm your password.',
+      confirmPasswordMismatch: 'Passwords do not match.'
+    },
+    errors: {
+      invalidCredentials: 'Check your email and password and try again.',
+      duplicateEmail: 'An account with this email already exists.',
+      weakPassword: 'Choose a stronger password with at least 8 characters.',
+      networkTimeout: 'The request took too long. Please try again.',
+      networkFailure: 'Network error. Check your connection and try again.',
+      serverFailure: 'Server error. Please try again in a moment.',
+      sessionExpired: 'Your session expired. Please sign in again.',
+      sessionRestoreFailed: 'Sign-in completed, but we could not restore your session. Please try again.',
+      blockedAccess: 'This account cannot access the app right now.',
+      malformedResponse: 'We could not complete authentication. Please try again.',
+      genericFailure: 'We could not complete that request. Please try again.'
     },
     signIn: {
       eyebrow: 'Sign in',

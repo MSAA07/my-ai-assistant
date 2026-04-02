@@ -6,36 +6,53 @@
   import AppHeader from './components/AppHeader.svelte';
   import AppShell from './lib/components/layout/AppShell.svelte';
   import PageLayout from './lib/components/layout/PageLayout.svelte';
-  import { currentPath } from './stores/router.js';
-  import { session, isLoading, signOut } from './stores/auth.js';
+  import { currentPath, routeParams as queryParams, router } from './stores/router.js';
+  import { session, isLoading, signOut, authMeta } from './stores/auth.js';
   import { t } from './lib/i18n/t.js';
   import { language } from './lib/stores/language.js';
   import {
     DEFAULT_AUTH_PATH,
+    LANDING_PATH,
+    SIGN_IN_PATH,
+    SIGN_UP_PATH,
     resolveRoute,
     getNavRoutes,
     getBottomNavRoutes,
     normalizeAppPath,
+    sanitizeRedirectPath,
+    isPublicRoutePath,
+    isAuthRoutePath,
     needsAdminAccess,
     getNavIdForRoute
   } from './routes.js';
   import './styles/global.css';
 
   const useAppShell = import.meta.env.VITE_FEATURE_APPSHELL !== 'false';
-  let showSignUp = false;
+
+  const AUTH_NOTICE_KEYS = {
+    signed_out: 'auth.notices.signedOut',
+    session_expired: 'auth.notices.sessionExpired',
+  };
 
   $: rawPath = $currentPath;
+  $: params = $queryParams;
   $: normalizedPath = normalizeAppPath(rawPath);
-  $: shouldRedirect = rawPath !== normalizedPath && normalizedPath !== '/';
-  $: if (shouldRedirect && typeof window !== 'undefined') {
-    window.location.hash = normalizedPath;
+  $: shouldNormalizePath = rawPath !== normalizedPath;
+  $: if (shouldNormalizePath && typeof window !== 'undefined') {
+    router.replace(normalizedPath);
   }
 
   $: isAuthenticated = !!$session;
+  $: bootstrapPending = $isLoading || $authMeta?.bootstrapPending;
   $: isAdmin = $session?.user?.role?.toLowerCase() === 'admin';
   $: plan = $session?.user?.plan ?? 'free';
   $: isPaidPlan = plan === 'pro' || plan === 'premium';
-  $: planLabel = isPaidPlan ? t('nav.proBadge') : t('nav.freeBadge');
+  $: locale = $language;
+  $: planLabel = locale && (isPaidPlan ? t('nav.proBadge') : t('nav.freeBadge'));
+  $: isPublicRoute = isPublicRoutePath(normalizedPath);
+  $: isAuthRoute = isAuthRoutePath(normalizedPath);
+  $: redirectTarget = sanitizeRedirectPath(params.redirect) ?? DEFAULT_AUTH_PATH;
+  $: authNoticeKey = AUTH_NOTICE_KEYS[params.reason] ?? '';
 
   $: routeMatch = resolveRoute(normalizedPath);
   $: activeRoute = routeMatch?.route;
@@ -45,18 +62,25 @@
   $: componentProps = routeAccessDenied ? {} : routeParams;
   $: ActiveComponent = routeAccessDenied ? null : activeRoute?.component ?? null;
   $: activeNav = activeRoute ? getNavIdForRoute(activeRoute) : '';
-  $: pageTitle = routeAccessDenied
+  $: pageTitle = locale && (routeAccessDenied
     ? t('access.deniedTitle')
     : activeRoute?.pageTitleKey
       ? t(activeRoute.pageTitleKey)
-      : t('topbar.defaultTitle');
+      : t('topbar.defaultTitle'));
 
-  $: if (isAuthenticated && normalizedPath === '/' && typeof window !== 'undefined') {
-    window.location.hash = DEFAULT_AUTH_PATH;
+  $: shouldRedirectUnauthenticated = !bootstrapPending && !isAuthenticated && !isPublicRoute;
+  $: shouldRedirectAuthenticated = !bootstrapPending && isAuthenticated && (normalizedPath === LANDING_PATH || isAuthRoute);
+  $: protectedRedirectTarget = `${SIGN_IN_PATH}?${new URLSearchParams({ redirect: normalizedPath }).toString()}`;
+  $: if (shouldRedirectUnauthenticated && typeof window !== 'undefined') {
+    router.replace(protectedRedirectTarget);
+  }
+
+  $: if (shouldRedirectAuthenticated && typeof window !== 'undefined') {
+    router.replace(redirectTarget);
   }
 
   $: navRoutes = getNavRoutes({ includeAdmin: isAdmin });
-  $: navItems = navRoutes.map((route) => ({
+  $: navItems = locale && navRoutes.map((route) => ({
     id: route.id,
     labelKey: route.labelKey,
     label: t(route.labelKey),
@@ -68,7 +92,7 @@
   }));
 
   $: bottomNavRoutes = getBottomNavRoutes({ includeAdmin: isAdmin });
-  $: bottomNavItems = bottomNavRoutes.map((route) => ({
+  $: bottomNavItems = locale && bottomNavRoutes.map((route) => ({
     id: route.id,
     labelKey: route.labelKey,
     label: t(route.labelKey),
@@ -79,7 +103,7 @@
       : undefined
   }));
 
-  $: secondaryItems = [
+  $: secondaryItems = locale && [
     {
       id: 'plan',
       labelKey: 'nav.plan',
@@ -92,30 +116,26 @@
       }
     }
   ];
-
-  function toggleAuthMode() {
-    showSignUp = !showSignUp;
-  }
 </script>
 
 {#key $language}
-  {#if $isLoading}
+  {#if bootstrapPending || shouldRedirectUnauthenticated || shouldRedirectAuthenticated}
     <div class="loading-screen">
       <div class="spinner"></div>
       <p>{t('app.loadingSession')}</p>
     </div>
   {:else}
-    {#if normalizedPath === '/'}
+    {#if !isAuthenticated && normalizedPath === LANDING_PATH}
       <div class="landing-wrapper">
         <Landing />
         <Footer />
       </div>
-    {:else if !isAuthenticated}
+    {:else if !isAuthenticated && isAuthRoute}
       <div class="auth-wrapper">
-        {#if showSignUp}
-          <SignUp on:success={() => (showSignUp = false)} on:toggle={toggleAuthMode} />
+        {#if normalizedPath === SIGN_UP_PATH}
+          <SignUp notice={authNoticeKey ? t(authNoticeKey) : ''} redirectTarget={redirectTarget} />
         {:else}
-          <SignIn on:success={() => {}} on:toggle={toggleAuthMode} />
+          <SignIn notice={authNoticeKey ? t(authNoticeKey) : ''} redirectTarget={redirectTarget} />
         {/if}
       </div>
     {:else if useAppShell}

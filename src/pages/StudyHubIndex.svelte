@@ -1,10 +1,11 @@
 <script>
   import { onDestroy, onMount } from 'svelte';
-  import { MoreVertical, Upload } from '@lucide/svelte';
+  import { BookOpenText, MoreVertical, Upload } from '@lucide/svelte';
   import { API_BASE } from '../config.js';
   import { routeParams } from '../stores/router.js';
   import { formatDate, t } from '../lib/i18n/t.js';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
+  import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import DocumentCard from '../lib/components/ui/DocumentCard.svelte';
@@ -45,6 +46,7 @@
   $: renameDisabled = !pendingRenameDoc?.id || !renameValue.trim() || renameValue.trim() === getDocumentDisplayName(pendingRenameDoc).trim();
   $: deleteLabel = t('documentsPage.actions.delete');
   $: cancelLabel = t('confirmModal.cancel');
+  $: showLibraryEmptyState = !loading && documents.length === 0;
 
   onMount(() => {
     const cached = readPageCache(STUDY_INDEX_CACHE_KEY);
@@ -317,32 +319,36 @@
   }
 </script>
 
-<PageLayout class="library-page" width="wide">
+<PageLayout class="library-page" width="wide" gap="compact">
   <PageHeader
     className="library-header"
     eyebrow={t('documentsPage.eyebrow')}
     title={t('documentsPage.title')}
     subtitle={t('documentsPage.description')}
   >
-    <div slot="actions" class="header-actions">
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="library-refresh"
-        on:click={() => loadDocuments({ background: documents.length > 0 })}
-        disabled={loading || refreshing}
-        aria-label={t('documentsPage.actions.refresh')}
-      >
-        {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
-      </Button>
-      <Button type="button" variant="primary" className="library-upload" on:click={goToHome}>
-        <span slot="icon" aria-hidden="true">
-          <Upload />
-        </span>
-        {t('documentsPage.actions.uploadCta')}
-      </Button>
-    </div>
+    <svelte:fragment slot="actions">
+      {#if !showLibraryEmptyState}
+        <div class="header-actions">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="library-refresh"
+            on:click={() => loadDocuments({ background: documents.length > 0 })}
+            disabled={loading || refreshing}
+            aria-label={t('documentsPage.actions.refresh')}
+          >
+            {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
+          </Button>
+          <Button type="button" variant="primary" className="library-upload" on:click={goToHome}>
+            <span slot="icon" aria-hidden="true">
+              <Upload />
+            </span>
+            {t('documentsPage.actions.uploadCta')}
+          </Button>
+        </div>
+      {/if}
+    </svelte:fragment>
   </PageHeader>
 
   {#if loading}
@@ -360,10 +366,41 @@
     {/if}
 
     {#if documents.length === 0}
-      <EmptyState title={t('documentsPage.emptyTitle')} description={t('documentsPage.emptyDescription')}>
-        <Button slot="actions" type="button" variant="primary" on:click={goToHome}>
-          {t('documentsPage.actions.uploadCta')}
-        </Button>
+      <EmptyState
+        variant="hero"
+        eyebrow={t('documentsPage.libraryEmptyEyebrow')}
+        title={t('documentsPage.libraryEmptyTitle')}
+        description={t('documentsPage.libraryEmptyDescription')}
+      >
+        <div slot="support" class="library-empty-support">
+          <p>{t('documentsPage.libraryEmptySupport')}</p>
+          <div class="library-empty-support__chips" aria-label={t('documentsPage.libraryEmptyBenefitsLabel')}>
+            <Badge tone="neutral" variant="outline" size="sm">{t('documentsPage.libraryEmptySummary')}</Badge>
+            <Badge tone="neutral" variant="outline" size="sm">{t('documentsPage.libraryEmptyFlashcards')}</Badge>
+            <Badge tone="neutral" variant="outline" size="sm">{t('documentsPage.libraryEmptyExams')}</Badge>
+          </div>
+        </div>
+        <div slot="actions" class="library-empty-actions">
+          <Button type="button" variant="primary" size="lg" on:click={goToHome}>
+            <span slot="icon" aria-hidden="true">
+              <Upload />
+            </span>
+            {t('documentsPage.libraryEmptyUploadCta')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="library-empty-refresh"
+            on:click={() => loadDocuments({ background: documents.length > 0 })}
+            disabled={refreshing}
+          >
+            {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
+          </Button>
+        </div>
+        <span slot="icon" aria-hidden="true">
+          <BookOpenText />
+        </span>
       </EmptyState>
     {:else}
       <section class="documents-grid">
@@ -499,6 +536,39 @@
     box-shadow: var(--ui-focus-ring-strong);
   }
 
+  .library-empty-support {
+    display: grid;
+    gap: var(--ui-space-3);
+    justify-items: center;
+    width: 100%;
+  }
+
+  .library-empty-support p {
+    margin: 0;
+    max-width: 44ch;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.6;
+  }
+
+  .library-empty-support__chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ui-space-2);
+  }
+
+  .library-empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ui-space-2);
+  }
+
+  :global(.library-page .library-empty-refresh.ui-button) {
+    --button-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
+  }
+
   .menu-wrap {
     position: relative;
   }
@@ -530,13 +600,6 @@
 
   :global(.inline-error) {
     color: var(--destructive);
-  }
-
-  :global(.library-page .empty-state) {
-    min-height: 320px;
-    border-color: var(--ui-border-default);
-    background: var(--ui-surface-card);
-    box-shadow: none;
   }
 
   :global(.library-page .document-list-skeleton) {

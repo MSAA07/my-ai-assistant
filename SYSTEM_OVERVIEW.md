@@ -15,6 +15,7 @@ Routing files:
 
 - `src/stores/router.js`
 - `src/routes.js`
+- `src/stores/auth.js`
 
 Current behavior:
 
@@ -22,6 +23,15 @@ Current behavior:
 - `App.svelte` resolves the normalized route and renders the active page.
 - `AppShell.svelte` is the default authenticated shell.
 - `AppHeader.svelte` + `Footer.svelte` remain only for the non-default fallback shell path when `VITE_FEATURE_APPSHELL=false`.
+- Public routes are exactly `#/`, `#/sign-in`, and `#/sign-up`.
+- All other routes are protected by default.
+- Legacy route normalization runs before auth-guard checks, so older document routes still resolve onto canonical protected routes before redirect handling.
+
+Public auth routes:
+
+- `#/`
+- `#/sign-in`
+- `#/sign-up`
 
 Canonical study routes:
 
@@ -147,7 +157,14 @@ Session:
 
 - owned by `src/stores/auth.js`
 - Better Auth endpoints are called with `credentials: include`
-- app bootstraps the current session on load
+- app bootstraps the current session on load before protected content renders
+- successful sign-up creates a session immediately in this phase; there is no email-verification holding state
+- unauthenticated access to protected routes redirects to `#/sign-in?redirect=<safe-path>`
+- authenticated access to `#/`, `#/sign-in`, or `#/sign-up` redirects to the sanitized target or `#/home`
+- redirect sanitization only accepts safe internal hash paths and rejects auth-route loops, malformed values, and external URLs
+- logout clears frontend auth state, clears session-dependent page cache, and redirects once to `#/sign-in`
+- expired or invalid sessions resolve to an unauthenticated state and redirect to `#/sign-in` without rendering stale protected content
+- cross-tab auth changes are synchronized through lightweight browser storage events
 
 ## API Base Resolution
 
@@ -175,4 +192,4 @@ Update this file when any of these change:
 - host-derived API base mapping
 - frontend-visible generation contracts or lifecycle semantics
 
-Last Updated: March 28, 2026
+Last Updated: March 29, 2026

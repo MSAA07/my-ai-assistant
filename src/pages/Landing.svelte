@@ -74,8 +74,12 @@
 
   let openFaq = 0;
 
-  function enterApp() {
-    router.navigate('/home');
+  function goToSignIn() {
+    router.navigate('/sign-in');
+  }
+
+  function goToSignUp() {
+    router.navigate('/sign-up');
   }
 
   function toggleFaq(index) {
@@ -98,8 +102,8 @@
       </nav>
 
       <div class="landing-actions">
-        <Button variant="ghost" size="sm" type="button" on:click={enterApp}>Sign in</Button>
-        <Button variant="primary" size="sm" type="button" on:click={enterApp}>Get started</Button>
+        <Button variant="ghost" size="sm" type="button" on:click={goToSignIn}>Sign in</Button>
+        <Button variant="primary" size="sm" type="button" on:click={goToSignUp}>Get started</Button>
       </div>
     </div>
   </header>
@@ -114,7 +118,7 @@
             Upload your study materials, generate summaries, flashcards, and practice exams, and review everything in a single calm interface.
           </p>
           <div class="hero-actions">
-            <Button variant="primary" size="lg" type="button" on:click={enterApp}>Get started</Button>
+            <Button variant="primary" size="lg" type="button" on:click={goToSignUp}>Get started</Button>
             <Button variant="secondary" size="lg" type="button" on:click={() => (window.location.hash = '#how-it-works')}>See how it works</Button>
           </div>
           <div class="hero-points">

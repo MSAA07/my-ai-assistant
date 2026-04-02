@@ -6,7 +6,7 @@
   export let className = '';
   export let variant = 'base';
   export let border = 'subtle';
-  export let padding = 'md';
+  export let padding = 'sm';
   export let compact = false;
   export let tableMinWidth = '720px';
 
@@ -85,26 +85,26 @@
 <style>
   :global(.ui-data-surface) {
     min-width: 0;
-    gap: 1rem;
+    gap: var(--ui-space-3);
   }
 
   :global(.ui-data-surface--compact) {
-    gap: 1rem;
+    gap: var(--ui-space-2);
   }
 
   .ui-data-surface__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--ui-space-3);
     flex-wrap: wrap;
-    padding-bottom: var(--ui-space-4);
+    padding-bottom: var(--ui-space-3);
     border-bottom: 1px solid var(--ui-divider);
   }
 
   .ui-data-surface__heading {
     display: grid;
-    gap: 0.2rem;
+    gap: var(--ui-space-1);
     min-width: 0;
   }
 
@@ -133,7 +133,7 @@
   .ui-data-surface__filters {
     display: flex;
     align-items: flex-end;
-    gap: 0.75rem;
+    gap: var(--ui-space-3);
     flex-wrap: wrap;
   }
 
@@ -145,13 +145,13 @@
   .ui-data-surface__bulk {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--ui-space-3);
     flex-wrap: wrap;
   }
 
   .ui-data-surface__panels {
     display: grid;
-    gap: 1rem;
+    gap: var(--ui-space-3);
     min-width: 0;
   }
 
@@ -168,7 +168,7 @@
     border: 1px dashed var(--ui-border-default);
     border-radius: var(--ui-radius-md);
     background: color-mix(in srgb, var(--ui-surface-secondary) 62%, transparent);
-    padding: 0.75rem 0.9rem;
+    padding: var(--ui-space-3) var(--ui-space-4);
   }
 
   .ui-data-surface__state :global(.ui-data-state-error) {
