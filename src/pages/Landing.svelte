@@ -82,6 +82,10 @@
     router.navigate('/sign-up');
   }
 
+  function enterApp() {
+    router.navigate('/sign-in');
+  }
+
   function toggleFaq(index) {
     openFaq = openFaq === index ? -1 : index;
   }
