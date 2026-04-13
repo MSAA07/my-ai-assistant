@@ -31,6 +31,7 @@ const initialMeta = {
 let authInterceptorInitialized = false;
 let authSyncInitialized = false;
 let redirectingToAuth = false;
+let bootstrapRequest = null;
 
 export const session = writable(null);
 export const isLoading = writable(true);
@@ -449,29 +450,60 @@ function initializeAuthSync() {
   authSyncInitialized = true;
 }
 
-async function bootstrapSession() {
-  updateMeta({ bootstrapPending: true, status: "loading", reason: "bootstrap", errorCode: "" });
+async function bootstrapSession(reason = "bootstrap") {
+  if (bootstrapRequest) {
+    return bootstrapRequest;
+  }
+
+  updateMeta({ bootstrapPending: true, status: "loading", reason, errorCode: "" });
   isLoading.set(true);
 
-  try {
-    const result = await getSession();
-    if (result.error) {
-      setUnauthenticated(
-        result.error.code === "blocked_access" ? "blocked_access" : "session_expired",
-        result.error.code,
-      );
+  bootstrapRequest = (async () => {
+    try {
+      const result = await getSession();
+      if (result.error) {
+        setUnauthenticated(
+          result.error.code === "blocked_access" ? "blocked_access" : "session_expired",
+          result.error.code,
+        );
+        return;
+      }
+
+      setAuthenticated(result.data);
+    } catch (error) {
+      console.error("Failed to load session:", error);
+      setUnauthenticated("session_expired", "session_expired");
+    } finally {
+      bootstrapRequest = null;
+    }
+  })();
+
+  return bootstrapRequest;
+}
+
+function initializeBootstrapRecovery() {
+  if (typeof window === "undefined") return;
+
+  const recoverBootstrap = () => {
+    const meta = get(authMeta);
+    if (!get(isLoading) && !meta?.bootstrapPending) {
       return;
     }
 
-    setAuthenticated(result.data);
-  } catch (error) {
-    console.error("Failed to load session:", error);
-    setUnauthenticated("session_expired", "session_expired");
-  }
+    bootstrapSession("resume");
+  };
+
+  window.addEventListener("pageshow", recoverBootstrap);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      recoverBootstrap();
+    }
+  });
 }
 
 initializeAuthInterceptor();
 initializeAuthSync();
+initializeBootstrapRecovery();
 bootstrapSession();
 
 export const authClient = {
