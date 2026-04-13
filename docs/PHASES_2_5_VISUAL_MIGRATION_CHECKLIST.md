@@ -20,8 +20,10 @@ This file is an archival rollout record. It is not the current runtime source of
 
 For current runtime guidance, prefer:
 
-- `../UI_POST_ROLLOUT.md`
 - `../SYSTEM_OVERVIEW.md`
+- `../PROJECT_STRUCTURE.md`
+- `../UI_POST_ROLLOUT.md`
+- `../README.md`
 - `../src/lib/components/ui/PRIMITIVES.md`
 
-Last Updated: March 23, 2026
+Last Updated: April 2, 2026

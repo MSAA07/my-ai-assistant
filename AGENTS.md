@@ -10,8 +10,9 @@ Use these source-of-truth docs instead:
 
 - `SYSTEM_OVERVIEW.md` for routes, lifecycle ownership, and runtime behavior
 - `PROJECT_STRUCTURE.md` for file ownership
-- `src/lib/components/ui/PRIMITIVES.md` for primitive guidance
 - `UI_POST_ROLLOUT.md` for current verified UI status
+- `README.md` for the high-level repo entry
+- `src/lib/components/ui/PRIMITIVES.md` for primitive guidance
 
 ## Shared UI System
 
@@ -43,4 +44,4 @@ Update docs when:
 - English and Arabic must use the same lifecycle semantics and labels for Study Hub progress states: `Queued`, `Preparing`, `Generating`, `Ready`, `Failed`.
 - Localization must not fork progress smoothing, lifecycle transitions, or feature-card state rules; only copy and layout direction may differ.
 
-Last Updated: March 28, 2026
+Last Updated: April 2, 2026

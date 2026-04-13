@@ -15,9 +15,10 @@ This file is preserved as the historical phase-1 audit/spec that preceded the vi
 
 Use these files for the current implemented state instead:
 
-- `../UI_POST_ROLLOUT.md`
 - `../SYSTEM_OVERVIEW.md`
 - `../PROJECT_STRUCTURE.md`
+- `../UI_POST_ROLLOUT.md`
+- `../README.md`
 - `../src/lib/components/ui/PRIMITIVES.md`
 - `../src/lib/components/ui/DATA_SURFACE_PATTERN.md`
 
@@ -27,4 +28,4 @@ Use these files for the current implemented state instead:
 - visual regression screenshot automation is not present
 - the fallback non-default shell path remains available when `VITE_FEATURE_APPSHELL=false`
 
-Last Updated: March 23, 2026
+Last Updated: April 2, 2026

@@ -6,22 +6,21 @@ Current frontend for the AI Study Assistant Study Hub.
 
 - Svelte frontend runtime
 - hash-based routing and authenticated shell
-- Study Hub library/document/activity UX
+- canonical Study Hub library/document UX
 - shared UI primitives and tokenized styling
 - Better Auth browser-session integration
 - backend API consumption for upload, study, admin, and settings flows
 
 ## Quick Orientation
 
-- canonical study flow lives under `#/study`
+- canonical study routes live under `#/study`
+- public auth routes are `#/`, `#/sign-in`, and `#/sign-up`
 - `AppShell` is the default authenticated shell
 - `StudyHubIndex.svelte` and `StudyHubDocument.svelte` are the canonical Study Hub screens
-- `DocumentView.svelte` remains the legacy activity route surface
+- legacy routes remain for legacy compatibility only, not primary UX
 - tokens live in `src/lib/styles/tokens.css`
 - shared primitives live in `src/lib/components/ui/*`
-- the backend AI prompt-engineering rollout is complete without requiring new frontend route or contract changes
-- free, pro, and premium behavior stays behind the same backend generation endpoints
-- prompt-version, routing, and benchmark metadata remain internal backend concerns and do not change the frontend API envelope
+- runtime detail for `Document.processingStatus`, `DocumentGeneration`, and `Job.status (worker-only)` lives in `SYSTEM_OVERVIEW.md`
 
 ## Development
 
@@ -41,14 +40,16 @@ Host-derived backend mapping in `src/config.js`:
 - local Vite dev on `localhost` / `127.0.0.1` -> same-origin dev proxy
 - local non-dev host -> staging backend
 - Vercel preview/stage hosts -> staging backend
-- `my-ai-assistant.vercel.app` and production-like hosts -> production backend
+- `studymaxing.com`, `www.studymaxing.com`, `my-ai-assistant.vercel.app`, and production-like hosts -> production backend
 
 ## Related Docs
 
-- `SYSTEM_OVERVIEW.md`: routing, lifecycle, runtime, and API behavior
+- `SYSTEM_OVERVIEW.md`: primary runtime, lifecycle, and contract source of truth
 - `PROJECT_STRUCTURE.md`: file and folder ownership
-- `UI_POST_ROLLOUT.md`: current UI status and verified deferred items
+- `UI_POST_ROLLOUT.md`: current UI state and guarantees
+- `README.md`: this high-level entry point
 - `src/lib/components/ui/PRIMITIVES.md`: primitive usage guidance
 - `src/lib/components/ui/DATA_SURFACE_PATTERN.md`: dense admin/data-surface guidance
+- `docs/*`: archival rollout references, not current runtime source of truth
 
-Last Updated: March 28, 2026
+Last Updated: April 2, 2026

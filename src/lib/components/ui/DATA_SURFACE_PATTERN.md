@@ -1,6 +1,6 @@
 # Data Surface Pattern
 
-Date: March 23, 2026
+Date: April 2, 2026
 Status: Current pattern guidance
 
 ## Why this exists
@@ -102,4 +102,4 @@ Canonical scaffold:
 1. Optional sticky headers for very large tables.
 2. Optional visual regression snapshots for dense admin routes.
 
-Last Updated: March 23, 2026
+Last Updated: April 2, 2026

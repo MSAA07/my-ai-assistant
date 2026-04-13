@@ -162,4 +162,4 @@ Route ownership and runtime behavior live in the frontend `SYSTEM_OVERVIEW.md`.
 Primitives consume semantic tokens from `src/lib/styles/tokens.css` (`--ui-*`, `--color-*`, `--space-*`).
 Use `--ui-*` as the authoritative API for new work and treat compatibility aliases as transitional only.
 
-Last Updated: March 23, 2026
+Last Updated: April 2, 2026

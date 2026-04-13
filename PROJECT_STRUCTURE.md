@@ -81,19 +81,20 @@ Routing and app entry:
 
 - `App.svelte`: auth gating, route resolution, shell selection
 - `main.js`: bootstrap and theme initialization
-- `routes.js`: canonical study routes, legacy activity routes, compatibility redirects
+- `routes.js`: canonical study routes, legacy routes, compatibility redirects
 - `stores/router.js`: hash parsing and navigation store
 
 Canonical study flow:
 
 - `pages/Home.svelte`: authenticated upload entry plus guided post-upload selection and progress flow for single-document uploads
 - `pages/StudyHubIndex.svelte`: canonical Study Hub Library
-- `pages/StudyHubDocument.svelte`: canonical Study Hub Document and canonical activity-route handoff
+- `pages/StudyHubDocument.svelte`: canonical Study Hub Document and canonical section handoff
 
-Legacy activity flow:
+Legacy routes:
 
-- `pages/DocumentView.svelte`: legacy activity route wrapper
-- `lib/components/study/DocumentActivityView.svelte`: actual activity implementation used by both route surfaces
+- legacy compatibility only, not primary UX
+- `pages/DocumentView.svelte`: legacy route wrapper
+- `lib/components/study/DocumentActivityView.svelte`: shared activity implementation used by canonical study routes and legacy routes
 
 Shared UI system:
 
@@ -107,21 +108,22 @@ Data and integration:
 - `stores/auth.js`: Better Auth session bootstrap and auth actions
 - `stores/theme.js`: theme persistence and DOM sync
 - `stores/pageCache.js`: page-level caching helpers
-- `lib/api/studyHub.js`: wrappers for canonical and legacy study APIs plus guided upload polling helpers for `/api/document/:id` and `/api/jobs/:id`
+- `lib/api/studyHub.js`: wrappers for canonical study APIs, legacy compatibility writes, and guided upload polling helpers for `/api/document/:id` and `/api/jobs/:id`
 - backend prompt/routing rollout metadata does not require new frontend API wrappers or route branching
 
 ## Notes on Legacy Files
 
-- `Documents.svelte`, `Flashcards.svelte`, and `Exams.svelte` still exist but are not the canonical Study Hub route ownership.
+- `Documents.svelte`, `Flashcards.svelte`, and `Exams.svelte` are non-canonical legacy compatibility files, not primary UX.
+- `DocumentView.svelte` is the only legacy route surface that remains connected to current canonical study behavior.
 - `AppHeader.svelte` remains only for the shell fallback path when `VITE_FEATURE_APPSHELL=false`.
 
 ## Docs in This Repo
 
-- `README.md`: quick runtime reference
-- `SYSTEM_OVERVIEW.md`: routing, lifecycle, UI, API overview
-- `PROJECT_STRUCTURE.md`: structure map
-- `UI_POST_ROLLOUT.md`: current UI post-rollout state
-- `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`: archival phase-1 audit/spec
-- `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`: archival rollout checklist
+- `SYSTEM_OVERVIEW.md`: primary runtime and lifecycle source of truth
+- `PROJECT_STRUCTURE.md`: file and folder ownership source of truth
+- `UI_POST_ROLLOUT.md`: current UI state, constraints, and guarantees
+- `README.md`: high-level entry only; should defer detail to the three files above
+- `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`: archival phase-1 audit/spec, not current runtime source of truth
+- `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`: archival rollout checklist, not current runtime source of truth
 
-Last Updated: March 28, 2026
+Last Updated: April 2, 2026

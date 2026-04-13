@@ -52,6 +52,7 @@
   $: isPublicRoute = isPublicRoutePath(normalizedPath);
   $: isAuthRoute = isAuthRoutePath(normalizedPath);
   $: redirectTarget = sanitizeRedirectPath(params.redirect) ?? DEFAULT_AUTH_PATH;
+  $: authScreenRedirectTarget = isAuthRoute ? redirectTarget : normalizedPath;
   $: authNoticeKey = AUTH_NOTICE_KEYS[params.reason] ?? '';
 
   $: routeMatch = resolveRoute(normalizedPath);
@@ -119,7 +120,7 @@
 </script>
 
 {#key $language}
-  {#if bootstrapPending || shouldRedirectUnauthenticated || shouldRedirectAuthenticated}
+  {#if bootstrapPending || shouldRedirectAuthenticated}
     <div class="loading-screen">
       <div class="spinner"></div>
       <p>{t('app.loadingSession')}</p>
@@ -130,12 +131,12 @@
         <Landing />
         <Footer />
       </div>
-    {:else if !isAuthenticated && isAuthRoute}
+    {:else if !isAuthenticated && (isAuthRoute || shouldRedirectUnauthenticated)}
       <div class="auth-wrapper">
         {#if normalizedPath === SIGN_UP_PATH}
-          <SignUp notice={authNoticeKey ? t(authNoticeKey) : ''} redirectTarget={redirectTarget} />
+          <SignUp notice={authNoticeKey ? t(authNoticeKey) : ''} redirectTarget={authScreenRedirectTarget} />
         {:else}
-          <SignIn notice={authNoticeKey ? t(authNoticeKey) : ''} redirectTarget={redirectTarget} />
+          <SignIn notice={authNoticeKey ? t(authNoticeKey) : ''} redirectTarget={authScreenRedirectTarget} />
         {/if}
       </div>
     {:else if useAppShell}

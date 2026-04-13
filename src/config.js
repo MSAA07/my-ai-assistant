@@ -11,6 +11,10 @@ function getHostDerivedApiBaseUrl() {
 
   const hostname = window.location.hostname.toLowerCase();
   const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+  const isProductionFrontendHost = hostname === "studymaxing.com"
+    || hostname === "www.studymaxing.com"
+    || hostname === "my-ai-assistant.vercel.app"
+    || hostname.includes("git-production");
 
   if (import.meta.env.DEV && isLocalHost) {
     return window.location.origin;
@@ -20,7 +24,7 @@ function getHostDerivedApiBaseUrl() {
     return DEPLOYMENT_API_BASES.staging;
   }
 
-  if (hostname === "my-ai-assistant.vercel.app" || hostname.includes("git-production")) {
+  if (isProductionFrontendHost) {
     return DEPLOYMENT_API_BASES.production;
   }
 
