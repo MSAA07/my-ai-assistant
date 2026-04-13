@@ -120,7 +120,7 @@
 </script>
 
 {#key $language}
-  {#if bootstrapPending || shouldRedirectAuthenticated}
+  {#if bootstrapPending}
     <div class="loading-screen">
       <div class="spinner"></div>
       <p>{t('app.loadingSession')}</p>
