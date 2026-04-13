@@ -4,6 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Study Assistant</title>
+    <script>
+      (function applyInitialTheme() {
+        const storageKey = 'my-ai-assistant:theme';
+        const fallbackTheme = 'dark';
+        let theme = fallbackTheme;
+
+        try {
+          const storedTheme = window.localStorage.getItem(storageKey);
+          if (storedTheme === 'dark' || storedTheme === 'light') {
+            theme = storedTheme;
+          }
+        } catch {
+          theme = fallbackTheme;
+        }
+
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" />
   </head>
   <body>

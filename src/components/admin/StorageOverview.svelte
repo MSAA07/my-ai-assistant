@@ -1,10 +1,16 @@
 <script>
   import { onMount } from 'svelte';
-  import { API_BASE } from "../../config.js";
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import DataSurface from '../../lib/components/ui/DataSurface.svelte';
+  import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
 
+  const CACHE_KEY = 'page:admin:storage';
 
   let users = [];
   let loading = true;
+  let refreshing = false;
   let error = '';
 
   const formatBytes = (bytes) => {
@@ -16,9 +22,13 @@
     return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
   };
 
-  async function fetchStorage() {
-    loading = true;
-    error = '';
+  async function fetchStorage({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const response = await fetch(`${API_BASE}/api/admin/storage`, {
@@ -31,29 +41,46 @@
       }
 
       users = data.users || [];
+      writePageCache(CACHE_KEY, { loaded: true, users });
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
-  onMount(fetchStorage);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded) {
+      users = Array.isArray(cached.users) ? cached.users : [];
+      loading = false;
+    }
+    void fetchStorage({ background: Boolean(cached?.loaded) });
+  });
 </script>
 
-<section class="storage-panel">
-  <header>
-    <h2>Storage Breakdown</h2>
-    <button on:click={fetchStorage}>Refresh</button>
-  </header>
+<DataSurface title="Storage Breakdown" description="Storage distribution by user account." tableMinWidth="760px">
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchStorage({ background: users.length > 0 })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
-  {#if loading}
-    <p class="muted">Loading storage data...</p>
-  {:else if error}
-    <p class="error">{error}</p>
-  {:else}
-    <div class="table-wrap">
-      <table>
+  <svelte:fragment slot="state">
+    {#if loading && users.length === 0}
+      <p class="ui-data-state-note">Loading storage data...</p>
+    {:else if error}
+      <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
+    {:else if users.length === 0}
+      <p class="ui-data-state-note">No storage data available.</p>
+    {/if}
+  </svelte:fragment>
+
+  <svelte:fragment slot="table">
+    {#if !loading && !error && users.length > 0}
+      <table class="ui-data-table">
         <thead>
           <tr>
             <th>User</th>
@@ -76,63 +103,19 @@
           {/each}
         </tbody>
       </table>
-    </div>
-  {/if}
-</section>
+    {/if}
+  </svelte:fragment>
+</DataSurface>
 
 <style>
-  .storage-panel {
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    padding: 1.5rem;
-  }
-
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-
-  button {
-    padding: 0.4rem 1rem;
-    border-radius: 999px;
-    border: 1px solid rgba(96, 165, 250, 0.4);
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
-  }
-
-  .table-wrap {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    padding: 0.75rem;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-    text-align: start;
-  }
-
-  th {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-secondary);
-  }
-
   .muted {
     color: var(--color-text-secondary);
+    margin: 0.2rem 0 0;
+    font-size: var(--font-size-xs);
     display: block;
   }
 
-  .error {
-    color: #fca5a5;
+  :global(.ui-data-table td:first-child) {
+    min-width: 210px;
   }
 </style>

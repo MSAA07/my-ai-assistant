@@ -1,83 +1,97 @@
 <script>
   import { direction } from '../../stores/language.js';
-  import LanguageToggle from '../ui/LanguageToggle.svelte';
+  import Badge from '../ui/Badge.svelte';
   import { t } from '../../i18n/t.js';
-  import { ENABLE_ARABIC_UI } from '../../config/features.js';
 
   export let items = [];
   export let secondaryItems = [];
   export let activeId = '';
+  export let planLabel = '';
+  export let collapsed = false;
+
+  const badgeToneMap = {
+    success: 'success',
+    info: 'info',
+    warning: 'warning',
+    danger: 'danger',
+    accent: 'accent',
+  };
+
+  $: planItem = secondaryItems.find((item) => item.icon === 'plan') ?? secondaryItems[0] ?? null;
+  $: footerItems = secondaryItems.filter((item) => item !== planItem);
+
+  function labelFor(item) {
+    return item?.labelKey ? t(item.labelKey) : item?.label ?? '';
+  }
 </script>
 
-<aside class={`sidebar ${$direction === 'rtl' ? 'rtl' : 'ltr'}`}>
-  <div class="sidebar-top">
-    <div class="brand">
-      <span class="brand-mark">{t('app.shortName')}</span>
+<aside
+  class={`sidebar ${$direction === 'rtl' ? 'rtl' : 'ltr'} ${collapsed ? 'collapsed' : ''}`}
+  aria-label={t('nav.mobileLabel')}
+>
+  <div class="sidebar-header">
+    <a class="brand" href="#/home" aria-label={t('app.wordmark')}>
+      <span class="brand-mark">{t('app.shortName').slice(0, 1)}</span>
       <span class="brand-wordmark">{t('app.wordmark')}</span>
-    </div>
-
-    <nav class="nav">
-      {#each items as item}
-        <a
-          class={`nav-item ${activeId === item.id ? 'active' : ''}`}
-          href={item.href}
-          aria-current={activeId === item.id ? 'page' : undefined}
-        >
-          <span class="nav-icon">
-            {#if item.icon === 'dashboard'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.75A1.75 1.75 0 0 1 5.25 11h5.5A1.75 1.75 0 0 1 12.5 12.75v6.5A1.75 1.75 0 0 1 10.75 21h-5.5A1.75 1.75 0 0 1 3.5 19.25v-6.5Zm9-8A1.75 1.75 0 0 1 14.25 3h4.5A1.75 1.75 0 0 1 20.5 4.75v4.5A1.75 1.75 0 0 1 18.75 11h-4.5A1.75 1.75 0 0 1 12.5 9.25v-4.5ZM3.5 4.75A1.75 1.75 0 0 1 5.25 3h5.5A1.75 1.75 0 0 1 12.5 4.75v2A1.75 1.75 0 0 1 10.75 8.5h-5.5A1.75 1.75 0 0 1 3.5 6.75v-2ZM13.5 13.75a1.75 1.75 0 0 1 1.75-1.75h3.5A1.75 1.75 0 0 1 20.5 13.75v5.5A1.75 1.75 0 0 1 18.75 21h-3.5A1.75 1.75 0 0 1 13.5 19.25v-5.5Z" /></svg>
-            {:else if item.icon === 'documents'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2.75A2.75 2.75 0 0 0 4.25 5.5v13A2.75 2.75 0 0 0 7 21.25h10A2.75 2.75 0 0 0 19.75 18.5V9.81a2.75 2.75 0 0 0-.81-1.94l-4.06-4.06A2.75 2.75 0 0 0 12.94 3H7Zm9.5 6.75H13a1 1 0 0 1-1-1V4.5" /></svg>
-            {:else if item.icon === 'upload'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.75 15A2.75 2.75 0 0 1 7.5 12.25h1.75v-3a.75.75 0 0 1 1.28-.53L12 10.19l1.47-1.47a.75.75 0 0 1 1.28.53v3h1.75A2.75 2.75 0 0 1 19.25 15v3.25A2.75 2.75 0 0 1 16.5 21h-9A2.75 2.75 0 0 1 4.75 18.25V15Zm7.25-11a.75.75 0 0 1 .75.75v7.19l1.22-1.22a.75.75 0 1 1 1.06 1.06l-2.5 2.5a.75.75 0 0 1-1.06 0l-2.5-2.5a.75.75 0 0 1 1.06-1.06l1.22 1.22V4.75A.75.75 0 0 1 12 4Z" /></svg>
-            {:else if item.icon === 'exams'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.25A2.25 2.25 0 0 1 7.75 2h8.5A2.25 2.25 0 0 1 18.5 4.25v15.5a.25.25 0 0 1-.38.21L12 16.65l-6.12 3.31a.25.25 0 0 1-.38-.21V4.25Z" /></svg>
-            {:else if item.icon === 'flashcards'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.75 5.5A2.75 2.75 0 0 1 7.5 2.75h11A2.75 2.75 0 0 1 21.25 5.5v9a2.75 2.75 0 0 1-2.75 2.75h-11A2.75 2.75 0 0 1 4.5 14.5v-9Zm-2 4.75A2.25 2.25 0 0 1 5 8H6v6.5a4.25 4.25 0 0 0 4.25 4.25h8.5a2.25 2.25 0 0 1-2.25 2.25h-11A2.25 2.25 0 0 1 3 18.75v-8.5Z" /></svg>
-            {:else if item.icon === 'settings'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.25A3.75 3.75 0 1 1 8.25 12 3.75 3.75 0 0 1 12 8.25Zm8.5 3a1 1 0 0 1 .95.68 8.41 8.41 0 0 1 0 6.14 1 1 0 0 1-.95.68h-1.11a1 1 0 0 0-.94.67l-.25.77a1 1 0 0 1-1.52.52l-.95-.69a1 1 0 0 0-1.05-.05L13.5 21a1 1 0 0 1-1 0l-.94-.53a1 1 0 0 0-1.05.05l-.95.69a1 1 0 0 1-1.52-.52l-.25-.77a1 1 0 0 0-.94-.67H5.64a1 1 0 0 1-.95-.68 8.41 8.41 0 0 1 0-6.14 1 1 0 0 1 .95-.68h1.11a1 1 0 0 0 .94-.67l.25-.77a1 1 0 0 1 1.52-.52l.95.69a1 1 0 0 0 1.05.05l.94-.53a1 1 0 0 1 1 0l.94.53a1 1 0 0 0 1.05-.05l.95-.69a1 1 0 0 1 1.52.52l.25.77a1 1 0 0 0 .94.67Z" /></svg>
-            {:else if item.icon === 'plan'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.75A2.75 2.75 0 0 1 7.75 3h8.5A2.75 2.75 0 0 1 19 5.75v12.5A2.75 2.75 0 0 1 16.25 21h-8.5A2.75 2.75 0 0 1 5 18.25V5.75ZM8.5 7a.75.75 0 0 0 0 1.5h7a.75.75 0 0 0 0-1.5Zm0 4a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5Zm0 4a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5Z" /></svg>
-            {:else if item.icon === 'admin'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a3.25 3.25 0 0 1 2.79 1.58l.38.63 2.37.46a3.25 3.25 0 0 1 2.6 3.53l-.09.73.57.9a3.25 3.25 0 0 1-.55 4.08l-.58.59.1.82a3.25 3.25 0 0 1-2.62 3.53l-2.37.46-.38.63a3.25 3.25 0 0 1-5.58 0l-.38-.63-2.37-.46a3.25 3.25 0 0 1-2.6-3.53l.09-.73-.57-.9a3.25 3.25 0 0 1 .55-4.08l.58-.59-.1-.82a3.25 3.25 0 0 1 2.62-3.53l2.37-.46.38-.63A3.25 3.25 0 0 1 12 2Zm0 6a3 3 0 1 0 3 3 3 3 0 0 0-3-3Z" /></svg>
-            {/if}
-          </span>
-          <span class="nav-label">{item.label}</span>
-          {#if item.badge}
-            <span class={`nav-badge ${item.badge.variant ?? ''}`}>{item.badge.label}</span>
-          {/if}
-        </a>
-      {/each}
-    </nav>
+    </a>
   </div>
 
-  <div class="sidebar-bottom">
-    <div class="sidebar-divider" aria-hidden="true"></div>
-    {#each secondaryItems as item}
-      <a class="nav-item secondary" href={item.href}>
-        <span class="nav-icon">
-          {#if item.icon === 'settings'}
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.25A3.75 3.75 0 1 1 8.25 12 3.75 3.75 0 0 1 12 8.25Zm8.5 3a1 1 0 0 1 .95.68 8.41 8.41 0 0 1 0 6.14 1 1 0 0 1-.95.68h-1.11a1 1 0 0 0-.94.67l-.25.77a1 1 0 0 1-1.52.52l-.95-.69a1 1 0 0 0-1.05-.05L13.5 21a1 1 0 0 1-1 0l-.94-.53a1 1 0 0 0-1.05.05l-.95.69a1 1 0 0 1-1.52-.52l-.25-.77a1 1 0 0 0-.94-.67H5.64a1 1 0 0 1-.95-.68 8.41 8.41 0 0 1 0-6.14 1 1 0 0 1 .95-.68h1.11a1 1 0 0 0 .94-.67l.25-.77a1 1 0 0 1 1.52-.52l.95.69a1 1 0 0 0 1.05.05l.94-.53a1 1 0 0 1 1 0l.94.53a1 1 0 0 0 1.05-.05l.95-.69a1 1 0 0 1 1.52.52l.25.77a1 1 0 0 0 .94.67Z" /></svg>
+  <nav class="sidebar-nav">
+    {#each items as item}
+      <a
+        class={`nav-item ${activeId === item.id ? 'active' : ''}`}
+        href={item.href}
+        aria-current={activeId === item.id ? 'page' : undefined}
+        aria-label={collapsed ? labelFor(item) : undefined}
+        title={collapsed ? labelFor(item) : undefined}
+      >
+        <span class="nav-icon" aria-hidden="true">
+          {#if item.icon === 'dashboard'}
+            <svg viewBox="0 0 24 24"><path d="M3.5 12.75A1.75 1.75 0 0 1 5.25 11h5.5A1.75 1.75 0 0 1 12.5 12.75v6.5A1.75 1.75 0 0 1 10.75 21h-5.5A1.75 1.75 0 0 1 3.5 19.25v-6.5Zm9-8A1.75 1.75 0 0 1 14.25 3h4.5A1.75 1.75 0 0 1 20.5 4.75v4.5A1.75 1.75 0 0 1 18.75 11h-4.5A1.75 1.75 0 0 1 12.5 9.25v-4.5ZM3.5 4.75A1.75 1.75 0 0 1 5.25 3h5.5A1.75 1.75 0 0 1 12.5 4.75v2A1.75 1.75 0 0 1 10.75 8.5h-5.5A1.75 1.75 0 0 1 3.5 6.75v-2ZM13.5 13.75a1.75 1.75 0 0 1 1.75-1.75h3.5A1.75 1.75 0 0 1 20.5 13.75v5.5A1.75 1.75 0 0 1 18.75 21h-3.5A1.75 1.75 0 0 1 13.5 19.25v-5.5Z" /></svg>
+          {:else if item.icon === 'documents'}
+            <svg viewBox="0 0 24 24"><path d="M7 2.75A2.75 2.75 0 0 0 4.25 5.5v13A2.75 2.75 0 0 0 7 21.25h10A2.75 2.75 0 0 0 19.75 18.5V9.81a2.75 2.75 0 0 0-.81-1.94l-4.06-4.06A2.75 2.75 0 0 0 12.94 3H7Zm9.5 6.75H13a1 1 0 0 1-1-1V4.5" /></svg>
+          {:else if item.icon === 'exams'}
+            <svg viewBox="0 0 24 24"><path d="M5.5 4.25A2.25 2.25 0 0 1 7.75 2h8.5A2.25 2.25 0 0 1 18.5 4.25v15.5a.25.25 0 0 1-.38.21L12 16.65l-6.12 3.31a.25.25 0 0 1-.38-.21V4.25Z" /></svg>
+          {:else if item.icon === 'flashcards'}
+            <svg viewBox="0 0 24 24"><path d="M4.75 5.5A2.75 2.75 0 0 1 7.5 2.75h11A2.75 2.75 0 0 1 21.25 5.5v9a2.75 2.75 0 0 1-2.75 2.75h-11A2.75 2.75 0 0 1 4.5 14.5v-9Zm-2 4.75A2.25 2.25 0 0 1 5 8H6v6.5a4.25 4.25 0 0 0 4.25 4.25h8.5a2.25 2.25 0 0 1-2.25 2.25h-11A2.25 2.25 0 0 1 3 18.75v-8.5Z" /></svg>
+          {:else if item.icon === 'settings'}
+            <svg viewBox="0 0 24 24"><path d="M12 8.25A3.75 3.75 0 1 1 8.25 12 3.75 3.75 0 0 1 12 8.25Zm8.5 3a1 1 0 0 1 .95.68 8.41 8.41 0 0 1 0 6.14 1 1 0 0 1-.95.68h-1.11a1 1 0 0 0-.94.67l-.25.77a1 1 0 0 1-1.52.52l-.95-.69a1 1 0 0 0-1.05-.05L13.5 21a1 1 0 0 1-1 0l-.94-.53a1 1 0 0 0-1.05.05l-.95.69a1 1 0 0 1-1.52-.52l-.25-.77a1 1 0 0 0-.94-.67H5.64a1 1 0 0 1-.95-.68 8.41 8.41 0 0 1 0-6.14 1 1 0 0 1 .95-.68h1.11a1 1 0 0 0 .94-.67l.25-.77a1 1 0 0 1 1.52-.52l.95.69a1 1 0 0 0 1.05.05l.94-.53a1 1 0 0 1 1 0l.94.53a1 1 0 0 0 1.05-.05l.95-.69a1 1 0 0 1 1.52.52l.25.77a1 1 0 0 0 .94.67Z" /></svg>
           {:else if item.icon === 'plan'}
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.75A2.75 2.75 0 0 1 7.75 3h8.5A2.75 2.75 0 0 1 19 5.75v12.5A2.75 2.75 0 0 1 16.25 21h-8.5A2.75 2.75 0 0 1 5 18.25V5.75Zm3.5 3.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5Zm0 4a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5Z" /></svg>
+            <svg viewBox="0 0 24 24"><path d="M5 5.75A2.75 2.75 0 0 1 7.75 3h8.5A2.75 2.75 0 0 1 19 5.75v12.5A2.75 2.75 0 0 1 16.25 21h-8.5A2.75 2.75 0 0 1 5 18.25V5.75Zm3.5 3.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5Zm0 4a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5Z" /></svg>
+          {:else if item.icon === 'admin'}
+            <svg viewBox="0 0 24 24"><path d="M12 2a3.25 3.25 0 0 1 2.79 1.58l.38.63 2.37.46a3.25 3.25 0 0 1 2.6 3.53l-.09.73.57.9a3.25 3.25 0 0 1-.55 4.08l-.58.59.1.82a3.25 3.25 0 0 1-2.62 3.53l-2.37.46-.38.63a3.25 3.25 0 0 1-5.58 0l-.38-.63-2.37-.46a3.25 3.25 0 0 1-2.6-3.53l.09-.73-.57-.9a3.25 3.25 0 0 1 .55-4.08l.58-.59-.1-.82a3.25 3.25 0 0 1 2.62-3.53l2.37-.46.38-.63A3.25 3.25 0 0 1 12 2Zm0 6a3 3 0 1 0 3 3 3 3 0 0 0-3-3Z" /></svg>
           {/if}
         </span>
-        <span class="nav-label">{item.label}</span>
+
+        <span class="nav-label">{labelFor(item)}</span>
+
         {#if item.badge}
-          <span class={`nav-badge ${item.badge.variant ?? ''}`}>{item.badge.label}</span>
+          <Badge className="nav-badge" size="xs" tone={badgeToneMap[item.badge.variant] ?? 'neutral'}>
+            {item.badge.label}
+          </Badge>
         {/if}
       </a>
     {/each}
+  </nav>
 
-    {#if ENABLE_ARABIC_UI}
-      <div class="language-card">
-        <div>
-          <p class="language-title">{t('language.sidebarLabel')}</p>
-          <p class="language-description">{t('language.sidebarDescription')}</p>
-        </div>
-        <LanguageToggle />
+  <div class="sidebar-footer">
+    {#if footerItems.length > 0}
+      <div class="footer-links">
+        {#each footerItems as item}
+          <a class="nav-item footer-link" href={item.href}>
+            <span class="nav-label">{labelFor(item)}</span>
+          </a>
+        {/each}
       </div>
     {/if}
+
+    {#if planItem}
+      <a class="plan-card" href={planItem.href}>
+        <p class="plan-label">{labelFor(planItem)}</p>
+        <p class="plan-value">{planItem.badge?.label || planLabel || t('nav.freeBadge')}</p>
+      </a>
+    {/if}
+
   </div>
 </aside>
 
@@ -85,160 +99,224 @@
   .sidebar {
     position: sticky;
     top: 0;
-    height: 100vh;
-    width: var(--size-sidebar);
-    background: var(--color-sidebar);
-    border-inline-end: 1px solid var(--color-border);
-    padding: var(--space-5) var(--space-3);
+    inset-inline-start: auto;
+    z-index: 20;
+    box-sizing: border-box;
     display: flex;
+    height: 100dvh;
+    width: var(--shell-sidebar-width, 16rem);
     flex-direction: column;
-    gap: var(--space-5);
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    background: color-mix(in srgb, var(--sidebar, var(--ui-surface-card)) 92%, black);
+    border-inline-end: 1px solid var(--ui-border-default);
+    box-shadow: none;
+    transition: width var(--motion-default) var(--ease-standard);
   }
 
   .sidebar.rtl {
     border-inline-end: none;
-    border-inline-start: 1px solid var(--color-border);
+    border-inline-start: 1px solid var(--ui-border-default);
   }
 
-  .sidebar-top {
+  .sidebar-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-    flex: 1;
+    min-height: var(--size-topbar);
+    align-items: center;
+    padding: 0 var(--ui-space-4);
+    border-bottom: 1px solid var(--ui-border-default);
+    background: inherit;
+    backdrop-filter: blur(10px);
   }
 
   .brand {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-primary);
+    gap: 0.625rem;
+    min-width: 0;
+    width: 100%;
+    color: var(--ui-text-primary);
+    text-decoration: none;
   }
 
   .brand-mark {
     display: inline-flex;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--color-accent-surface);
-    color: var(--color-accent-primary);
-    font-size: 0.95rem;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--ui-text-primary);
+    color: var(--ui-bg-page);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 
-  .nav {
+  .brand-wordmark {
+    min-width: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-nav {
+    flex: 1;
     display: grid;
-    gap: var(--space-1);
+    align-content: start;
+    gap: 0.25rem;
+    padding: 0.9rem 0.75rem;
+    min-height: 0;
   }
 
   .nav-item {
     display: flex;
+    min-height: 40px;
     align-items: center;
-    gap: var(--space-2);
-    padding: 0.75rem 0.875rem;
-    border-radius: var(--radius-2);
-    color: var(--color-text-secondary);
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-muted);
     text-decoration: none;
-    min-height: 48px;
-    transition: all var(--motion-fast) var(--ease-standard);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
   }
 
   .nav-item:hover {
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--sidebar-accent) 58%, transparent);
+    color: var(--ui-text-primary);
   }
 
   .nav-item.active {
-    background: var(--color-accent-surface);
-    color: var(--color-text-primary);
-    box-shadow: inset 0 0 0 1px var(--color-accent-primary);
+    background: var(--sidebar-accent);
+    color: var(--ui-text-primary);
+    box-shadow: none;
+  }
+
+  .nav-item:focus-visible,
+  .brand:focus-visible,
+  .plan-card:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
   .nav-icon {
-    width: 28px;
-    height: 28px;
     display: inline-flex;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: var(--color-surface-2);
-    color: inherit;
   }
 
   .nav-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     fill: currentColor;
   }
 
   .nav-label {
     flex: 1;
-    font-weight: 600;
-    font-size: 0.95rem;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .nav-badge {
-    padding: 0.15rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    flex: 0 0 auto;
   }
 
-  .nav-badge.success {
-    background: var(--color-success-surface);
-    color: var(--color-success);
-  }
-
-  .secondary {
-    color: var(--color-text-muted);
-  }
-
-  .sidebar-bottom {
-    margin-top: auto;
+  .sidebar-footer {
     display: grid;
-    gap: var(--space-3);
+    gap: 0.75rem;
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--ui-border-default);
   }
 
-  .sidebar-divider {
-    height: 1px;
-    background: var(--color-border);
-    opacity: 0.35;
-    margin-bottom: var(--space-2);
+  .sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0 0.75rem;
   }
 
-  .language-card {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    padding: var(--space-3);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    background: var(--color-surface-2);
+  .sidebar.collapsed .brand {
+    justify-content: center;
   }
 
-  .language-title {
+  .sidebar.collapsed .brand-wordmark,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed :global(.nav-badge),
+  .sidebar.collapsed .footer-links,
+  .sidebar.collapsed .plan-card {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-nav {
+    padding-inline: 0.625rem;
+  }
+
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0.75rem;
+  }
+
+  .sidebar.collapsed .sidebar-footer {
+    padding: 0.75rem;
+    min-height: 0;
+  }
+
+  .footer-links {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .footer-link {
+    min-height: 36px;
+  }
+
+  .plan-card {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.85rem 0.9rem;
+    border-radius: var(--ui-radius-md);
+    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    background: color-mix(in srgb, var(--sidebar-accent) 64%, transparent);
+    box-shadow: none;
+    color: var(--foreground);
+    text-decoration: none;
+  }
+
+  .plan-card:hover {
+    background: var(--sidebar-accent);
+  }
+
+  .plan-label,
+  .plan-value {
     margin: 0;
-    font-weight: 600;
-    color: var(--color-text-primary);
   }
 
-  .language-description {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.85rem;
+  .plan-label {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
   }
 
-  .language-card :global(.language-toggle) {
-    width: 100%;
-    justify-content: space-between;
+  .plan-value {
+    font-size: 0.875rem;
+    font-weight: 500;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .sidebar {
       display: none;
     }

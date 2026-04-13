@@ -1,10 +1,22 @@
 <script>
-  import { onMount, createEventDispatcher } from 'svelte';
-  import { API_BASE } from "../../config.js";
+  import { createEventDispatcher, onMount } from 'svelte';
+  import Badge from '../../lib/components/ui/Badge.svelte';
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import ModalSurface from '../../lib/components/ui/ModalSurface.svelte';
+  import Tabs from '../../lib/components/ui/Tabs.svelte';
+  import { API_BASE } from '../../config.js';
 
   export let userId;
 
   const dispatch = createEventDispatcher();
+
+  const tabItems = [
+    { value: 'profile', label: 'Profile' },
+    { value: 'files', label: 'Files' },
+    { value: 'sessions', label: 'Sessions' }
+  ];
 
   let user = null;
   let stats = null;
@@ -68,9 +80,8 @@
   }
 
   async function updateUser() {
-    const monthlyLimitValue = form.monthlyLimit === '' || form.monthlyLimit === null
-      ? undefined
-      : Number(form.monthlyLimit);
+    const monthlyLimitValue =
+      form.monthlyLimit === '' || form.monthlyLimit === null ? undefined : Number(form.monthlyLimit);
 
     const response = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
       method: 'PATCH',
@@ -140,378 +151,305 @@
     dispatch('updated');
   }
 
-  const handleBackdropClick = (event) => {
-    if (event.target === event.currentTarget) {
-      dispatch('close');
-    }
-  };
-
-  const handleBackdropKeydown = (event) => {
-    if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      event.stopPropagation();
-      dispatch('close');
-    }
-  };
+  function handleTabChange(event) {
+    activeTab = event.detail.value;
+  }
 
   onMount(fetchUser);
 </script>
 
-<div
-  class="modal-backdrop"
-  role="button"
-  aria-label="Close user detail"
-  tabindex="0"
-  on:click={handleBackdropClick}
-  on:keydown={handleBackdropKeydown}
+<ModalSurface
+  open
+  width="min(980px, 100%)"
+  labelledBy="user-detail-heading"
+  className="user-detail-modal"
+  on:close={() => dispatch('close')}
 >
-  <div
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="user-detail-heading"
-  >
-    <header>
-      <div>
-        <h2 id="user-detail-heading">User Detail</h2>
-        <p class="muted">Manage account, files, and sessions.</p>
-      </div>
-      <button class="close" type="button" on:click={() => dispatch('close')}>
-        Close
-      </button>
-    </header>
+  <header class="modal-header">
+    <div>
+      <h2 id="user-detail-heading">User Detail</h2>
+      <p class="muted">Manage account, files, and sessions.</p>
+    </div>
+    <Button type="button" variant="secondary" size="sm" on:click={() => dispatch('close')}>Close</Button>
+  </header>
 
-    {#if loading}
-      <p class="muted">Loading...</p>
-    {:else if error}
-      <p class="error">{error}</p>
-    {:else}
-      <div class="tab-row" role="tablist" aria-label="User detail sections">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'profile'}
-          class:active={activeTab === 'profile'}
-          on:click={() => (activeTab = 'profile')}
-        >
-          Profile
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'files'}
-          class:active={activeTab === 'files'}
-          on:click={() => (activeTab = 'files')}
-        >
-          Files
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'sessions'}
-          class:active={activeTab === 'sessions'}
-          on:click={() => (activeTab = 'sessions')}
-        >
-          Sessions
-        </button>
-      </div>
+  {#if loading}
+    <p class="muted state-note">Loading...</p>
+  {:else if error}
+    <Card class="error-card" variant="soft" border="strong" padding="sm">{error}</Card>
+  {:else}
+    <Tabs
+      className="user-detail-tabs"
+      items={tabItems}
+      value={activeTab}
+      ariaLabel="User detail sections"
+      mobileScrollable
+      on:change={handleTabChange}
+    />
 
-      {#if activeTab === 'profile'}
-        <div class="profile-grid">
-          <div class="card">
-            <h3>Account</h3>
-            <div class="field">
-              <label for="account-name">Name</label>
+    {#if activeTab === 'profile'}
+      <div class="profile-grid">
+        <Card class="detail-card" variant="base" padding="md">
+          <h3>Account</h3>
+          <div class="field-grid">
+            <FieldShell label="Name" forId="account-name">
               <input id="account-name" name="name" bind:value={form.name} />
-            </div>
-            <div class="field">
-              <label for="account-plan">Plan</label>
+            </FieldShell>
+            <FieldShell label="Plan" forId="account-plan">
               <select id="account-plan" name="plan" bind:value={form.plan}>
                 <option value="free">Free</option>
                 <option value="premium">Premium</option>
               </select>
-            </div>
-            <div class="field">
-              <label for="account-monthly-limit">Monthly Limit</label>
+            </FieldShell>
+            <FieldShell label="Monthly Limit" forId="account-monthly-limit">
               <input id="account-monthly-limit" name="monthlyLimit" type="number" bind:value={form.monthlyLimit} />
-            </div>
-            <div class="field">
-              <label for="account-role">Role</label>
+            </FieldShell>
+            <FieldShell label="Role" forId="account-role">
               <select id="account-role" name="role" bind:value={form.role}>
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
               </select>
-            </div>
-            <div class="actions">
-              <button class="primary" type="button" on:click={updateUser}>Save Changes</button>
-              <button class="secondary" type="button" on:click={toggleBan}>
-                {user.banned ? 'Unban' : 'Ban'} User
-              </button>
-            </div>
+            </FieldShell>
           </div>
 
-          <div class="card">
-            <h3>Stats</h3>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Documents:</strong> {stats?.documents ?? 0}</p>
-            <p><strong>Storage:</strong> {formatBytes(user.storageUsed)}</p>
-            <p><strong>Sessions:</strong> {stats?.sessions ?? 0}</p>
-            <p><strong>Exam Attempts:</strong> {stats?.examAttempts ?? 0}</p>
-            <p><strong>Flashcard Progress:</strong> {stats?.flashcardProgress ?? 0}</p>
-            <p><strong>Last Active:</strong> {user.lastActive ? new Date(user.lastActive).toLocaleString() : '-'}</p>
+          <div class="actions">
+            <Button type="button" variant="primary" size="sm" on:click={updateUser}>Save Changes</Button>
+            <Button type="button" variant={user.banned ? 'success' : 'danger'} size="sm" on:click={toggleBan}>
+              {user.banned ? 'Unban User' : 'Ban User'}
+            </Button>
           </div>
-        </div>
-      {:else if activeTab === 'files'}
-        <div class="card">
-          <h3>User Files</h3>
-          {#if documents.length === 0}
-            <p class="muted">No documents uploaded.</p>
-          {:else}
-            <ul class="list">
-              {#each documents as doc}
-                <li>
-                  <div>
-                    <strong>{doc.originalName}</strong>
-                    <span class="muted">{formatBytes(doc.fileSize)} - {new Date(doc.uploadDate).toLocaleDateString()}</span>
-                  </div>
-                  <button class="danger" type="button" on:click={() => deleteDocument(doc.id)}>Delete</button>
-                </li>
-              {/each}
-            </ul>
-          {/if}
-        </div>
-      {:else}
-        <div class="card">
-          <header class="card-header">
-            <h3>Sessions</h3>
-            <button class="secondary" type="button" on:click={revokeAllSessions}>Revoke All</button>
+        </Card>
+
+        <Card class="detail-card" variant="base" padding="md">
+          <header class="stats-header">
+            <h3>Stats</h3>
+            <Badge tone={user.banned ? 'danger' : 'success'} size="sm">
+              {user.banned ? 'Banned' : 'Active'}
+            </Badge>
           </header>
-          {#if sessions.length === 0}
-            <p class="muted">No active sessions.</p>
-          {:else}
-            <ul class="list">
-              {#each sessions as session}
-                <li>
-                  <div>
-                    <strong>{session.ipAddress || 'Unknown IP'}</strong>
-                    <span class="muted">
-                      Expires {new Date(session.expiresAt).toLocaleString()}
-                      {session.userAgent ? ` - ${session.userAgent}` : ''}
-                    </span>
-                  </div>
-                  <button class="danger" type="button" on:click={() => revokeSession(session.id)}>Revoke</button>
-                </li>
-              {/each}
-            </ul>
-          {/if}
-        </div>
-      {/if}
+          <dl class="stats-list">
+            <div><dt>Email</dt><dd>{user.email}</dd></div>
+            <div><dt>Documents</dt><dd>{stats?.documents ?? 0}</dd></div>
+            <div><dt>Storage</dt><dd>{formatBytes(user.storageUsed)}</dd></div>
+            <div><dt>Sessions</dt><dd>{stats?.sessions ?? 0}</dd></div>
+            <div><dt>Exam Attempts</dt><dd>{stats?.examAttempts ?? 0}</dd></div>
+            <div><dt>Flashcard Progress</dt><dd>{stats?.flashcardProgress ?? 0}</dd></div>
+            <div>
+              <dt>Last Active</dt>
+              <dd>{user.lastActive ? new Date(user.lastActive).toLocaleString() : '-'}</dd>
+            </div>
+          </dl>
+        </Card>
+      </div>
+    {:else if activeTab === 'files'}
+      <Card class="detail-card" variant="base" padding="md">
+        <header class="card-header">
+          <h3>User Files</h3>
+          <Badge tone="neutral" size="sm">{documents.length} total</Badge>
+        </header>
+
+        {#if documents.length === 0}
+          <p class="muted">No documents uploaded.</p>
+        {:else}
+          <ul class="item-list">
+            {#each documents as doc}
+              <li>
+                <div>
+                  <strong>{doc.originalName}</strong>
+                  <span class="muted">{formatBytes(doc.fileSize)} - {new Date(doc.uploadDate).toLocaleDateString()}</span>
+                </div>
+                <Button type="button" variant="danger" size="sm" on:click={() => deleteDocument(doc.id)}>
+                  Delete
+                </Button>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </Card>
+    {:else}
+      <Card class="detail-card" variant="base" padding="md">
+        <header class="card-header">
+          <h3>Sessions</h3>
+          <Button type="button" variant="danger" size="sm" disabled={sessions.length === 0} on:click={revokeAllSessions}>
+            Revoke All
+          </Button>
+        </header>
+
+        {#if sessions.length === 0}
+          <p class="muted">No active sessions.</p>
+        {:else}
+          <ul class="item-list">
+            {#each sessions as session}
+              <li>
+                <div>
+                  <strong>{session.ipAddress || 'Unknown IP'}</strong>
+                  <span class="muted">
+                    Expires {new Date(session.expiresAt).toLocaleString()}
+                    {session.userAgent ? ` - ${session.userAgent}` : ''}
+                  </span>
+                </div>
+                <Button type="button" variant="danger" size="sm" on:click={() => revokeSession(session.id)}>
+                  Revoke
+                </Button>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </Card>
     {/if}
-  </div>
-</div>
+  {/if}
+</ModalSurface>
 
 <style>
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: color-mix(in srgb, var(--color-bg) 65%, rgba(0, 0, 0, 0.55) 35%);
+  .modal-header {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    padding: var(--space-4);
-  }
-
-  .modal {
-    background: var(--color-surface-1);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    padding: var(--space-5);
-    width: min(900px, 100%);
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 32px 64px color-mix(in srgb, var(--color-bg) 70%, transparent);
-  }
-
-  header {
-    display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-4);
-    margin-bottom: var(--space-5);
+    gap: var(--space-3);
+    flex-wrap: wrap;
   }
 
-  .close {
-    border: 1px solid var(--color-border);
-    background: transparent;
+  h2,
+  h3 {
+    margin: 0;
     color: var(--color-text-primary);
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard);
   }
 
-  .close:hover,
-  .close:focus-visible {
-    background: var(--color-surface-2);
-    border-color: var(--color-accent-primary);
-    color: var(--color-text-primary);
-    outline: none;
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
   }
 
-  .tab-row {
-    display: flex;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
+  h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
   }
 
-  .tab-row button {
-    padding: 0.45rem 1rem;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard);
+  .muted {
+    margin: 0.22rem 0 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    display: block;
   }
 
-  .tab-row button.active {
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
-    border-color: var(--color-accent-primary);
+  .state-note {
+    margin: 0;
+    padding: 0.48rem 0.6rem;
+    border: 1px dashed var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-base) 94%, transparent);
+  }
+
+  :global(.user-detail-tabs) {
+    width: 100%;
   }
 
   .profile-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-3);
   }
 
-  .card {
-    background: var(--color-surface-1);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    padding: var(--space-4);
+  :global(.detail-card) {
+    gap: var(--space-2);
+  }
+
+  .field-grid {
     display: grid;
     gap: var(--space-3);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .stats-list {
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .stats-list div {
+    display: grid;
+    gap: 0.12rem;
+  }
+
+  .stats-list dt {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .stats-list dd {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
   }
 
   .card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-
-  .field {
-    display: grid;
     gap: var(--space-2);
-  }
-
-  input,
-  select {
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-1);
-    padding: 0.5rem 0.8rem;
-    color: var(--color-text-primary);
-    transition: border-color var(--motion-fast) var(--ease-standard),
-      box-shadow var(--motion-fast) var(--ease-standard);
-  }
-
-  input:focus-visible,
-  select:focus-visible {
-    outline: none;
-    border-color: var(--color-accent-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
-  }
-
-  .actions {
-    display: flex;
-    gap: var(--space-3);
     flex-wrap: wrap;
   }
 
-  .primary {
-    background: var(--color-accent-primary);
-    border: none;
-    color: var(--color-bg);
-    font-weight: 600;
-    border-radius: var(--radius-1);
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard);
-  }
-
-  .primary:hover,
-  .primary:focus-visible {
-    background: color-mix(in srgb, var(--color-accent-primary) 85%, white 15%);
-    outline: none;
-  }
-
-  .secondary {
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-primary);
-    border-radius: var(--radius-1);
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard);
-  }
-
-  .secondary:hover,
-  .secondary:focus-visible {
-    background: var(--color-surface-2);
-    border-color: var(--color-accent-primary);
-    outline: none;
-  }
-
-  .list {
+  .item-list {
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
     display: grid;
     gap: var(--space-2);
   }
 
-  .list li {
+  .item-list li {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: 0.6rem 0.8rem;
-    border-radius: var(--radius-1);
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-base) 92%, transparent);
+    padding: 0.54rem 0.62rem;
   }
 
-  .danger {
-    border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
-    color: var(--color-danger);
-    background: transparent;
-    border-radius: var(--radius-1);
-    padding: 0.35rem 0.8rem;
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard);
+  .item-list li .muted {
+    word-break: break-word;
   }
 
-  .danger:hover,
-  .danger:focus-visible {
-    background: color-mix(in srgb, var(--color-danger) 18%, transparent);
-    color: color-mix(in srgb, var(--color-danger) 80%, #fff 20%);
-    outline: none;
+  :global(.error-card) {
+    color: color-mix(in srgb, var(--color-danger) 74%, var(--color-text-primary) 26%);
+    border-color: color-mix(in srgb, var(--color-danger) 34%, var(--color-border) 66%);
   }
 
-  .muted {
-    color: var(--color-text-muted);
-  }
+  @media (max-width: 640px) {
+    .actions {
+      width: 100%;
+    }
 
-  .error {
-    color: var(--color-danger);
+    .actions :global(.ui-button) {
+      width: 100%;
+    }
+
+    .item-list li {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .item-list li :global(.ui-button) {
+      width: 100%;
+    }
   }
 </style>

@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import { t } from '../../i18n/t.js';
+  import Button from './Button.svelte';
 
   export let open = false;
   export let title = '';
@@ -41,9 +42,9 @@
         <h2 id={title ? titleId : undefined}>{title}</h2>
         <slot name="subtitle"></slot>
       </div>
-      <button type="button" class="drawer__close" on:click={handleClose}>
+      <Button type="button" className="drawer__close" variant="ghost" size="sm" on:click={handleClose}>
         {t('drawer.close')}
-      </button>
+      </Button>
     </header>
     <div class="drawer__scroll">
       <div class="drawer__content">
@@ -66,7 +67,7 @@
   .drawer-overlay {
     position: fixed;
     inset: 0;
-    background: color-mix(in srgb, black 40%, transparent);
+    background: var(--color-backdrop-strong);
     opacity: 0;
     transition: opacity var(--motion-normal) var(--ease-standard);
     pointer-events: none;
@@ -77,9 +78,9 @@
     inset-block: 0;
     inline-size: var(--drawer-width);
     max-inline-size: min(var(--drawer-width), 100%);
-    background: var(--color-surface-1);
-    border-inline-start: 1px solid var(--color-border);
-    box-shadow: 0 0 40px color-mix(in srgb, var(--color-bg) 70%, transparent);
+    background: var(--ui-surface-overlay);
+    border-inline-start: 1px solid var(--ui-border-subtle);
+    box-shadow: var(--ui-shadow-lg);
     transform: translateX(var(--drawer-hidden-offset, 100%));
     transition: transform var(--motion-normal) var(--ease-standard);
     display: flex;
@@ -90,7 +91,7 @@
     inset-inline-start: 0;
     inset-inline-end: auto;
     border-inline-start: none;
-    border-inline-end: 1px solid var(--color-border);
+    border-inline-end: 1px solid var(--ui-border-subtle);
     --drawer-hidden-offset: -100%;
   }
 
@@ -109,42 +110,26 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-5);
-    border-block-end: 1px solid var(--color-border);
+    padding: var(--space-4);
+    border-block-end: 1px solid var(--ui-border-subtle);
   }
 
   h2 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 0.98rem;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
   .drawer__close {
-    min-inline-size: 44px;
-    min-block-size: 36px;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-muted);
-    font: inherit;
-    cursor: pointer;
-    transition: background var(--motion-fast) var(--ease-standard),
-      border-color var(--motion-fast) var(--ease-standard),
-      color var(--motion-fast) var(--ease-standard);
-  }
-
-  .drawer__close:hover,
-  .drawer__close:focus-visible {
-    color: var(--color-text-primary);
-    background: var(--color-surface-2);
-    border-color: var(--color-accent-primary);
-    outline: none;
+    min-inline-size: 70px;
+    justify-self: end;
   }
 
   .drawer__scroll {
     flex: 1;
     overflow-y: auto;
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-3) var(--space-4);
   }
 
   .drawer__content {
@@ -154,15 +139,15 @@
   }
 
   .drawer__footer {
-    padding: var(--space-4) var(--space-5);
-    border-block-start: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-4);
+    border-block-start: 1px solid var(--ui-border-subtle);
     display: flex;
     justify-content: flex-end;
     gap: var(--space-2);
   }
 
   :global(html[dir='rtl']) .drawer {
-    border-inline-start: 1px solid var(--color-border);
+    border-inline-start: 1px solid var(--ui-border-subtle);
     border-inline-end: none;
   }
 

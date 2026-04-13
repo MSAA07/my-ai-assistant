@@ -1,79 +1,55 @@
 # AI Study Assistant Frontend
 
-Svelte + Vite frontend for the AI Study Assistant. The UI uploads study documents, tracks document-owned processing state, and renders summaries, flashcards, and exam questions returned by the backend.
+Current frontend for the AI Study Assistant Study Hub.
 
-## Lifecycle Model
+## What This Repo Owns
 
-The frontend treats the `Document` record as the source of truth for processing state.
+- Svelte frontend runtime
+- hash-based routing and authenticated shell
+- canonical Study Hub library/document UX
+- shared UI primitives and tokenized styling
+- Better Auth browser-session integration
+- backend API consumption for upload, study, admin, and settings flows
 
-- `queued`
-- `processing`
-- `complete`
-- `failed`
+## Quick Orientation
 
-`/api/jobs/:id` is still polled for worker progress, but list and detail views both rely on `Document.processingStatus`, `processingJobId`, `processingError`, and `processedAt`.
+- canonical study routes live under `#/study`
+- public auth routes are `#/`, `#/sign-in`, and `#/sign-up`
+- `AppShell` is the default authenticated shell
+- `StudyHubIndex.svelte` and `StudyHubDocument.svelte` are the canonical Study Hub screens
+- legacy routes remain for legacy compatibility only, not primary UX
+- tokens live in `src/lib/styles/tokens.css`
+- shared primitives live in `src/lib/components/ui/*`
+- runtime detail for `Document.processingStatus`, `DocumentGeneration`, and `Job.status (worker-only)` lives in `SYSTEM_OVERVIEW.md`
 
-## Key Frontend Flows
-
-- Upload a PDF, DOCX, or PPTX with `POST /api/upload`
-- Refresh safely while processing by reloading `GET /api/document/:id`
-- Keep the dashboard list in sync with `GET /api/user/me`
-- Open a document directly and render finalized study materials after `complete`
-
-## Backend Endpoints Used by the UI
-
-- `POST /api/auth/sign-up/email`
-- `POST /api/auth/sign-in/email`
-- `GET /api/auth/get-session`
-- `POST /api/auth/sign-out`
-- `GET /api/user/me`
-- `POST /api/upload`
-- `GET /api/document/:id`
-- `GET /api/jobs/:id`
-- `DELETE /api/document/:id`
-- `POST /api/flashcard/progress`
-- `POST /api/exam/attempt`
-
-## Local Development
-
-Install dependencies:
+## Development
 
 ```bash
 npm install
-```
-
-Start the dev server:
-
-```bash
 npm run dev
-```
-
-Create a production build:
-
-```bash
 npm run build
-```
-
-Preview the built app locally:
-
-```bash
 npm run preview
 ```
 
-## Environment
+Environment:
 
-- `VITE_API_BASE_URL`
-  Optional explicit backend base URL.
+- `VITE_API_BASE_URL` optionally overrides host-derived backend resolution.
 
-If `VITE_API_BASE_URL` is not set, the frontend derives a safe fallback from the current hostname:
+Host-derived backend mapping in `src/config.js`:
 
-- local development -> `http://localhost:3001`
-- Vercel preview/stage deployments -> Railway staging backend
-- Vercel production deployments -> Railway production backend
+- local Vite dev on `localhost` / `127.0.0.1` -> same-origin dev proxy
+- local non-dev host -> staging backend
+- Vercel preview/stage hosts -> staging backend
+- `studymaxing.com`, `www.studymaxing.com`, `my-ai-assistant.vercel.app`, and production-like hosts -> production backend
 
-## Deployment
+## Related Docs
 
-- `stage` auto-deploys to Vercel preview
-- `production` auto-deploys to Vercel production
+- `SYSTEM_OVERVIEW.md`: primary runtime, lifecycle, and contract source of truth
+- `PROJECT_STRUCTURE.md`: file and folder ownership
+- `UI_POST_ROLLOUT.md`: current UI state and guarantees
+- `README.md`: this high-level entry point
+- `src/lib/components/ui/PRIMITIVES.md`: primitive usage guidance
+- `src/lib/components/ui/DATA_SURFACE_PATTERN.md`: dense admin/data-surface guidance
+- `docs/*`: archival rollout references, not current runtime source of truth
 
-The frontend expects the backend worker lifecycle to be stable before production promotion, including worker leases, stale-job recovery, and document/list detail consistency across refreshes.
+Last Updated: April 2, 2026

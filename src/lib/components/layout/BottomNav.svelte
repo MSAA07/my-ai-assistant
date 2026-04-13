@@ -1,9 +1,22 @@
 <script>
   import { direction } from '../../stores/language.js';
   import { t } from '../../i18n/t.js';
+  import Badge from '../ui/Badge.svelte';
 
   export let items = [];
   export let activeId = '';
+
+  const badgeToneMap = {
+    success: 'success',
+    info: 'info',
+    warning: 'warning',
+    danger: 'danger',
+    accent: 'accent',
+  };
+
+  function labelFor(item) {
+    return item?.labelKey ? t(item.labelKey) : item?.label ?? '';
+  }
 </script>
 
 <nav class={`bottom-nav ${$direction === 'rtl' ? 'rtl' : 'ltr'}`} aria-label={t('nav.mobileLabel')}>
@@ -18,8 +31,6 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12.75A1.75 1.75 0 0 1 5.25 11h5.5A1.75 1.75 0 0 1 12.5 12.75v6.5A1.75 1.75 0 0 1 10.75 21h-5.5A1.75 1.75 0 0 1 3.5 19.25v-6.5Zm9-8A1.75 1.75 0 0 1 14.25 3h4.5A1.75 1.75 0 0 1 20.5 4.75v4.5A1.75 1.75 0 0 1 18.75 11h-4.5A1.75 1.75 0 0 1 12.5 9.25v-4.5Z" /></svg>
         {:else if item.icon === 'documents'}
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2.75A2.75 2.75 0 0 0 4.25 5.5v13A2.75 2.75 0 0 0 7 21.25h10A2.75 2.75 0 0 0 19.75 18.5V9.81a2.75 2.75 0 0 0-.81-1.94l-4.06-4.06A2.75 2.75 0 0 0 12.94 3H7Zm9.5 6.75H13a1 1 0 0 1-1-1V4.5" /></svg>
-        {:else if item.icon === 'upload'}
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.75 15A2.75 2.75 0 0 1 7.5 12.25h1.75v-3a.75.75 0 0 1 1.28-.53L12 10.19l1.47-1.47a.75.75 0 0 1 1.28.53v3h1.75A2.75 2.75 0 0 1 19.25 15v3.25A2.75 2.75 0 0 1 16.5 21h-9A2.75 2.75 0 0 1 4.75 18.25V15Zm7.25-11a.75.75 0 0 1 .75.75v7.19l1.22-1.22a.75.75 0 1 1 1.06 1.06l-2.5 2.5a.75.75 0 0 1-1.06 0l-2.5-2.5a.75.75 0 0 1 1.06-1.06l1.22 1.22V4.75A.75.75 0 0 1 12 4Z" /></svg>
         {:else if item.icon === 'exams'}
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.25A2.25 2.25 0 0 1 7.75 2h8.5A2.25 2.25 0 0 1 18.5 4.25v15.5a.25.25 0 0 1-.38.21L12 16.65l-6.12 3.31a.25.25 0 0 1-.38-.21V4.25Z" /></svg>
         {:else if item.icon === 'flashcards'}
@@ -28,9 +39,11 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a3.25 3.25 0 0 1 2.79 1.58l.38.63 2.37.46a3.25 3.25 0 0 1 2.6 3.53l-.09.73.57.9a3.25 3.25 0 0 1-.55 4.08l-.58.59.1.82a3.25 3.25 0 0 1-2.62 3.53l-2.37.46-.38.63a3.25 3.25 0 0 1-5.58 0l-.38-.63-2.37-.46a3.25 3.25 0 0 1-2.6-3.53l.09-.73-.57-.9a3.25 3.25 0 0 1 .55-4.08l.58-.59-.1-.82a3.25 3.25 0 0 1 2.62-3.53l2.37-.46.38-.63A3.25 3.25 0 0 1 12 2Z" /></svg>
         {/if}
       </span>
-      <span class="label">{item.label}</span>
+      <span class="label">{labelFor(item)}</span>
       {#if item.badge}
-        <span class={`badge ${item.badge.variant ?? ''}`}>{item.badge.label}</span>
+        <Badge className="badge" size="xs" tone={badgeToneMap[item.badge.variant] ?? 'neutral'}>
+          {item.badge.label}
+        </Badge>
       {/if}
     </a>
   {/each}
@@ -44,10 +57,11 @@
     z-index: 95;
     display: none;
     pointer-events: none;
-    background: var(--color-surface-overlay);
-    backdrop-filter: blur(16px);
-    border-top: 1px solid var(--color-border);
-    padding: var(--space-2);
+    background: color-mix(in srgb, var(--ui-surface-card) 90%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--ui-border-default);
+    min-height: var(--size-bottom-nav);
+    padding: var(--space-2) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
     justify-content: space-around;
   }
 
@@ -65,62 +79,62 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    min-height: 56px;
-    padding: var(--space-1);
-    color: var(--color-text-secondary);
+    gap: 0.2rem;
+    min-height: 52px;
+    padding: 0.35rem var(--space-1);
+    color: var(--ui-text-secondary);
     text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border-radius: var(--radius-1);
-    transition: all var(--motion-fast) var(--ease-standard);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-radius: var(--ui-radius-sm);
+    transition: border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .bottom-nav-item:hover {
+    border-color: var(--ui-border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--ui-text-primary);
   }
 
   .bottom-nav-item.active {
-    color: var(--color-text-primary);
-    background: var(--color-accent-surface);
+    border-color: var(--ui-border-strong);
+    color: var(--ui-text-primary);
+    background: var(--ui-surface-ghost);
+    box-shadow: none;
+  }
+
+  .bottom-nav-item:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring);
   }
 
   .icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
   .icon svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     fill: currentColor;
   }
 
   .label {
-    font-size: 0.75rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.01em;
   }
 
   .badge {
-    padding: 0.1rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    line-height: 1;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
-    border: 1px solid var(--color-border);
-    color: var(--color-text-secondary);
   }
 
-  .badge.info {
-    border-color: var(--color-info);
-    color: var(--color-info);
-  }
-
-  .badge.success {
-    border-color: var(--color-success);
-    color: var(--color-success);
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .bottom-nav {
       display: flex;
       pointer-events: auto;

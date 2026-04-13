@@ -1,4 +1,7 @@
 <script>
+  import PageLayout from '../lib/components/layout/PageLayout.svelte';
+  import PageHeader from '../lib/components/ui/PageHeader.svelte';
+  import Tabs from '../lib/components/ui/Tabs.svelte';
   import AdminStats from './admin/AdminStats.svelte';
   import UserTable from './admin/UserTable.svelte';
   import SessionManager from './admin/SessionManager.svelte';
@@ -6,38 +9,39 @@
   import AuditLogViewer from './admin/AuditLogViewer.svelte';
 
   const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'users', label: 'Users' },
-    { id: 'sessions', label: 'Sessions' },
-    { id: 'storage', label: 'Storage' },
-    { id: 'audit', label: 'Audit Logs' }
+    { value: 'overview', label: 'Overview' },
+    { value: 'users', label: 'Users' },
+    { value: 'sessions', label: 'Sessions' },
+    { value: 'storage', label: 'Storage' },
+    { value: 'audit', label: 'Audit Logs' }
   ];
 
   let activeTab = 'overview';
+
+  function handleTabChange(event) {
+    activeTab = event.detail.value;
+  }
 </script>
 
-<div class="admin-shell">
-  <header class="admin-header">
-    <div>
-      <p class="eyebrow">Admin Console</p>
-      <h1>User Management & Security</h1>
-      <p class="subtitle">Monitor platform activity, manage users, and audit actions.</p>
-    </div>
-  </header>
+<PageLayout class="admin-page" width="full" gap="spacious">
+  <PageHeader
+    eyebrow="Admin Console"
+    title="User Management & Security"
+    subtitle="Monitor platform activity, manage users, and audit actions."
+    className="admin-header"
+  />
 
-  <nav class="admin-tabs">
-    {#each tabs as tab}
-      <button
-        class="tab"
-        class:active={activeTab === tab.id}
-        on:click={() => (activeTab = tab.id)}
-      >
-        {tab.label}
-      </button>
-    {/each}
-  </nav>
+  <Tabs
+    className="admin-tabs"
+    ariaLabel="Admin sections"
+    items={tabs}
+    value={activeTab}
+    variant="underline"
+    mobileScrollable
+    on:change={handleTabChange}
+  />
 
-  <section class="admin-content">
+  <div class="admin-content">
     {#if activeTab === 'overview'}
       <AdminStats />
     {:else if activeTab === 'users'}
@@ -49,85 +53,48 @@
     {:else if activeTab === 'audit'}
       <AuditLogViewer />
     {/if}
-  </section>
-</div>
+  </div>
+</PageLayout>
 
 <style>
-  .admin-shell {
-    padding: 2rem;
-    background: var(--color-surface);
-    border-radius: 1.25rem;
-    border: 1px solid var(--color-border);
+  :global(.admin-page) {
+    display: grid;
+    gap: var(--study-flow-page-gap);
+    min-width: 0;
   }
 
-  .admin-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    margin-bottom: 2rem;
+  :global(.admin-header) {
+    max-width: 44rem;
   }
 
-  .eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 0.7rem;
-    color: var(--color-text-secondary);
-    margin: 0 0 0.5rem;
+  :global(.admin-page .admin-tabs) {
+    width: fit-content;
+    max-width: 100%;
+    gap: 1.5rem;
+    border-bottom-color: color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
   }
 
-  .admin-header h1 {
-    font-size: 2rem;
-    margin: 0 0 0.5rem;
-    color: var(--color-text);
-  }
-
-  .subtitle {
-    color: var(--color-text-secondary);
-    margin: 0;
-  }
-
-  .admin-tabs {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.5rem;
-  }
-
-  .tab {
-    padding: 0.6rem 1.2rem;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    background: rgba(96, 165, 250, 0.08);
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .tab:hover {
-    color: var(--color-text);
-    border-color: rgba(96, 165, 250, 0.35);
-  }
-
-  .tab.active {
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.25), rgba(139, 92, 246, 0.2));
-    color: var(--color-text);
-    border-color: rgba(96, 165, 250, 0.5);
+  :global(.admin-page .admin-tabs .ui-tabs__tab) {
+    min-width: 0;
+    justify-content: flex-start;
+    padding: 0 0 0.875rem;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
 
   .admin-content {
-    display: grid;
-    gap: 1.5rem;
+    min-width: 0;
   }
 
   @media (max-width: 640px) {
-    .admin-shell {
-      padding: 1.5rem;
+    :global(.admin-page) {
+      gap: 1.25rem;
     }
 
-    .admin-header h1 {
-      font-size: 1.6rem;
+    :global(.admin-page .admin-tabs .ui-tabs__tab) {
+      min-width: max-content;
+      padding-bottom: 0.8rem;
+      font-size: 0.9rem;
     }
   }
 </style>

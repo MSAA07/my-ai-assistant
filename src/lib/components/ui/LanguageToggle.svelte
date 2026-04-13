@@ -1,6 +1,7 @@
 <script>
   import { availableLanguages, language } from '../../stores/language.js';
   import { t } from '../../i18n/t.js';
+  import Button from './Button.svelte';
 
   $: currentLanguage = $language;
 
@@ -8,6 +9,10 @@
     if (lang !== currentLanguage) {
       $language = lang;
     }
+  }
+
+  function handleChange(event) {
+    select(event.detail.value);
   }
 
   $: localizedLanguages = availableLanguages.map((lang) => ({
@@ -18,76 +23,44 @@
 
 <div class="language-toggle" role="group" aria-label={t('language.toggleLabel')}>
   {#each localizedLanguages as lang}
-    <button
-      class="toggle-option"
+    <Button
       type="button"
-      aria-pressed={currentLanguage === lang.code}
+      variant={currentLanguage === lang.code ? 'primary' : 'outline'}
+      size="sm"
+      className={`language-toggle__button ${currentLanguage === lang.code ? 'language-toggle__button--active' : ''}`}
       on:click={() => select(lang.code)}
+      aria-pressed={currentLanguage === lang.code}
     >
-      <span class="option-code">{lang.shortLabel}</span>
-      <span class="option-label">{lang.label}</span>
-    </button>
+      <span class="language-toggle__label">{lang.label}</span>
+      <span class="language-toggle__meta">{lang.shortLabel}</span>
+    </Button>
   {/each}
 </div>
 
 <style>
   .language-toggle {
-    display: inline-flex;
-    gap: var(--space-1);
-    padding: var(--space-1);
-    border-radius: var(--radius-2);
-    background: var(--color-surface-1);
-    border: 1px solid var(--color-border);
+    display: flex;
+    gap: var(--ui-space-2);
+    flex-wrap: wrap;
+    min-width: 200px;
   }
 
-  .toggle-option {
-    min-width: 44px;
-    min-height: 44px;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    padding: var(--space-1) var(--space-3);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--color-text-muted);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-1);
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
+  :global(.language-toggle__button.ui-button) {
+    min-width: 0;
+    box-shadow: none;
+    padding-inline: var(--ui-space-3);
   }
 
-  .toggle-option[aria-pressed="true"] {
-    color: var(--color-text-primary);
-    background: var(--color-accent-surface);
-    box-shadow: 0 0 0 1px var(--color-accent-primary) inset;
+  :global(.language-toggle__button--active.ui-button) {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 14%, transparent);
   }
 
-  .toggle-option:hover {
-    color: var(--color-text-primary);
+  .language-toggle__label {
+    font-weight: 700;
   }
 
-  .option-code {
-    font-size: var(--font-size-xs);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .option-label {
-    font-size: var(--font-size-sm);
-  }
-
-  @media (max-width: 480px) {
-    .toggle-option {
-      padding: var(--space-1) var(--space-2);
-      flex-direction: row;
-      gap: var(--space-1);
-    }
-
-    .option-label {
-      font-size: var(--font-size-xs);
-    }
+  .language-toggle__meta {
+    font-size: 0.78rem;
+    opacity: 0.78;
   }
 </style>

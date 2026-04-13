@@ -1,6 +1,9 @@
 <script>
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
+  import Badge from '../ui/Badge.svelte';
+  import MenuItem from '../ui/MenuItem.svelte';
+  import MenuSurface from '../ui/MenuSurface.svelte';
   import { ENABLE_ARABIC_UI } from '../../config/features.js';
   import { t } from '../../i18n/t.js';
 
@@ -8,10 +11,11 @@
   export let userName = '';
   export let userEmail = '';
   export let planLabel = '';
+  export let sidebarCollapsed = false;
 
   const dispatch = createEventDispatcher();
   let menuOpen = false;
-  let avatarButton;
+  let accountWrapper;
 
   function toggleMenu() {
     menuOpen = !menuOpen;
@@ -23,14 +27,23 @@
 
   function handleOutsideClick(event) {
     if (!menuOpen) return;
-    if (avatarButton && !avatarButton.contains(event.target)) {
+    if (accountWrapper && !accountWrapper.contains(event.target)) {
       closeMenu();
     }
+  }
+
+  function handleProfile() {
+    dispatch('openProfile');
+    closeMenu();
   }
 
   function handleSignOut() {
     dispatch('signOut');
     closeMenu();
+  }
+
+  function handleSidebarToggle() {
+    dispatch('toggleSidebar');
   }
 
   onMount(() => {
@@ -56,52 +69,71 @@
 </script>
 
 <header class="topbar">
-  <div class="topbar-left">
-    <h1>{pageTitle || t('topbar.defaultTitle')}</h1>
+  <div class="title-area">
+    <button
+      class="sidebar-toggle"
+      type="button"
+      on:click={handleSidebarToggle}
+      aria-label={sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
+      title={sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4.75 4A1.75 1.75 0 0 0 3 5.75v12.5A1.75 1.75 0 0 0 4.75 20h14.5A1.75 1.75 0 0 0 21 18.25V5.75A1.75 1.75 0 0 0 19.25 4H4.75Zm4.5 1.5v13h10a.25.25 0 0 0 .25-.25V5.75a.25.25 0 0 0-.25-.25h-10ZM4.75 5.5h3v13h-3a.25.25 0 0 1-.25-.25V5.75c0-.14.11-.25.25-.25Z" />
+      </svg>
+      <span class="toggle-label">
+        {sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
+      </span>
+    </button>
+
+    <h1 class="page-title">{pageTitle || t('topbar.defaultTitle')}</h1>
   </div>
 
-  <div class="topbar-right">
+  <div class="utility-area">
     {#if planLabel}
-      <span class="plan-pill">{planLabel}</span>
+      <Badge className="plan-pill" tone="neutral" size="sm">{planLabel}</Badge>
     {/if}
+
     {#if ENABLE_ARABIC_UI}
       <LanguageToggle />
     {/if}
+
     <button
-      class="icon-button"
+      class="utility-button"
       type="button"
       disabled
       aria-disabled="true"
-      title={t('common.comingSoon')}
       aria-label={t('topbar.notificationsComingSoon')}
+      title={t('common.comingSoon')}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v2.88l-.95 2.86A1.75 1.75 0 0 0 6.69 17h10.62a1.75 1.75 0 0 0 1.64-2.26L18 11.88V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z" /></svg>
     </button>
-    <div class="avatar-wrapper">
+
+    <div class="account-wrapper" bind:this={accountWrapper}>
       <button
-        class="avatar-button"
+        class="account-trigger"
         type="button"
-        on:click={toggleMenu}
-        bind:this={avatarButton}
+        on:click|stopPropagation={toggleMenu}
         aria-haspopup="menu"
         aria-expanded={menuOpen}
+        aria-label={t('topbar.profile')}
       >
-        <span class="avatar-initials">{initials}</span>
+        <span class="account-avatar">{initials}</span>
       </button>
 
       {#if menuOpen}
-        <div class="menu" role="menu">
+        <MenuSurface className="account-menu" role="menu" minWidth="220px">
           <div class="menu-header">
-            <span class="menu-name">{userName}</span>
-            <span class="menu-email">{userEmail}</span>
+            <span class="menu-name">{userName || t('settings.account.anonymous')}</span>
+            <span class="menu-email">{userEmail || t('settings.account.noEmail')}</span>
           </div>
-          <button class="menu-item" role="menuitem" type="button" on:click={() => dispatch('openProfile')}>
+
+          <MenuItem on:click={handleProfile}>
             {t('topbar.profile')}
-          </button>
-          <button class="menu-item" role="menuitem" type="button" on:click={handleSignOut}>
+          </MenuItem>
+          <MenuItem on:click={handleSignOut}>
             {t('topbar.logout')}
-          </button>
-        </div>
+          </MenuItem>
+        </MenuSurface>
       {/if}
     </div>
   </div>
@@ -109,150 +141,223 @@
 
 <style>
   .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 90;
+    position: relative;
+    z-index: 1;
     display: flex;
+    min-height: var(--size-topbar);
+    flex: 0 0 auto;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
-    height: var(--size-topbar);
-    padding: 0 var(--space-4);
-    background: var(--color-surface-overlay);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--color-border);
+    gap: var(--ui-space-4);
+    padding: 0 max(var(--layout-shell-padding-inline), env(safe-area-inset-left))
+      0 max(var(--layout-shell-padding-inline), env(safe-area-inset-right));
+    border-bottom: 1px solid var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-surface-card) 90%, var(--ui-bg-page) 10%);
+    backdrop-filter: blur(10px);
   }
 
-  .topbar h1 {
-    margin: 0;
-    font-size: 1.25rem;
-    color: var(--color-text-primary);
-  }
-
-  .topbar-right {
-    display: inline-flex;
+  .title-area {
+    display: flex;
+    min-width: 0;
     align-items: center;
-    gap: var(--space-3);
+    gap: 0.75rem;
   }
 
-  .plan-pill {
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    background: var(--color-success-surface);
-    color: var(--color-success);
-    font-size: 0.8rem;
+  .page-title {
+    margin: 0;
+    min-width: 0;
+    color: var(--ui-text-primary);
+    font-size: 1rem;
     font-weight: 600;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .icon-button {
-    width: 44px;
-    height: 44px;
+  .sidebar-toggle {
     display: inline-flex;
+    width: 32px;
+    min-height: 32px;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
+    gap: 0;
+    padding: 0;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-sm);
     background: transparent;
-    color: var(--color-text-muted);
+    box-shadow: none;
+    color: var(--ui-text-secondary);
     cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
+    transition: background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
   }
 
-  .icon-button:hover {
-    color: var(--color-text-primary);
-    border-color: var(--color-accent-primary);
+  .sidebar-toggle:hover {
+    background: var(--ui-surface-ghost);
+    color: var(--ui-text-primary);
   }
 
-  .icon-button:disabled {
-    opacity: 0.5;
-    border-color: var(--color-border);
-    cursor: not-allowed;
+  .sidebar-toggle:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
-  .icon-button svg {
-    width: 22px;
-    height: 22px;
+  .sidebar-toggle svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
     fill: currentColor;
   }
 
-  .avatar-wrapper {
+  .toggle-label {
+    display: none;
+  }
+
+  .utility-area {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 0 0 auto;
+  }
+
+  :global(.plan-pill) {
+    min-height: 24px;
+    padding-inline: 0.625rem;
+    border-radius: var(--ui-radius-sm);
+    border-color: transparent;
+    background: color-mix(in srgb, var(--ui-surface-secondary) 82%, transparent);
+    color: var(--ui-text-primary);
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .utility-button,
+  .account-trigger {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 48%, transparent);
+    color: var(--ui-text-muted);
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard);
+  }
+
+  .utility-button:hover:enabled,
+  .account-trigger:hover,
+  .account-trigger[aria-expanded='true'] {
+    background: var(--ui-surface-ghost);
+    color: var(--ui-text-primary);
+  }
+
+  .utility-button:disabled {
+    cursor: default;
+    opacity: 1;
+  }
+
+  .utility-button:focus-visible,
+  .account-trigger:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
+  }
+
+  .utility-button svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  .account-wrapper {
     position: relative;
   }
 
-  .avatar-button {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid transparent;
-    background: var(--color-accent-surface);
-    color: var(--color-accent-primary);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
+  .account-trigger {
+    width: 32px;
+    height: 32px;
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
+    background: color-mix(in srgb, var(--card) 78%, var(--muted) 22%);
+    color: var(--foreground);
+    box-shadow: none;
   }
 
-  .avatar-button:hover,
-  .avatar-button[aria-expanded="true"] {
-    box-shadow: 0 0 0 1px var(--color-accent-primary) inset;
+  .account-avatar {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
   }
 
-  .menu {
+  :global(.account-menu) {
     position: absolute;
     inset-inline-end: 0;
-    margin-top: var(--space-2);
-    background: var(--color-surface-1);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2);
-    box-shadow: 0 20px 40px var(--color-shadow);
-    min-width: 220px;
-    padding: var(--space-2);
-    display: grid;
-    gap: var(--space-1);
+    top: calc(100% + 0.5rem);
+    z-index: 40;
   }
 
   .menu-header {
-    padding: var(--space-2);
-    border-bottom: 1px solid var(--color-border);
     display: grid;
     gap: 0.25rem;
+    margin-bottom: 0.25rem;
+    padding: 0.5rem 0.625rem 0.625rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .menu-name,
+  .menu-email {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .menu-name {
-    font-weight: 600;
-    color: var(--color-text-primary);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
   }
 
   .menu-email {
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
   }
 
-  .menu-item {
-    width: 100%;
-    min-height: 40px;
-    padding: 0.5rem var(--space-2);
-    border-radius: var(--radius-1);
-    border: none;
-    background: transparent;
-    text-align: start;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
-  }
-
-  .menu-item:hover {
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .topbar {
-      padding: 0 var(--space-3);
+      padding:
+        0
+        max(var(--ui-space-4), env(safe-area-inset-right))
+        0
+        max(var(--ui-space-4), env(safe-area-inset-left));
+      gap: 0.75rem;
     }
 
-    .topbar h1 {
-      font-size: 1.05rem;
+    .sidebar-toggle {
+      display: none;
+    }
+
+    .utility-area {
+      gap: 0.5rem;
+    }
+
+    :global(.plan-pill) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .toggle-label {
+      display: none;
+    }
+
+    .sidebar-toggle {
+      padding-inline: 0.625rem;
     }
   }
 </style>

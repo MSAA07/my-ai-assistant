@@ -1,10 +1,17 @@
 <script>
   import { onMount } from 'svelte';
-  import { API_BASE } from "../../config.js";
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import DataSurface from '../../lib/components/ui/DataSurface.svelte';
+  import StatCard from '../../lib/components/ui/StatCard.svelte';
+  import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
 
+  const CACHE_KEY = 'page:admin:stats';
 
   let stats = null;
   let loading = true;
+  let refreshing = false;
   let error = '';
 
   const formatBytes = (bytes) => {
@@ -16,9 +23,13 @@
     return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
   };
 
-  async function fetchStats() {
-    loading = true;
-    error = '';
+  async function fetchStats({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const response = await fetch(`${API_BASE}/api/admin/analytics`, {
@@ -31,121 +42,82 @@
       }
 
       stats = data;
+      writePageCache(CACHE_KEY, { loaded: true, stats });
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
-  onMount(fetchStats);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded && cached?.stats) {
+      stats = cached.stats;
+      loading = false;
+    }
+    void fetchStats({ background: Boolean(cached?.loaded && cached?.stats) });
+  });
 </script>
 
-<section class="stats-panel">
-  <header>
-    <h2>Platform Overview</h2>
-    <button on:click={fetchStats}>Refresh</button>
-  </header>
+<DataSurface
+  className="admin-overview"
+  title="Platform Overview"
+  description="Key activity and usage indicators."
+  tableMinWidth="640px"
+  compact
+>
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchStats({ background: Boolean(stats) })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
-  {#if loading}
-    <p class="muted">Loading analytics...</p>
-  {:else if error}
-    <p class="error">{error}</p>
-  {:else if stats}
+  <svelte:fragment slot="state">
+    {#if loading && !stats}
+      <p class="ui-data-state-note">Loading analytics...</p>
+    {:else if error}
+      <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
+    {/if}
+  </svelte:fragment>
+
+  {#if !loading && !error && stats}
     <div class="stats-grid">
-      <div class="stat-card">
-        <p class="label">Total Users</p>
-        <h3>{stats.totals.users}</h3>
-        <span class="meta">Active 24h: {stats.activeUsers.last24h}</span>
-      </div>
-      <div class="stat-card">
-        <p class="label">Documents</p>
-        <h3>{stats.totals.documents}</h3>
-        <span class="meta">Active 7d: {stats.activeUsers.last7d}</span>
-      </div>
-      <div class="stat-card">
-        <p class="label">Storage Processed</p>
-        <h3>{formatBytes(stats.totals.storageBytes)}</h3>
-        <span class="meta">Active 30d: {stats.activeUsers.last30d}</span>
-      </div>
-      <div class="stat-card">
-        <p class="label">Active Sessions</p>
-        <h3>{stats.totals.activeSessions}</h3>
-        <span class="meta">Across all devices</span>
-      </div>
+      <StatCard className="metric-card" label="Total Users" value={stats.totals.users} meta={`Active 24h: ${stats.activeUsers.last24h}`} />
+      <StatCard className="metric-card" label="Documents" value={stats.totals.documents} meta={`Active 7d: ${stats.activeUsers.last7d}`} />
+      <StatCard className="metric-card" label="Storage Processed" value={formatBytes(stats.totals.storageBytes)} meta={`Active 30d: ${stats.activeUsers.last30d}`} />
+      <StatCard className="metric-card" label="Active Sessions" value={stats.totals.activeSessions} meta="Across all devices" />
     </div>
   {/if}
-</section>
+</DataSurface>
 
 <style>
-  .stats-panel {
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    padding: 1.5rem;
-  }
-
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-
-  h2 {
-    margin: 0;
-    color: var(--color-text);
-  }
-
-  button {
-    padding: 0.45rem 1rem;
-    border-radius: 999px;
-    border: 1px solid rgba(96, 165, 250, 0.4);
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  button:hover {
-    background: rgba(96, 165, 250, 0.15);
+  :global(.admin-overview) {
+    gap: 0.875rem;
+    background: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
   }
 
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 
-  .stat-card {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    border-radius: 0.9rem;
-    padding: 1rem;
+  :global(.metric-card) {
+    min-height: 104px;
   }
 
-  .label {
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-    margin: 0 0 0.5rem;
+  @media (max-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
-  h3 {
-    margin: 0 0 0.35rem;
-    font-size: 1.6rem;
-    color: var(--color-text);
-  }
-
-  .meta {
-    font-size: 0.8rem;
-    color: #94a3b8;
-  }
-
-  .muted {
-    color: var(--color-text-secondary);
-  }
-
-  .error {
-    color: #fca5a5;
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

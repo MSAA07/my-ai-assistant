@@ -1,10 +1,18 @@
 <script>
   import { onMount } from 'svelte';
-  import { API_BASE } from "../../config.js";
+  import Badge from '../../lib/components/ui/Badge.svelte';
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import DataSurface from '../../lib/components/ui/DataSurface.svelte';
+  import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import { API_BASE } from '../../config.js';
+  import { readPageCache, writePageCache } from '../../stores/pageCache.js';
 
+  const CACHE_KEY = 'page:admin:audit';
 
   let logs = [];
   let loading = true;
+  let refreshing = false;
   let error = '';
   let actionFilter = 'all';
   let adminFilter = '';
@@ -29,9 +37,13 @@
     'VIEW_AUDIT_LOGS'
   ];
 
-  async function fetchLogs() {
-    loading = true;
-    error = '';
+  async function fetchLogs({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+      error = '';
+    }
 
     try {
       const params = new URLSearchParams();
@@ -48,46 +60,68 @@
       }
 
       logs = data.logs || [];
+      writePageCache(CACHE_KEY, {
+        loaded: true,
+        logs,
+        actionFilter,
+        adminFilter
+      });
     } catch (err) {
       error = err.message;
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
-  onMount(fetchLogs);
+  onMount(() => {
+    const cached = readPageCache(CACHE_KEY);
+    if (cached?.loaded) {
+      logs = Array.isArray(cached.logs) ? cached.logs : [];
+      actionFilter = cached.actionFilter || 'all';
+      adminFilter = cached.adminFilter || '';
+      loading = false;
+    }
+    void fetchLogs({ background: Boolean(cached?.loaded) });
+  });
 </script>
 
-<section class="audit-panel">
-  <header>
-    <div>
-      <h2>Audit Logs</h2>
-      <p class="muted">Track sensitive admin activity and security events.</p>
-    </div>
-    <button on:click={fetchLogs}>Refresh</button>
-  </header>
+<DataSurface title="Audit Logs" description="Track sensitive admin activity and security events." tableMinWidth="1040px">
+  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchLogs({ background: logs.length > 0 })} disabled={loading || refreshing}>
+    {refreshing ? 'Refreshing...' : 'Refresh'}
+  </Button>
 
-  <div class="filters">
-    <select bind:value={actionFilter} on:change={fetchLogs}>
-      <option value="all">All actions</option>
-      {#each actions as action}
-        <option value={action}>{action.replaceAll('_', ' ')}</option>
-      {/each}
-    </select>
-    <input
-      placeholder="Admin ID"
-      bind:value={adminFilter}
-      on:change={fetchLogs}
-    />
-  </div>
+  <svelte:fragment slot="filters">
+    <FieldShell className="filter-field" label="Action">
+      <select bind:value={actionFilter} on:change={() => fetchLogs({ background: logs.length > 0 })}>
+        <option value="all">All actions</option>
+        {#each actions as action}
+          <option value={action}>{action.replaceAll('_', ' ')}</option>
+        {/each}
+      </select>
+    </FieldShell>
 
-  {#if loading}
-    <p class="muted">Loading logs...</p>
-  {:else if error}
-    <p class="error">{error}</p>
-  {:else}
-    <div class="table-wrap">
-      <table>
+    <FieldShell className="filter-field" label="Admin ID">
+      <input placeholder="Admin ID" bind:value={adminFilter} on:change={() => fetchLogs({ background: logs.length > 0 })} />
+    </FieldShell>
+  </svelte:fragment>
+
+  <svelte:fragment slot="state">
+    {#if loading && logs.length === 0}
+      <p class="ui-data-state-note">Loading logs...</p>
+    {:else if error}
+      <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">{error}</Card>
+    {:else if logs.length === 0}
+      <p class="ui-data-state-note">No logs match the current filters.</p>
+    {/if}
+  </svelte:fragment>
+
+  <svelte:fragment slot="table">
+    {#if !loading && !error && logs.length > 0}
+      <table class="ui-data-table">
         <thead>
           <tr>
             <th>Time</th>
@@ -101,95 +135,31 @@
           {#each logs as log}
             <tr>
               <td>{new Date(log.createdAt).toLocaleString()}</td>
-              <td>{log.adminId}</td>
-              <td>{log.action}</td>
+              <td class="admin-id">{log.adminId}</td>
+              <td>
+                <Badge tone="neutral" size="xs" uppercase>{log.action.replaceAll('_', ' ')}</Badge>
+              </td>
               <td>{log.targetId || '-'}</td>
               <td class="details">{log.details ? JSON.stringify(log.details) : '-'}</td>
             </tr>
           {/each}
         </tbody>
       </table>
-    </div>
-  {/if}
-</section>
+    {/if}
+  </svelte:fragment>
+</DataSurface>
 
 <style>
-  .audit-panel {
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    padding: 1.5rem;
-  }
-
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  button {
-    padding: 0.4rem 1rem;
-    border-radius: 999px;
-    border: 1px solid rgba(96, 165, 250, 0.4);
-    background: transparent;
-    color: var(--color-text);
-    cursor: pointer;
-  }
-
-  .filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .filters input,
-  .filters select {
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    border-radius: 0.6rem;
-    padding: 0.6rem 0.8rem;
-    color: var(--color-text);
-  }
-
-  .table-wrap {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    padding: 0.75rem;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-    text-align: start;
-    vertical-align: top;
-  }
-
-  th {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-secondary);
+  .admin-id {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
   }
 
   .details {
-    max-width: 320px;
+    max-width: 420px;
     word-break: break-word;
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     color: var(--color-text-secondary);
-  }
-
-  .muted {
-    color: var(--color-text-secondary);
-  }
-
-  .error {
-    color: #fca5a5;
   }
 </style>

@@ -1,10 +1,14 @@
 <script>
   import { onMount } from 'svelte';
   import { API_BASE } from '../config.js';
-  import { t } from '../lib/i18n/t.js';
+  import { formatDate, t } from '../lib/i18n/t.js';
+  import Button from '../lib/components/ui/Button.svelte';
+  import Card from '../lib/components/ui/Card.svelte';
   import EmptyState from '../lib/components/ui/EmptyState.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import ConfirmModal from '../lib/components/ui/ConfirmModal.svelte';
+  import DocumentListSkeleton from '../lib/components/ui/DocumentListSkeleton.svelte';
+  import { readPageCache, writePageCache } from '../stores/pageCache.js';
 
   const statusToneMap = {
     queued: 'processing',
@@ -13,19 +17,33 @@
     complete: 'ready',
     failed: 'failed'
   };
+  const DOCUMENTS_CACHE_KEY = 'page:documents-legacy';
 
   let documents = [];
   let loading = true;
+  let refreshing = false;
   let errorKey = '';
   let errorArgs = {};
   let confirmOpen = false;
   let deleting = false;
   let pendingDoc = null;
 
-  onMount(fetchDocuments);
+  onMount(() => {
+    const cached = readPageCache(DOCUMENTS_CACHE_KEY);
+    const cachedDocuments = Array.isArray(cached?.documents) ? cached.documents : [];
+    if (cached?.loaded) {
+      documents = cachedDocuments;
+      loading = false;
+    }
+    void fetchDocuments({ background: Boolean(cached?.loaded) });
+  });
 
-  async function fetchDocuments() {
-    loading = true;
+  async function fetchDocuments({ background = false } = {}) {
+    if (background) {
+      refreshing = true;
+    } else {
+      loading = true;
+    }
     errorKey = '';
     errorArgs = {};
 
@@ -40,11 +58,16 @@
 
       const data = await response.json();
       documents = data.documents ?? [];
+      writePageCache(DOCUMENTS_CACHE_KEY, { loaded: true, documents });
     } catch (error) {
       console.error('Failed to load documents', error);
       errorKey = 'documentsPage.errors.load';
     } finally {
-      loading = false;
+      if (background) {
+        refreshing = false;
+      } else {
+        loading = false;
+      }
     }
   }
 
@@ -76,8 +99,10 @@
         throw new Error('DELETE_ERROR');
       }
 
-      await fetchDocuments();
+      documents = documents.filter((doc) => doc.id !== pendingDoc.id);
+      writePageCache(DOCUMENTS_CACHE_KEY, { loaded: true, documents });
       closeDeleteModal();
+      await fetchDocuments({ background: true });
     } catch (error) {
       console.error('Failed to delete document', error);
       errorKey = 'documentsPage.errors.delete';
@@ -101,36 +126,33 @@
 
 <div class="documents-page">
   <header class="page-header">
-    <div>
+    <div class="heading">
       <p class="eyebrow">{t('documentsPage.eyebrow')}</p>
       <h1>{t('documentsPage.title')}</h1>
       <p class="subtitle">{t('documentsPage.description')}</p>
     </div>
-    <button class="refresh-btn" type="button" on:click={fetchDocuments} disabled={loading}>
-      {t('documentsPage.actions.refresh')}
-    </button>
+    <Button type="button" variant="secondary" on:click={() => fetchDocuments({ background: documents.length > 0 })} disabled={loading || refreshing}>
+      {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
+    </Button>
   </header>
 
   {#if loading}
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>{t('common.loading')}</p>
-    </div>
+    <DocumentListSkeleton />
   {:else if errorMessage}
-    <div class="alert alert-error">{errorMessage}</div>
+    <Card class="alert alert-error" variant="soft" border="strong" padding="md">{errorMessage}</Card>
   {:else if documents.length === 0}
     <EmptyState
       title={t('documentsPage.emptyTitle')}
       description={t('documentsPage.emptyDescription')}
     >
-      <button class="primary-btn" type="button" on:click={() => (window.location.hash = '/dashboard')}>
+      <Button type="button" variant="primary" on:click={() => (window.location.hash = '/home')}>
         {t('documentsPage.actions.uploadCta')}
-      </button>
+      </Button>
     </EmptyState>
   {:else}
     <section class="documents-grid">
       {#each documents as doc}
-        <article class="document-card">
+        <Card as="article" class="document-card" variant="base" padding="md" border="subtle">
           <div class="card-head">
             <div class="title-row">
               <h3>{doc.originalName}</h3>
@@ -140,7 +162,7 @@
               />
             </div>
             <p class="meta">
-              {t('documentsPage.labels.uploaded')}: {new Date(doc.uploadDate).toLocaleDateString()}
+              {t('documentsPage.labels.uploaded')}: {formatDate(doc.uploadDate)}
               · {t('documentsPage.labels.language')}:
               {doc.language === 'arabic' ? t('home.documents.languageArabic') : t('home.documents.languageEnglish')}
             </p>
@@ -158,14 +180,14 @@
           </dl>
 
           <div class="card-actions">
-            <button type="button" class="secondary-btn" on:click={() => viewDocument(doc.id)}>
+            <Button type="button" variant="secondary" on:click={() => viewDocument(doc.id)}>
               {t('documentsPage.actions.view')}
-            </button>
-            <button type="button" class="danger-btn" on:click={() => openDeleteModal(doc)}>
+            </Button>
+            <Button type="button" variant="danger" on:click={() => openDeleteModal(doc)}>
               {t('documentsPage.actions.delete')}
-            </button>
+            </Button>
           </div>
-        </article>
+        </Card>
       {/each}
     </section>
   {/if}
@@ -183,17 +205,23 @@
 
 <style>
   .documents-page {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
+    display: grid;
+    width: min(100%, var(--size-page-wide));
+    margin-inline: auto;
+    gap: var(--study-flow-page-gap);
   }
 
   .page-header {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--study-flow-header-gap);
     flex-wrap: wrap;
+  }
+
+  .heading {
+    display: grid;
+    gap: var(--ui-space-1);
   }
 
   .eyebrow {
@@ -205,63 +233,24 @@
   }
 
   h1 {
-    margin: 0.25rem 0;
-    font-size: 2rem;
+    margin: 0;
+    font-size: var(--study-flow-title-size);
+    font-weight: 600;
+    letter-spacing: -0.03em;
     color: var(--color-text-primary);
   }
 
   .subtitle {
     margin: 0;
+    font-size: var(--study-flow-subtitle-size);
     color: var(--color-text-secondary);
   }
 
-  .refresh-btn {
-    align-self: flex-end;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius-1);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-1);
-    color: var(--color-text-primary);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
-  }
-
-  .refresh-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .refresh-btn:not(:disabled):hover {
-    border-color: var(--color-accent-primary);
-  }
-
-  .loading-state,
-  .alert {
-    border-radius: var(--radius-2);
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-1);
+  .documents-page :global(.alert) {
     text-align: center;
   }
 
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-accent-primary);
-    margin: 0 auto var(--space-3);
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .alert-error {
+  .documents-page :global(.alert-error) {
     color: var(--color-danger);
     border-color: var(--color-danger);
     background: var(--color-danger-surface);
@@ -269,21 +258,20 @@
 
   .documents-grid {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--study-flow-card-gap);
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
   }
 
-  .document-card {
-    padding: var(--space-4);
-    border-radius: var(--radius-3);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-1);
+  .documents-page :global(.document-card) {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--study-flow-card-gap);
     height: 100%;
-    min-height: 272px;
+    min-height: 228px;
+    border-radius: var(--study-flow-card-radius);
+    background: var(--study-flow-card-surface);
+    box-shadow: none;
   }
 
   .card-head {
@@ -300,10 +288,11 @@
   }
 
   .card-head h3 {
-    margin: 0 0 0.35rem;
-    font-size: 1.1rem;
+    margin: 0;
+    font-size: 0.96rem;
+    font-weight: 600;
     color: var(--color-text-primary);
-    line-height: 1.35;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -314,7 +303,7 @@
 
   .meta {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: var(--font-size-xs);
     color: var(--color-text-secondary);
   }
 
@@ -327,17 +316,17 @@
 
   .stats dt {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.67rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     color: var(--color-text-secondary);
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .stats dd {
-    margin: 0.25rem 0 0;
-    font-size: 1.5rem;
-    font-weight: 700;
+    margin: 0.18rem 0 0;
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
@@ -347,47 +336,8 @@
     margin-top: auto;
   }
 
-  .card-actions button {
+  .card-actions :global(.ui-button) {
     flex: 1;
-    min-height: 44px;
-    border-radius: var(--radius-1);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--motion-fast) var(--ease-standard);
-  }
-
-  .secondary-btn {
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
-    color: var(--color-text-primary);
-  }
-
-  .secondary-btn:hover {
-    border-color: var(--color-accent-primary);
-  }
-
-  .danger-btn {
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-secondary);
-  }
-
-  .danger-btn:hover {
-    border-color: var(--color-danger);
-    background: var(--color-danger-surface);
-    color: var(--color-danger);
-  }
-
-  .primary-btn {
-    border: none;
-    background: var(--gradient-accent);
-    color: var(--color-bg);
-    padding: 0 1.5rem;
-    min-height: 44px;
-    border-radius: var(--radius-1);
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 10px 30px var(--color-shadow);
   }
 
   @media (max-width: 1024px) {
@@ -399,14 +349,6 @@
   @media (max-width: 640px) {
     .documents-grid {
       grid-template-columns: 1fr;
-    }
-
-    .page-header {
-      align-items: flex-start;
-    }
-
-    .refresh-btn {
-      align-self: flex-start;
     }
 
     .card-actions {

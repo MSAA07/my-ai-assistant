@@ -1,144 +1,304 @@
 <script>
-  import { signUp } from '../../stores/auth';
-  import { createEventDispatcher } from 'svelte';
-  
-  const dispatch = createEventDispatcher();
-  
+  import Button from '../../lib/components/ui/Button.svelte';
+  import Card from '../../lib/components/ui/Card.svelte';
+  import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import { t } from '../../lib/i18n/t.js';
+  import { signUp } from '../../stores/auth.js';
+  import { router } from '../../stores/router.js';
+  import {
+    validateEmail,
+    validatePassword,
+    validateName,
+    validateConfirmPassword,
+  } from './validation.js';
+
+  export let notice = '';
+  export let redirectTarget = '/home';
+
   let name = '';
   let email = '';
   let password = '';
+  let confirmPassword = '';
   let error = '';
   let loading = false;
+  let showPassword = false;
+  let showConfirmPassword = false;
+  let touched = {
+    name: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  };
+
+  $: fieldErrors = {
+    name: touched.name ? validateName(name, t) : '',
+    email: touched.email ? validateEmail(email, t) : '',
+    password: touched.password ? validatePassword(password, t) : '',
+    confirmPassword: touched.confirmPassword ? validateConfirmPassword(password, confirmPassword, t) : '',
+  };
+
+  $: hasFieldErrors = Boolean(
+    fieldErrors.name
+      || fieldErrors.email
+      || fieldErrors.password
+      || fieldErrors.confirmPassword
+  );
+
+  function markAllTouched() {
+    touched = {
+      name: true,
+      email: true,
+      password: true,
+      confirmPassword: true,
+    };
+  }
 
   async function handleSubmit() {
-    loading = true;
+    if (loading) return;
+
+    markAllTouched();
     error = '';
-    const res = await signUp(email, password, name);
-    loading = false;
-    
-    if (res.error) {
-      error = res.error.message || 'Signup failed';
-    } else {
-        dispatch('success');
+
+    const nextErrors = {
+      name: validateName(name, t),
+      email: validateEmail(email, t),
+      password: validatePassword(password, t),
+      confirmPassword: validateConfirmPassword(password, confirmPassword, t),
+    };
+
+    if (Object.values(nextErrors).some(Boolean)) {
+      return;
     }
+
+    loading = true;
+    const res = await signUp(email.trim(), password, name.trim());
+    loading = false;
+
+    if (res.error) {
+      error = res.error.message || t('auth.signUp.errors.failed');
+      return;
+    }
+
+  }
+
+  function goToSignIn() {
+    const params = new URLSearchParams();
+    if (redirectTarget && redirectTarget !== '/home') {
+      params.set('redirect', redirectTarget);
+    }
+
+    const query = params.toString();
+    router.navigate(`/sign-in${query ? `?${query}` : ''}`);
   }
 </script>
 
-<div class="auth-container">
-  <h2>Create Account</h2>
-  <form on:submit|preventDefault={handleSubmit}>
-    <div class="form-group">
-      <label for="name">Full Name</label>
-      <input id="name" type="text" bind:value={name} required placeholder="Enter your name" />
-    </div>
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input id="email" type="email" bind:value={email} required placeholder="Enter your email" />
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input id="password" type="password" bind:value={password} required placeholder="Choose a password (min 8 chars)" minlength="8" />
-    </div>
+<Card class="auth-card" variant="raised" padding="lg" border="subtle">
+  <header class="auth-header">
+    <p class="auth-eyebrow">{t('auth.signUp.eyebrow')}</p>
+    <h2>{t('auth.signUp.title')}</h2>
+    <p>{t('auth.signUp.subtitle')}</p>
+  </header>
+
+  {#if notice}
+    <p class="auth-notice">{notice}</p>
+  {/if}
+
+  <form class="auth-form" on:submit|preventDefault={handleSubmit} novalidate>
+    <FieldShell
+      label={t('auth.fields.name')}
+      forId="name"
+      required
+      error={fieldErrors.name}
+    >
+      <input
+        id="name"
+        type="text"
+        bind:value={name}
+        autocomplete="name"
+        placeholder={t('auth.signUp.placeholders.name')}
+        aria-invalid={fieldErrors.name ? 'true' : 'false'}
+        on:blur={() => (touched = { ...touched, name: true })}
+      />
+    </FieldShell>
+
+    <FieldShell
+      label={t('auth.fields.email')}
+      forId="email"
+      required
+      error={fieldErrors.email}
+    >
+      <input
+        id="email"
+        type="email"
+        bind:value={email}
+        inputmode="email"
+        autocomplete="email"
+        placeholder={t('auth.signUp.placeholders.email')}
+        aria-invalid={fieldErrors.email ? 'true' : 'false'}
+        on:blur={() => (touched = { ...touched, email: true })}
+      />
+    </FieldShell>
+
+    <FieldShell
+      label={t('auth.fields.password')}
+      forId="password"
+      required
+      error={fieldErrors.password}
+      hint={t('auth.validation.passwordHint')}
+    >
+      <div class="password-field">
+        <input
+          id="password"
+          type={showPassword ? 'text' : 'password'}
+          bind:value={password}
+          autocomplete="new-password"
+          placeholder={t('auth.signUp.placeholders.password')}
+          aria-invalid={fieldErrors.password ? 'true' : 'false'}
+          on:blur={() => (touched = { ...touched, password: true })}
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          aria-label={showPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+          on:click={() => (showPassword = !showPassword)}
+        >
+          {showPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+        </button>
+      </div>
+    </FieldShell>
+
+    <FieldShell
+      label={t('auth.fields.confirmPassword')}
+      forId="confirm-password"
+      required
+      error={fieldErrors.confirmPassword}
+    >
+      <div class="password-field">
+        <input
+          id="confirm-password"
+          type={showConfirmPassword ? 'text' : 'password'}
+          bind:value={confirmPassword}
+          autocomplete="new-password"
+          placeholder={t('auth.signUp.placeholders.confirmPassword')}
+          aria-invalid={fieldErrors.confirmPassword ? 'true' : 'false'}
+          on:blur={() => (touched = { ...touched, confirmPassword: true })}
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          aria-label={showConfirmPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+          on:click={() => (showConfirmPassword = !showConfirmPassword)}
+        >
+          {showConfirmPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+        </button>
+      </div>
+    </FieldShell>
+
     {#if error}
-      <p class="error">{error}</p>
+      <p class="auth-error" role="alert">{error}</p>
     {/if}
-    <button type="submit" disabled={loading} class="btn-primary">
-      {loading ? 'Creating Account...' : 'Sign Up'}
-    </button>
+
+    <Button type="submit" variant="primary" loading={loading} disabled={loading || hasFieldErrors} block>
+      {loading ? t('auth.signUp.actions.loading') : t('auth.signUp.actions.submit')}
+    </Button>
   </form>
+
   <p class="toggle-text">
-    Already have an account? <button class="link-btn" on:click={() => dispatch('toggle')}>Login</button>
+    {t('auth.signUp.switch.prompt')}
+    <Button type="button" variant="ghost" size="sm" className="link-btn" on:click={goToSignIn}>
+      {t('auth.signUp.switch.action')}
+    </Button>
   </p>
-</div>
+</Card>
 
 <style>
-  /* Use same styles as SignIn.svelte */
-  .auth-container {
-    max-width: 400px;
-    margin: 4rem auto;
-    padding: 2.5rem;
-    background: var(--color-surface);
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
+  :global(.auth-card) {
+    width: min(440px, 100%);
   }
-  
-  h2 {
-    margin-bottom: 2rem;
-    text-align: center;
-    color: var(--color-text);
+
+  .auth-header {
+    display: grid;
+    gap: 0.45rem;
+    text-align: left;
   }
-  
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-secondary, #ccc);
-  }
-  
-  input {
-    width: 100%;
-    padding: 0.8rem;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: rgba(0,0,0,0.2);
-    color: white;
-    font-size: 1rem;
-  }
-  
-  input:focus {
-    outline: none;
-    border-color: var(--color-accent);
-  }
-  
-  .btn-primary {
-    width: 100%;
-    padding: 0.8rem;
-    background: var(--color-accent);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
+
+  .auth-eyebrow {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
     font-weight: 600;
-    transition: background 0.2s;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
-  
-  .btn-primary:hover:not(:disabled) {
-    background: #4a90e2;
+
+  .auth-header h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
   }
-  
-  .btn-primary:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+
+  .auth-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
   }
-  
-  .error {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-    padding: 0.75rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    text-align: center;
+
+  .auth-form {
+    display: grid;
+    gap: var(--space-3);
   }
-  
-  .toggle-text {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.9rem;
-    color: #888;
+
+  .auth-notice,
+  .auth-error {
+    margin: 0;
+    border: 1px solid var(--color-danger-border);
+    border-radius: var(--ui-radius-md);
+    padding: 0.65rem 0.8rem;
+    font-size: var(--font-size-sm);
   }
-  
-  .link-btn {
-    background: none;
+
+  .auth-notice {
+    border-color: color-mix(in srgb, var(--ui-border-accent) 55%, var(--ui-border-subtle) 45%);
+    background: color-mix(in srgb, var(--ui-surface-card) 84%, var(--ui-surface-secondary) 16%);
+    color: var(--color-text-secondary);
+  }
+
+  .auth-error {
+    background: var(--color-danger-surface);
+    color: var(--color-danger-soft);
+  }
+
+  .password-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .password-toggle {
+    flex: 0 0 auto;
     border: none;
-    color: var(--color-accent);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
     cursor: pointer;
+    padding-inline-end: 0.7rem;
+  }
+
+  .toggle-text {
+    margin: 0;
+    color: var(--color-text-muted);
+    text-align: left;
+    font-size: var(--font-size-sm);
+  }
+
+  :global(.link-btn) {
+    margin-inline-start: 0.25rem;
+    min-height: auto;
+    padding-inline: 0.35rem;
     text-decoration: underline;
-    font-size: 0.9rem;
-    padding: 0;
+    text-underline-offset: 2px;
   }
 </style>

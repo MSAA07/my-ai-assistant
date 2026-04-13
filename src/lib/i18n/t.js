@@ -56,6 +56,20 @@ export function t(path, vars = {}) {
   return path;
 }
 
+export function formatNumber(value, options = {}) {
+  const lang = get(language);
+  const locale = lang === 'ar' ? 'ar' : 'en';
+  return new Intl.NumberFormat(locale, options).format(value);
+}
+
+export function formatDate(value, options = {}) {
+  const lang = get(language);
+  const locale = lang === 'ar' ? 'ar' : 'en';
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return new Intl.DateTimeFormat(locale, options).format(parsed);
+}
+
 export function registerDictionary(code, dict) {
   dictionaries[code] = dict;
 }

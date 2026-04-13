@@ -64,17 +64,17 @@
   }
   
   .logout-btn {
-    background: rgba(255,255,255,0.1);
+    background: var(--color-accent-bg);
     border: none;
-    color: white;
+    color: var(--color-text-primary);
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: var(--radius-1);
     cursor: pointer;
     font-size: 0.9rem;
   }
   
   .logout-btn:hover {
-    background: rgba(255,255,255,0.2);
+    background: var(--color-accent-bg-hover);
   }
 
   .logo {
