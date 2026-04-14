@@ -114,6 +114,10 @@ export default {
       modalTitle: 'Media Upload',
       modalDescription: 'Add your document here',
       modalDescriptionSingle: 'Upload one document, then choose what you want to generate next.',
+      compactTitle: 'Upload your first document',
+      compactSubtitle: 'Generate summaries, flashcards, and exams',
+      compactSupport: 'PDF, DOCX, PPTX',
+      browseFile: 'Browse file',
       heroEyebrow: 'First upload',
       heroTitle: 'Start your study library with one document',
       heroDescription: 'Upload a PDF, DOCX, or PPTX to begin a cleaner study flow with summaries, flashcards, and exam questions ready from the same workspace.',
@@ -624,6 +628,10 @@ export default {
       dark: 'Dark',
       light: 'Light'
     },
+    security: {
+      title: 'Security',
+      description: 'Update your password while keeping your current session active.'
+    },
     account: {
       title: 'Account',
       description: 'Manage your identity and session.',
@@ -649,13 +657,16 @@ export default {
     },
     notices: {
       signedOut: 'You have been signed out.',
-      sessionExpired: 'Your session expired. Please sign in again.'
+      sessionExpired: 'Your session expired. Please sign in again.',
+      verificationRequired: 'Verify your email to finish setting up your account.',
+      passwordReset: 'Your password was reset. Sign in with your new password.'
     },
     validation: {
       nameRequired: 'Enter your full name.',
       emailRequired: 'Enter your email address.',
       emailInvalid: 'Enter a valid email address.',
       passwordRequired: 'Enter your password.',
+      currentPasswordRequired: 'Enter your current password.',
       passwordMin: 'Use at least {count} characters.',
       passwordHint: 'Use at least 8 characters.',
       confirmPasswordRequired: 'Confirm your password.',
@@ -671,6 +682,10 @@ export default {
       sessionExpired: 'Your session expired. Please sign in again.',
       sessionRestoreFailed: 'Sign-in completed, but we could not restore your session. Please try again.',
       blockedAccess: 'This account cannot access the app right now.',
+      emailVerificationRequired: 'Verify your email address before signing in.',
+      passwordResetRequestFailed: 'We could not send the reset email right now. Please try again.',
+      resetTokenInvalid: 'This reset link is invalid, expired, or has already been used.',
+      currentPasswordInvalid: 'Your current password is incorrect.',
       malformedResponse: 'We could not complete authentication. Please try again.',
       genericFailure: 'We could not complete that request. Please try again.'
     },
@@ -684,7 +699,8 @@ export default {
       },
       actions: {
         submit: 'Login',
-        loading: 'Logging in...'
+        loading: 'Logging in...',
+        forgotPassword: 'Forgot password?'
       },
       switch: {
         prompt: "Don't have an account?",
@@ -713,6 +729,101 @@ export default {
       },
       errors: {
         failed: 'Signup failed'
+      }
+    },
+    verify: {
+      eyebrow: 'Email verification',
+      pending: {
+        title: 'Check your inbox',
+        subtitleSignup: 'We sent a verification link to finish setting up your account.',
+        subtitleSignin: 'This account still needs email verification. We sent a fresh verification link.',
+        sentTo: 'Verification email sent to {email}.',
+        resend: 'Resend verification email',
+        resending: 'Sending verification email...',
+        resendSuccess: 'A fresh verification email is on its way.',
+        resendError: 'We could not resend the verification email right now.',
+        resendCooldown: 'Resend in {seconds}s',
+        backToSignIn: 'Back to sign in'
+      },
+      success: {
+        title: 'Email verified',
+        subtitle: 'Your email was verified successfully. You can continue to the app.',
+        signIn: 'Sign in',
+        continue: 'Continue to app'
+      },
+      error: {
+        title: 'Verification link unavailable',
+        subtitle: 'We could not complete email verification. {error}',
+        invalidToken: 'The link is invalid, expired, or has already been used.',
+        alreadyVerified: 'This email address is already verified.',
+        generic: 'Please request a new verification email and try again.',
+        backToSignIn: 'Back to sign in'
+      }
+    },
+    forgotPassword: {
+      eyebrow: 'Password recovery',
+      title: 'Forgot your password?',
+      subtitle: 'Enter your email and we will send reset instructions if an account exists.',
+      placeholders: {
+        email: 'Enter your email'
+      },
+      actions: {
+        submit: 'Send reset email',
+        loading: 'Sending reset email...',
+        backToSignIn: 'Back to sign in'
+      },
+      success: {
+        subtitle: 'Check your inbox',
+        body: 'If an account exists for that email, a password reset link is on the way.'
+      },
+      errors: {
+        failed: 'We could not process the reset request right now.'
+      }
+    },
+    resetPassword: {
+      eyebrow: 'Reset password',
+      title: 'Choose a new password',
+      subtitle: 'Create a new password for your account.',
+      placeholders: {
+        password: 'Choose a new password',
+        confirmPassword: 'Confirm your new password'
+      },
+      actions: {
+        submit: 'Reset password',
+        loading: 'Resetting password...',
+        backToSignIn: 'Back to sign in'
+      },
+      success: {
+        title: 'Password reset complete',
+        subtitle: 'Your password has been updated.',
+        body: 'You can now sign in using your new password.'
+      },
+      error: {
+        subtitle: 'We could not complete the password reset. {error}',
+        invalidToken: 'The reset link is invalid.',
+        expiredToken: 'The reset link has expired.',
+        alreadyUsed: 'This reset link has already been used.',
+        generic: 'Request a new reset email and try again.'
+      }
+    },
+    changePassword: {
+      fields: {
+        currentPassword: 'Current password',
+        newPassword: 'New password'
+      },
+      placeholders: {
+        currentPassword: 'Enter your current password',
+        newPassword: 'Choose a new password',
+        confirmPassword: 'Confirm your new password'
+      },
+      actions: {
+        submit: 'Update password',
+        loading: 'Updating password...'
+      },
+      success: 'Your password was updated successfully.',
+      sessionNote: 'Your current session stays active. Other sessions are not revoked in this flow.',
+      errors: {
+        failed: 'We could not update your password right now.'
       }
     }
   }
