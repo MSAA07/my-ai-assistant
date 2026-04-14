@@ -1,5 +1,5 @@
 import { get, writable } from "svelte/store";
-import { API_BASE } from "../config.js";
+import { API_BASE, getEmailVerificationCallbackUrl, getPasswordResetCallbackUrl } from "../config.js";
 import { clearAllPageCache } from "./pageCache.js";
 import { router } from "./router.js";
 import {
@@ -141,14 +141,50 @@ function normalizeAuthError({ status, message, path }) {
   }
 
   if (path === "/sign-in/email") {
+    if (status === 403 && /verify|verified|verification/.test(lowerMessage)) {
+      return { code: "email_verification_required", message: t("auth.errors.emailVerificationRequired") };
+    }
+
     if (status === 401 || /invalid|credential|password|email/.test(lowerMessage)) {
       return { code: "invalid_credentials", message: t("auth.errors.invalidCredentials") };
     }
   }
 
   if (path === "/sign-up/email") {
+    if (status === 403 && /verify|verified|verification/.test(lowerMessage)) {
+      return { code: "email_verification_required", message: t("auth.errors.emailVerificationRequired") };
+    }
+
     if (status === 409 || (/already|exists|taken|duplicate/.test(lowerMessage) && /email|user|account/.test(lowerMessage))) {
       return { code: "duplicate_email", message: t("auth.errors.duplicateEmail") };
+    }
+
+    if (status === 400 && /password/.test(lowerMessage)) {
+      return { code: "weak_password", message: t("auth.errors.weakPassword") };
+    }
+  }
+
+  if (path === "/request-password-reset") {
+    if (status >= 500) {
+      return { code: "server_failure", message: t("auth.errors.serverFailure") };
+    }
+
+    return { code: "password_reset_request_failed", message: t("auth.errors.passwordResetRequestFailed") };
+  }
+
+  if (path === "/reset-password") {
+    if (/token|expired|invalid|used/.test(lowerMessage)) {
+      return { code: "reset_token_invalid", message: t("auth.errors.resetTokenInvalid") };
+    }
+
+    if (status === 400 && /password/.test(lowerMessage)) {
+      return { code: "weak_password", message: t("auth.errors.weakPassword") };
+    }
+  }
+
+  if (path === "/change-password") {
+    if (status === 401 || /current password|current_password|invalid current/.test(lowerMessage)) {
+      return { code: "current_password_invalid", message: t("auth.errors.currentPasswordInvalid") };
     }
 
     if (status === 400 && /password/.test(lowerMessage)) {
@@ -169,6 +205,10 @@ function normalizeAuthError({ status, message, path }) {
   }
 
   if (status >= 400 && normalizedMessage) {
+    if (/verify|verified|verification/.test(lowerMessage)) {
+      return { code: "email_verification_required", message: t("auth.errors.emailVerificationRequired") };
+    }
+
     return { code: "request_failed", message: t("auth.errors.genericFailure") };
   }
 
@@ -312,7 +352,11 @@ export async function signIn(email, password) {
 
   const result = await request("/sign-in/email", {
     method: "POST",
-    body: { email, password }
+    body: {
+      email,
+      password,
+      callbackURL: getEmailVerificationCallbackUrl(),
+    }
   });
 
   if (result.error) {
@@ -340,7 +384,12 @@ export async function signUp(email, password, name) {
 
   const result = await request("/sign-up/email", {
     method: "POST",
-    body: { email, password, name }
+    body: {
+      email,
+      password,
+      name,
+      callbackURL: getEmailVerificationCallbackUrl(),
+    }
   });
 
   if (result.error) {
@@ -353,12 +402,138 @@ export async function signUp(email, password, name) {
     return result;
   }
 
-  const sessionResult = await restoreSession("signed_up", { broadcast: true });
+  finishAuthAction();
+  setUnauthenticated("verification_pending", "");
+  return {
+    data: {
+      ...result.data,
+      requiresVerification: true,
+      email,
+    },
+    error: null,
+  };
+}
+
+export async function resendVerification(email) {
+  updateMeta({ action: "resend_verification", errorCode: "" });
+
+  const result = await request("/send-verification-email", {
+    method: "POST",
+    body: {
+      email,
+      callbackURL: getEmailVerificationCallbackUrl(),
+    },
+  });
+
   finishAuthAction();
 
-  if (sessionResult.error) {
-    return sessionResult;
+  if (result.error) {
+    updateMeta({
+      status: "unauthenticated",
+      reason: "verification_resend_failed",
+      errorCode: result.error.code,
+    });
+    return result;
   }
+
+  updateMeta({
+    status: "unauthenticated",
+    reason: "verification_resent",
+    errorCode: "",
+  });
+
+  return result;
+}
+
+export async function requestPasswordReset(email) {
+  updateMeta({ action: "request_password_reset", errorCode: "" });
+
+  const result = await request("/request-password-reset", {
+    method: "POST",
+    body: {
+      email,
+      redirectTo: getPasswordResetCallbackUrl(),
+    },
+  });
+
+  finishAuthAction();
+
+  if (result.error) {
+    updateMeta({
+      status: "unauthenticated",
+      reason: "password_reset_request_failed",
+      errorCode: result.error.code,
+    });
+  } else {
+    updateMeta({
+      status: "unauthenticated",
+      reason: "password_reset_requested",
+      errorCode: "",
+    });
+  }
+
+  return result;
+}
+
+export async function resetPassword(token, newPassword) {
+  updateMeta({ action: "reset_password", errorCode: "" });
+
+  const result = await request("/reset-password", {
+    method: "POST",
+    body: {
+      token,
+      newPassword,
+    },
+  });
+
+  finishAuthAction();
+
+  if (result.error) {
+    updateMeta({
+      status: "unauthenticated",
+      reason: "password_reset_failed",
+      errorCode: result.error.code,
+    });
+    return result;
+  }
+
+  updateMeta({
+    status: "unauthenticated",
+    reason: "password_reset_complete",
+    errorCode: "",
+  });
+
+  return result;
+}
+
+export async function changePassword(currentPassword, newPassword, { revokeOtherSessions = false } = {}) {
+  updateMeta({ action: "change_password", errorCode: "" });
+
+  const result = await request("/change-password", {
+    method: "POST",
+    body: {
+      currentPassword,
+      newPassword,
+      revokeOtherSessions,
+    },
+  });
+
+  finishAuthAction();
+
+  if (result.error) {
+    updateMeta({
+      status: get(session) ? "authenticated" : "unauthenticated",
+      reason: "change_password_failed",
+      errorCode: result.error.code,
+    });
+    return result;
+  }
+
+  updateMeta({
+    status: get(session) ? "authenticated" : "unauthenticated",
+    reason: "password_changed",
+    errorCode: "",
+  });
 
   return result;
 }
@@ -511,5 +686,9 @@ export const authClient = {
   signIn,
   signUp,
   signOut,
+  resendVerification,
+  requestPasswordReset,
+  resetPassword,
+  changePassword,
   handleSessionInvalidation,
 };

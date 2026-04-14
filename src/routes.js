@@ -9,8 +9,11 @@ export const DEFAULT_AUTH_PATH = '/home';
 export const LANDING_PATH = '/';
 export const SIGN_IN_PATH = '/sign-in';
 export const SIGN_UP_PATH = '/sign-up';
-export const PUBLIC_ROUTE_PATHS = new Set([LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH]);
-export const AUTH_ROUTE_PATHS = new Set([SIGN_IN_PATH, SIGN_UP_PATH]);
+export const FORGOT_PASSWORD_PATH = '/forgot-password';
+export const RESET_PASSWORD_PATH = '/reset-password';
+export const VERIFY_EMAIL_PATH = '/verify-email';
+export const PUBLIC_ROUTE_PATHS = new Set([LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH, FORGOT_PASSWORD_PATH, RESET_PASSWORD_PATH, VERIFY_EMAIL_PATH]);
+export const AUTH_ROUTE_PATHS = new Set([SIGN_IN_PATH, SIGN_UP_PATH, FORGOT_PASSWORD_PATH]);
 
 const LEGACY_REDIRECTS = new Map([
   ['/app', DEFAULT_AUTH_PATH],

@@ -5,6 +5,7 @@
   import { t } from '../../lib/i18n/t.js';
   import { signUp } from '../../stores/auth.js';
   import { router } from '../../stores/router.js';
+  import { VERIFY_EMAIL_PATH } from '../../routes.js';
   import {
     validateEmail,
     validatePassword,
@@ -79,6 +80,12 @@
       return;
     }
 
+    const params = new URLSearchParams({
+      status: 'pending',
+      email: email.trim(),
+      source: 'signup',
+    });
+    router.replace(`${VERIFY_EMAIL_PATH}?${params.toString()}`);
   }
 
   function goToSignIn() {

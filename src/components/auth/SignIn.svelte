@@ -4,6 +4,7 @@
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import { t } from '../../lib/i18n/t.js';
   import { signIn } from '../../stores/auth.js';
+  import { FORGOT_PASSWORD_PATH, VERIFY_EMAIL_PATH } from '../../routes.js';
   import { router } from '../../stores/router.js';
   import { validateEmail, validatePassword } from './validation.js';
 
@@ -51,6 +52,16 @@
     loading = false;
 
     if (res.error) {
+      if (res.error.code === 'email_verification_required') {
+        const params = new URLSearchParams({
+          status: 'pending',
+          email: email.trim(),
+          source: 'signin',
+        });
+        router.replace(`${VERIFY_EMAIL_PATH}?${params.toString()}`);
+        return;
+      }
+
       error = res.error.message || t('auth.signIn.errors.failed');
       return;
     }
@@ -65,6 +76,10 @@
 
     const query = params.toString();
     router.navigate(`/sign-up${query ? `?${query}` : ''}`);
+  }
+
+  function goToForgotPassword() {
+    router.navigate(FORGOT_PASSWORD_PATH);
   }
 </script>
 
@@ -124,6 +139,10 @@
         </button>
       </div>
     </FieldShell>
+
+    <Button type="button" variant="ghost" size="sm" className="forgot-btn" on:click={goToForgotPassword}>
+      {t('auth.signIn.actions.forgotPassword')}
+    </Button>
 
     {#if error}
       <p class="auth-error" role="alert">{error}</p>
@@ -229,6 +248,15 @@
     margin-inline-start: 0.25rem;
     min-height: auto;
     padding-inline: 0.35rem;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  :global(.forgot-btn) {
+    justify-self: start;
+    min-height: auto;
+    padding-inline: 0.2rem;
+    color: var(--color-text-secondary);
     text-decoration: underline;
     text-underline-offset: 2px;
   }

@@ -1,11 +1,15 @@
 <script>
   import Footer from './components/Footer.svelte';
   import Landing from './pages/Landing.svelte';
+  import ForgotPassword from './components/auth/ForgotPassword.svelte';
+  import ResetPassword from './components/auth/ResetPassword.svelte';
   import SignIn from './components/auth/SignIn.svelte';
   import SignUp from './components/auth/SignUp.svelte';
+  import VerifyEmail from './components/auth/VerifyEmail.svelte';
   import AppHeader from './components/AppHeader.svelte';
   import AppShell from './lib/components/layout/AppShell.svelte';
   import PageLayout from './lib/components/layout/PageLayout.svelte';
+  import { API_BASE, getEmailVerificationCallbackUrl } from './config.js';
   import { currentPath, routeParams as queryParams, router } from './stores/router.js';
   import { session, isLoading, signOut, authMeta } from './stores/auth.js';
   import { t } from './lib/i18n/t.js';
@@ -13,8 +17,11 @@
   import {
     DEFAULT_AUTH_PATH,
     LANDING_PATH,
+    FORGOT_PASSWORD_PATH,
+    RESET_PASSWORD_PATH,
     SIGN_IN_PATH,
     SIGN_UP_PATH,
+    VERIFY_EMAIL_PATH,
     resolveRoute,
     getNavRoutes,
     getBottomNavRoutes,
@@ -32,7 +39,63 @@
   const AUTH_NOTICE_KEYS = {
     signed_out: 'auth.notices.signedOut',
     session_expired: 'auth.notices.sessionExpired',
+    password_reset: 'auth.notices.passwordReset',
   };
+
+  function consumeVerificationBridge() {
+    if (typeof window === 'undefined') return;
+
+    const search = new URLSearchParams(window.location.search);
+    if (search.get('auth_action') !== 'verify-email') {
+      return;
+    }
+
+    const token = search.get('token');
+    if (token) {
+      const handoffUrl = new URL(`${API_BASE}/api/auth/verify-email`);
+      handoffUrl.searchParams.set('token', token);
+      handoffUrl.searchParams.set('callbackURL', getEmailVerificationCallbackUrl());
+      window.location.replace(handoffUrl.toString());
+      return;
+    }
+
+    const nextParams = new URLSearchParams();
+    nextParams.set('status', search.get('error') ? 'error' : 'success');
+
+    const error = search.get('error');
+    if (error) {
+      nextParams.set('error', error.toLowerCase());
+    }
+
+    const nextHash = `#${VERIFY_EMAIL_PATH}?${nextParams.toString()}`;
+    window.history.replaceState(null, '', `${window.location.pathname}${nextHash}`);
+  }
+
+  function consumeResetPasswordBridge() {
+    if (typeof window === 'undefined') return;
+
+    const search = new URLSearchParams(window.location.search);
+    if (search.get('auth_action') !== 'reset-password') {
+      return;
+    }
+
+    const nextParams = new URLSearchParams();
+    const token = search.get('token');
+    const error = search.get('error');
+
+    if (token) {
+      nextParams.set('token', token);
+    } else {
+      nextParams.set('status', 'error');
+      nextParams.set('error', (error || 'invalid_token').toLowerCase());
+    }
+
+    const nextHash = `#${RESET_PASSWORD_PATH}?${nextParams.toString()}`;
+    window.history.replaceState(null, '', `${window.location.pathname}${nextHash}`);
+  }
+
+  consumeVerificationBridge();
+  consumeResetPasswordBridge();
 
   $: rawPath = $currentPath;
   $: params = $queryParams;
@@ -130,6 +193,27 @@
       <div class="landing-wrapper">
         <Landing />
         <Footer />
+      </div>
+    {:else if normalizedPath === VERIFY_EMAIL_PATH}
+      <div class="auth-wrapper">
+        <VerifyEmail
+          status={params.status ?? 'pending'}
+          email={params.email ?? ''}
+          source={params.source ?? ''}
+          errorCode={params.error ?? ''}
+        />
+      </div>
+    {:else if normalizedPath === FORGOT_PASSWORD_PATH}
+      <div class="auth-wrapper">
+        <ForgotPassword />
+      </div>
+    {:else if normalizedPath === RESET_PASSWORD_PATH}
+      <div class="auth-wrapper">
+        <ResetPassword
+          token={params.token ?? ''}
+          status={params.status ?? ''}
+          errorCode={params.error ?? ''}
+        />
       </div>
     {:else if !isAuthenticated && (isAuthRoute || shouldRedirectUnauthenticated)}
       <div class="auth-wrapper">
