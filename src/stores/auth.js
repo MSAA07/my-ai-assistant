@@ -1,5 +1,5 @@
 import { get, writable } from "svelte/store";
-import { API_BASE, getEmailVerificationCallbackUrl, getPasswordResetCallbackUrl } from "../config.js";
+import { API_BASE, AUTH_SUPPORT_EMAIL, getEmailVerificationCallbackUrl, getPasswordResetCallbackUrl } from "../config.js";
 import { clearAllPageCache } from "./pageCache.js";
 import { router } from "./router.js";
 import {
@@ -124,9 +124,10 @@ function isBlockedMessage(message = "") {
   return /(blocked|suspend|suspended|banned|disabled|forbidden|denied)/i.test(message);
 }
 
-function normalizeAuthError({ status, message, path }) {
+function normalizeAuthError({ status, message, path, errorCode = "", retryAfterSeconds = 0 }) {
   const normalizedMessage = typeof message === "string" ? message.trim() : "";
   const lowerMessage = normalizedMessage.toLowerCase();
+  const normalizedCode = String(errorCode || "").trim().toLowerCase();
 
   if (status === 0) {
     if (lowerMessage.includes("timed out")) {
@@ -136,8 +137,28 @@ function normalizeAuthError({ status, message, path }) {
     return { code: "network_failure", message: t("auth.errors.networkFailure") };
   }
 
-  if (isBlockedMessage(lowerMessage) || status === 423) {
-    return { code: "blocked_access", message: t("auth.errors.blockedAccess") };
+  if (status === 429 || normalizedCode === "rate_limited") {
+    return {
+      code: "rate_limited",
+      message: retryAfterSeconds > 0
+        ? t("auth.errors.rateLimitedRetry", { seconds: retryAfterSeconds })
+        : t("auth.errors.rateLimited"),
+    };
+  }
+
+  if (normalizedCode === "challenge_required") {
+    return { code: "challenge_required", message: t("auth.errors.challengeRequired") };
+  }
+
+  if (normalizedCode === "challenge_failed") {
+    return { code: "challenge_failed", message: t("auth.errors.challengeFailed") };
+  }
+
+  if (normalizedCode === "account_suspended" || isBlockedMessage(lowerMessage) || status === 423) {
+    return {
+      code: "account_suspended",
+      message: t("auth.errors.accountSuspended", { email: AUTH_SUPPORT_EMAIL }),
+    };
   }
 
   if (path === "/sign-in/email") {
@@ -239,10 +260,14 @@ async function toResult(response, path) {
     : null;
 
   if (!response.ok) {
+    const retryAfterHeader = response.headers.get("retry-after");
+    const retryAfterSeconds = Number.parseInt(data?.retryAfterSeconds ?? retryAfterHeader ?? "0", 10);
     const normalizedError = normalizeAuthError({
       status: response.status,
       message: data?.message || data?.error || response.statusText || "Request failed",
       path,
+      errorCode: data?.code || "",
+      retryAfterSeconds: Number.isFinite(retryAfterSeconds) ? retryAfterSeconds : 0,
     });
 
     return {
@@ -251,6 +276,7 @@ async function toResult(response, path) {
         status: response.status,
         code: normalizedError.code,
         message: normalizedError.message,
+        retryAfterSeconds: Number.isFinite(retryAfterSeconds) ? retryAfterSeconds : 0,
       }
     };
   }
@@ -339,7 +365,7 @@ async function restoreSession(reason = "authenticated", { broadcast = false } = 
 
   if (sessionResult.error) {
     setUnauthenticated(
-      sessionResult.error.code === "blocked_access" ? "blocked_access" : "session_expired",
+      sessionResult.error.code === "account_suspended" ? "blocked_access" : "session_expired",
       sessionResult.error.code,
     );
     if (broadcast) {
@@ -361,7 +387,7 @@ async function restoreSession(reason = "authenticated", { broadcast = false } = 
   return sessionResult;
 }
 
-export async function signIn(email, password) {
+export async function signIn(email, password, { challengeToken = "" } = {}) {
   updateMeta({ action: "sign_in", errorCode: "" });
   const callbackURL = getEmailVerificationCallbackUrl();
   logAuthFlow("sign-in", {
@@ -376,6 +402,7 @@ export async function signIn(email, password) {
       email,
       password,
       callbackURL,
+      ...(challengeToken ? { challengeToken } : {}),
     }
   });
 
@@ -383,7 +410,7 @@ export async function signIn(email, password) {
     finishAuthAction();
     updateMeta({
       status: "unauthenticated",
-      reason: result.error.code === "blocked_access" ? "blocked_access" : "sign_in_failed",
+      reason: result.error.code === "account_suspended" ? "blocked_access" : "sign_in_failed",
       errorCode: result.error.code,
     });
     return result;
@@ -399,7 +426,7 @@ export async function signIn(email, password) {
   return result;
 }
 
-export async function signUp(email, password, name) {
+export async function signUp(email, password, name, { challengeToken = "" } = {}) {
   updateMeta({ action: "sign_up", errorCode: "" });
   const callbackURL = getEmailVerificationCallbackUrl();
   logAuthFlow("sign-up", {
@@ -415,6 +442,7 @@ export async function signUp(email, password, name) {
       password,
       name,
       callbackURL,
+      ...(challengeToken ? { challengeToken } : {}),
     }
   });
 
@@ -422,7 +450,7 @@ export async function signUp(email, password, name) {
     finishAuthAction();
     updateMeta({
       status: "unauthenticated",
-      reason: result.error.code === "blocked_access" ? "blocked_access" : "sign_up_failed",
+      reason: result.error.code === "account_suspended" ? "blocked_access" : "sign_up_failed",
       errorCode: result.error.code,
     });
     return result;
@@ -440,7 +468,7 @@ export async function signUp(email, password, name) {
   };
 }
 
-export async function resendVerification(email) {
+export async function resendVerification(email, { challengeToken = "" } = {}) {
   updateMeta({ action: "resend_verification", errorCode: "" });
   const callbackURL = getEmailVerificationCallbackUrl();
   logAuthFlow("resend-verification", {
@@ -454,6 +482,7 @@ export async function resendVerification(email) {
     body: {
       email,
       callbackURL,
+      ...(challengeToken ? { challengeToken } : {}),
     },
   });
 
@@ -477,7 +506,7 @@ export async function resendVerification(email) {
   return result;
 }
 
-export async function requestPasswordReset(email) {
+export async function requestPasswordReset(email, { challengeToken = "" } = {}) {
   updateMeta({ action: "request_password_reset", errorCode: "" });
   const redirectTo = getPasswordResetCallbackUrl();
   logAuthFlow("request-password-reset", {
@@ -491,6 +520,7 @@ export async function requestPasswordReset(email) {
     body: {
       email,
       redirectTo,
+      ...(challengeToken ? { challengeToken } : {}),
     },
   });
 
@@ -592,7 +622,8 @@ export async function signOut({ broadcast = true, redirect = true } = {}) {
 }
 
 export function handleSessionInvalidation(reason = "session_expired", { broadcast = true, redirect = true } = {}) {
-  setUnauthenticated(reason, "session_expired");
+  const errorCode = reason === "blocked_access" ? "account_suspended" : "session_expired";
+  setUnauthenticated(reason, errorCode);
 
   if (broadcast) {
     broadcastAuthEvent("session_invalid");
@@ -604,7 +635,7 @@ export function handleSessionInvalidation(reason = "session_expired", { broadcas
 }
 
 function shouldInvalidateForResponse(input, response) {
-  if (!response || response.status !== 401) return false;
+  if (!response || (response.status !== 401 && response.status !== 423)) return false;
 
   const url = typeof input === "string"
     ? input
@@ -625,7 +656,7 @@ function initializeAuthInterceptor() {
     const response = await originalFetch(...args);
 
     if (shouldInvalidateForResponse(args[0], response) && get(session)) {
-      handleSessionInvalidation("session_expired");
+      handleSessionInvalidation(response.status === 423 ? "blocked_access" : "session_expired");
     }
 
     return response;
@@ -676,7 +707,7 @@ async function bootstrapSession(reason = "bootstrap") {
       const result = await getSession();
       if (result.error) {
         setUnauthenticated(
-          result.error.code === "blocked_access" ? "blocked_access" : "session_expired",
+          result.error.code === "account_suspended" ? "blocked_access" : "session_expired",
           result.error.code,
         );
         return;

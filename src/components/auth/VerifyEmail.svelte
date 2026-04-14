@@ -2,8 +2,10 @@
   import { onDestroy } from 'svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
+  import AuthChallenge from './AuthChallenge.svelte';
   import { t } from '../../lib/i18n/t.js';
   import { session, resendVerification } from '../../stores/auth.js';
+  import { isAuthChallengeEnabled } from '../../config.js';
   import { router } from '../../stores/router.js';
 
   export let status = 'pending';
@@ -16,6 +18,9 @@
   let feedbackTone = 'info';
   let remainingSeconds = 0;
   let cooldownId = null;
+  let challengeToken = '';
+  let challengeRef;
+  const challengeEnabled = isAuthChallengeEnabled();
 
   $: normalizedStatus = status || 'pending';
   $: verifiedSession = Boolean($session?.user?.emailVerified);
@@ -63,13 +68,27 @@
     feedbackTone = 'info';
     loading = true;
 
-    const result = await resendVerification(effectiveEmail);
+    if (challengeEnabled && !challengeToken) {
+      loading = false;
+      feedbackTone = 'error';
+      feedback = t('auth.errors.challengeRequired');
+      return;
+    }
+
+    const result = await resendVerification(effectiveEmail, { challengeToken });
 
     loading = false;
 
     if (result.error) {
       feedbackTone = 'error';
       feedback = result.error.message || t('auth.verify.pending.resendError');
+      if (result.error.code === 'rate_limited') {
+        startCooldown(result.error.retryAfterSeconds || 30);
+      }
+      if (challengeEnabled && (result.error.code === 'challenge_required' || result.error.code === 'challenge_failed' || result.error.code === 'rate_limited')) {
+        challengeRef?.reset?.();
+        challengeToken = '';
+      }
       return;
     }
 
@@ -108,6 +127,13 @@
 
   {#if normalizedStatus === 'pending' && !verifiedSession}
     <div class="actions">
+      <AuthChallenge
+        bind:this={challengeRef}
+        action="resend_verification"
+        on:change={(event) => {
+          challengeToken = event.detail.token;
+        }}
+      />
       <Button type="button" variant="primary" loading={loading} disabled={!canResend || loading || remainingSeconds > 0} block on:click={handleResend}>
         {loading
           ? t('auth.verify.pending.resending')

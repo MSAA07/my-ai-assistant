@@ -39,6 +39,7 @@
   const AUTH_NOTICE_KEYS = {
     signed_out: 'auth.notices.signedOut',
     session_expired: 'auth.notices.sessionExpired',
+    blocked_access: 'auth.notices.blockedAccess',
     password_reset: 'auth.notices.passwordReset',
   };
 
@@ -168,7 +169,12 @@
 
   $: shouldRedirectUnauthenticated = !bootstrapPending && !isAuthenticated && !isPublicRoute;
   $: shouldRedirectAuthenticated = !bootstrapPending && isAuthenticated && (normalizedPath === LANDING_PATH || isAuthRoute);
-  $: protectedRedirectTarget = `${SIGN_IN_PATH}?${new URLSearchParams({ redirect: normalizedPath }).toString()}`;
+  $: protectedRedirectReason = $authMeta?.reason === 'blocked_access' ? 'blocked_access' : '';
+  $: protectedRedirectParams = new URLSearchParams({
+    redirect: normalizedPath,
+    ...(protectedRedirectReason ? { reason: protectedRedirectReason } : {}),
+  });
+  $: protectedRedirectTarget = `${SIGN_IN_PATH}?${protectedRedirectParams.toString()}`;
   $: if (shouldRedirectUnauthenticated && typeof window !== 'undefined') {
     router.replace(protectedRedirectTarget);
   }
