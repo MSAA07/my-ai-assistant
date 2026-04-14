@@ -316,6 +316,20 @@ function finishAuthAction() {
   updateMeta({ action: "idle" });
 }
 
+function logAuthFlow(event, details = {}) {
+  if (typeof window === "undefined") return;
+  console.info(`[auth-flow] ${event}`, details);
+}
+
+function maskEmail(email = "") {
+  const [localPart = "", domain = ""] = String(email).split("@");
+  if (!domain) return "";
+  if (localPart.length <= 2) {
+    return `${localPart[0] || "*"}***@${domain}`;
+  }
+  return `${localPart.slice(0, 2)}***@${domain}`;
+}
+
 export async function getSession() {
   return request("/get-session");
 }
@@ -349,13 +363,19 @@ async function restoreSession(reason = "authenticated", { broadcast = false } = 
 
 export async function signIn(email, password) {
   updateMeta({ action: "sign_in", errorCode: "" });
+  const callbackURL = getEmailVerificationCallbackUrl();
+  logAuthFlow("sign-in", {
+    email: maskEmail(email),
+    callbackURL,
+    callbackHost: callbackURL ? new URL(callbackURL).host : "",
+  });
 
   const result = await request("/sign-in/email", {
     method: "POST",
     body: {
       email,
       password,
-      callbackURL: getEmailVerificationCallbackUrl(),
+      callbackURL,
     }
   });
 
@@ -381,6 +401,12 @@ export async function signIn(email, password) {
 
 export async function signUp(email, password, name) {
   updateMeta({ action: "sign_up", errorCode: "" });
+  const callbackURL = getEmailVerificationCallbackUrl();
+  logAuthFlow("sign-up", {
+    email: maskEmail(email),
+    callbackURL,
+    callbackHost: callbackURL ? new URL(callbackURL).host : "",
+  });
 
   const result = await request("/sign-up/email", {
     method: "POST",
@@ -388,7 +414,7 @@ export async function signUp(email, password, name) {
       email,
       password,
       name,
-      callbackURL: getEmailVerificationCallbackUrl(),
+      callbackURL,
     }
   });
 
@@ -416,12 +442,18 @@ export async function signUp(email, password, name) {
 
 export async function resendVerification(email) {
   updateMeta({ action: "resend_verification", errorCode: "" });
+  const callbackURL = getEmailVerificationCallbackUrl();
+  logAuthFlow("resend-verification", {
+    email: maskEmail(email),
+    callbackURL,
+    callbackHost: callbackURL ? new URL(callbackURL).host : "",
+  });
 
   const result = await request("/send-verification-email", {
     method: "POST",
     body: {
       email,
-      callbackURL: getEmailVerificationCallbackUrl(),
+      callbackURL,
     },
   });
 
@@ -447,12 +479,18 @@ export async function resendVerification(email) {
 
 export async function requestPasswordReset(email) {
   updateMeta({ action: "request_password_reset", errorCode: "" });
+  const redirectTo = getPasswordResetCallbackUrl();
+  logAuthFlow("request-password-reset", {
+    email: maskEmail(email),
+    redirectTo,
+    callbackHost: redirectTo ? new URL(redirectTo).host : "",
+  });
 
   const result = await request("/request-password-reset", {
     method: "POST",
     body: {
       email,
-      redirectTo: getPasswordResetCallbackUrl(),
+      redirectTo,
     },
   });
 
