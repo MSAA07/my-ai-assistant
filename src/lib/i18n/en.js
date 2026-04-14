@@ -682,6 +682,11 @@ export default {
       sessionExpired: 'Your session expired. Please sign in again.',
       sessionRestoreFailed: 'Sign-in completed, but we could not restore your session. Please try again.',
       blockedAccess: 'This account cannot access the app right now.',
+      accountSuspended: 'This account cannot sign in right now. Contact {email} for help.',
+      rateLimited: 'Too many attempts. Please wait a moment and try again.',
+      rateLimitedRetry: 'Too many attempts. Please wait about {seconds} seconds and try again.',
+      challengeRequired: 'Complete the security check and try again.',
+      challengeFailed: 'We could not verify the security check. Please try again.',
       emailVerificationRequired: 'Verify your email address before signing in.',
       passwordResetRequestFailed: 'We could not send the reset email right now. Please try again.',
       resetTokenInvalid: 'This reset link is invalid, expired, or has already been used.',
@@ -825,6 +830,10 @@ export default {
       errors: {
         failed: 'We could not update your password right now.'
       }
+    },
+    challenge: {
+      loading: 'Loading security check...',
+      unavailable: 'The security check is unavailable right now. Refresh and try again.'
     }
   }
 };

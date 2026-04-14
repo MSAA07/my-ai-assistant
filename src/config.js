@@ -10,6 +10,10 @@ function normalizeAbsoluteUrl(value = "") {
   return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 }
 
+function normalizeEnvValue(value = "") {
+  return String(value || "").trim();
+}
+
 const PRODUCTION_FRONTEND_HOSTS = new Set([
   "studymaxing.com",
   "www.studymaxing.com",
@@ -64,6 +68,12 @@ export const getApiBaseUrl = () => {
 };
 
 export const API_BASE = getApiBaseUrl();
+export const AUTH_SUPPORT_EMAIL = normalizeEnvValue(import.meta.env?.VITE_AUTH_SUPPORT_EMAIL || "support@studymaxing.com");
+export const AUTH_TURNSTILE_SITE_KEY = normalizeEnvValue(import.meta.env?.VITE_AUTH_TURNSTILE_SITE_KEY || "");
+
+export function isAuthChallengeEnabled() {
+  return Boolean(AUTH_TURNSTILE_SITE_KEY);
+}
 
 export function getEmailVerificationCallbackUrl() {
   const envOverride = normalizeAbsoluteUrl(import.meta.env?.VITE_AUTH_VERIFICATION_CALLBACK_URL || "");

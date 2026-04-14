@@ -2,8 +2,10 @@
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import AuthChallenge from './AuthChallenge.svelte';
   import { t } from '../../lib/i18n/t.js';
   import { signIn } from '../../stores/auth.js';
+  import { isAuthChallengeEnabled } from '../../config.js';
   import { FORGOT_PASSWORD_PATH, VERIFY_EMAIL_PATH } from '../../routes.js';
   import { router } from '../../stores/router.js';
   import { validateEmail, validatePassword } from './validation.js';
@@ -16,10 +18,13 @@
   let error = '';
   let loading = false;
   let showPassword = false;
+  let challengeToken = '';
+  let challengeRef;
   let touched = {
     email: false,
     password: false,
   };
+  const challengeEnabled = isAuthChallengeEnabled();
 
   $: fieldErrors = {
     email: touched.email ? validateEmail(email, t) : '',
@@ -47,8 +52,13 @@
       return;
     }
 
+    if (challengeEnabled && !challengeToken) {
+      error = t('auth.errors.challengeRequired');
+      return;
+    }
+
     loading = true;
-    const res = await signIn(email.trim(), password);
+    const res = await signIn(email.trim(), password, { challengeToken });
     loading = false;
 
     if (res.error) {
@@ -63,6 +73,10 @@
       }
 
       error = res.error.message || t('auth.signIn.errors.failed');
+      if (challengeEnabled && (res.error.code === 'challenge_required' || res.error.code === 'challenge_failed' || res.error.code === 'rate_limited')) {
+        challengeRef?.reset?.();
+        challengeToken = '';
+      }
       return;
     }
 
@@ -143,6 +157,14 @@
     <Button type="button" variant="ghost" size="sm" className="forgot-btn" on:click={goToForgotPassword}>
       {t('auth.signIn.actions.forgotPassword')}
     </Button>
+
+    <AuthChallenge
+      bind:this={challengeRef}
+      action="sign_in"
+      on:change={(event) => {
+        challengeToken = event.detail.token;
+      }}
+    />
 
     {#if error}
       <p class="auth-error" role="alert">{error}</p>

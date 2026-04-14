@@ -6,21 +6,40 @@
   import MetaPill from '../lib/components/ui/MetaPill.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Button from '../lib/components/ui/Button.svelte';
+  import FieldShell from '../lib/components/ui/FieldShell.svelte';
   import Section from '../lib/components/ui/Section.svelte';
   import SettingsPanelSkeleton from '../lib/components/ui/SettingsPanelSkeleton.svelte';
   import ThemeToggle from '../lib/components/ui/ThemeToggle.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
-  import { session, signOut } from '../stores/auth.js';
+  import { changePassword, session, signOut } from '../stores/auth.js';
   import { theme } from '../stores/theme.js';
   import { t } from '../lib/i18n/t.js';
+  import { validateConfirmPassword, validatePassword } from '../components/auth/validation.js';
 
   let loggingOut = false;
+  let changingPassword = false;
+  let currentPassword = '';
+  let newPassword = '';
+  let confirmPassword = '';
+  let passwordFeedback = '';
+  let passwordFeedbackTone = 'info';
+  let passwordTouched = {
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  };
 
   $: userName = $session?.user?.name ?? t('settings.account.anonymous');
   $: userEmail = $session?.user?.email ?? t('settings.account.noEmail');
   $: plan = $session?.user?.plan ?? 'free';
   $: planLabel = plan === 'pro' || plan === 'premium' ? t('nav.proBadge') : t('nav.freeBadge');
   $: currentThemeLabel = $theme === 'light' ? t('settings.theme.light') : t('settings.theme.dark');
+  $: passwordErrors = {
+    currentPassword: passwordTouched.currentPassword && !currentPassword ? t('auth.validation.currentPasswordRequired') : '',
+    newPassword: passwordTouched.newPassword ? validatePassword(newPassword, t) : '',
+    confirmPassword: passwordTouched.confirmPassword ? validateConfirmPassword(newPassword, confirmPassword, t) : '',
+  };
+  $: passwordHasErrors = Boolean(passwordErrors.currentPassword || passwordErrors.newPassword || passwordErrors.confirmPassword);
 
   async function handleLogout() {
     loggingOut = true;
@@ -33,6 +52,48 @@
 
   function handleThemeChange(event) {
     theme.setTheme(event.detail.theme);
+  }
+
+  async function handleChangePassword() {
+    if (changingPassword) return;
+
+    passwordTouched = {
+      currentPassword: true,
+      newPassword: true,
+      confirmPassword: true,
+    };
+    passwordFeedback = '';
+
+    const nextErrors = {
+      currentPassword: currentPassword ? '' : t('auth.validation.currentPasswordRequired'),
+      newPassword: validatePassword(newPassword, t),
+      confirmPassword: validateConfirmPassword(newPassword, confirmPassword, t),
+    };
+
+    if (Object.values(nextErrors).some(Boolean)) {
+      return;
+    }
+
+    changingPassword = true;
+    const result = await changePassword(currentPassword, newPassword, { revokeOtherSessions: false });
+    changingPassword = false;
+
+    if (result.error) {
+      passwordFeedbackTone = 'error';
+      passwordFeedback = result.error.message || t('auth.changePassword.errors.failed');
+      return;
+    }
+
+    passwordFeedbackTone = 'success';
+    passwordFeedback = t('auth.changePassword.success');
+    currentPassword = '';
+    newPassword = '';
+    confirmPassword = '';
+    passwordTouched = {
+      currentPassword: false,
+      newPassword: false,
+      confirmPassword: false,
+    };
   }
 </script>
 
@@ -130,6 +191,84 @@
           </div>
         </article>
       </Section>
+
+      <Section
+        id="security"
+        className="settings-section settings-section-security"
+        title={t('settings.security.title')}
+        description={t('settings.security.description')}
+      >
+        <div slot="header" class="section-copy">
+          <p class="section-eyebrow">{t('settings.security.title')}</p>
+          <h2>{t('settings.security.title')}</h2>
+          <p>{t('settings.security.description')}</p>
+        </div>
+
+        <div class="password-form">
+          <FieldShell
+            label={t('auth.changePassword.fields.currentPassword')}
+            forId="current-password"
+            required
+            error={passwordErrors.currentPassword}
+          >
+            <input
+              id="current-password"
+              type="password"
+              bind:value={currentPassword}
+              autocomplete="current-password"
+              placeholder={t('auth.changePassword.placeholders.currentPassword')}
+              aria-invalid={passwordErrors.currentPassword ? 'true' : 'false'}
+              on:blur={() => (passwordTouched = { ...passwordTouched, currentPassword: true })}
+            />
+          </FieldShell>
+
+          <FieldShell
+            label={t('auth.changePassword.fields.newPassword')}
+            forId="new-password"
+            required
+            error={passwordErrors.newPassword}
+            hint={t('auth.validation.passwordHint')}
+          >
+            <input
+              id="new-password"
+              type="password"
+              bind:value={newPassword}
+              autocomplete="new-password"
+              placeholder={t('auth.changePassword.placeholders.newPassword')}
+              aria-invalid={passwordErrors.newPassword ? 'true' : 'false'}
+              on:blur={() => (passwordTouched = { ...passwordTouched, newPassword: true })}
+            />
+          </FieldShell>
+
+          <FieldShell
+            label={t('auth.fields.confirmPassword')}
+            forId="confirm-new-password"
+            required
+            error={passwordErrors.confirmPassword}
+          >
+            <input
+              id="confirm-new-password"
+              type="password"
+              bind:value={confirmPassword}
+              autocomplete="new-password"
+              placeholder={t('auth.changePassword.placeholders.confirmPassword')}
+              aria-invalid={passwordErrors.confirmPassword ? 'true' : 'false'}
+              on:blur={() => (passwordTouched = { ...passwordTouched, confirmPassword: true })}
+            />
+          </FieldShell>
+
+          {#if passwordFeedback}
+            <p class={`password-feedback password-feedback--${passwordFeedbackTone}`} role="status">{passwordFeedback}</p>
+          {/if}
+
+          <div class="password-actions">
+            <Button type="button" variant="primary" loading={changingPassword} disabled={changingPassword || passwordHasErrors} on:click={handleChangePassword}>
+              {changingPassword ? t('auth.changePassword.actions.loading') : t('auth.changePassword.actions.submit')}
+            </Button>
+            <p class="helper">{t('auth.changePassword.sessionNote')}</p>
+          </div>
+        </div>
+      </Section>
     </div>
   </PageLayout>
 {/if}
@@ -217,6 +356,37 @@
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     line-height: 1.55;
+  }
+
+  .password-form {
+    display: grid;
+    gap: var(--ui-space-3);
+    max-width: 34rem;
+  }
+
+  .password-actions {
+    display: grid;
+    gap: var(--ui-space-2);
+    justify-items: start;
+  }
+
+  .password-feedback {
+    margin: 0;
+    border-radius: var(--ui-radius-md);
+    padding: 0.75rem 0.85rem;
+    font-size: var(--font-size-sm);
+  }
+
+  .password-feedback--success {
+    background: color-mix(in srgb, var(--ui-surface-card) 82%, #dff4e8 18%);
+    border: 1px solid color-mix(in srgb, #1f8f58 40%, var(--ui-border-subtle) 60%);
+    color: #176640;
+  }
+
+  .password-feedback--error {
+    background: var(--color-danger-surface);
+    border: 1px solid var(--color-danger-border);
+    color: var(--color-danger-soft);
   }
 
   .account-card {

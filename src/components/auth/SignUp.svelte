@@ -2,8 +2,10 @@
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import AuthChallenge from './AuthChallenge.svelte';
   import { t } from '../../lib/i18n/t.js';
   import { signUp } from '../../stores/auth.js';
+  import { isAuthChallengeEnabled } from '../../config.js';
   import { router } from '../../stores/router.js';
   import { VERIFY_EMAIL_PATH } from '../../routes.js';
   import {
@@ -24,12 +26,15 @@
   let loading = false;
   let showPassword = false;
   let showConfirmPassword = false;
+  let challengeToken = '';
+  let challengeRef;
   let touched = {
     name: false,
     email: false,
     password: false,
     confirmPassword: false,
   };
+  const challengeEnabled = isAuthChallengeEnabled();
 
   $: fieldErrors = {
     name: touched.name ? validateName(name, t) : '',
@@ -71,12 +76,21 @@
       return;
     }
 
+    if (challengeEnabled && !challengeToken) {
+      error = t('auth.errors.challengeRequired');
+      return;
+    }
+
     loading = true;
-    const res = await signUp(email.trim(), password, name.trim());
+    const res = await signUp(email.trim(), password, name.trim(), { challengeToken });
     loading = false;
 
     if (res.error) {
       error = res.error.message || t('auth.signUp.errors.failed');
+      if (challengeEnabled && (res.error.code === 'challenge_required' || res.error.code === 'challenge_failed' || res.error.code === 'rate_limited')) {
+        challengeRef?.reset?.();
+        challengeToken = '';
+      }
       return;
     }
 
@@ -200,6 +214,14 @@
         </button>
       </div>
     </FieldShell>
+
+    <AuthChallenge
+      bind:this={challengeRef}
+      action="sign_up"
+      on:change={(event) => {
+        challengeToken = event.detail.token;
+      }}
+    />
 
     {#if error}
       <p class="auth-error" role="alert">{error}</p>
