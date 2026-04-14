@@ -42,6 +42,12 @@
     password_reset: 'auth.notices.passwordReset',
   };
 
+  function logAuthBridge(event, details = {}) {
+    if (typeof window === 'undefined') return;
+
+    console.info(`[auth-bridge] ${event}`, details);
+  }
+
   function consumeVerificationBridge() {
     if (typeof window === 'undefined') return;
 
@@ -54,7 +60,18 @@
     if (token) {
       const handoffUrl = new URL(`${API_BASE}/api/auth/verify-email`);
       handoffUrl.searchParams.set('token', token);
-      handoffUrl.searchParams.set('callbackURL', getEmailVerificationCallbackUrl());
+      const callbackUrl = getEmailVerificationCallbackUrl();
+      handoffUrl.searchParams.set('callbackURL', callbackUrl);
+
+      logAuthBridge('verification-handoff', {
+        browserUrl: window.location.href,
+        tokenPresent: true,
+        callbackUrl,
+        callbackHost: new URL(callbackUrl).host,
+        handoffOrigin: handoffUrl.origin,
+        handoffPath: handoffUrl.pathname,
+      });
+
       window.location.replace(handoffUrl.toString());
       return;
     }
@@ -68,6 +85,13 @@
     }
 
     const nextHash = `#${VERIFY_EMAIL_PATH}?${nextParams.toString()}`;
+    logAuthBridge('verification-complete', {
+      browserUrl: window.location.href,
+      tokenPresent: false,
+      status: nextParams.get('status'),
+      error: nextParams.get('error') || '',
+      nextHash,
+    });
     window.history.replaceState(null, '', `${window.location.pathname}${nextHash}`);
   }
 
@@ -85,9 +109,19 @@
 
     if (token) {
       nextParams.set('token', token);
+      logAuthBridge('reset-password-handoff', {
+        browserUrl: window.location.href,
+        tokenPresent: true,
+        nextHash: `#${RESET_PASSWORD_PATH}?${nextParams.toString()}`,
+      });
     } else {
       nextParams.set('status', 'error');
       nextParams.set('error', (error || 'invalid_token').toLowerCase());
+      logAuthBridge('reset-password-error', {
+        browserUrl: window.location.href,
+        tokenPresent: false,
+        error: nextParams.get('error'),
+      });
     }
 
     const nextHash = `#${RESET_PASSWORD_PATH}?${nextParams.toString()}`;
