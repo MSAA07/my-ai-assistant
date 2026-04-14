@@ -287,7 +287,7 @@
             <p>No backend changes. No workflow changes. Just a sharper system for the product you already use.</p>
           </div>
           <div class="final-cta__actions">
-            <Button variant="primary" size="lg" type="button" on:click={enterApp}>Open the app</Button>
+            <Button variant="primary" size="lg" type="button" on:click={goToSignUp}>Open the app</Button>
             <Button variant="secondary" size="lg" type="button" on:click={() => (window.location.hash = '#features')}>Review features</Button>
           </div>
         </Card>
