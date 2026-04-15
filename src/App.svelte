@@ -85,7 +85,8 @@
       nextParams.set('error', error.toLowerCase());
     }
 
-    const nextHash = `#${VERIFY_EMAIL_PATH}?${nextParams.toString()}`;
+    const nextPath = `${VERIFY_EMAIL_PATH}?${nextParams.toString()}`;
+    const nextHash = `#${nextPath}`;
     logAuthBridge('verification-complete', {
       browserUrl: window.location.href,
       tokenPresent: false,
@@ -93,7 +94,7 @@
       error: nextParams.get('error') || '',
       nextHash,
     });
-    window.history.replaceState(null, '', `${window.location.pathname}${nextHash}`);
+    router.replace(nextPath);
   }
 
   function consumeResetPasswordBridge() {
@@ -125,8 +126,8 @@
       });
     }
 
-    const nextHash = `#${RESET_PASSWORD_PATH}?${nextParams.toString()}`;
-    window.history.replaceState(null, '', `${window.location.pathname}${nextHash}`);
+    const nextPath = `${RESET_PASSWORD_PATH}?${nextParams.toString()}`;
+    router.replace(nextPath);
   }
 
   consumeVerificationBridge();
