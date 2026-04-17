@@ -1,13 +1,13 @@
 # System Overview (Frontend)
 
-This document describes the current implemented frontend runtime.
+This document describes the current implemented frontend runtime on the synced `stage` codebase. It stays shared across environments and calls out verified stage/production differences only where they affect operation.
 
 ## Stack
 
 - Svelte 5
 - Vite 7
 - Better Auth cookie-session calls
-- Hash-based routing
+- hash-based routing
 
 ## Routing and Shell
 
@@ -16,33 +16,61 @@ Routing files:
 - `src/stores/router.js`
 - `src/routes.js`
 - `src/stores/auth.js`
+- `src/App.svelte`
 
 Current behavior:
 
 - The browser hash is the route source of truth.
-- `App.svelte` resolves the normalized route and renders the active page.
+- `src/stores/router.js` parses hash paths plus hash query params, which is why public section links use forms like `#/?section=features`.
+- `App.svelte` resolves the normalized route and renders either the shared public shell or the authenticated shell.
 - `AppShell.svelte` is the default authenticated shell.
 - `AppHeader.svelte` + `Footer.svelte` remain only for the non-default fallback shell path when `VITE_FEATURE_APPSHELL=false`.
-- Public routes are exactly `#/`, `#/sign-in`, and `#/sign-up`.
-- All other routes are protected by default.
-- Canonical study routes are the only primary user-facing Study Hub model.
+- `PublicHeader.svelte` + `PublicFooter.svelte` wrap the current landing and public auth pages.
+- Canonical authenticated study ownership remains under `#/study`.
 - Legacy route normalization runs before auth-guard checks, so older document routes still resolve onto canonical study routes before redirect handling.
 
-Public auth routes:
+## Public Routes
+
+Public landing and auth-entry routes:
 
 - `#/`
 - `#/sign-in`
 - `#/sign-up`
+
+Additional public auth utility routes:
+
+- `#/forgot-password`
+- `#/reset-password`
+- `#/verify-email`
+
+Public shell behavior:
+
+- `#/` renders `src/pages/Landing.svelte` inside the shared public shell.
+- `#/sign-in` and `#/sign-up` render auth cards inside the same public shell, with Study Maxing messaging and CTA framing.
+- `#/forgot-password`, `#/reset-password`, and `#/verify-email` also use the same public shell pattern.
+- `src/components/public/PublicHeader.svelte` owns Study Maxing branding, section navigation, sign-in/sign-up CTA buttons, and the theme toggle for public pages.
+- `src/components/public/PublicFooter.svelte` owns the shared public footer and its public navigation links.
+- Landing CTA and footer CTA links route to `#/sign-in` and `#/sign-up`.
+- Landing section links use router-safe hash query targets such as `#/?section=features`, `#/?section=how-it-works`, and `#/?section=faq`.
+- The theme toggle is available through `PublicHeader.svelte`, so it is present on landing and on the public auth pages that render that header.
+
+## Authenticated Routes
 
 Canonical study routes:
 
 - `#/study`
 - `#/study/:id/:section?`
 
+Other authenticated routes:
+
+- `#/home`
+- `#/settings`
+- `#/admin`
+- `#/admin/*`
+
 Legacy routes:
 
 - legacy compatibility only, not primary UX
-
 - `#/legacy/documents/:id/:section?`
 - `#/documents-legacy/:id/:section?`
 
@@ -50,17 +78,24 @@ Compatibility normalization also maps older routes like `#/documents/:id/:sectio
 
 ## Page Ownership
 
-- `Home.svelte`: authenticated upload/dashboard entry
-- `StudyHubIndex.svelte`: canonical Study Hub Library
-- `StudyHubDocument.svelte`: canonical Study Hub Document
-- `DocumentView.svelte`: legacy route wrapper
-- `DocumentActivityView.svelte`: shared summary/flashcards/exam activity implementation
-- `Settings.svelte`: settings and preferences
-- `AdminDashboard.svelte`: admin console
+- `src/pages/Landing.svelte`: public Study Maxing landing page
+- `src/components/auth/SignIn.svelte`: sign-in card
+- `src/components/auth/SignUp.svelte`: sign-up card
+- `src/components/auth/ForgotPassword.svelte`: password reset request card
+- `src/components/auth/ResetPassword.svelte`: password reset completion card
+- `src/components/auth/VerifyEmail.svelte`: verification status/resend card
+- `src/pages/Home.svelte`: authenticated upload/dashboard entry
+- `src/pages/StudyHubIndex.svelte`: canonical Study Hub Library
+- `src/pages/StudyHubDocument.svelte`: canonical Study Hub Document
+- `src/pages/DocumentView.svelte`: legacy route wrapper
+- `src/lib/components/study/DocumentActivityView.svelte`: shared summary/flashcards/exam activity implementation
+- `src/pages/Settings.svelte`: settings and preferences
+- `src/components/AdminDashboard.svelte`: admin console
 
 Important distinction:
 
-- Canonical study routes are the user-facing route model.
+- The public shell is now a first-class implementation surface, but it does not own authenticated study flow.
+- Canonical study routes remain the user-facing route model after sign-in.
 - `DocumentView.svelte` is kept for legacy compatibility only, not primary UX.
 - On canonical routes, activity sections are rendered from `StudyHubDocument.svelte` through `DocumentActivityView.svelte`.
 
@@ -135,13 +170,13 @@ Study activities:
   - `POST /api/exam/attempt`
 - canonical study artifact APIs are wrapped in `src/lib/api/studyHub.js`
 
-## I18N Rules (STRICT)
+## I18N Rules
 
-- Canonical application surfaces must route user-facing copy through the translation layer in `src/lib/i18n/*`.
-- New user-facing copy must not be hardcoded in components in English or Arabic on canonical application surfaces.
+- Canonical authenticated application surfaces must route user-facing copy through the translation layer in `src/lib/i18n/*`.
+- New user-facing copy must not be hardcoded in components in English or Arabic on canonical authenticated application surfaces.
 - `App.svelte` remounts on language change with `{#key $language}`, and `src/lib/stores/language.js` reapplies `lang`, `dir`, and font settings, so language switching fully re-renders the canonical application UI.
-- Mixed-language UI state is not allowed on canonical application surfaces.
-- Current exception: `src/pages/Landing.svelte` still contains hardcoded marketing copy and is not yet aligned to this strict contract.
+- Mixed-language UI state is not allowed on canonical authenticated application surfaces.
+- The refreshed public landing and auth shell currently contain product copy directly in `Landing.svelte` and `App.svelte`; that public copy is implemented and intentional in the current stage build.
 
 ## Shared UI System
 
@@ -173,16 +208,20 @@ Theme:
 - values: `dark`, `light`
 - persisted in `localStorage` key `my-ai-assistant:theme`
 - initialized before and during app bootstrap to keep DOM and store aligned
+- used by both the shared public shell and the authenticated shell
 
 Session:
 
 - owned by `src/stores/auth.js`
 - Better Auth endpoints are called with `credentials: include`
 - app bootstraps the current session on load before protected content renders
-- successful sign-up creates a session immediately in this phase; there is no email-verification holding state
 - unauthenticated access to protected routes redirects to `#/sign-in?redirect=<safe-path>`
 - authenticated access to `#/`, `#/sign-in`, or `#/sign-up` redirects to the sanitized target or `#/home`
 - redirect sanitization only accepts safe internal hash paths and rejects auth-route loops, malformed values, and external URLs
+- sign-in restores the Better Auth session when credentials succeed
+- sign-in can route users to `#/verify-email` when the backend reports `email_verification_required`
+- sign-up currently routes to `#/verify-email` with a verification-pending state; it does not immediately enter the authenticated shell
+- verification and password reset links hand off through same-origin callback URLs by default, then re-enter the hash router via `/?auth_action=verify-email` and `/?auth_action=reset-password`
 - logout clears frontend auth state, clears session-dependent page cache, and redirects once to `#/sign-in`
 - expired or invalid sessions resolve to an unauthenticated state and redirect to `#/sign-in` without rendering stale protected content
 - cross-tab auth changes are synchronized through lightweight browser storage events
@@ -195,22 +234,40 @@ Session:
 2. host-derived mapping
 3. local fallback
 
-Current host-derived mapping:
+Shared behavior:
 
-- Vite dev localhost -> same-origin dev proxy
-- local non-dev host -> staging backend
-- Vercel preview/stage hosts -> staging backend
-- `studymaxing.com`, `www.studymaxing.com`, and production hosts -> production backend
+- Vite dev on `localhost` or `127.0.0.1` uses same-origin dev proxy behavior
+- local non-dev hostnames resolve to the staging backend
+- unknown non-local hosts fall back to the production backend
+
+Stage:
+
+- Vercel preview and stage-like hosts for this frontend resolve to `https://ai-assistant-backend-staging.up.railway.app`
+
+Production:
+
+- `studymaxing.com`
+- `www.studymaxing.com`
+- `my-ai-assistant.vercel.app`
+- production-like hosts including names containing `git-production`
+
+These resolve to `https://ai-assistant-backend-production-ddf0.up.railway.app`
+
+Environment differences:
+
+- The verified long-term environment difference in this repo is frontend host to backend mapping.
+- Support email, Turnstile site key, and auth callback URLs are environment-configurable through env vars, but this codebase alone does not verify distinct stage versus production values.
 
 ## Maintenance Triggers
 
 Update this file when any of these change:
 
+- public shell ownership or public auth routes
 - canonical study routes or legacy routes
 - lifecycle ownership between `Document.processingStatus`, `DocumentGeneration`, and `Job.status (worker-only)`
-- page ownership between `StudyHubIndex`, `StudyHubDocument`, `DocumentView`, and `DocumentActivityView`
+- page ownership between landing/auth/public components and authenticated study surfaces
 - shared UI primitive or token ownership
 - host-derived API base mapping
-- frontend-visible generation contracts, I18N rules, or lifecycle semantics
+- frontend-visible auth callbacks, verification flow, I18N rules, or lifecycle semantics
 
-Last Updated: April 2, 2026
+Last Updated: April 17, 2026
