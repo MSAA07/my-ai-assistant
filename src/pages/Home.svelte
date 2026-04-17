@@ -831,10 +831,9 @@
         files={selectedFiles}
         accept={VALID_EXTENSIONS.join(",")}
         multiple={false}
-        variant="hero"
-        eyebrow={t("home.uploadSection.heroEyebrow")}
-        title={t("home.uploadSection.heroTitle")}
-        description={t("home.uploadSection.heroDescription")}
+        variant="compact"
+        title=""
+        description=""
         supportTitle={t("home.uploadSection.heroSupport")}
         benefitLabel={t("home.uploadSection.heroBenefitsLabel")}
         benefitItems={[
@@ -842,11 +841,12 @@
           t("home.uploadSection.heroBenefits.flashcards"),
           t("home.uploadSection.heroBenefits.exams"),
         ]}
-        dropzoneTitle={t("home.uploadSection.dropzoneTitle")}
-        dropzoneDescription={t("home.uploadSection.dropzoneDescription")}
+        detailsSummary={t("home.uploadSection.heroBenefitsLabel")}
+        dropzoneTitle={t("home.uploadSection.title")}
+        dropzoneDescription=""
         dropzoneOr={t("home.uploadSection.dropzoneOr")}
-        browseLabel={t("home.uploadSection.browse")}
-        supportLabel={t("home.uploadSection.supportedFilesSingle")}
+        browseLabel={t("home.uploadSection.browseFile")}
+        supportLabel={t("home.uploadSection.constraints")}
         showCounter={false}
         cancelLabel={t("home.uploadSection.cancel")}
         submitLabel={t("home.uploadSection.submitUpload")}
@@ -1143,28 +1143,12 @@
   }
 
   .upload-stack {
-    width: min(100%, 760px);
+    width: min(100%, 680px);
     margin-inline: auto;
   }
 
-  :global(.home-page .upload-panel-shell .empty-state--hero) {
-    --card-gap: var(--ui-space-3);
-  }
-
-  :global(.home-page .upload-panel-shell .empty-state__inner) {
-    gap: var(--ui-space-2);
-  }
-
-  :global(.home-page .upload-panel-shell .empty-state__copy) {
-    gap: var(--ui-space-1);
-  }
-
-  :global(.home-page .upload-panel-shell .empty-state__support) {
-    gap: var(--ui-space-2);
-  }
-
-  :global(.home-page .upload-panel-shell .empty-state__support .upload-panel__hero-support-copy) {
-    max-width: 38ch;
+  :global(.home-page .upload-panel-shell .upload-panel__titles p) {
+    max-width: 48ch;
   }
 
   .guided-panel {

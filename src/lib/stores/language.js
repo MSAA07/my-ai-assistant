@@ -7,7 +7,7 @@ const DEFAULT_LANGUAGE = 'en';
 export const availableLanguages = ENABLE_ARABIC_UI
   ? [
       { code: 'en', labelKey: 'language.english', shortLabel: 'EN' },
-      { code: 'ar', labelKey: 'language.arabic', shortLabel: 'AR' }
+      { code: 'ar', labelKey: 'language.arabic', shortLabel: 'ع' }
     ]
   : [{ code: 'en', labelKey: 'language.english', shortLabel: 'EN' }];
 const isBrowser = typeof window !== 'undefined';

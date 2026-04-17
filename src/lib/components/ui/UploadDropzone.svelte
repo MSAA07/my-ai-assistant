@@ -18,6 +18,7 @@
   export let variant = 'default';
 
   $: isHero = variant === 'hero';
+  $: isCompact = variant === 'compact';
 
   let isDragActive = false;
 
@@ -75,6 +76,7 @@
   class:upload-dropzone--active={isDragActive}
   class:upload-dropzone--disabled={disabled || isBusy}
   class:upload-dropzone--hero={isHero}
+  class:upload-dropzone--compact={isCompact}
   role="button"
   tabindex="0"
   on:dragover={handleDragOver}
@@ -92,13 +94,15 @@
     disabled={disabled || isBusy}
   />
 
-  <div class="upload-dropzone__icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M12 15V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-      <path d="M8.5 10.5L12 7l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      <path d="M6 17.5h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-    </svg>
-  </div>
+  {#if !isCompact}
+    <div class="upload-dropzone__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 15V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        <path d="M8.5 10.5L12 7l3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M6 17.5h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </div>
+  {/if}
 
   {#if activeFileName}
     <div class="upload-dropzone__drag-chip">{activeFileName}</div>
@@ -110,11 +114,13 @@
     <p class="upload-dropzone__description">{description}</p>
   {/if}
 
-  <div class="upload-dropzone__divider" aria-hidden="true">
-    <span></span>
-    <strong>{orLabel}</strong>
-    <span></span>
-  </div>
+  {#if !isCompact}
+    <div class="upload-dropzone__divider" aria-hidden="true">
+      <span></span>
+      <strong>{orLabel}</strong>
+      <span></span>
+    </div>
+  {/if}
 
   <Button
     type="button"
@@ -154,6 +160,15 @@
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--ui-text-primary) 6%, transparent),
       0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .upload-dropzone--compact {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    justify-items: stretch;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-3) var(--upload-dropzone-padding-inline);
+    text-align: left;
   }
 
   .upload-dropzone:hover:not(.upload-dropzone--disabled),
@@ -204,6 +219,11 @@
     box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
   }
 
+  .upload-dropzone--compact .upload-dropzone__drag-chip {
+    top: var(--ui-space-2);
+    inset-inline-end: var(--ui-space-2);
+  }
+
   .upload-dropzone__icon svg {
     width: 22px;
     height: 22px;
@@ -246,6 +266,13 @@
     letter-spacing: -0.02em;
   }
 
+  .upload-dropzone--compact .upload-dropzone__title {
+    max-width: none;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    align-self: center;
+  }
+
   .upload-dropzone__description {
     margin: 0;
     max-width: 34rem;
@@ -257,6 +284,11 @@
   .upload-dropzone--hero .upload-dropzone__description {
     max-width: 30rem;
     font-size: 0.875rem;
+  }
+
+  .upload-dropzone--compact .upload-dropzone__description {
+    max-width: none;
+    font-size: var(--font-size-xs);
   }
 
   .upload-dropzone__divider {
@@ -292,6 +324,12 @@
       0 10px 24px color-mix(in srgb, var(--ui-text-primary) 12%, transparent);
   }
 
+  :global(.upload-dropzone--compact .upload-dropzone__browse.ui-button) {
+    min-width: 8.5rem;
+    justify-self: end;
+    align-self: center;
+  }
+
   @media (max-width: 640px) {
     .upload-dropzone__drag-chip {
       position: static;
@@ -309,6 +347,16 @@
     :global(.upload-dropzone__browse.ui-button) {
       width: 100%;
       min-width: 0;
+    }
+
+    .upload-dropzone--compact {
+      grid-template-columns: 1fr;
+      justify-items: stretch;
+      text-align: center;
+    }
+
+    :global(.upload-dropzone--compact .upload-dropzone__browse.ui-button) {
+      justify-self: stretch;
     }
   }
 </style>

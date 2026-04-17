@@ -30,24 +30,26 @@
       className={`language-toggle__button ${currentLanguage === lang.code ? 'language-toggle__button--active' : ''}`}
       on:click={() => select(lang.code)}
       aria-pressed={currentLanguage === lang.code}
+      aria-label={lang.label}
+      title={lang.label}
     >
-      <span class="language-toggle__label">{lang.label}</span>
-      <span class="language-toggle__meta">{lang.shortLabel}</span>
+      <span class="language-toggle__short">{lang.shortLabel}</span>
     </Button>
   {/each}
 </div>
 
 <style>
   .language-toggle {
-    display: flex;
+    display: inline-flex;
+    align-items: center;
     gap: var(--ui-space-2);
-    flex-wrap: wrap;
-    min-width: 200px;
+    flex-wrap: nowrap;
   }
 
   :global(.language-toggle__button.ui-button) {
     min-width: 0;
     box-shadow: none;
+    min-height: 2rem;
     padding-inline: var(--ui-space-3);
   }
 
@@ -55,12 +57,10 @@
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 14%, transparent);
   }
 
-  .language-toggle__label {
+  .language-toggle__short {
+    min-width: 1.2rem;
+    text-align: center;
     font-weight: 700;
-  }
-
-  .language-toggle__meta {
-    font-size: 0.78rem;
-    opacity: 0.78;
+    line-height: 1;
   }
 </style>

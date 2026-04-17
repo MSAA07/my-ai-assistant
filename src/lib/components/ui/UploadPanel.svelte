@@ -33,10 +33,16 @@
   export let submitBusyLabel = '';
   export let removeFileLabel = '';
   export let errorMessage = '';
+  export let detailsSummary = '';
 
   $: canSubmit = Array.isArray(files) && files.length > 0 && !busy;
   $: showFooter = busy || files.length > 0 || showCounter;
   $: isHero = variant === 'hero';
+  $: isCompact = variant === 'compact';
+  $: panelClassName = ['upload-panel', isHero ? 'upload-panel--hero' : isCompact ? 'upload-panel--compact' : 'upload-panel--default']
+    .filter(Boolean)
+    .join(' ');
+  $: ariaLabel = title || dropzoneTitle || browseLabel;
 
   function handleSubmit() {
     dispatch('submit');
@@ -56,7 +62,7 @@
   }
 </script>
 
-<section class={['upload-panel-shell', className, $$props.class ?? ''].filter(Boolean).join(' ')} aria-label={title}>
+<section class={['upload-panel-shell', className, $$props.class ?? ''].filter(Boolean).join(' ')} aria-label={ariaLabel}>
   {#if isHero}
     <EmptyState variant="hero" {eyebrow} {title} {description}>
       <div slot="support" class="upload-panel__hero-support">
@@ -140,13 +146,15 @@
       </span>
     </EmptyState>
   {:else}
-    <div class="upload-panel upload-panel--default">
-      <div class="upload-panel__header">
-        <div class="upload-panel__titles">
-          <h2>{title}</h2>
-          <p>{description}</p>
+    <div class={panelClassName}>
+      {#if title || description}
+        <div class="upload-panel__header">
+          <div class="upload-panel__titles">
+            {#if title}<h2>{title}</h2>{/if}
+            {#if description}<p>{description}</p>{/if}
+          </div>
         </div>
-      </div>
+      {/if}
 
       <UploadDropzone
         id="upload-panel-input"
@@ -158,10 +166,29 @@
         description={dropzoneDescription}
         orLabel={dropzoneOr}
         {browseLabel}
+        variant={isCompact ? 'compact' : 'default'}
         on:filesSelected={handleFilesSelected}
       />
 
-      <p class="upload-panel__support">{supportLabel}</p>
+      {#if supportLabel}
+        <p class="upload-panel__support">{supportLabel}</p>
+      {/if}
+
+      {#if isCompact && detailsSummary}
+        <details class="upload-panel__details">
+          <summary>{detailsSummary}</summary>
+          {#if supportTitle}
+            <p class="upload-panel__details-copy">{supportTitle}</p>
+          {/if}
+          {#if benefitItems.length > 0}
+            <div class="upload-panel__hero-chips" aria-label={benefitLabel}>
+              {#each benefitItems as item (item)}
+                <Badge tone="neutral" variant="outline" size="sm">{item}</Badge>
+              {/each}
+            </div>
+          {/if}
+        </details>
+      {/if}
 
       {#if errorMessage}
         <p class="upload-panel__error" role="alert">{errorMessage}</p>
@@ -235,6 +262,16 @@
     max-width: 100%;
   }
 
+  .upload-panel--default,
+  .upload-panel--compact {
+    box-shadow: none;
+  }
+
+  .upload-panel--compact {
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-3);
+  }
+
   .upload-panel__header {
     display: grid;
     gap: var(--ui-space-1);
@@ -296,6 +333,35 @@
     line-height: 1.4;
   }
 
+  .upload-panel--compact .upload-panel__support {
+    text-align: left;
+  }
+
+  .upload-panel__details {
+    display: grid;
+    gap: var(--ui-space-2);
+    color: var(--ui-text-secondary);
+  }
+
+  .upload-panel__details summary {
+    cursor: pointer;
+    color: var(--ui-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    list-style: none;
+  }
+
+  .upload-panel__details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .upload-panel__details-copy {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
   .upload-panel__error {
     margin: 0;
     color: var(--upload-panel-error);
@@ -323,6 +389,10 @@
     gap: var(--ui-space-3);
     border-top: 1px solid var(--upload-footer-border);
     padding-top: var(--ui-space-3);
+  }
+
+  .upload-panel--compact .upload-panel__footer {
+    padding-top: var(--ui-space-2);
   }
 
   .upload-panel__counter {
@@ -362,6 +432,10 @@
 
     .upload-panel__counter {
       text-align: left;
+    }
+
+    .upload-panel--compact .upload-panel__support {
+      text-align: center;
     }
 
     .upload-panel__actions {

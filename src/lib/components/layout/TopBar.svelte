@@ -97,17 +97,6 @@
       <LanguageToggle />
     {/if}
 
-    <button
-      class="utility-button"
-      type="button"
-      disabled
-      aria-disabled="true"
-      aria-label={t('topbar.notificationsComingSoon')}
-      title={t('common.comingSoon')}
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v2.88l-.95 2.86A1.75 1.75 0 0 0 6.69 17h10.62a1.75 1.75 0 0 0 1.64-2.26L18 11.88V9a6 6 0 0 0-6-6Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z" /></svg>
-    </button>
-
     <div class="account-wrapper" bind:this={accountWrapper}>
       <button
         class="account-trigger"
@@ -141,8 +130,9 @@
 
 <style>
   .topbar {
-    position: relative;
-    z-index: 1;
+    position: sticky;
+    top: 0;
+    z-index: 30;
     display: flex;
     min-height: var(--size-topbar);
     flex: 0 0 auto;
@@ -233,7 +223,6 @@
     font-weight: 500;
   }
 
-  .utility-button,
   .account-trigger {
     display: inline-flex;
     width: 32px;
@@ -250,28 +239,15 @@
       border-color var(--motion-fast) var(--ease-standard);
   }
 
-  .utility-button:hover:enabled,
   .account-trigger:hover,
   .account-trigger[aria-expanded='true'] {
     background: var(--ui-surface-ghost);
     color: var(--ui-text-primary);
   }
 
-  .utility-button:disabled {
-    cursor: default;
-    opacity: 1;
-  }
-
-  .utility-button:focus-visible,
   .account-trigger:focus-visible {
     outline: none;
     box-shadow: var(--ui-focus-ring-strong);
-  }
-
-  .utility-button svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
   }
 
   .account-wrapper {

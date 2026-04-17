@@ -829,7 +829,7 @@
 {#if isActivityRoute}
   <DocumentActivityView {documentId} studyTab={studyTab} />
 {:else}
-  <PageLayout class="document-hub" width="wide">
+  <PageLayout class="document-hub" width="wide" gap="compact">
     <Button type="button" className="back-link" variant="ghost" size="sm" on:click={goBackToLibrary}>
       <span slot="icon" aria-hidden="true"><ArrowLeft class="rtl-flip" /></span>
       {t('document.hub.backToStudyHub')}

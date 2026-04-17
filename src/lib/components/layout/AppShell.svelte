@@ -21,10 +21,6 @@
     dispatch('signOut');
   }
 
-  function onNotifications() {
-    dispatch('openNotifications');
-  }
-
   function onProfile() {
     dispatch('openProfile');
   }
@@ -53,7 +49,6 @@
       planLabel={planLabel}
       sidebarCollapsed={$sidebarCollapsed}
       on:signOut={onSignOut}
-      on:openNotifications={onNotifications}
       on:openProfile={onProfile}
       on:toggleSidebar={onToggleSidebar}
     />
@@ -97,6 +92,7 @@
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     background: var(--ui-bg-page);
+    align-content: start;
   }
 
   .shell-main::before {
