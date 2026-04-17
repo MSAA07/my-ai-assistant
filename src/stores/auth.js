@@ -389,11 +389,10 @@ async function restoreSession(reason = "authenticated", { broadcast = false } = 
 
 export async function signIn(email, password, { challengeToken = "" } = {}) {
   updateMeta({ action: "sign_in", errorCode: "" });
-  const callbackURL = getEmailVerificationCallbackUrl();
   logAuthFlow("sign-in", {
     email: maskEmail(email),
-    callbackURL,
-    callbackHost: callbackURL ? new URL(callbackURL).host : "",
+    callbackURL: "",
+    callbackHost: "",
   });
 
   const result = await request("/sign-in/email", {
@@ -401,7 +400,6 @@ export async function signIn(email, password, { challengeToken = "" } = {}) {
     body: {
       email,
       password,
-      callbackURL,
       ...(challengeToken ? { challengeToken } : {}),
     }
   });
