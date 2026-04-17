@@ -69,6 +69,15 @@
     border-radius: var(--ui-radius-md);
   }
 
+  .ui-card:is(button) {
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
+    text-align: inherit;
+    color: inherit;
+    background-clip: padding-box;
+  }
+
   .ui-card[data-variant='standard'] {
     --card-bg: var(--ui-surface-card);
     --card-shadow: none;
