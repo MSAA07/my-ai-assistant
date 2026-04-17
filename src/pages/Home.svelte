@@ -18,7 +18,8 @@
   import PageHeader from "../lib/components/ui/PageHeader.svelte";
   import ProgressBar from "../lib/components/ui/ProgressBar.svelte";
   import StudyActionCard from "../lib/components/ui/StudyActionCard.svelte";
-  import UploadPanel from "../lib/components/ui/UploadPanel.svelte";
+  import UploadDropzone from "../lib/components/ui/UploadDropzone.svelte";
+  import UploadFileRow from "../lib/components/ui/UploadFileRow.svelte";
   import { getDocument, getJob } from "../lib/api/studyHub.js";
   import { getDocumentDisplayName } from "../lib/utils/documentName.js";
   import { writeStudyGenerationPlan } from "../lib/utils/studyGenerationPlan.js";
@@ -412,7 +413,11 @@
   }
 
   function handleFilesSelected(event) {
-    addSelectedFiles(event?.detail?.files ?? []);
+    const candidates = event?.detail?.files ?? [];
+    addSelectedFiles(candidates);
+    const file = candidates[0];
+    if (!file || selectedFiles[0] !== file) return;
+    void handleUpload(file);
   }
 
   function handleRemoveSelectedFile(event) {
@@ -473,13 +478,14 @@
     setFeatureSelected(featureKey, !selectedFeatures[featureKey]);
   }
 
-  async function handleUpload() {
+  async function handleUpload(fileOverride = null) {
     if (!user || !canUploadDocuments) {
       setUploadError("home.uploadSection.errors.limitReached");
       return;
     }
 
-    if (selectedFiles.length === 0) {
+    const file = fileOverride ?? selectedFiles[0];
+    if (!file) {
       setUploadError("home.uploadSection.errors.selectFile");
       return;
     }
@@ -490,7 +496,6 @@
     generationErrors = createFeatureMap("");
 
     try {
-      const file = selectedFiles[0];
       const data = await uploadSingleFile(file);
       const documentId = data?.documentId ?? data?.document?.id;
       if (!documentId) {
@@ -825,39 +830,38 @@
 
   {#if showUploadSection}
     <section class="upload-stack" aria-label={t("home.uploadSection.modalTitle")}>
-      <UploadPanel
-        busy={uploading}
-        maxFiles={MAX_UPLOAD_FILES}
-        files={selectedFiles}
+      <UploadDropzone
+        className="home-dropzone"
         accept={VALID_EXTENSIONS.join(",")}
         multiple={false}
-        variant="compact"
-        title=""
-        description=""
-        supportTitle={t("home.uploadSection.heroSupport")}
-        benefitLabel={t("home.uploadSection.heroBenefitsLabel")}
-        benefitItems={[
-          t("home.uploadSection.heroBenefits.summary"),
-          t("home.uploadSection.heroBenefits.flashcards"),
-          t("home.uploadSection.heroBenefits.exams"),
-        ]}
-        detailsSummary={t("home.uploadSection.heroBenefitsLabel")}
-        dropzoneTitle={t("home.uploadSection.title")}
-        dropzoneDescription=""
-        dropzoneOr={t("home.uploadSection.dropzoneOr")}
+        disabled={uploading}
+        isBusy={uploading}
+        variant="surface"
+        title={t("home.uploadSection.surfaceTitle")}
+        description={t("home.uploadSection.surfaceSubtitle")}
+        supportText={t("home.uploadSection.surfaceMeta")}
         browseLabel={t("home.uploadSection.browseFile")}
-        supportLabel={t("home.uploadSection.constraints")}
-        showCounter={false}
-        cancelLabel={t("home.uploadSection.cancel")}
-        submitLabel={t("home.uploadSection.submitUpload")}
-        submitBusyLabel={t("home.uploadSection.submitUploading")}
-        removeFileLabel={t("home.uploadSection.removeFile")}
-        errorMessage={uploadError}
-        on:cancel={clearSelectedFiles}
-        on:submit={handleUpload}
         on:filesSelected={handleFilesSelected}
-        on:removeFile={handleRemoveSelectedFile}
       />
+
+      {#if uploadError}
+        <p class="upload-feedback upload-feedback--error" role="alert">{uploadError}</p>
+      {/if}
+
+      {#if selectedFiles.length > 0}
+        <div class="upload-feedback" role="list" aria-label={t("home.uploadSection.title")}>
+          {#each selectedFiles as file, index (file.name + file.size + index)}
+            <div role="listitem">
+              <UploadFileRow
+                {file}
+                disabled={uploading}
+                removeLabel={t("home.uploadSection.removeFile")}
+                on:remove={handleRemoveSelectedFile}
+              />
+            </div>
+          {/each}
+        </div>
+      {/if}
     </section>
   {/if}
 
@@ -1143,12 +1147,25 @@
   }
 
   .upload-stack {
-    width: min(100%, 680px);
+    width: 100%;
     margin-inline: auto;
   }
 
-  :global(.home-page .upload-panel-shell .upload-panel__titles p) {
-    max-width: 48ch;
+  :global(.home-dropzone) {
+    width: 100%;
+  }
+
+  .upload-feedback {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .upload-feedback--error {
+    margin: 0;
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    line-height: 1.5;
   }
 
   .guided-panel {

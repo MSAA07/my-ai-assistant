@@ -11,6 +11,7 @@
   export let isBusy = false;
   export let title = '';
   export let description = '';
+  export let supportText = '';
   export let orLabel = 'OR';
   export let browseLabel = '';
   export let activeFileName = '';
@@ -19,6 +20,7 @@
 
   $: isHero = variant === 'hero';
   $: isCompact = variant === 'compact';
+  $: isSurface = variant === 'surface';
 
   let isDragActive = false;
 
@@ -77,6 +79,7 @@
   class:upload-dropzone--disabled={disabled || isBusy}
   class:upload-dropzone--hero={isHero}
   class:upload-dropzone--compact={isCompact}
+  class:upload-dropzone--surface={isSurface}
   role="button"
   tabindex="0"
   on:dragover={handleDragOver}
@@ -114,7 +117,7 @@
     <p class="upload-dropzone__description">{description}</p>
   {/if}
 
-  {#if !isCompact}
+  {#if !isCompact && !isSurface}
     <div class="upload-dropzone__divider" aria-hidden="true">
       <span></span>
       <strong>{orLabel}</strong>
@@ -122,15 +125,21 @@
     </div>
   {/if}
 
-  <Button
-    type="button"
-    variant="outline"
-    class="upload-dropzone__browse"
-    disabled={disabled || isBusy}
-    on:click={handleBrowseClick}
-  >
-    {browseLabel}
-  </Button>
+  {#if supportText}
+    <p class="upload-dropzone__support">{supportText}</p>
+  {/if}
+
+  {#if !isSurface}
+    <Button
+      type="button"
+      variant="outline"
+      class="upload-dropzone__browse"
+      disabled={disabled || isBusy}
+      on:click={handleBrowseClick}
+    >
+      {browseLabel}
+    </Button>
+  {/if}
 </div>
 
 <style>
@@ -171,6 +180,17 @@
     text-align: left;
   }
 
+  .upload-dropzone--surface {
+    min-height: clamp(14rem, 30vw, 16rem);
+    align-content: center;
+    justify-items: center;
+    gap: var(--ui-space-2);
+    border-style: dashed;
+    border-width: 1.5px;
+    border-radius: var(--ui-radius-lg);
+    background: color-mix(in srgb, var(--ui-surface-card) 92%, transparent);
+  }
+
   .upload-dropzone:hover:not(.upload-dropzone--disabled),
   .upload-dropzone--active {
     border-color: var(--upload-dropzone-hover-border);
@@ -185,6 +205,18 @@
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--ui-text-primary) 8%, transparent),
       0 16px 38px rgba(0, 0, 0, 0.12);
+  }
+
+  .upload-dropzone--surface:hover:not(.upload-dropzone--disabled) {
+    border-color: color-mix(in srgb, var(--ui-text-primary) 20%, var(--ui-border-default) 80%);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 44%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
+  }
+
+  .upload-dropzone--surface.upload-dropzone--active {
+    border-color: color-mix(in srgb, var(--ui-text-primary) 28%, var(--ui-border-default) 72%);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 58%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
   }
 
   .upload-dropzone--disabled {
@@ -219,6 +251,14 @@
     box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
   }
 
+  .upload-dropzone--surface .upload-dropzone__icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 78%, transparent);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 10%, var(--ui-border-default) 90%);
+  }
+
   .upload-dropzone--compact .upload-dropzone__drag-chip {
     top: var(--ui-space-2);
     inset-inline-end: var(--ui-space-2);
@@ -230,6 +270,11 @@
   }
 
   .upload-dropzone--hero .upload-dropzone__icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .upload-dropzone--surface .upload-dropzone__icon svg {
     width: 24px;
     height: 24px;
   }
@@ -266,6 +311,13 @@
     letter-spacing: -0.02em;
   }
 
+  .upload-dropzone--surface .upload-dropzone__title {
+    max-width: 24rem;
+    font-size: clamp(1.05rem, 1rem + 0.25vw, 1.15rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
   .upload-dropzone--compact .upload-dropzone__title {
     max-width: none;
     font-size: var(--font-size-sm);
@@ -284,6 +336,19 @@
   .upload-dropzone--hero .upload-dropzone__description {
     max-width: 30rem;
     font-size: 0.875rem;
+  }
+
+  .upload-dropzone--surface .upload-dropzone__description {
+    max-width: 24rem;
+    color: var(--ui-text-secondary);
+    font-size: var(--font-size-sm);
+  }
+
+  .upload-dropzone__support {
+    margin: 0;
+    color: var(--ui-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.45;
   }
 
   .upload-dropzone--compact .upload-dropzone__description {

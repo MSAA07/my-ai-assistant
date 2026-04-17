@@ -145,6 +145,9 @@ const ar = {
         flashcards: 'بطاقات تعليمية',
         exams: 'أسئلة الاختبار'
       },
+      surfaceTitle: 'ارفع موادك الدراسية',
+      surfaceSubtitle: 'اسحب وأفلت أو انقر للاستعراض',
+      surfaceMeta: 'PDF، DOCX، PPTX • الحد الأقصى 25MB',
       dropzoneTitle: 'أفلت مستندك هنا أو استعرض الملفات للبدء',
       dropzoneDescription: 'ما زال السحب والإفلات مدعومًا، لكن أسرع طريق هو اختيار ملف واحد ثم المتابعة.',
       dropzoneOr: 'أو',

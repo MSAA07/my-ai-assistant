@@ -128,6 +128,9 @@ export default {
         flashcards: 'Flashcards',
         exams: 'Exam questions'
       },
+      surfaceTitle: 'Upload your study materials',
+      surfaceSubtitle: 'Drag & drop or click to browse',
+      surfaceMeta: 'PDF, DOCX, PPTX • Max 25MB',
       dropzoneTitle: 'Drop your document here or browse to get started',
       dropzoneDescription: 'Drag and drop still works, but the fastest path is to choose one file and continue.',
       dropzoneOr: 'OR',
