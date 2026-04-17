@@ -903,20 +903,14 @@
           {#each featureSelectionCards as card (card.key)}
             {@const Icon = card.icon}
             <StudyActionCard
+              as="button"
+              type="button"
               class={`guided-feature-card ${card.selected ? "guided-feature-card--selected" : ""}`.trim()}
               title={card.title}
               status={card.selected ? "ready" : "info"}
               statusLabel={card.supportLabel}
-              role="button"
-              tabindex="0"
               aria-pressed={card.selected}
               on:click={() => toggleFeature(card.key)}
-              on:keydown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  toggleFeature(card.key);
-                }
-              }}
             >
               <div slot="icon">
                 <Icon />

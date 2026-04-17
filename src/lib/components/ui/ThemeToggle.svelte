@@ -34,15 +34,14 @@
 <div
   class="theme-toggle"
   role="radiogroup"
-  tabindex="0"
   aria-label={t('settings.theme.ariaLabel')}
-  on:keydown={handleKeydown}
 >
   <button
     type="button"
     role="radio"
     class={`option ${value === 'dark' ? 'active' : ''}`}
     aria-checked={value === 'dark'}
+    on:keydown={handleKeydown}
     on:click={() => selectTheme('dark')}
   >
     {t('settings.theme.dark')}
@@ -52,6 +51,7 @@
     role="radio"
     class={`option ${value === 'light' ? 'active' : ''}`}
     aria-checked={value === 'light'}
+    on:keydown={handleKeydown}
     on:click={() => selectTheme('light')}
   >
     {t('settings.theme.light')}

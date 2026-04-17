@@ -141,6 +141,8 @@
     width: 100%;
     color: var(--ui-text-primary);
     text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .brand-mark {
@@ -188,6 +190,8 @@
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
+    user-select: none;
+    -webkit-user-select: none;
     transition: background var(--motion-fast) var(--ease-standard),
       color var(--motion-fast) var(--ease-standard);
   }
@@ -231,6 +235,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .plan-card {
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .nav-badge {

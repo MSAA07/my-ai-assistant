@@ -73,20 +73,17 @@
   }
 </script>
 
-<div
+<label
   class={['upload-dropzone', className, $$props.class ?? ''].filter(Boolean).join(' ')}
   class:upload-dropzone--active={isDragActive}
   class:upload-dropzone--disabled={disabled || isBusy}
   class:upload-dropzone--hero={isHero}
   class:upload-dropzone--compact={isCompact}
   class:upload-dropzone--surface={isSurface}
-  role="button"
-  tabindex="0"
+  for={id}
   on:dragover={handleDragOver}
   on:dragleave={handleDragLeave}
   on:drop={handleDrop}
-  on:click={openFilePicker}
-  on:keydown={(event) => (event.key === 'Enter' || event.key === ' ') && openFilePicker()}
 >
   <input
     id={id}
@@ -140,7 +137,7 @@
       {browseLabel}
     </Button>
   {/if}
-</div>
+</label>
 
 <style>
   .upload-dropzone {

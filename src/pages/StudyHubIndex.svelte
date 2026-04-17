@@ -113,15 +113,6 @@
     window.location.hash = `/study/${documentId}`;
   }
 
-  function handleDocumentCardKeydown(event, documentId) {
-    if (event.key !== 'Enter' && event.key !== ' ') {
-      return;
-    }
-
-    event.preventDefault();
-    openDocument(documentId);
-  }
-
   function toggleMenu(event, docId) {
     event.stopPropagation();
     openMenuId = openMenuId === docId ? '' : docId;
@@ -407,9 +398,9 @@
         {#each documents as doc}
           {@const displayState = getDocumentDisplayState(doc)}
           <DocumentCard
+            as="button"
+            type="button"
             class="document-card"
-            role="link"
-            tabindex="0"
             aria-label={getDocumentDisplayName(doc)}
             title={getDocumentDisplayName(doc)}
             meta={`${t('documentsPage.labels.uploaded')}: ${formatDocumentDate(doc.uploadDate)}`}
@@ -419,7 +410,6 @@
             statusLabel={t(displayState.labelKey)}
             highlighted={highlightDocumentId === doc.id}
             on:click={() => openDocument(doc.id)}
-            on:keydown={(event) => handleDocumentCardKeydown(event, doc.id)}
           >
             <p class="document-card__detail">{t(displayState.messageKey)}</p>
 

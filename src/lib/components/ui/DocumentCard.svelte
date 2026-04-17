@@ -11,13 +11,16 @@
   export let badgeTone = 'neutral';
   export let highlighted = false;
   export let className = '';
+  export let as = 'article';
+  export let type = undefined;
 
   $: normalizedFileType = typeof badgeLabel === 'string' ? badgeLabel.trim().toUpperCase() : '';
 </script>
 
 <Card
   {...$$restProps}
-  as="article"
+  {as}
+  {type}
   variant="standard"
   padding="sm"
   hoverable
@@ -87,6 +90,12 @@
     border-radius: var(--study-flow-card-radius);
     background: var(--study-flow-card-surface);
     box-shadow: none;
+  }
+
+  :global(button.ui-document-card) {
+    width: 100%;
+    appearance: none;
+    text-align: inherit;
   }
 
   :global(.ui-document-card[data-hoverable='true']) {

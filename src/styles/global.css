@@ -100,6 +100,8 @@ button {
   font: inherit;
   color: inherit;
   line-height: 1.2;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 input:not([type='checkbox']):not([type='radio']):not([type='file']),

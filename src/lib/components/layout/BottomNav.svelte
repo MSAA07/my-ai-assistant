@@ -86,6 +86,8 @@
     text-decoration: none;
     font-size: var(--font-size-xs);
     font-weight: 500;
+    user-select: none;
+    -webkit-user-select: none;
     border: 1px solid transparent;
     border-radius: var(--ui-radius-sm);
     transition: border-color var(--motion-fast) var(--ease-standard),
