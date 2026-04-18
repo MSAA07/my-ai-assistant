@@ -4,54 +4,75 @@
   import StudyActionCard from '../ui/StudyActionCard.svelte';
   import { Sparkles } from '@lucide/svelte';
 
-  export let card;
+  export let card = {};
   export let icon;
   export let onPrimaryAction = () => {};
 
   $: Icon = icon;
+  $: resolvedCard = {
+    title: '',
+    stateTone: 'info',
+    stateLabel: '',
+    description: '',
+    statusCopy: '',
+    errorMessage: '',
+    progressVisible: false,
+    phase: 'not_requested',
+    loadingLabel: '',
+    progressText: '',
+    progressValue: 0,
+    progressIndeterminate: false,
+    canPrimaryAction: false,
+    primaryLabel: '',
+    ...card,
+  };
 </script>
 
-<StudyActionCard class="study-hub-feature-card" title={card.title} status={card.stateTone} statusLabel={card.stateLabel}>
-  <div slot="icon"><svelte:component this={Icon} /></div>
+<StudyActionCard class="study-hub-feature-card" title={resolvedCard.title} status={resolvedCard.stateTone} statusLabel={resolvedCard.stateLabel}>
+  <svelte:fragment slot="icon">
+    {#if Icon}
+      <svelte:component this={Icon} />
+    {/if}
+  </svelte:fragment>
 
   <svelte:fragment slot="description">
-    <p>{card.description}</p>
-    <p class="study-hub-feature-card__support-copy">{card.statusCopy}</p>
-    {#if card.errorMessage}<p class="study-hub-feature-card__error">{card.errorMessage}</p>{/if}
+    <p>{resolvedCard.description}</p>
+    <p class="study-hub-feature-card__support-copy">{resolvedCard.statusCopy}</p>
+    {#if resolvedCard.errorMessage}<p class="study-hub-feature-card__error">{resolvedCard.errorMessage}</p>{/if}
   </svelte:fragment>
 
   <div slot="actions" class="study-hub-feature-card__actions">
-    {#if card.progressVisible}
+    {#if resolvedCard.progressVisible}
       <div
-        class={`study-hub-feature-card__loading study-hub-feature-card__loading--${card.phase}`.trim()}
+        class={`study-hub-feature-card__loading study-hub-feature-card__loading--${resolvedCard.phase}`.trim()}
         role="status"
         aria-live="polite"
-        aria-label={`${card.title} ${card.loadingLabel}`}
+        aria-label={`${resolvedCard.title} ${resolvedCard.loadingLabel}`}
       >
         <div class="study-hub-feature-card__loading-meta">
-          <span class="study-hub-feature-card__loading-label">{card.loadingLabel}</span>
-          {#if card.progressText}
-            <span class="study-hub-feature-card__loading-value">{card.progressText}</span>
+          <span class="study-hub-feature-card__loading-label">{resolvedCard.loadingLabel}</span>
+          {#if resolvedCard.progressText}
+            <span class="study-hub-feature-card__loading-value">{resolvedCard.progressText}</span>
           {/if}
         </div>
         <ProgressBar
-          value={card.progressValue}
+          value={resolvedCard.progressValue}
           max={100}
-          indeterminate={card.progressIndeterminate}
-          ariaLabel={`${card.title} ${card.loadingLabel}`}
+          indeterminate={resolvedCard.progressIndeterminate}
+          ariaLabel={`${resolvedCard.title} ${resolvedCard.loadingLabel}`}
           className="study-hub-feature-card__loading-bar"
         />
       </div>
     {:else}
       <Button
         type="button"
-        variant={card.phase === 'ready' ? 'primary' : 'secondary'}
+        variant={resolvedCard.phase === 'ready' ? 'primary' : 'secondary'}
         className="study-hub-feature-card__button"
-        on:click={() => onPrimaryAction(card)}
-        disabled={!card.canPrimaryAction}
+        on:click={() => onPrimaryAction(resolvedCard)}
+        disabled={!resolvedCard.canPrimaryAction}
       >
         <span slot="icon" aria-hidden="true"><Sparkles /></span>
-        {card.primaryLabel}
+        {resolvedCard.primaryLabel}
       </Button>
     {/if}
   </div>
