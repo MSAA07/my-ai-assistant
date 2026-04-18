@@ -27,7 +27,7 @@
   {type}
   variant="standard"
   padding="sm"
-  border="default"
+  border="none"
   className={['ui-study-action-card', className, $$props.class ?? ''].filter(Boolean).join(' ')}
   on:click
   on:keydown

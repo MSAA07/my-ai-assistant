@@ -24,7 +24,7 @@
   variant="standard"
   padding="sm"
   hoverable
-  border={highlighted ? 'strong' : 'default'}
+  border={highlighted ? 'strong' : 'none'}
   className={['ui-document-card', className, $$props.class ?? ''].filter(Boolean).join(' ')}
   on:click
   on:keydown
@@ -99,7 +99,7 @@
   }
 
   :global(.ui-document-card[data-hoverable='true']) {
-    --card-hover-border: color-mix(in srgb, var(--ui-text-primary) 12%, var(--ui-border-default) 88%);
+    --card-hover-border: transparent;
     --card-hover-bg: color-mix(in srgb, var(--study-flow-card-surface) 92%, var(--ui-surface-secondary) 8%);
     --card-hover-shadow: none;
   }
