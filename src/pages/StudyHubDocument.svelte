@@ -3,6 +3,8 @@
   import { ArrowLeft, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
   import { formatDate, formatNumber, t } from '../lib/i18n/t.js';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
+  import Badge from '../lib/components/ui/Badge.svelte';
+  import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
