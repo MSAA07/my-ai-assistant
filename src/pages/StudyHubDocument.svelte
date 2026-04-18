@@ -1,17 +1,14 @@
 <script>
   import { onDestroy } from 'svelte';
-  import { ArrowLeft, ClipboardCheck, FileText, Layers3, Sparkles } from '@lucide/svelte';
+  import { ArrowLeft, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
   import { formatDate, formatNumber, t } from '../lib/i18n/t.js';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
-  import Badge from '../lib/components/ui/Badge.svelte';
-  import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
-  import ProgressBar from '../lib/components/ui/ProgressBar.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
-  import StudyActionCard from '../lib/components/ui/StudyActionCard.svelte';
   import DocumentDetailSkeleton from '../lib/components/ui/DocumentDetailSkeleton.svelte';
   import DocumentActivityView from '../lib/components/study/DocumentActivityView.svelte';
+  import StudyHubFeatureCard from '../lib/components/study/StudyHubFeatureCard.svelte';
   import { getDocument, getJob, requestGeneration } from '../lib/api/studyHub.js';
   import { getDocumentFileTypeLabel } from '../lib/utils/fileType.js';
   import { getDocumentDisplayName } from '../lib/utils/documentName.js';
@@ -868,46 +865,7 @@
 
       <section class="features-grid" aria-label={t('document.hub.featuresTitle')}>
         {#each featureCards as card (card.key)}
-          {@const Icon = featureIcon(card.key)}
-          <StudyActionCard class="feature-card" title={card.title} status={card.stateTone} statusLabel={card.stateLabel}>
-            <div slot="icon"><Icon /></div>
-
-            <svelte:fragment slot="description">
-              <p>{card.description}</p>
-              <p class="feature-support-copy">{card.statusCopy}</p>
-              {#if card.errorMessage}<p class="feature-inline-error">{card.errorMessage}</p>{/if}
-            </svelte:fragment>
-
-            <div slot="actions" class="feature-actions">
-              {#if card.progressVisible}
-                <div
-                  class={`feature-action-loading feature-action-loading--${card.phase}`.trim()}
-                  role="status"
-                  aria-live="polite"
-                  aria-label={`${card.title} ${card.loadingLabel}`}
-                >
-                  <div class="feature-action-loading__meta">
-                    <span class="feature-action-loading__label">{card.loadingLabel}</span>
-                    {#if card.progressText}
-                      <span class="feature-action-loading__value">{card.progressText}</span>
-                    {/if}
-                  </div>
-                  <ProgressBar
-                    value={card.progressValue}
-                    max={100}
-                    indeterminate={card.progressIndeterminate}
-                    ariaLabel={`${card.title} ${card.loadingLabel}`}
-                    className="feature-action-loading__bar"
-                  />
-                </div>
-              {:else}
-                <Button type="button" variant={card.phase === 'ready' ? 'primary' : 'secondary'} className="feature-action-button" on:click={() => runPrimaryAction(card)} disabled={!card.canPrimaryAction}>
-                  <span slot="icon" aria-hidden="true"><Sparkles /></span>
-                  {card.primaryLabel}
-                </Button>
-              {/if}
-            </div>
-          </StudyActionCard>
+          <StudyHubFeatureCard card={card} icon={featureIcon(card.key)} onPrimaryAction={runPrimaryAction} />
         {/each}
       </section>
     {/if}
@@ -928,62 +886,11 @@
   :global(.document-hub .state-panel p){color:var(--muted-foreground);line-height:1.45;font-size:var(--font-size-sm)}
   :global(.document-hub .state-panel-error){border-color:color-mix(in srgb,var(--destructive) 35%,var(--ui-border-default) 65%)}
   .row{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-3);flex-wrap:wrap}
-  .feature-support-copy{margin:0;color:var(--ui-text-secondary);line-height:1.5;font-size:.88rem}
-  .feature-action-loading__value{
-    color:var(--ui-text-primary);
-    font-size:.82rem;
-    font-weight:700;
-    font-variant-numeric:tabular-nums;
-    direction:ltr;
-    unicode-bidi:plaintext;
-  }
   .features-grid{display:grid;gap:var(--study-flow-card-gap);grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
-  :global(.feature-card){min-height:0}
-  .feature-inline-error,:global(.inline-error){color:var(--destructive)}
-  .feature-inline-error,.feature-support-copy{margin-top:.35rem;font-size:.8125rem;line-height:1.5}
-  .feature-actions{position:relative;z-index:1}
-  .feature-action-loading{
-    display:grid;
-    gap:.5rem;
-    min-height:var(--ui-control-height-md);
-    padding:.8rem .9rem;
-    border-radius:var(--ui-radius-sm);
-    border:1px solid color-mix(in srgb,var(--ui-text-primary) 12%,var(--ui-border-default) 88%);
-    background:color-mix(in srgb,var(--ui-surface-secondary) 82%,black 18%);
-    color:var(--ui-text-primary);
-    box-shadow:none;
-    --ui-progress-track:color-mix(in srgb,var(--ui-surface-secondary) 74%,black 26%);
-    --ui-progress-fill:linear-gradient(90deg,rgba(255,255,255,.96),rgba(209,213,219,.82),rgba(255,255,255,.96));
-    animation:feature-action-pulse 1.4s ease-in-out infinite;
-  }
-  .feature-action-loading__meta{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:.75rem;
-    min-width:0;
-  }
-  .feature-action-loading__label{
-    min-width:0;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    color:var(--ui-text-primary);
-    font-size:.82rem;
-    font-weight:650;
-  }
-  :global(.feature-action-loading__bar){height:.36rem}
-  :global(.feature-action-button.ui-button){--button-shadow:none}
-  :global(.feature-action-button .ui-button__icon svg){fill:none;stroke:currentColor;stroke-width:2}
-  @keyframes feature-action-pulse{
-    0%,100%{border-color:color-mix(in srgb,var(--ui-text-primary) 10%,var(--ui-border-default) 90%);background:color-mix(in srgb,var(--ui-surface-secondary) 82%,black 18%)}
-    50%{border-color:color-mix(in srgb,var(--ui-text-primary) 16%,var(--ui-border-default) 84%);background:color-mix(in srgb,var(--ui-surface-secondary) 88%,black 12%)}
-  }
-  :global(html[dir='rtl']) .feature-action-loading__meta{align-items:flex-start}
+  :global(.inline-error){color:var(--destructive)}
   @media (max-width:1024px){.features-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media (max-width:640px){
     .features-grid{grid-template-columns:1fr}
     .document-meta{align-items:stretch}
-    .feature-action-loading__meta{flex-direction:column;align-items:flex-start}
   }
 </style>
