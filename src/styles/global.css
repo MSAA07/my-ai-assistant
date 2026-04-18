@@ -104,6 +104,16 @@ button {
   -webkit-user-select: none;
 }
 
+button,
+a,
+[role='button'],
+[role='link'],
+[role='tab'],
+[role='menuitem'],
+summary {
+  caret-color: transparent;
+}
+
 input:not([type='checkbox']):not([type='radio']):not([type='file']),
 textarea,
 select {
