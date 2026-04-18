@@ -335,7 +335,10 @@ export default {
         selectedFeatures: 'Selected: {features}'
       },
       actions: {
-        open: 'Open'
+        open: 'Open',
+        startSummary: 'Start Summary',
+        startFlashcards: 'Start Flashcards',
+        startMockExam: 'Start Mock Exam'
       },
       meta: {
         fileType: 'File type'

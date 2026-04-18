@@ -25,9 +25,27 @@
   const DOCUMENT_CACHE_KEY = (id) => `page:study-document:${id}`;
   const ACTIVITY_TABS = new Set(['summary', 'flashcards', 'exam', 'exams']);
   const FEATURE_CONFIG = {
-    summary: { titleKey: 'document.hub.features.summary', descriptionKey: 'document.hub.featureDescriptions.summary', openSection: 'summary', options: { length: 'medium' } },
-    flashcards: { titleKey: 'document.hub.features.flashcards', descriptionKey: 'document.hub.featureDescriptions.flashcards', openSection: 'flashcards', options: { includeExplanations: false } },
-    exam: { titleKey: 'document.hub.features.exam', descriptionKey: 'document.hub.featureDescriptions.exam', openSection: 'exam', options: { questionCount: 10 } },
+    summary: {
+      titleKey: 'document.hub.features.summary',
+      descriptionKey: 'document.hub.featureDescriptions.summary',
+      primaryActionLabelKey: 'document.hub.actions.startSummary',
+      openSection: 'summary',
+      options: { length: 'medium' },
+    },
+    flashcards: {
+      titleKey: 'document.hub.features.flashcards',
+      descriptionKey: 'document.hub.featureDescriptions.flashcards',
+      primaryActionLabelKey: 'document.hub.actions.startFlashcards',
+      openSection: 'flashcards',
+      options: { includeExplanations: false },
+    },
+    exam: {
+      titleKey: 'document.hub.features.exam',
+      descriptionKey: 'document.hub.featureDescriptions.exam',
+      primaryActionLabelKey: 'document.hub.actions.startMockExam',
+      openSection: 'exam',
+      options: { questionCount: 10 },
+    },
   };
   const FEATURE_KEYS = Object.keys(FEATURE_CONFIG);
   const VISUAL_PROGRESS_PHASES = {
@@ -303,7 +321,7 @@
   }
 
   function getFeaturePrimaryLabel(featureKey, phase) {
-    if (phase === 'ready') return featureKey === 'flashcards' ? t('document.activity.actions.startFlashcards') : t('document.hub.actions.open');
+    if (phase === 'ready') return t(FEATURE_CONFIG[featureKey].primaryActionLabelKey);
     return t('document.actions.generate');
   }
 

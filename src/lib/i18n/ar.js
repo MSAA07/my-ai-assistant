@@ -342,7 +342,10 @@ const ar = {
         selectedFeatures: 'المحدد: {features}'
       },
       actions: {
-        open: 'فتح'
+        open: 'فتح',
+        startSummary: 'بدء الملخص',
+        startFlashcards: 'بدء البطاقات التعليمية',
+        startMockExam: 'بدء الاختبار التجريبي'
       },
       meta: {
         fileType: 'نوع الملف'
