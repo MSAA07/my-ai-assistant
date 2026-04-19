@@ -1456,6 +1456,9 @@
     justify-content: flex-start;
     justify-self: start;
     align-items: center;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
   }
 
   /* Inline page header that now lives inside the content body for summary/exam */
@@ -1764,13 +1767,16 @@
   }
 
   .session-chrome-status--flashcards {
-    width: 100%;
+    width: auto;
+    max-width: min(100%, 28rem);
+    margin-inline-start: auto;
     justify-content: flex-end;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
     gap: 0.45rem;
     flex-wrap: nowrap;
     white-space: nowrap;
+    pointer-events: auto;
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__controls) {
@@ -1790,7 +1796,14 @@
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--status) {
     min-width: 0;
-    width: 100%;
+    width: auto;
+    max-width: min(100%, 28rem);
+    pointer-events: none;
+  }
+
+  :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__pane--back) {
+    z-index: 2;
+    pointer-events: auto;
   }
 
   .session-chrome-status__metric {
@@ -1832,6 +1845,9 @@
     justify-content: flex-start;
     flex-shrink: 0;
     white-space: nowrap;
+    position: relative;
+    z-index: 3;
+    pointer-events: auto;
   }
 
   :global(.chrome-back-link--session.ui-button:hover:not(:disabled)) {
