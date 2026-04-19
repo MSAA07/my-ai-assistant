@@ -97,6 +97,7 @@
     currentFlashcard?.explanation,
   );
   $: currentFlashcardLanguage = currentFlashcardDirection === 'rtl' ? 'ar' : 'en';
+  $: hubPath = currentDocumentId ? `/study/${encodeURIComponent(currentDocumentId)}` : '/study';
 
   $: summaryBlocks = parseSummaryBlocks(docData?.summary);
 
@@ -681,8 +682,7 @@
   }
 
   function goBackToHub() {
-    const nextPath = currentDocumentId ? `/study/${encodeURIComponent(currentDocumentId)}` : '/study';
-    router.navigate(nextPath);
+    router.navigate(hubPath);
   }
 
   function startExam() {
@@ -896,7 +896,10 @@
       {#if mode === 'flashcards'}
         <div class="session-chrome-status session-chrome-status--flashcards" aria-label={chromeProgressLabel}>
           <span class="session-chrome-status__metric session-chrome-status__metric--current">
-            Card {flashcards.length ? flashcardIndex + 1 : 0} / {flashcards.length}
+            {t('document.flashcards.cardCounter', {
+              current: flashcards.length ? flashcardIndex + 1 : 0,
+              total: flashcards.length,
+            })}
           </span>
           <span class="session-chrome-status__dot" aria-hidden="true">&bull;</span>
           <span class="session-chrome-status__metric session-chrome-status__metric--correct">
