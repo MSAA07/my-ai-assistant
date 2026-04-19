@@ -97,7 +97,8 @@
     currentFlashcard?.explanation,
   );
   $: currentFlashcardLanguage = currentFlashcardDirection === 'rtl' ? 'ar' : 'en';
-  $: hubPath = currentDocumentId ? `/study/${encodeURIComponent(currentDocumentId)}` : '/study';
+  $: resolvedDocumentId = text(documentId) || text(docData?.id) || currentDocumentId;
+  $: hubPath = resolvedDocumentId ? `/study/${encodeURIComponent(resolvedDocumentId)}` : '';
 
   $: summaryBlocks = parseSummaryBlocks(docData?.summary);
 
@@ -682,6 +683,7 @@
   }
 
   function goBackToHub() {
+    if (!hubPath) return;
     router.navigate(hubPath);
   }
 
@@ -847,7 +849,7 @@
   <Card as="section" class="activity-panel activity-panel-error" variant="base" padding="md" border="strong">
     <h2>{t('document.processingFailedTitle')}</h2>
     <p>{pageError || t('document.notFound')}</p>
-    <Button type="button" variant="back" on:click={goBackToHub}>{t('document.activity.backToHub')}</Button>
+    <Button type="button" variant="back" on:click={goBackToHub} disabled={!hubPath}>{t('document.activity.backToHub')}</Button>
   </Card>
 {:else}
   <StudyActivityShell
@@ -873,6 +875,7 @@
         variant="ghost"
         size="sm"
         on:click={goBackToHub}
+        disabled={!hubPath}
       >
         <span slot="icon" aria-hidden="true">
           <svg class="rtl-flip" viewBox="0 0 24 24"><path d="M10.75 6.75 5.5 12l5.25 5.25M6.5 12h12" /></svg>
