@@ -13,6 +13,7 @@
   import { getDocumentDisplayName } from '../../utils/documentName.js';
   import { getDocumentFileTypeLabel } from '../../utils/fileType.js';
   import { readPageCache, writePageCache } from '../../../stores/pageCache.js';
+  import { router } from '../../../stores/router.js';
   import {
     exportStudyMaterialPdf,
     getDocument,
@@ -87,6 +88,15 @@
     : mode === 'flashcards'
       ? t('document.activity.subtitle.flashcards')
       : t('document.activity.subtitle.exam');
+  $: documentLanguage = text(docData?.language).toLowerCase();
+  $: summaryDirection = resolveContentDirection(docData?.summary);
+  $: summaryLanguage = summaryDirection === 'rtl' ? 'ar' : 'en';
+  $: currentFlashcardDirection = resolveContentDirection(
+    currentFlashcard?.question,
+    currentFlashcard?.answer,
+    currentFlashcard?.explanation,
+  );
+  $: currentFlashcardLanguage = currentFlashcardDirection === 'rtl' ? 'ar' : 'en';
 
   $: summaryBlocks = parseSummaryBlocks(docData?.summary);
 
@@ -192,6 +202,18 @@
 
   function text(value) {
     return typeof value === 'string' ? value.trim() : '';
+  }
+
+  function containsArabicText(value) {
+    return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(text(value));
+  }
+
+  function resolveContentDirection(...values) {
+    if (documentLanguage === 'arabic') {
+      return 'rtl';
+    }
+
+    return values.some((value) => containsArabicText(value)) ? 'rtl' : 'ltr';
   }
 
   function parseSummaryBlocks(value) {
@@ -659,7 +681,8 @@
   }
 
   function goBackToHub() {
-    window.location.hash = currentDocumentId ? `/study/${currentDocumentId}` : '/study';
+    const nextPath = currentDocumentId ? `/study/${encodeURIComponent(currentDocumentId)}` : '/study';
+    router.navigate(nextPath);
   }
 
   function startExam() {
@@ -975,7 +998,11 @@
 
       {#if summaryFeature.hasContent}
         <Card as="article" class="activity-frame activity-frame--summary" variant="base" padding="lg" border="strong">
-          <article class="reader">
+          <article
+            class={`reader ${summaryDirection === 'rtl' ? 'reader--rtl' : 'reader--ltr'}`}
+            dir={summaryDirection}
+            lang={summaryLanguage}
+          >
             {#if summaryBlocks.length}
               {#each summaryBlocks as block}
                 {#if block.type === 'heading'}
@@ -1118,15 +1145,33 @@
               >
                 <div class="flashcard-stage__copy study-session-card__copy study-session-card__copy--flashcards">
                   <p class="card-side">{t('document.activity.flashcards.questionLabel')}</p>
-                  <h2>{currentFlashcard?.question}</h2>
+                  <h2
+                    class={`flashcard-stage__question ${currentFlashcardDirection === 'rtl' ? 'flashcard-stage__question--rtl' : 'flashcard-stage__question--ltr'} bidi-isolate`}
+                    dir={currentFlashcardDirection}
+                    lang={currentFlashcardLanguage}
+                  >
+                    {currentFlashcard?.question}
+                  </h2>
                 </div>
 
                 <div class={`flashcard-stage__answer ${revealAnswer ? 'flashcard-stage__answer--visible' : ''}`}>
                   <div class="flashcard-stage__answer-copy">
                     <p class="flashcard-stage__answer-label">{t('document.activity.flashcards.answerLabel')}</p>
-                    <p class="flashcard-stage__answer-text">{currentFlashcard?.answer}</p>
+                    <p
+                      class={`flashcard-stage__answer-text ${currentFlashcardDirection === 'rtl' ? 'flashcard-stage__answer-text--rtl' : 'flashcard-stage__answer-text--ltr'} bidi-isolate`}
+                      dir={currentFlashcardDirection}
+                      lang={currentFlashcardLanguage}
+                    >
+                      {currentFlashcard?.answer}
+                    </p>
                     {#if revealAnswer && text(currentFlashcard?.explanation)}
-                      <p class="explanation">{currentFlashcard.explanation}</p>
+                      <p
+                        class={`explanation ${currentFlashcardDirection === 'rtl' ? 'explanation--rtl' : 'explanation--ltr'} bidi-isolate`}
+                        dir={currentFlashcardDirection}
+                        lang={currentFlashcardLanguage}
+                      >
+                        {currentFlashcard.explanation}
+                      </p>
                     {/if}
                   </div>
                 </div>
@@ -1606,12 +1651,23 @@
     gap: 1.35rem;
   }
 
+  .reader--rtl {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .reader--ltr {
+    direction: ltr;
+    text-align: left;
+  }
+
   .reader-paragraph,
   .reader-list li {
     line-height: 1.8;
     white-space: pre-wrap;
     color: color-mix(in srgb, var(--foreground) 84%, var(--muted-foreground) 16%);
     font-size: clamp(0.98rem, 1vw, 1.03rem);
+    unicode-bidi: plaintext;
   }
 
   .reader-section-title {
@@ -1628,6 +1684,11 @@
     padding-left: 1.25rem;
     display: grid;
     gap: 0.7rem;
+  }
+
+  .reader--rtl .reader-list {
+    padding-left: 0;
+    padding-right: 1.25rem;
   }
 
   .reader strong,
@@ -1797,7 +1858,7 @@
   }
 
   .study-session__canvas--flashcards {
-    max-width: var(--study-flow-session-content-width);
+    max-width: var(--study-flow-reading-width);
     gap: var(--study-flow-card-gap);
   }
 
@@ -1891,13 +1952,13 @@
   }
 
   :global(.study-session-card--flashcards) {
-    width: 100%;
-    min-height: clamp(18rem, 38vh, 22rem);
+    width: min(100%, var(--study-flow-reading-width));
+    min-height: clamp(14rem, 30vh, 17rem);
     display: grid;
-    gap: clamp(1rem, 0.8rem + 0.75vw, 1.5rem);
-    text-align: left;
+    gap: clamp(0.85rem, 0.72rem + 0.55vw, 1.2rem);
+    text-align: start;
     border-radius: var(--study-flow-card-radius);
-    padding: clamp(1.5rem, 1.15rem + 0.8vw, 2rem);
+    padding: clamp(1.15rem, 0.95rem + 0.6vw, 1.5rem);
     box-shadow: none;
   }
 
@@ -1908,9 +1969,9 @@
 
   .study-session-card__copy--flashcards {
     width: 100%;
-    gap: 0.9rem;
+    gap: 0.75rem;
     justify-items: start;
-    text-align: left;
+    text-align: start;
   }
 
   .study-session-card__copy--exam {
@@ -1931,10 +1992,32 @@
 
   :global(.study-session-card--flashcards) h2 {
     max-width: none;
-    font-size: clamp(1.55rem, 1.15rem + 0.95vw, 2.2rem);
-    line-height: 1.38;
+    font-size: clamp(1.3rem, 1.08rem + 0.7vw, 1.75rem);
+    line-height: 1.5;
     font-weight: 500;
     letter-spacing: -0.03em;
+  }
+
+  .flashcard-stage__question,
+  .flashcard-stage__answer-text,
+  .explanation {
+    width: 100%;
+    text-align: start;
+    unicode-bidi: plaintext;
+  }
+
+  .flashcard-stage__question--rtl,
+  .flashcard-stage__answer-text--rtl,
+  .explanation--rtl {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .flashcard-stage__question--ltr,
+  .flashcard-stage__answer-text--ltr,
+  .explanation--ltr {
+    direction: ltr;
+    text-align: left;
   }
 
   :global(.study-session-card--exam) {
@@ -2153,12 +2236,12 @@
     max-height: 22rem;
     opacity: 1;
     border-top: 1px solid var(--ui-border-default);
-    padding-top: 1.1rem;
+    padding-top: 0.95rem;
   }
 
   .flashcard-stage__answer-copy {
     display: grid;
-    gap: 0.8rem;
+    gap: 0.65rem;
   }
 
   .flashcard-stage__answer-label {
