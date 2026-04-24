@@ -31,6 +31,16 @@
     flashcards: { includeExplanations: false },
     exam: { questionCount: 10 },
   };
+  const SUMMARY_SECTION_LABELS = new Set([
+    'title',
+    'core definition',
+    'main sections',
+    'processes',
+    'classifications',
+    'key distinctions',
+    'quick revision',
+    'common pitfalls',
+  ]);
 
   export let documentId = '';
   export let studyTab = 'summary';
@@ -219,35 +229,112 @@
   }
 
   function parseSummaryBlocks(value) {
-    const source = text(value);
+    const source = text(value).replace(/\r\n?/g, '\n');
     if (!source) return [];
 
-    return source
-      .split(/\n\s*\n/)
-      .map((block) => block.trim())
-      .filter(Boolean)
-      .map((block) => {
-        const lines = block
-          .split('\n')
-          .map((line) => line.trim())
-          .filter(Boolean);
+    const blocks = [];
+    let pendingParagraph = [];
+    let pendingList = null;
 
-        if (lines.length === 1 && /^##\s+/.test(lines[0])) {
-          return { type: 'heading', text: lines[0].replace(/^##\s+/, '').trim() };
+    const flushParagraph = () => {
+      if (!pendingParagraph.length) return;
+      const paragraph = pendingParagraph.join(' ').replace(/\s+/g, ' ').trim();
+      if (paragraph) {
+        blocks.push({ type: 'paragraph', text: paragraph });
+      }
+      pendingParagraph = [];
+    };
+
+    const flushList = () => {
+      if (!pendingList?.items?.length) {
+        pendingList = null;
+        return;
+      }
+      blocks.push(pendingList);
+      pendingList = null;
+    };
+
+    const pushListItem = (item) => {
+      flushParagraph();
+      if (!pendingList || pendingList.ordered !== item.ordered) {
+        flushList();
+        pendingList = { type: 'list', ordered: item.ordered, items: [] };
+      }
+      pendingList.items.push(item);
+    };
+
+    for (const rawLine of source.split('\n')) {
+      if (!rawLine.trim()) {
+        flushParagraph();
+        flushList();
+        continue;
+      }
+
+      const line = rawLine.trim();
+      const sectionMatch = line.match(/^(.+?):\s*(.*)$/);
+      if (sectionMatch && isSummarySectionLabel(sectionMatch[1])) {
+        flushParagraph();
+        flushList();
+        blocks.push({ type: 'heading', text: `${normalizeSummaryLabel(sectionMatch[1])}:`, level: 2 });
+        if (sectionMatch[2]?.trim()) {
+          blocks.push({ type: 'paragraph', text: sectionMatch[2].trim() });
         }
+        continue;
+      }
 
-        if (lines.length > 0 && lines.every((line) => /^-\s+/.test(line))) {
-          return {
-            type: 'list',
-            items: lines.map((line) => line.replace(/^-\s+/, '').trim()).filter(Boolean),
-          };
-        }
+      const bulletMatch = rawLine.match(/^(\s*)[-•]\s+(.+)$/);
+      if (bulletMatch) {
+        pushListItem({
+          text: bulletMatch[2].trim(),
+          level: getSummaryIndentLevel(bulletMatch[1]),
+          ordered: false,
+        });
+        continue;
+      }
 
-        return {
-          type: 'paragraph',
-          text: block.replace(/\s*\n+\s*/g, ' ').trim(),
-        };
-      });
+      const numberedMatch = rawLine.match(/^(\s*)(\d+)[.)]\s+(.+)$/);
+      if (numberedMatch) {
+        pushListItem({
+          text: numberedMatch[3].trim(),
+          level: getSummaryIndentLevel(numberedMatch[1]),
+          ordered: true,
+        });
+        continue;
+      }
+
+      if (/^##\s+/.test(line)) {
+        flushParagraph();
+        flushList();
+        blocks.push({ type: 'heading', text: line.replace(/^##\s+/, '').trim(), level: 2 });
+        continue;
+      }
+
+      if (line.endsWith(':') && line.length <= 80) {
+        flushParagraph();
+        flushList();
+        blocks.push({ type: 'subheading', text: line, level: 3 });
+        continue;
+      }
+
+      flushList();
+      pendingParagraph.push(line);
+    }
+
+    flushParagraph();
+    flushList();
+    return blocks;
+  }
+
+  function normalizeSummaryLabel(value) {
+    return text(value).replace(/\s+/g, ' ');
+  }
+
+  function isSummarySectionLabel(value) {
+    return SUMMARY_SECTION_LABELS.has(normalizeSummaryLabel(value).replace(/:$/, '').toLowerCase());
+  }
+
+  function getSummaryIndentLevel(indent = '') {
+    return Math.min(3, Math.floor(indent.replace(/\t/g, '  ').length / 2));
   }
 
   function parseInlineSegments(value) {
@@ -1013,11 +1100,13 @@
               {#each summaryBlocks as block}
                 {#if block.type === 'heading'}
                   <h3 class="reader-section-title">{block.text}</h3>
+                {:else if block.type === 'subheading'}
+                  <h4 class="reader-subsection-title">{block.text}</h4>
                 {:else if block.type === 'list'}
-                  <ul class="reader-list">
+                  <svelte:element this={block.ordered ? 'ol' : 'ul'} class={`reader-list ${block.ordered ? 'reader-list--ordered' : 'reader-list--unordered'}`}>
                     {#each block.items as item}
-                      <li>
-                        {#each parseInlineSegments(item) as segment}
+                      <li class={`reader-list__item reader-list__item--level-${item.level || 0}`}>
+                        {#each parseInlineSegments(item.text) as segment}
                           {#if segment.strong}
                             <strong>{segment.text}</strong>
                           {:else}
@@ -1026,7 +1115,7 @@
                         {/each}
                       </li>
                     {/each}
-                  </ul>
+                  </svelte:element>
                 {:else}
                   <p class="reader-paragraph">
                     {#each parseInlineSegments(block.text) as segment}
@@ -1682,10 +1771,20 @@
   .reader-section-title {
     margin: 0;
     color: var(--ui-text-primary);
-    font-size: clamp(1rem, 0.92rem + 0.42vw, 1.18rem);
-    font-weight: 600;
+    font-size: clamp(1.02rem, 0.94rem + 0.46vw, 1.22rem);
+    font-weight: 700;
     line-height: 1.4;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
+    padding-top: 0.15rem;
+  }
+
+  .reader-subsection-title {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: 0.98rem;
+    font-weight: 650;
+    line-height: 1.45;
+    letter-spacing: 0;
   }
 
   .reader-list {
@@ -1698,6 +1797,41 @@
   .reader--rtl .reader-list {
     padding-left: 0;
     padding-right: 1.25rem;
+  }
+
+  .reader-list--ordered {
+    list-style-type: decimal;
+  }
+
+  .reader-list--unordered {
+    list-style-type: disc;
+  }
+
+  .reader-list__item--level-1 {
+    margin-left: 1.15rem;
+  }
+
+  .reader-list__item--level-2 {
+    margin-left: 2.3rem;
+  }
+
+  .reader-list__item--level-3 {
+    margin-left: 3.45rem;
+  }
+
+  .reader--rtl .reader-list__item--level-1 {
+    margin-left: 0;
+    margin-right: 1.15rem;
+  }
+
+  .reader--rtl .reader-list__item--level-2 {
+    margin-left: 0;
+    margin-right: 2.3rem;
+  }
+
+  .reader--rtl .reader-list__item--level-3 {
+    margin-left: 0;
+    margin-right: 3.45rem;
   }
 
   .reader strong,
