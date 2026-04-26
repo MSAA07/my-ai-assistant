@@ -263,7 +263,32 @@
       pendingList.items.push(item);
     };
 
-    for (const rawLine of source.split('\n')) {
+    const parseTableRow = (value = '') => value
+      .trim()
+      .replace(/^\|/, '')
+      .replace(/\|$/, '')
+      .split('|')
+      .map((cell) => cell.trim());
+
+    const isTableLine = (value = '') => /^\s*\|.+\|\s*$/.test(value);
+    const isTableDivider = (value = '') => {
+      const cells = parseTableRow(value);
+      return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+    };
+
+    const parseTableBlock = (lines = []) => {
+      if (lines.length < 2 || !isTableDivider(lines[1])) return null;
+      const headers = parseTableRow(lines[0]);
+      const rows = lines.slice(2)
+        .map(parseTableRow)
+        .filter((row) => row.some(Boolean));
+      if (!headers.length || !rows.length) return null;
+      return { type: 'table', headers, rows };
+    };
+
+    const lines = source.split('\n');
+    for (let index = 0; index < lines.length; index += 1) {
+      const rawLine = lines[index];
       if (!rawLine.trim()) {
         flushParagraph();
         flushList();
@@ -271,6 +296,24 @@
       }
 
       const line = rawLine.trim();
+      if (isTableLine(rawLine)) {
+        const tableLines = [];
+        let cursor = index;
+        while (cursor < lines.length && isTableLine(lines[cursor])) {
+          tableLines.push(lines[cursor]);
+          cursor += 1;
+        }
+
+        const tableBlock = parseTableBlock(tableLines);
+        if (tableBlock) {
+          flushParagraph();
+          flushList();
+          blocks.push(tableBlock);
+          index = cursor - 1;
+          continue;
+        }
+      }
+
       const sectionMatch = line.match(/^(.+?):\s*(.*)$/);
       if (sectionMatch && isSummarySectionLabel(sectionMatch[1])) {
         flushParagraph();
@@ -1116,6 +1159,43 @@
                       </li>
                     {/each}
                   </svelte:element>
+                {:else if block.type === 'table'}
+                  <div class="reader-table-wrap">
+                    <table class="reader-table">
+                      <thead>
+                        <tr>
+                          {#each block.headers as header}
+                            <th>
+                              {#each parseInlineSegments(header) as segment}
+                                {#if segment.strong}
+                                  <strong>{segment.text}</strong>
+                                {:else}
+                                  {segment.text}
+                                {/if}
+                              {/each}
+                            </th>
+                          {/each}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {#each block.rows as row}
+                          <tr>
+                            {#each block.headers as _, cellIndex}
+                              <td>
+                                {#each parseInlineSegments(row[cellIndex] || '') as segment}
+                                  {#if segment.strong}
+                                    <strong>{segment.text}</strong>
+                                  {:else}
+                                    {segment.text}
+                                  {/if}
+                                {/each}
+                              </td>
+                            {/each}
+                          </tr>
+                        {/each}
+                      </tbody>
+                    </table>
+                  </div>
                 {:else}
                   <p class="reader-paragraph">
                     {#each parseInlineSegments(block.text) as segment}
@@ -1640,6 +1720,12 @@
     border-radius: var(--study-flow-chip-radius);
   }
 
+  .activity-content-head--summary :global(.summary-mode-badge.ui-badge) {
+    color: var(--ui-text-secondary);
+    border-color: color-mix(in srgb, var(--ui-border-default) 88%, transparent);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 34%, transparent);
+  }
+
   :global(.summary-chrome__actions .ui-button) {
     min-height: var(--ui-control-height-sm);
   }
@@ -1713,11 +1799,11 @@
   }
 
   :global(.activity-frame--summary) {
-    width: min(100%, var(--study-flow-reading-width));
+    width: min(100%, var(--size-page-study-wide));
     min-height: 0;
-    gap: var(--study-flow-card-gap);
-    border-radius: var(--study-flow-card-radius);
-    background: var(--study-flow-card-surface);
+    gap: 0;
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--ui-surface-card) 98%, var(--ui-bg-page) 2%);
     box-shadow: none;
   }
 
@@ -1746,7 +1832,10 @@
 
   .reader {
     display: grid;
-    gap: 1.35rem;
+    gap: 0.7rem;
+    color: var(--ui-text-secondary);
+    font-size: 0.94rem;
+    line-height: 1.58;
   }
 
   .reader--rtl {
@@ -1761,42 +1850,49 @@
 
   .reader-paragraph,
   .reader-list li {
-    line-height: 1.8;
+    line-height: 1.58;
     white-space: pre-wrap;
-    color: color-mix(in srgb, var(--foreground) 84%, var(--muted-foreground) 16%);
-    font-size: clamp(0.98rem, 1vw, 1.03rem);
+    color: var(--ui-text-secondary);
+    font-size: 0.94rem;
     unicode-bidi: plaintext;
   }
 
   .reader-section-title {
     margin: 0;
     color: var(--ui-text-primary);
-    font-size: clamp(1.02rem, 0.94rem + 0.46vw, 1.22rem);
+    font-size: 1.04rem;
     font-weight: 700;
-    line-height: 1.4;
+    line-height: 1.28;
     letter-spacing: 0;
-    padding-top: 0.15rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--ui-border-default) 78%, transparent);
+  }
+
+  .reader-section-title:first-child {
+    padding-top: 0;
   }
 
   .reader-subsection-title {
     margin: 0;
     color: var(--ui-text-primary);
-    font-size: 0.98rem;
+    font-size: 0.95rem;
     font-weight: 650;
-    line-height: 1.45;
+    line-height: 1.35;
     letter-spacing: 0;
+    padding-top: 0.15rem;
   }
 
   .reader-list {
     margin: 0;
-    padding-left: 1.25rem;
+    padding-left: 1.05rem;
     display: grid;
-    gap: 0.7rem;
+    gap: 0.34rem;
   }
 
   .reader--rtl .reader-list {
     padding-left: 0;
-    padding-right: 1.25rem;
+    padding-right: 1.05rem;
   }
 
   .reader-list--ordered {
@@ -1807,37 +1903,88 @@
     list-style-type: disc;
   }
 
+  .reader-list li::marker {
+    color: var(--ui-text-muted);
+    font-size: 0.82em;
+  }
+
   .reader-list__item--level-1 {
-    margin-left: 1.15rem;
+    margin-left: 0.85rem;
   }
 
   .reader-list__item--level-2 {
-    margin-left: 2.3rem;
+    margin-left: 1.7rem;
   }
 
   .reader-list__item--level-3 {
-    margin-left: 3.45rem;
+    margin-left: 2.55rem;
   }
 
   .reader--rtl .reader-list__item--level-1 {
     margin-left: 0;
-    margin-right: 1.15rem;
+    margin-right: 0.85rem;
   }
 
   .reader--rtl .reader-list__item--level-2 {
     margin-left: 0;
-    margin-right: 2.3rem;
+    margin-right: 1.7rem;
   }
 
   .reader--rtl .reader-list__item--level-3 {
     margin-left: 0;
-    margin-right: 3.45rem;
+    margin-right: 2.55rem;
   }
 
   .reader strong,
   .reader-list strong {
     color: var(--ui-text-primary);
     font-weight: 600;
+  }
+
+  .reader-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid color-mix(in srgb, var(--ui-border-default) 82%, transparent);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--ui-surface-secondary) 30%, transparent);
+  }
+
+  .reader-table {
+    width: 100%;
+    min-width: 34rem;
+    border-collapse: collapse;
+    color: var(--ui-text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.42;
+  }
+
+  .reader-table th,
+  .reader-table td {
+    padding: 0.5rem 0.65rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid color-mix(in srgb, var(--ui-border-default) 70%, transparent);
+  }
+
+  .reader--rtl .reader-table th,
+  .reader--rtl .reader-table td {
+    text-align: right;
+  }
+
+  .reader-table th {
+    color: var(--ui-text-primary);
+    font-weight: 650;
+    background: color-mix(in srgb, var(--ui-surface-secondary) 48%, transparent);
+  }
+
+  .reader-table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .reader-table td strong,
+  .reader-table th strong {
+    color: var(--ui-text-primary);
+    font-weight: 650;
   }
 
   .launch-metrics {
