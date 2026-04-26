@@ -282,7 +282,7 @@
         continue;
       }
 
-      const bulletMatch = rawLine.match(/^(\s*)[-•]\s+(.+)$/);
+      const bulletMatch = rawLine.match(/^(\s*)[-*•]\s+(.+)$/);
       if (bulletMatch) {
         pushListItem({
           text: bulletMatch[2].trim(),
