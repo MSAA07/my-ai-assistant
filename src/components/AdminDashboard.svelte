@@ -7,10 +7,16 @@
   import SessionManager from './admin/SessionManager.svelte';
   import StorageOverview from './admin/StorageOverview.svelte';
   import AuditLogViewer from './admin/AuditLogViewer.svelte';
+  import AdminJobs from './admin/AdminJobs.svelte';
+  import AdminUsageDashboard from './admin/AdminUsageDashboard.svelte';
+  import AdminLimits from './admin/AdminLimits.svelte';
 
   const tabs = [
     { value: 'overview', label: 'Overview' },
     { value: 'users', label: 'Users' },
+    { value: 'usage', label: 'Usage' },
+    { value: 'limits', label: 'Limits' },
+    { value: 'jobs', label: 'Jobs' },
     { value: 'sessions', label: 'Sessions' },
     { value: 'storage', label: 'Storage' },
     { value: 'audit', label: 'Audit Logs' }
@@ -46,6 +52,12 @@
       <AdminStats />
     {:else if activeTab === 'users'}
       <UserTable />
+    {:else if activeTab === 'usage'}
+      <AdminUsageDashboard />
+    {:else if activeTab === 'limits'}
+      <AdminLimits />
+    {:else if activeTab === 'jobs'}
+      <AdminJobs />
     {:else if activeTab === 'sessions'}
       <SessionManager />
     {:else if activeTab === 'storage'}

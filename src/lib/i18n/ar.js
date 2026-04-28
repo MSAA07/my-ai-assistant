@@ -110,7 +110,7 @@ const ar = {
     enterCta: 'دخول'
   },
   home: {
-    heroTitle: 'مساعد الدراسة بالذكاء الاصطناعي',
+    heroTitle: 'StudyMaxing',
     heroSubtitle: 'ارفع موادك الدراسية واحصل على ملخصات وبطاقات تعليمية واختبارات تدريبية مدعومة بالذكاء الاصطناعي',
     stats: {
       documentsRemaining: 'المستندات المتبقية',

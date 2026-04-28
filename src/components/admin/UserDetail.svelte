@@ -3,9 +3,11 @@
   import Badge from '../../lib/components/ui/Badge.svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
+  import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import ModalSurface from '../../lib/components/ui/ModalSurface.svelte';
   import Tabs from '../../lib/components/ui/Tabs.svelte';
+  import UsageBreakdownTable from './UsageBreakdownTable.svelte';
   import { API_BASE } from '../../config.js';
 
   export let userId;
@@ -15,15 +17,22 @@
   const tabItems = [
     { value: 'profile', label: 'Profile' },
     { value: 'files', label: 'Files' },
-    { value: 'sessions', label: 'Sessions' }
+    { value: 'sessions', label: 'Sessions' },
+    { value: 'limits', label: 'Limits' },
+    { value: 'usage', label: 'Usage' }
   ];
 
   let user = null;
   let stats = null;
   let documents = [];
   let sessions = [];
+  let usageDetail = null;
+  let userLimit = null;
+  let allowance = null;
   let loading = true;
   let error = '';
+  let limitsError = '';
+  let limitsSaving = false;
   let activeTab = 'profile';
 
   let form = {
@@ -32,6 +41,39 @@
     monthlyLimit: '',
     role: 'user'
   };
+  let limitForm = {
+    documentCapOverride: '',
+    costCapUsdOverride: '',
+    tokenCapOverride: '',
+    reason: ''
+  };
+
+  $: usageTotals = usageDetail?.totals || {};
+  $: usageFeatures = usageDetail?.features || [];
+  $: usageModels = usageDetail?.models || [];
+  $: usageDocuments = usageDetail?.documents || [];
+  $: usageSeries = usageDetail?.series || [];
+  $: limitConsumed = allowance?.consumed || {};
+  $: limitCaps = allowance?.caps || {};
+  $: limitRemaining = allowance?.remaining || {};
+  $: limitOverrides = allowance?.overrides || {};
+  $: proposedDocumentOverride = parseNullableInteger(limitForm.documentCapOverride);
+  $: proposedCostOverride = parseNullableNumber(limitForm.costCapUsdOverride);
+  $: proposedTokenOverride = parseNullableInteger(limitForm.tokenCapOverride);
+  $: loweringUserCaps = Boolean(
+    allowance && (
+      isLowering(proposedDocumentOverride, limitCaps.documentCap)
+      || isLowering(proposedCostOverride, limitCaps.costCapUsd)
+      || isLowering(proposedTokenOverride, limitCaps.tokenCap)
+    )
+  );
+  $: proposedOverLimit = Boolean(
+    allowance && (
+      (proposedDocumentOverride !== null && Number(limitConsumed.documents || 0) >= proposedDocumentOverride)
+      || (proposedCostOverride !== null && Number(limitConsumed.costUsd || 0) >= proposedCostOverride)
+      || (proposedTokenOverride !== null && Number(limitConsumed.totalTokens || 0) >= proposedTokenOverride)
+    )
+  );
 
   const formatBytes = (bytes) => {
     const value = Number(bytes || 0);
@@ -42,29 +84,71 @@
     return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
   };
 
+  const formatUsd = (value) => `$${Number(value || 0).toFixed(4)}`;
+  const formatSar = (value) => `${Number(value || 0).toFixed(2)} SAR`;
+  const formatNumber = (value) => Number(value || 0).toLocaleString();
+  const formatCap = (value, formatter = formatNumber) => value === null || value === undefined ? 'Unlimited' : formatter(value);
+  const formatDate = (value) => (value ? new Date(value).toLocaleString() : '-');
+
+  function parseNullableInteger(value) {
+    if (value === '' || value === null || value === undefined) return null;
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+  }
+
+  function parseNullableNumber(value) {
+    if (value === '' || value === null || value === undefined) return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  }
+
+  function isLowering(nextValue, currentValue) {
+    if (nextValue === null || currentValue === null || currentValue === undefined) return false;
+    return Number(nextValue) < Number(currentValue);
+  }
+
+  function hydrateLimitForm(nextUserLimit, nextAllowance) {
+    userLimit = nextUserLimit;
+    allowance = nextAllowance;
+    limitForm = {
+      documentCapOverride: nextUserLimit?.documentCapOverride ?? '',
+      costCapUsdOverride: nextUserLimit?.costCapUsdOverride ?? '',
+      tokenCapOverride: nextUserLimit?.tokenCapOverride ?? '',
+      reason: ''
+    };
+  }
+
   async function fetchUser() {
     loading = true;
     error = '';
 
     try {
-      const [userRes, fileRes, sessionRes] = await Promise.all([
+      const [userRes, fileRes, sessionRes, usageRes, limitsRes] = await Promise.all([
         fetch(`${API_BASE}/api/admin/users/${userId}`, { credentials: 'include' }),
         fetch(`${API_BASE}/api/admin/users/${userId}/files`, { credentials: 'include' }),
-        fetch(`${API_BASE}/api/admin/users/${userId}/sessions`, { credentials: 'include' })
+        fetch(`${API_BASE}/api/admin/users/${userId}/sessions`, { credentials: 'include' }),
+        fetch(`${API_BASE}/api/admin/usage/users/${userId}?granularity=day`, { credentials: 'include' }),
+        fetch(`${API_BASE}/api/admin/users/${userId}/limits`, { credentials: 'include' })
       ]);
 
       const userData = await userRes.json();
       const fileData = await fileRes.json();
       const sessionData = await sessionRes.json();
+      const usageData = await usageRes.json();
+      const limitsData = await limitsRes.json();
 
       if (!userRes.ok) throw new Error(userData.error || 'Failed to fetch user');
       if (!fileRes.ok) throw new Error(fileData.error || 'Failed to fetch files');
       if (!sessionRes.ok) throw new Error(sessionData.error || 'Failed to fetch sessions');
+      if (!usageRes.ok) throw new Error(usageData.error || 'Failed to fetch usage');
+      if (!limitsRes.ok) throw new Error(limitsData.error || 'Failed to fetch limits');
 
       user = userData.user;
       stats = userData.stats;
       documents = fileData.documents || [];
       sessions = sessionData.sessions || [];
+      usageDetail = usageData;
+      hydrateLimitForm(limitsData.userLimit, limitsData.allowance);
 
       form = {
         name: user.name,
@@ -149,6 +233,74 @@
     });
     await fetchUser();
     dispatch('updated');
+  }
+
+  async function saveLimitOverrides() {
+    limitsError = '';
+
+    if ((loweringUserCaps || proposedOverLimit) && !limitForm.reason.trim()) {
+      limitsError = 'Add a reason before lowering caps or placing this user over cap.';
+      return;
+    }
+
+    if (loweringUserCaps || proposedOverLimit) {
+      const warning = [
+        'Save this user cap override?',
+        proposedOverLimit ? 'The user is already at or above one proposed cap.' : '',
+        'This change is audited.'
+      ].filter(Boolean).join('\n');
+      if (!confirm(warning)) return;
+    }
+
+    limitsSaving = true;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/users/${userId}/limits/overrides`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentCapOverride: limitForm.documentCapOverride === '' ? null : Number(limitForm.documentCapOverride),
+          costCapUsdOverride: limitForm.costCapUsdOverride === '' ? null : Number(limitForm.costCapUsdOverride),
+          tokenCapOverride: limitForm.tokenCapOverride === '' ? null : Number(limitForm.tokenCapOverride),
+          reason: limitForm.reason.trim() || null
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to save overrides');
+      hydrateLimitForm(data.userLimit, data.allowance);
+      dispatch('updated');
+    } catch (err) {
+      limitsError = err.message;
+    } finally {
+      limitsSaving = false;
+    }
+  }
+
+  async function clearLimitOverrides() {
+    limitsError = '';
+    if (!confirm('Clear this user’s cap overrides? This is audited.')) return;
+    limitsSaving = true;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/users/${userId}/limits/overrides/clear`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: ['documentCapOverride', 'costCapUsdOverride', 'tokenCapOverride'],
+          reason: limitForm.reason.trim() || null
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to clear overrides');
+      hydrateLimitForm(data.userLimit, data.allowance);
+      dispatch('updated');
+    } catch (err) {
+      limitsError = err.message;
+    } finally {
+      limitsSaving = false;
+    }
   }
 
   function handleTabChange(event) {
@@ -266,7 +418,7 @@
           </ul>
         {/if}
       </Card>
-    {:else}
+    {:else if activeTab === 'sessions'}
       <Card class="detail-card" variant="base" padding="md">
         <header class="card-header">
           <h3>Sessions</h3>
@@ -296,6 +448,135 @@
           </ul>
         {/if}
       </Card>
+    {:else if activeTab === 'limits'}
+      <div class="limits-panel">
+        <Card class="detail-card" variant="base" padding="md">
+          <header class="card-header">
+            <h3>Usage Limits</h3>
+            {#if limitOverrides.overrideBy}
+              <Badge tone="warning" size="sm">Override active</Badge>
+            {:else}
+              <Badge tone="neutral" size="sm">Default caps</Badge>
+            {/if}
+          </header>
+
+          <div class="usage-metric-grid">
+            <div><span>Consumed USD</span><strong>{formatUsd(limitConsumed.costUsd)}</strong></div>
+            <div><span>Cost Cap</span><strong>{formatCap(limitCaps.costCapUsd, formatUsd)}</strong></div>
+            <div><span>Remaining USD</span><strong>{formatCap(limitRemaining.costUsd, formatUsd)}</strong></div>
+            <div><span>Documents</span><strong>{formatNumber(limitConsumed.documents)}</strong></div>
+            <div><span>Document Cap</span><strong>{formatCap(limitCaps.documentCap)}</strong></div>
+            <div><span>Remaining Docs</span><strong>{formatCap(limitRemaining.documents)}</strong></div>
+            <div><span>Total Tokens</span><strong>{formatNumber(limitConsumed.totalTokens)}</strong></div>
+            <div><span>Token Cap</span><strong>{formatCap(limitCaps.tokenCap)}</strong></div>
+            <div><span>Remaining Tokens</span><strong>{formatCap(limitRemaining.tokens)}</strong></div>
+          </div>
+
+          <p class="muted">
+            Cost allowance is calculated dynamically as active cap minus billable ledger spend.
+          </p>
+        </Card>
+
+        <Card class="detail-card" variant="base" padding="md">
+          <header class="card-header">
+            <h3>Cap Overrides</h3>
+            {#if loweringUserCaps || proposedOverLimit}
+              <Badge tone="warning" size="sm">Reason required</Badge>
+            {/if}
+          </header>
+
+          <div class="field-grid">
+            <FieldShell label="Document Cap Override" forId="user-document-cap-override">
+              <input id="user-document-cap-override" type="number" min="0" bind:value={limitForm.documentCapOverride} placeholder="Use default" />
+            </FieldShell>
+            <FieldShell label="USD Cost Cap Override" forId="user-cost-cap-override">
+              <input id="user-cost-cap-override" type="number" min="0" step="0.0001" bind:value={limitForm.costCapUsdOverride} placeholder="Use default" />
+            </FieldShell>
+            <FieldShell label="Token Cap Override" forId="user-token-cap-override">
+              <input id="user-token-cap-override" type="number" min="0" bind:value={limitForm.tokenCapOverride} placeholder="Use default" />
+            </FieldShell>
+            <FieldShell label="Reason" forId="user-limit-reason">
+              <textarea id="user-limit-reason" rows="3" bind:value={limitForm.reason} placeholder="Required for high-impact changes"></textarea>
+            </FieldShell>
+          </div>
+
+          {#if limitsError}
+            <Card class="error-card" variant="soft" border="strong" padding="sm">{limitsError}</Card>
+          {/if}
+
+          <div class="actions">
+            <Button type="button" variant="primary" size="sm" on:click={saveLimitOverrides} disabled={limitsSaving}>
+              {limitsSaving ? 'Saving...' : 'Save Overrides'}
+            </Button>
+            <Button type="button" variant="secondary" size="sm" on:click={clearLimitOverrides} disabled={limitsSaving}>
+              Clear Overrides
+            </Button>
+          </div>
+        </Card>
+      </div>
+    {:else if activeTab === 'usage'}
+      <div class="usage-panel">
+        <Card class="detail-card" variant="base" padding="md">
+          <header class="card-header">
+            <h3>Usage & Cost</h3>
+            <Badge tone="neutral" size="sm">Daily</Badge>
+          </header>
+
+          <div class="usage-metric-grid">
+            <div><span>USD Cost</span><strong>{formatUsd(usageTotals.costUsd)}</strong></div>
+            <div><span>SAR Approx.</span><strong>{formatSar(usageTotals.costSar)}</strong></div>
+            <div><span>Total Tokens</span><strong>{formatNumber(usageTotals.totalTokens)}</strong></div>
+            <div><span>Input Tokens</span><strong>{formatNumber(usageTotals.inputTokens)}</strong></div>
+            <div><span>Output Tokens</span><strong>{formatNumber(usageTotals.outputTokens)}</strong></div>
+            <div><span>Events</span><strong>{formatNumber(usageTotals.events)}</strong></div>
+          </div>
+
+          <p class="muted">
+            SAR uses fixed rate {usageDetail?.sarRate ?? 3.75} and is approximate.
+          </p>
+        </Card>
+
+        <div class="usage-breakdowns">
+          <UsageBreakdownTable title="Documents" rows={usageDocuments} nameKey="document" idKey="documentId" compact />
+          <UsageBreakdownTable title="Features" rows={usageFeatures} labelKey="featureKey" compact />
+          <UsageBreakdownTable title="Models" rows={usageModels} labelKey="model" compact />
+        </div>
+
+        <DataSurface title="Daily Usage" description="Ledger totals by day for this user." tableMinWidth="760px" compact>
+          <svelte:fragment slot="table">
+            {#if usageSeries.length > 0}
+              <table class="ui-data-table">
+                <thead>
+                  <tr>
+                    <th>Bucket</th>
+                    <th>Events</th>
+                    <th>Input</th>
+                    <th>Output</th>
+                    <th>Total</th>
+                    <th>USD</th>
+                    <th>SAR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {#each usageSeries as item}
+                    <tr>
+                      <td><strong>{formatDate(item.bucketStart)}</strong></td>
+                      <td>{formatNumber(item.events)}</td>
+                      <td>{formatNumber(item.inputTokens)}</td>
+                      <td>{formatNumber(item.outputTokens)}</td>
+                      <td>{formatNumber(item.totalTokens)}</td>
+                      <td>{formatUsd(item.costUsd)}</td>
+                      <td>{formatSar(item.costSar)}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            {:else}
+              <p class="ui-data-state-note">No model usage recorded for this user.</p>
+            {/if}
+          </svelte:fragment>
+        </DataSurface>
+      </div>
     {/if}
   {/if}
 </ModalSurface>
@@ -429,6 +710,49 @@
     word-break: break-word;
   }
 
+  .limits-panel,
+  .usage-panel,
+  .usage-breakdowns {
+    display: grid;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  .usage-breakdowns {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .usage-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .usage-metric-grid div {
+    display: grid;
+    gap: 0.16rem;
+    min-width: 0;
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-base) 92%, transparent);
+    padding: 0.58rem 0.62rem;
+  }
+
+  .usage-metric-grid span {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+  }
+
+  .usage-metric-grid strong {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
   :global(.error-card) {
     color: color-mix(in srgb, var(--color-danger) 74%, var(--color-text-primary) 26%);
     border-color: color-mix(in srgb, var(--color-danger) 34%, var(--color-border) 66%);
@@ -450,6 +774,10 @@
 
     .item-list li :global(.ui-button) {
       width: 100%;
+    }
+
+    .usage-metric-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>

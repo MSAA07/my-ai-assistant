@@ -93,7 +93,7 @@ export default {
     enterCta: 'Enter'
   },
   home: {
-    heroTitle: 'AI Study Assistant',
+    heroTitle: 'StudyMaxing',
     heroSubtitle: 'Upload your study materials and get AI-powered summaries, flashcards, and practice exams',
     stats: {
       documentsRemaining: 'Documents Remaining',
