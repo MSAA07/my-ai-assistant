@@ -182,7 +182,7 @@
   }
 
   .theme-toggle-wrap {
-    min-width: 168px;
+    min-width: 76px;
   }
 
   @media (max-width: 1024px) {

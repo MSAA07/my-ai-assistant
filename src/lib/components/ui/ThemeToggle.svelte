@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import { Moon, Sun } from '@lucide/svelte';
   import { t } from '../../i18n/t.js';
 
   export let value = 'dark';
@@ -41,20 +42,22 @@
     role="radio"
     class={`option ${value === 'dark' ? 'active' : ''}`}
     aria-checked={value === 'dark'}
+    aria-label={t('settings.theme.dark')}
     on:keydown={handleKeydown}
     on:click={() => selectTheme('dark')}
   >
-    {t('settings.theme.dark')}
+    <Moon size={16} strokeWidth={2.2} aria-hidden="true" />
   </button>
   <button
     type="button"
     role="radio"
     class={`option ${value === 'light' ? 'active' : ''}`}
     aria-checked={value === 'light'}
+    aria-label={t('settings.theme.light')}
     on:keydown={handleKeydown}
     on:click={() => selectTheme('light')}
   >
-    {t('settings.theme.light')}
+    <Sun size={16} strokeWidth={2.2} aria-hidden="true" />
   </button>
 </div>
 
@@ -72,7 +75,9 @@
 
   .option {
     min-height: var(--ui-control-height-sm);
-    min-width: 80px;
+    min-width: var(--ui-control-height-sm);
+    display: inline-grid;
+    place-items: center;
     border: 1px solid transparent;
     border-radius: var(--ui-radius-sm);
     background: transparent;
