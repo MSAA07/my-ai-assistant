@@ -10,24 +10,24 @@
   ];
 
   const companyItems = [
-    'Company line placeholder',
-    'About page placeholder'
+    'Built for focused document-based study',
+    'Product updates and school support coming soon'
   ];
 
   const legalItems = [
-    'Privacy policy placeholder',
-    'Terms placeholder',
-    'Cookie policy placeholder',
-    'Refund policy placeholder'
+    'Privacy policy',
+    'Terms of service',
+    'Cookie policy',
+    'Refund policy'
   ];
 
   const supportItems = [
-    'Support email placeholder',
-    'Contact method placeholder'
+    'contact@studymaxing.com',
+    'Use this email for support, feedback, and account questions'
   ];
 
   const socialItems = [
-    'Social links placeholder'
+    'Social links coming soon'
   ];
 </script>
 
@@ -35,13 +35,11 @@
   <div class="public-footer__inner">
     <div class="public-footer__lead">
       <div class="public-footer__brand">
-        <span class="public-footer__mark">SM</span>
         <div>
           <p class="public-footer__title">Study Maxing</p>
-          <p class="public-footer__copy">Upload study documents, generate summaries, flashcards, and exam prep, then review everything in one clean workflow.</p>
         </div>
       </div>
-      <p class="public-footer__meta">Copyright placeholder, region note placeholder.</p>
+      <p class="public-footer__meta">© 2026 Study Maxing. All rights reserved.</p>
     </div>
 
     <div class="public-footer__grid">
@@ -125,22 +123,7 @@
     gap: 0.9rem;
   }
 
-  .public-footer__mark {
-    width: 2.5rem;
-    height: 2.5rem;
-    display: grid;
-    place-items: center;
-    border-radius: calc(var(--ui-radius-md) + 2px);
-    border: 1px solid color-mix(in srgb, var(--ui-border-strong) 70%, transparent);
-    background: color-mix(in srgb, var(--ui-surface-secondary) 78%, var(--ui-surface-card) 22%);
-    color: var(--ui-text-primary);
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-  }
-
   .public-footer__title,
-  .public-footer__copy,
   .public-footer__meta,
   .public-footer h2,
   .public-footer ul,
@@ -153,14 +136,6 @@
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-  }
-
-  .public-footer__copy {
-    margin-top: 0.35rem;
-    max-width: 54ch;
-    color: var(--ui-text-secondary);
-    font-size: var(--ui-type-body-sm);
-    line-height: 1.6;
   }
 
   .public-footer__meta {

@@ -8,7 +8,6 @@
   const sectionLinks = [
     { id: 'features', label: 'Features' },
     { id: 'how-it-works', label: 'How it works' },
-    { id: 'study-flow', label: 'Study flow' },
     { id: 'faq', label: 'FAQ' }
   ];
 
@@ -47,7 +46,6 @@
 <header class="public-header">
   <div class="public-header__inner">
     <button type="button" class="brand" on:click={navigateHome} aria-label="Study Maxing home">
-      <span class="brand-mark">SM</span>
       <span class="brand-copy">
         <span class="brand-title">Study Maxing</span>
         <span class="brand-subtitle">Fast document-to-study workflow</span>
@@ -120,21 +118,6 @@
     color: var(--ui-text-primary);
     cursor: pointer;
     text-align: left;
-  }
-
-  .brand-mark {
-    width: 2.5rem;
-    height: 2.5rem;
-    display: grid;
-    place-items: center;
-    border-radius: calc(var(--ui-radius-md) + 2px);
-    border: 1px solid color-mix(in srgb, var(--ui-border-strong) 70%, transparent);
-    background:
-      radial-gradient(circle at top left, color-mix(in srgb, var(--ui-text-primary) 18%, transparent), transparent 60%),
-      color-mix(in srgb, var(--ui-surface-secondary) 78%, var(--ui-surface-card) 22%);
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
   }
 
   .brand-copy {

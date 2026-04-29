@@ -1,6 +1,5 @@
 <script>
   import { tick } from 'svelte';
-  import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import { LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH } from '../routes.js';
@@ -17,59 +16,41 @@
     },
     {
       title: 'Study inside one hub',
-      description: 'Open the canonical study flow under #/study and move between document views without losing your place.'
+      description: 'Open the Study Hub to review the source document, summary, flashcards, and exam prep in one place.'
     }
   ];
 
   const featureCards = [
     {
-      title: 'Document upload that leads somewhere',
-      description: 'The product starts with your actual study files, not a blank chat box.'
+      title: 'Upload the documents you already study from',
+      description: 'Bring in lecture notes, PDFs, DOCX files, or slide decks and keep the work tied to the original material.'
     },
     {
-      title: 'Summary generation for fast review',
-      description: 'Turn long documents into readable high-signal summaries you can scan before class or exams.'
+      title: 'Generate a clear study summary',
+      description: 'Turn long files into readable summaries that help you review the important parts faster.'
     },
     {
-      title: 'Flashcards from the same source',
-      description: 'Generate review prompts tied to the uploaded material so memorization stays grounded.'
+      title: 'Practice with flashcards',
+      description: 'Create question-and-answer cards from the same document so memorization stays connected to your course material.'
     },
     {
-      title: 'Exam prep in the same flow',
-      description: 'Move from source document to questions and review without jumping across disconnected screens.'
-    }
-  ];
-
-  const studyFlowPanels = [
-    {
-      label: 'Ingest',
-      title: 'Upload and process',
-      description: 'Bring in notes, lecture slides, or study guides and let Study Maxing structure the next step.'
-    },
-    {
-      label: 'Generate',
-      title: 'Build your study set',
-      description: 'Create summaries, flashcards, and exam prep outputs from the same document record.'
-    },
-    {
-      label: 'Review',
-      title: 'Stay inside the study hub',
-      description: 'Open the study route, switch modes, and keep the review loop compact and readable.'
+      title: 'Prepare with exam-style questions',
+      description: 'Move from reading to practice questions without switching tools or losing the document context.'
     }
   ];
 
   const faqs = [
     {
-      question: 'What does Study Maxing actually do today?',
-      answer: 'It supports document upload plus generation of summaries, flashcards, and exam prep, all feeding into the study hub workflow.'
+      question: 'What does Study Maxing do?',
+      answer: 'It lets you upload study documents, generate summaries, flashcards, and exam prep, then review those outputs inside the Study Hub.'
     },
     {
-      question: 'Where does the main authenticated experience live?',
-      answer: 'The canonical study workflow remains under #/study, with the landing and auth screens acting as the public entry surface.'
+      question: 'Where do my documents and generated study materials live?',
+      answer: 'They live under the Study Hub after you sign in. That is where your uploaded documents, summaries, flashcards, and exam prep are organized.'
     },
     {
-      question: 'Do I need separate tools for each output?',
-      answer: 'No. The product is built around one document-to-study flow rather than isolated feature pages.'
+      question: 'Do I need separate tools for summaries, flashcards, and exam prep?',
+      answer: 'No. Study Maxing keeps those study outputs together so you can move from upload to review without rebuilding your workflow.'
     }
   ];
 
@@ -118,21 +99,14 @@
   <section class="hero-section section-shell">
     <div class="section-shell__inner hero-grid">
       <div class="hero-copy">
-        <Badge tone="neutral" variant="soft" size="sm" className="hero-badge">Study Maxing</Badge>
         <h1>Study documents in one premium flow.</h1>
         <p class="hero-subtitle">
-          Upload notes and course files, generate summaries, flashcards, and exam prep, then review everything through the real study workflow under <code>#/study</code>.
+          Upload notes and course files, then find the generated summaries, flashcards, and exam prep under the Study Hub where your documents are organized.
         </p>
 
         <div class="hero-actions">
           <Button variant="primary" size="lg" type="button" on:click={() => goTo(SIGN_UP_PATH)}>Get started</Button>
           <Button variant="secondary" size="lg" type="button" on:click={() => goToSection('how-it-works')}>See how it works</Button>
-        </div>
-
-        <div class="hero-pills">
-          <span>PDF, DOCX, PPTX</span>
-          <span>Summary + flashcards + exam prep</span>
-          <span>Canonical study hub</span>
         </div>
       </div>
 
@@ -142,7 +116,6 @@
             <p class="hero-card__eyebrow">Live workflow</p>
             <h2>From upload to study-ready output</h2>
           </div>
-          <span class="hero-card__badge">Fast</span>
         </div>
 
         <div class="hero-card__stack">
@@ -152,23 +125,9 @@
             <p>Document is processed once and becomes the anchor for the rest of the workflow.</p>
           </div>
 
-          <div class="workflow-grid">
-            <div class="workflow-tile">
-              <span>Summary</span>
-              <p>Readable recap for fast review before deeper practice.</p>
-            </div>
-            <div class="workflow-tile">
-              <span>Flashcards</span>
-              <p>Question-and-answer prompts based on the same source material.</p>
-            </div>
-            <div class="workflow-tile">
-              <span>Exam prep</span>
-              <p>Practice questions without leaving the document context.</p>
-            </div>
-            <div class="workflow-tile workflow-tile--accent">
-              <span>Study hub</span>
-              <p>Open the generated assets together inside the authenticated flow.</p>
-            </div>
+          <div class="study-hub-box">
+            <span>Under Study Hub</span>
+            <p>Your uploaded document, generated summary, flashcards, and exam prep stay together so you can review from one organized place.</p>
           </div>
         </div>
       </Card>
@@ -178,9 +137,9 @@
   <section id="features" class="section-shell">
     <div class="section-shell__inner">
       <div class="section-heading">
-        <p class="section-eyebrow">Product story</p>
-        <h2>Study Maxing matches the product you already have, not a generic AI landing page.</h2>
-        <p>The public experience now mirrors the real app: document ingestion, generated study assets, and one clean review flow.</p>
+        <p class="section-eyebrow">What it does</p>
+        <h2>Turn your study files into organized review material.</h2>
+        <p>Study Maxing starts with the documents you upload, then helps you create the study outputs students actually use: summaries, flashcards, and exam prep.</p>
       </div>
 
       <div class="feature-grid">
@@ -214,36 +173,12 @@
     </div>
   </section>
 
-  <section id="study-flow" class="section-shell">
-    <div class="section-shell__inner">
-      <Card class="study-flow-card" variant="raised" padding="lg" border="subtle">
-        <div class="study-flow-copy">
-          <p class="section-eyebrow">Study flow</p>
-          <h2>The core loop stays compact, readable, and tied to the source document.</h2>
-          <p>
-            Study Maxing is strongest when upload, summary generation, flashcards, and exam prep all feel like one system instead of four disconnected features.
-          </p>
-        </div>
-
-        <div class="study-flow-grid">
-          {#each studyFlowPanels as panel}
-            <div class="study-flow-panel">
-              <span class="study-flow-panel__label">{panel.label}</span>
-              <strong>{panel.title}</strong>
-              <p>{panel.description}</p>
-            </div>
-          {/each}
-        </div>
-      </Card>
-    </div>
-  </section>
-
   <section id="faq" class="section-shell">
     <div class="section-shell__inner section-shell__inner--narrow">
       <div class="section-heading section-heading--center">
-        <p class="section-eyebrow">Trust and FAQ</p>
-        <h2>Clear expectations for the public surface</h2>
-        <p>Keep the story concise, accurate, and easy to verify once a user signs in.</p>
+        <p class="section-eyebrow">FAQ</p>
+        <h2>How Study Maxing helps you study</h2>
+        <p>Upload your course material, generate useful study outputs, and keep everything together in the Study Hub.</p>
       </div>
 
       <div class="faq-list">
@@ -332,10 +267,6 @@
     gap: 1.25rem;
   }
 
-  :global(.hero-badge) {
-    width: fit-content;
-  }
-
   .hero-copy h1,
   .hero-copy p,
   .section-heading p,
@@ -344,9 +275,6 @@
   :global(.feature-card) p,
   :global(.step-card) h3,
   :global(.step-card) p,
-  .study-flow-copy h2,
-  .study-flow-copy p,
-  .study-flow-panel p,
   :global(.final-cta) h2,
   :global(.final-cta) p {
     margin: 0;
@@ -366,28 +294,12 @@
     line-height: 1.72;
   }
 
-  .hero-subtitle code {
-    color: var(--ui-text-primary);
-    background: color-mix(in srgb, var(--ui-surface-secondary) 78%, transparent);
-    border-radius: var(--ui-radius-xs);
-    padding: 0.14rem 0.35rem;
-  }
-
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
 
-  .hero-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem;
-  }
-
-  .hero-pills span,
-  .hero-card__badge,
-  .study-flow-panel__label,
   .step-index {
     display: inline-flex;
     align-items: center;
@@ -397,13 +309,6 @@
     font-size: var(--ui-type-label);
     font-weight: 700;
     letter-spacing: 0.04em;
-  }
-
-  .hero-pills span {
-    padding: 0 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--ui-border-default) 92%, transparent);
-    background: color-mix(in srgb, var(--ui-surface-card) 76%, transparent);
-    color: var(--ui-text-primary);
   }
 
   :global(.hero-card) {
@@ -444,21 +349,13 @@
     letter-spacing: -0.04em;
   }
 
-  .hero-card__badge {
-    padding: 0 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--ui-border-default) 92%, transparent);
-    background: color-mix(in srgb, var(--ui-surface-card) 80%, transparent);
-    color: var(--ui-text-primary);
-  }
-
   .hero-card__stack {
     display: grid;
     gap: 1rem;
   }
 
   .workflow-row,
-  .workflow-tile,
-  .study-flow-panel {
+  .study-hub-box {
     border: 1px solid color-mix(in srgb, var(--ui-border-default) 92%, transparent);
     border-radius: var(--ui-radius-md);
     background: color-mix(in srgb, var(--ui-surface-card) 82%, transparent);
@@ -480,53 +377,39 @@
 
   .workflow-row strong,
   .workflow-row p,
-  .workflow-tile span,
-  .workflow-tile p,
-  .study-flow-panel strong,
-  .study-flow-panel p,
+  .study-hub-box span,
+  .study-hub-box p,
   .faq-trigger span,
   .faq-content p {
     margin: 0;
   }
 
   .workflow-row strong,
-  .workflow-tile span,
-  .study-flow-panel strong {
+  .study-hub-box span {
     color: var(--ui-text-primary);
   }
 
   .workflow-row p,
-  .workflow-tile p,
-  .study-flow-panel p,
+  .study-hub-box p,
   .faq-content p {
     color: var(--ui-text-secondary);
     line-height: 1.6;
   }
 
-  .workflow-grid,
   .feature-grid,
-  .step-grid,
-  .study-flow-grid {
+  .step-grid {
     display: grid;
     gap: 1rem;
   }
 
-  .workflow-grid,
   .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .workflow-tile,
-  .study-flow-panel {
+  .study-hub-box {
     display: grid;
     gap: 0.55rem;
     padding: 1rem;
-  }
-
-  .workflow-tile--accent {
-    background:
-      radial-gradient(circle at top right, color-mix(in srgb, var(--ui-text-primary) 10%, transparent), transparent 62%),
-      color-mix(in srgb, var(--ui-surface-card) 82%, transparent);
   }
 
   .section-heading {
@@ -549,7 +432,6 @@
   }
 
   .section-heading h2,
-  .study-flow-copy h2,
   :global(.final-cta) h2 {
     max-width: 18ch;
     color: var(--ui-text-primary);
@@ -559,7 +441,6 @@
   }
 
   .section-heading p,
-  .study-flow-copy p,
   :global(.final-cta) p {
     max-width: 62ch;
     color: var(--ui-text-secondary);
@@ -580,8 +461,7 @@
       color-mix(in srgb, var(--ui-surface-secondary) 78%, var(--ui-surface-card) 22%);
   }
 
-  .step-grid,
-  .study-flow-grid {
+  .step-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -597,21 +477,8 @@
     color: var(--ui-text-primary);
   }
 
-  :global(.study-flow-card),
   :global(.final-cta) {
     gap: 1.5rem;
-  }
-
-  .study-flow-copy {
-    display: grid;
-    gap: 0.75rem;
-  }
-
-  .study-flow-panel__label {
-    width: fit-content;
-    padding: 0 0.7rem;
-    background: color-mix(in srgb, var(--ui-surface-secondary) 76%, transparent);
-    color: var(--ui-text-secondary);
   }
 
   .faq-list {
@@ -662,9 +529,7 @@
   @media (max-width: 960px) {
     .hero-grid,
     .step-grid,
-    .study-flow-grid,
-    .feature-grid,
-    .workflow-grid {
+    .feature-grid {
       grid-template-columns: 1fr;
     }
 
@@ -683,7 +548,6 @@
 
     .hero-copy h1,
     .section-heading h2,
-    .study-flow-copy h2,
     :global(.final-cta) h2 {
       max-width: 100%;
     }
