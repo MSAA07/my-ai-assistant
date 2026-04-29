@@ -22,6 +22,10 @@
   let selectedUserId = null;
   let searchTimeout = null;
   let selectedUserIds = [];
+  let capDefaults = {
+    free: { plan: 'free', documentCap: 5, costCapUsd: 1.5, tokenCap: null },
+    premium: { plan: 'premium', documentCap: 100, costCapUsd: null, tokenCap: null }
+  };
 
   let newUser = {
     name: '',
@@ -29,8 +33,14 @@
     password: '',
     role: 'user',
     plan: 'free',
-    monthlyLimit: ''
+    usePlanDefaultLimits: true,
+    documentCapOverride: '',
+    costCapUsdOverride: '',
+    tokenCapOverride: ''
   };
+
+  $: selectedPlanCap = capDefaults[newUser.plan] || capDefaults.free;
+  $: defaultLimitCopy = buildDefaultLimitCopy(newUser.plan, selectedPlanCap);
 
   const formatBytes = (bytes) => {
     const value = Number(bytes || 0);
@@ -49,6 +59,60 @@
     if (planFilter !== 'all') params.set('plan', planFilter);
     return params.toString();
   };
+
+  function formatCapNumber(value) {
+    return value === null || value === undefined ? 'unlimited' : Number(value).toLocaleString();
+  }
+
+  function formatCapUsd(value) {
+    return value === null || value === undefined ? 'unlimited' : `$${Number(value || 0).toFixed(2)} USD`;
+  }
+
+  function buildDefaultLimitCopy(plan, cap) {
+    const planName = plan === 'premium' ? 'Premium' : 'Free';
+    const docs = formatCapNumber(cap?.documentCap);
+    const cost = formatCapUsd(cap?.costCapUsd);
+    const token = cap?.tokenCap === null || cap?.tokenCap === undefined
+      ? ''
+      : ` and ${formatCapNumber(cap.tokenCap)} tokens`;
+    return `This user will use the ${planName} plan defaults: ${docs} documents and ${cost} cost cap${token}.`;
+  }
+
+  function parseOptionalInteger(value, label) {
+    if (value === '' || value === null || value === undefined) return { valid: true };
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed < 0) {
+      return { valid: false, error: `${label} must be an integer greater than or equal to 0.` };
+    }
+    return { valid: true, value: parsed };
+  }
+
+  function parseOptionalNumber(value, label) {
+    if (value === '' || value === null || value === undefined) return { valid: true };
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return { valid: false, error: `${label} must be a number greater than or equal to 0.` };
+    }
+    return { valid: true, value: parsed };
+  }
+
+  async function fetchCapDefaults() {
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/caps/defaults`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to fetch cap defaults');
+      for (const cap of data.caps || []) {
+        capDefaults = {
+          ...capDefaults,
+          [cap.plan]: cap
+        };
+      }
+    } catch (err) {
+      console.warn('Failed to fetch cap defaults', err);
+    }
+  }
 
   async function fetchUsers({ background = false } = {}) {
     if (background) {
@@ -165,19 +229,64 @@
   }
 
   async function createUser() {
-    if (!newUser.email.trim() || !newUser.name.trim()) {
+    const email = newUser.email.trim();
+
+    if (!email || !newUser.name.trim()) {
       error = 'Name and email are required.';
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      error = 'Enter a valid email address.';
+      return;
+    }
+
+    if (!newUser.password.trim()) {
+      error = 'Temporary password is required.';
+      return;
+    }
+
+    if (!newUser.role) {
+      error = 'Role is required.';
+      return;
+    }
+
+    if (!newUser.plan) {
+      error = 'Plan is required.';
       return;
     }
 
     const payload = {
       name: newUser.name.trim(),
-      email: newUser.email.trim(),
-      password: newUser.password || undefined,
+      email,
+      password: newUser.password,
       role: newUser.role,
-      plan: newUser.plan,
-      monthlyLimit: newUser.monthlyLimit ? Number(newUser.monthlyLimit) : undefined
+      plan: newUser.plan
     };
+
+    if (!newUser.usePlanDefaultLimits) {
+      const documentCap = parseOptionalInteger(newUser.documentCapOverride, 'Document cap override');
+      if (!documentCap.valid) {
+        error = documentCap.error;
+        return;
+      }
+
+      const costCap = parseOptionalNumber(newUser.costCapUsdOverride, 'Cost cap override');
+      if (!costCap.valid) {
+        error = costCap.error;
+        return;
+      }
+
+      const tokenCap = parseOptionalInteger(newUser.tokenCapOverride, 'Token cap override');
+      if (!tokenCap.valid) {
+        error = tokenCap.error;
+        return;
+      }
+
+      if (documentCap.value !== undefined) payload.documentCapOverride = documentCap.value;
+      if (costCap.value !== undefined) payload.costCapUsdOverride = costCap.value;
+      if (tokenCap.value !== undefined) payload.tokenCapOverride = tokenCap.value;
+    }
 
     const response = await fetch(`${API_BASE}/api/admin/users`, {
       method: 'POST',
@@ -192,7 +301,17 @@
       return;
     }
 
-    newUser = { name: '', email: '', password: '', role: 'user', plan: 'free', monthlyLimit: '' };
+    newUser = {
+      name: '',
+      email: '',
+      password: '',
+      role: 'user',
+      plan: 'free',
+      usePlanDefaultLimits: true,
+      documentCapOverride: '',
+      costCapUsdOverride: '',
+      tokenCapOverride: ''
+    };
     error = '';
     await fetchUsers();
   }
@@ -219,6 +338,7 @@
       loading = false;
     }
     void fetchUsers({ background: Boolean(cached?.loaded) });
+    void fetchCapDefaults();
   });
 
   onDestroy(() => {
@@ -269,34 +389,63 @@
   <Card slot="panels" class="create-user" variant="base" padding="md" border="subtle">
     <header class="create-header">
       <h3>Create User</h3>
-      <p class="muted">Add an account with role and plan defaults.</p>
+      <p class="muted">Add a login-ready account with plan-based usage caps.</p>
     </header>
 
     <div class="form-grid">
-      <FieldShell label="Full name" forId="create-name">
-        <input id="create-name" placeholder="Full name" bind:value={newUser.name} />
+      <FieldShell label="Full name" forId="create-name" required>
+        <input id="create-name" placeholder="Full name" bind:value={newUser.name} required />
       </FieldShell>
-      <FieldShell label="Email" forId="create-email">
-        <input id="create-email" placeholder="Email" bind:value={newUser.email} />
+      <FieldShell label="Email" forId="create-email" required>
+        <input id="create-email" placeholder="Email" type="email" bind:value={newUser.email} required />
       </FieldShell>
-      <FieldShell label="Password (optional)" forId="create-password">
-        <input id="create-password" placeholder="Password" type="password" bind:value={newUser.password} />
+      <FieldShell
+        label="Temporary password"
+        forId="create-password"
+        hint="The user can sign in with this password. Use a temporary password and ask them to change it later."
+        required
+      >
+        <input id="create-password" placeholder="Temporary password" type="password" bind:value={newUser.password} required />
       </FieldShell>
-      <FieldShell label="Role" forId="create-role">
-        <select id="create-role" bind:value={newUser.role}>
+      <FieldShell label="Role" forId="create-role" required>
+        <select id="create-role" bind:value={newUser.role} required>
           <option value="user">User</option>
           <option value="admin">Admin</option>
         </select>
       </FieldShell>
-      <FieldShell label="Plan" forId="create-plan">
-        <select id="create-plan" bind:value={newUser.plan}>
+      <FieldShell label="Plan" forId="create-plan" required>
+        <select id="create-plan" bind:value={newUser.plan} required>
           <option value="free">Free</option>
           <option value="premium">Premium</option>
         </select>
       </FieldShell>
-      <FieldShell label="Monthly limit" forId="create-limit">
-        <input id="create-limit" placeholder="Monthly limit" type="number" bind:value={newUser.monthlyLimit} />
-      </FieldShell>
+    </div>
+
+    <div class="limit-settings">
+      <label class="check-row" for="create-use-default-limits">
+        <input id="create-use-default-limits" type="checkbox" bind:checked={newUser.usePlanDefaultLimits} />
+        <span>
+          <strong>Use plan default limits</strong>
+          <small>{defaultLimitCopy}</small>
+        </span>
+      </label>
+
+      {#if !newUser.usePlanDefaultLimits}
+        <div class="custom-limits">
+          <p class="muted">Custom limits override the plan defaults only for this user.</p>
+          <div class="form-grid">
+            <FieldShell label="Document cap override" forId="create-document-cap" hint="Leave empty to use the selected plan default.">
+              <input id="create-document-cap" placeholder="Plan default" type="number" min="0" step="1" bind:value={newUser.documentCapOverride} />
+            </FieldShell>
+            <FieldShell label="Cost cap override (USD)" forId="create-cost-cap" hint="Leave empty to use the selected plan default.">
+              <input id="create-cost-cap" placeholder="Plan default" type="number" min="0" step="0.01" bind:value={newUser.costCapUsdOverride} />
+            </FieldShell>
+            <FieldShell label="Token cap override" forId="create-token-cap" hint="Leave empty to use the selected plan default.">
+              <input id="create-token-cap" placeholder="Plan default" type="number" min="0" step="1" bind:value={newUser.tokenCapOverride} />
+            </FieldShell>
+          </div>
+        </div>
+      {/if}
     </div>
 
     <div class="create-actions">
@@ -448,6 +597,48 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: var(--space-2);
+  }
+
+  .limit-settings,
+  .custom-limits {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.75rem;
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-surface-secondary);
+    color: var(--color-text-primary);
+  }
+
+  .check-row input {
+    width: 16px;
+    height: 16px;
+    margin-top: 0.12rem;
+    accent-color: var(--color-accent-primary);
+    flex: 0 0 auto;
+  }
+
+  .check-row span {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+  }
+
+  .check-row strong {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+  }
+
+  .check-row small {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    line-height: 1.45;
   }
 
   .create-actions {

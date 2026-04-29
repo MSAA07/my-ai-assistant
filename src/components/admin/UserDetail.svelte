@@ -38,7 +38,6 @@
   let form = {
     name: '',
     plan: 'free',
-    monthlyLimit: '',
     role: 'user'
   };
   let limitForm = {
@@ -153,7 +152,6 @@
       form = {
         name: user.name,
         plan: user.plan,
-        monthlyLimit: user.monthlyLimit,
         role: user.role || 'user'
       };
     } catch (err) {
@@ -164,9 +162,6 @@
   }
 
   async function updateUser() {
-    const monthlyLimitValue =
-      form.monthlyLimit === '' || form.monthlyLimit === null ? undefined : Number(form.monthlyLimit);
-
     const response = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
       method: 'PATCH',
       credentials: 'include',
@@ -174,7 +169,6 @@
       body: JSON.stringify({
         name: form.name,
         plan: form.plan,
-        monthlyLimit: monthlyLimitValue,
         role: form.role
       })
     });
@@ -352,9 +346,6 @@
                 <option value="free">Free</option>
                 <option value="premium">Premium</option>
               </select>
-            </FieldShell>
-            <FieldShell label="Monthly Limit" forId="account-monthly-limit">
-              <input id="account-monthly-limit" name="monthlyLimit" type="number" bind:value={form.monthlyLimit} />
             </FieldShell>
             <FieldShell label="Role" forId="account-role">
               <select id="account-role" name="role" bind:value={form.role}>
