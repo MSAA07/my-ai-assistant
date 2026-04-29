@@ -36,6 +36,7 @@
   };
   const challengeEnabled = isAuthChallengeEnabled();
 
+  $: signInHref = buildAuthHref('/sign-in');
   $: fieldErrors = {
     name: touched.name ? validateName(name, t) : '',
     email: touched.email ? validateEmail(email, t) : '',
@@ -102,14 +103,14 @@
     router.replace(`${VERIFY_EMAIL_PATH}?${params.toString()}`);
   }
 
-  function goToSignIn() {
+  function buildAuthHref(path) {
     const params = new URLSearchParams();
     if (redirectTarget && redirectTarget !== '/home') {
       params.set('redirect', redirectTarget);
     }
 
     const query = params.toString();
-    router.navigate(`/sign-in${query ? `?${query}` : ''}`);
+    return `#${path}${query ? `?${query}` : ''}`;
   }
 </script>
 
@@ -234,9 +235,9 @@
 
   <p class="toggle-text">
     {t('auth.signUp.switch.prompt')}
-    <Button type="button" variant="ghost" size="sm" className="link-btn" on:click={goToSignIn}>
+    <a class="auth-switch-link" href={signInHref}>
       {t('auth.signUp.switch.action')}
-    </Button>
+    </a>
   </p>
 </Card>
 
@@ -323,11 +324,21 @@
     font-size: var(--font-size-sm);
   }
 
-  :global(.link-btn) {
+  .auth-switch-link {
     margin-inline-start: 0.25rem;
-    min-height: auto;
-    padding-inline: 0.35rem;
+    color: var(--ui-text-primary);
+    font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 2px;
+  }
+
+  .auth-switch-link:hover {
+    color: var(--ui-text-secondary);
+  }
+
+  .auth-switch-link:focus-visible {
+    border-radius: var(--ui-radius-xs);
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 </style>

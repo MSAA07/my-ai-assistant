@@ -728,7 +728,8 @@ export default {
       placeholders: {
         name: 'Enter your name',
         email: 'Enter your email',
-        password: 'Choose a password (min 8 chars)'
+        password: 'Choose a password (min 8 chars)',
+        confirmPassword: 'Confirm your password'
       },
       actions: {
         submit: 'Sign up',

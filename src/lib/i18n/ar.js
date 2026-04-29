@@ -721,7 +721,8 @@ const ar = {
       placeholders: {
         name: 'أدخل اسمك',
         email: 'أدخل بريدك الإلكتروني',
-        password: 'اختر كلمة مرور (8 أحرف على الأقل)'
+        password: 'اختر كلمة مرور (8 أحرف على الأقل)',
+        confirmPassword: 'أكّد كلمة المرور'
       },
       actions: {
         submit: 'إنشاء حساب',

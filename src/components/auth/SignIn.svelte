@@ -26,6 +26,7 @@
   };
   const challengeEnabled = isAuthChallengeEnabled();
 
+  $: signUpHref = buildAuthHref('/sign-up');
   $: fieldErrors = {
     email: touched.email ? validateEmail(email, t) : '',
     password: touched.password ? validatePassword(password, t) : '',
@@ -82,14 +83,14 @@
 
   }
 
-  function goToSignUp() {
+  function buildAuthHref(path) {
     const params = new URLSearchParams();
     if (redirectTarget && redirectTarget !== '/home') {
       params.set('redirect', redirectTarget);
     }
 
     const query = params.toString();
-    router.navigate(`/sign-up${query ? `?${query}` : ''}`);
+    return `#${path}${query ? `?${query}` : ''}`;
   }
 
   function goToForgotPassword() {
@@ -177,9 +178,9 @@
 
   <p class="toggle-text">
     {t('auth.signIn.switch.prompt')}
-    <Button type="button" variant="ghost" size="sm" className="link-btn" on:click={goToSignUp}>
+    <a class="auth-switch-link" href={signUpHref}>
       {t('auth.signIn.switch.action')}
-    </Button>
+    </a>
   </p>
 </Card>
 
@@ -266,12 +267,22 @@
     font-size: var(--font-size-sm);
   }
 
-  :global(.link-btn) {
+  .auth-switch-link {
     margin-inline-start: 0.25rem;
-    min-height: auto;
-    padding-inline: 0.35rem;
+    color: var(--ui-text-primary);
+    font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 2px;
+  }
+
+  .auth-switch-link:hover {
+    color: var(--ui-text-secondary);
+  }
+
+  .auth-switch-link:focus-visible {
+    border-radius: var(--ui-radius-xs);
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
   :global(.forgot-btn) {
