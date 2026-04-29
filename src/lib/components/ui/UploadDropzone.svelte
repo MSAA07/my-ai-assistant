@@ -165,7 +165,7 @@
       linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 94%, transparent) 0%, color-mix(in srgb, var(--ui-surface-secondary) 88%, transparent) 100%);
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--ui-text-primary) 6%, transparent),
-      0 12px 30px rgba(0, 0, 0, 0.08);
+      var(--ui-shadow-2);
   }
 
   .upload-dropzone--compact {
@@ -201,7 +201,7 @@
       linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 90%, transparent) 0%, color-mix(in srgb, var(--ui-surface-secondary) 82%, transparent) 100%);
     box-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--ui-text-primary) 8%, transparent),
-      0 16px 38px rgba(0, 0, 0, 0.12);
+      var(--ui-shadow-3);
   }
 
   .upload-dropzone--surface:hover:not(.upload-dropzone--disabled) {
@@ -305,14 +305,14 @@
     max-width: 28rem;
     font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1rem);
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   .upload-dropzone--surface .upload-dropzone__title {
     max-width: 24rem;
     font-size: clamp(1.05rem, 1rem + 0.25vw, 1.15rem);
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   .upload-dropzone--compact .upload-dropzone__title {

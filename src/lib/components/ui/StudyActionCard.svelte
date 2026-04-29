@@ -134,7 +134,7 @@
     font-size: 0.95rem;
     color: var(--ui-text-primary);
     line-height: 1.3;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     font-weight: 500;
   }
 

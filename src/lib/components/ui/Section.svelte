@@ -78,7 +78,7 @@
     margin: 0;
     font-size: var(--ui-type-title-sm);
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     color: var(--ui-text-primary);
   }
 

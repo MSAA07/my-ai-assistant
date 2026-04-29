@@ -114,7 +114,7 @@
     color: var(--ui-text-primary);
     font-size: var(--study-flow-title-size);
     line-height: 1.08;
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 

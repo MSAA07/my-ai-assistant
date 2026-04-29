@@ -375,7 +375,7 @@
     min-width: 88px;
     border: 1px solid var(--ui-border-default);
     border-radius: var(--ui-radius-sm);
-    background: var(--ui-surface-primary);
+    background: var(--ui-surface-card);
     color: var(--ui-text-primary);
     padding: 0.55rem 0.7rem;
     text-align: start;
@@ -383,8 +383,8 @@
   }
 
   .summary-strip button.active {
-    border-color: color-mix(in srgb, var(--ui-accent-primary) 48%, var(--ui-border-default));
-    background: color-mix(in srgb, var(--ui-accent-primary) 10%, var(--ui-surface-primary));
+    border-color: color-mix(in srgb, var(--ui-text-primary) 48%, var(--ui-border-default));
+    background: color-mix(in srgb, var(--ui-text-primary) 10%, var(--ui-surface-card));
   }
 
   .summary-strip span {
@@ -395,7 +395,7 @@
   .summary-strip small,
   .jobs-table td span {
     color: var(--ui-text-muted);
-    font-size: var(--ui-type-body-xs);
+    font-size: var(--ui-type-label);
   }
 
   .jobs-table tbody tr {
@@ -403,7 +403,7 @@
   }
 
   .jobs-table tbody tr.selected {
-    background: color-mix(in srgb, var(--ui-accent-primary) 9%, transparent);
+    background: color-mix(in srgb, var(--ui-text-primary) 9%, transparent);
   }
 
   .jobs-table td:first-child,
@@ -421,14 +421,14 @@
     max-width: 180px;
     word-break: break-word;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size: var(--ui-type-body-xs);
+    font-size: var(--ui-type-label);
   }
 
   .error-cell {
     max-width: 260px;
     word-break: break-word;
     color: color-mix(in srgb, var(--ui-accent-danger) 72%, var(--ui-text-secondary));
-    font-size: var(--ui-type-body-xs);
+    font-size: var(--ui-type-label);
   }
 
   .detail-grid {
@@ -449,7 +449,7 @@
 
   .detail-grid span {
     color: var(--ui-text-muted);
-    font-size: var(--ui-type-body-xs);
+    font-size: var(--ui-type-label);
   }
 
   .detail-grid strong {

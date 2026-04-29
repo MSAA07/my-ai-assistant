@@ -13,7 +13,7 @@
   };
 
   const sizeClasses = {
-    sm: 'h-8 rounded-md px-3 text-sm',
+    sm: 'h-8 rounded-md px-3 text-xs',
     md: 'h-9 rounded-md px-4 py-2 text-sm',
     lg: 'h-10 rounded-md px-6 text-sm',
     icon: 'size-9 rounded-md p-0',
@@ -25,7 +25,7 @@
   $: normalizedSize = sizeClasses[size] ? size : 'md';
   $: isDisabled = disabled || loading;
   $: resolvedClass = [
-    'ui-button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap bg-[color:var(--button-bg)] text-[color:var(--button-fg)] shadow-[var(--button-shadow)] outline-none transition-[background-color,color,box-shadow,opacity,transform] transition-default disabled:pointer-events-none disabled:opacity-45',
+    'ui-button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap bg-[color:var(--button-bg)] text-[color:var(--button-fg)] shadow-[var(--button-shadow)] outline-none transition-[background-color,color,box-shadow,opacity,transform] transition-default disabled:pointer-events-none disabled:opacity-40',
     'hover:bg-[color:var(--button-bg-hover)] hover:text-[color:var(--button-fg-hover)]',
     'active:bg-[color:var(--button-bg-active)]',
     sizeClasses[normalizedSize],
@@ -49,7 +49,7 @@
   on:click
 >
   {#if $$slots.icon}
-    <span class="ui-button__icon pointer-events-none inline-flex items-center justify-center [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:fill-current">
+    <span class="ui-button__icon pointer-events-none inline-flex items-center justify-center [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-current">
       <slot name="icon" />
     </span>
   {/if}
@@ -61,7 +61,7 @@
   {/if}
 
   {#if loading}
-    <span class="ui-button__spinner inline-block size-3 rounded-full border-2 border-[color:color-mix(in_srgb,currentColor_35%,transparent)] border-t-current" aria-hidden="true"></span>
+    <span class="ui-button__spinner inline-block size-3 rounded-full border-2 border-[color:color-mix(in_srgb,currentColor_30%,transparent)] border-t-current" aria-hidden="true"></span>
   {/if}
 </button>
 
@@ -75,8 +75,8 @@
     --button-shadow: inset 0 0 0 1px transparent;
     border-radius: var(--ui-radius-sm);
     border: 1px solid transparent;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: 500;
+    letter-spacing: 0;
   }
 
   .ui-button:focus-visible {
@@ -85,35 +85,35 @@
 
   .ui-button[data-variant='primary'] {
     --button-bg: var(--ui-text-primary);
-    --button-bg-hover: color-mix(in srgb, var(--ui-text-primary) 92%, var(--ui-bg-page) 8%);
-    --button-bg-active: color-mix(in srgb, var(--ui-text-primary) 82%, var(--ui-bg-page) 18%);
+    --button-bg-hover: color-mix(in srgb, var(--ui-text-primary) 90%, var(--ui-bg-page) 10%);
+    --button-bg-active: color-mix(in srgb, var(--ui-text-primary) 80%, var(--ui-bg-page) 20%);
     --button-fg: var(--ui-bg-page);
     --button-fg-hover: var(--ui-bg-page);
     --button-shadow: inset 0 0 0 1px transparent;
   }
 
   .ui-button[data-variant='secondary'] {
-    --button-bg: color-mix(in srgb, var(--ui-surface-secondary) 72%, var(--ui-surface-card) 28%);
-    --button-bg-hover: color-mix(in srgb, var(--ui-surface-secondary) 64%, var(--ui-text-primary) 12%);
-    --button-bg-active: color-mix(in srgb, var(--ui-surface-secondary) 58%, var(--ui-text-primary) 16%);
+    --button-bg: var(--ui-surface-card);
+    --button-bg-hover: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-text-primary) 12%);
+    --button-bg-active: color-mix(in srgb, var(--ui-surface-card) 80%, var(--ui-text-primary) 20%);
     --button-fg: var(--ui-text-primary);
     --button-fg-hover: var(--ui-text-primary);
-    --button-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 7%, transparent);
+    --button-shadow: inset 0 0 0 1px var(--ui-border-default);
   }
 
   .ui-button[data-variant='outline'] {
-    --button-bg: color-mix(in srgb, var(--ui-surface-card) 88%, transparent);
-    --button-bg-hover: color-mix(in srgb, var(--ui-surface-card) 78%, var(--ui-text-primary) 10%);
-    --button-bg-active: color-mix(in srgb, var(--ui-surface-card) 72%, var(--ui-text-primary) 14%);
+    --button-bg: transparent;
+    --button-bg-hover: var(--ui-surface-card);
+    --button-bg-active: color-mix(in srgb, var(--ui-surface-card) 92%, var(--ui-text-primary) 8%);
     --button-fg: var(--ui-text-primary);
     --button-fg-hover: var(--ui-text-primary);
-    --button-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
+    --button-shadow: inset 0 0 0 1px var(--ui-border-default);
   }
 
   .ui-button[data-variant='ghost'] {
     --button-bg: transparent;
-    --button-bg-hover: var(--ui-surface-ghost);
-    --button-bg-active: var(--ui-surface-ghost-strong);
+    --button-bg-hover: color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
     --button-fg: var(--ui-text-secondary);
     --button-fg-hover: var(--ui-text-primary);
     --button-shadow: inset 0 0 0 1px transparent;
@@ -123,8 +123,8 @@
     --button-bg: var(--ui-accent-danger);
     --button-bg-hover: var(--ui-accent-danger-hover);
     --button-bg-active: color-mix(in srgb, var(--ui-accent-danger-hover) 84%, black 16%);
-    --button-fg: #fff5f5;
-    --button-fg-hover: #fff5f5;
+    --button-fg: var(--destructive-foreground);
+    --button-fg-hover: var(--destructive-foreground);
     --button-shadow: inset 0 0 0 1px transparent;
   }
 
@@ -132,22 +132,22 @@
     --button-bg: var(--ui-accent-success-strong);
     --button-bg-hover: var(--ui-accent-success-hover);
     --button-bg-active: color-mix(in srgb, var(--ui-accent-success-hover) 84%, black 16%);
-    --button-fg: #ecfdf5;
-    --button-fg-hover: #ecfdf5;
+    --button-fg: var(--success-foreground);
+    --button-fg-hover: var(--success-foreground);
     --button-shadow: inset 0 0 0 1px transparent;
   }
 
   .ui-button[data-variant='warning'] {
-    --button-bg: color-mix(in srgb, var(--ui-accent-warning) 20%, var(--ui-surface-card) 80%);
-    --button-bg-hover: color-mix(in srgb, var(--ui-accent-warning) 30%, var(--ui-surface-card) 70%);
-    --button-bg-active: color-mix(in srgb, var(--ui-accent-warning) 36%, var(--ui-surface-card) 64%);
-    --button-fg: color-mix(in srgb, var(--ui-accent-warning) 72%, var(--ui-text-primary) 28%);
-    --button-fg-hover: color-mix(in srgb, var(--ui-accent-warning) 82%, var(--ui-text-primary) 18%);
+    --button-bg: color-mix(in srgb, var(--ui-accent-warning) 16%, var(--ui-surface-card) 84%);
+    --button-bg-hover: color-mix(in srgb, var(--ui-accent-warning) 24%, var(--ui-surface-card) 76%);
+    --button-bg-active: color-mix(in srgb, var(--ui-accent-warning) 30%, var(--ui-surface-card) 70%);
+    --button-fg: color-mix(in srgb, var(--ui-accent-warning) 80%, var(--ui-text-primary) 20%);
+    --button-fg-hover: color-mix(in srgb, var(--ui-accent-warning) 90%, var(--ui-text-primary) 10%);
     --button-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-accent-warning) 20%, transparent);
   }
 
   .ui-button__spinner {
-    animation: ui-button-spin 700ms linear infinite;
+    animation: ui-button-spin 600ms linear infinite;
   }
 
   @keyframes ui-button-spin {

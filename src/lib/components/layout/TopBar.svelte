@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+  import { PanelLeftClose, PanelLeftOpen } from '@lucide/svelte';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
   import Badge from '../ui/Badge.svelte';
   import MenuItem from '../ui/MenuItem.svelte';
@@ -77,9 +78,11 @@
       aria-label={sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
       title={sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4.75 4A1.75 1.75 0 0 0 3 5.75v12.5A1.75 1.75 0 0 0 4.75 20h14.5A1.75 1.75 0 0 0 21 18.25V5.75A1.75 1.75 0 0 0 19.25 4H4.75Zm4.5 1.5v13h10a.25.25 0 0 0 .25-.25V5.75a.25.25 0 0 0-.25-.25h-10ZM4.75 5.5h3v13h-3a.25.25 0 0 1-.25-.25V5.75c0-.14.11-.25.25-.25Z" />
-      </svg>
+      {#if sidebarCollapsed}
+        <PanelLeftOpen size={16} strokeWidth={1.75} aria-hidden="true" />
+      {:else}
+        <PanelLeftClose size={16} strokeWidth={1.75} aria-hidden="true" />
+      {/if}
       <span class="toggle-label">
         {sidebarCollapsed ? t('topbar.expandSidebar') : t('topbar.collapseSidebar')}
       </span>
@@ -159,7 +162,7 @@
     color: var(--ui-text-primary);
     font-size: 1rem;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -194,11 +197,12 @@
     box-shadow: var(--ui-focus-ring-strong);
   }
 
-  .sidebar-toggle svg {
+  .sidebar-toggle :global(svg) {
     width: 16px;
     height: 16px;
     flex: 0 0 auto;
-    fill: currentColor;
+    fill: none;
+    stroke: currentColor;
   }
 
   .toggle-label {

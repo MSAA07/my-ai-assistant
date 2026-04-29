@@ -87,7 +87,7 @@
     font-size: clamp(1.4rem, 2.2vw, 1.65rem);
     font-weight: 600;
     line-height: 1.1;
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
   }
 
   .ui-stat-card__meta {

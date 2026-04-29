@@ -316,7 +316,7 @@
     color: var(--upload-panel-title);
     font-size: var(--ui-type-title-sm);
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   .upload-panel__titles p {

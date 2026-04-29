@@ -1,4 +1,13 @@
 <script>
+  import {
+    BookOpen,
+    ClipboardCheck,
+    CreditCard,
+    House,
+    Layers,
+    Settings,
+    ShieldCheck,
+  } from '@lucide/svelte';
   import { direction } from '../../stores/language.js';
   import Badge from '../ui/Badge.svelte';
   import { t } from '../../i18n/t.js';
@@ -17,6 +26,16 @@
     accent: 'accent',
   };
 
+  const iconMap = {
+    dashboard: House,
+    documents: BookOpen,
+    flashcards: Layers,
+    exams: ClipboardCheck,
+    settings: Settings,
+    plan: CreditCard,
+    admin: ShieldCheck,
+  };
+
   $: planItem = secondaryItems.find((item) => item.icon === 'plan') ?? secondaryItems[0] ?? null;
   $: footerItems = secondaryItems.filter((item) => item !== planItem);
 
@@ -31,13 +50,13 @@
 >
   <div class="sidebar-header">
     <a class="brand" href="#/home" aria-label={t('app.wordmark')}>
-      <span class="brand-mark">{t('app.shortName').slice(0, 1)}</span>
       <span class="brand-wordmark">{t('app.wordmark')}</span>
     </a>
   </div>
 
   <nav class="sidebar-nav">
     {#each items as item}
+      {@const IconComponent = iconMap[item.icon]}
       <a
         class={`nav-item ${activeId === item.id ? 'active' : ''}`}
         href={item.href}
@@ -46,20 +65,8 @@
         title={collapsed ? labelFor(item) : undefined}
       >
         <span class="nav-icon" aria-hidden="true">
-          {#if item.icon === 'dashboard'}
-            <svg viewBox="0 0 24 24"><path d="M3.5 12.75A1.75 1.75 0 0 1 5.25 11h5.5A1.75 1.75 0 0 1 12.5 12.75v6.5A1.75 1.75 0 0 1 10.75 21h-5.5A1.75 1.75 0 0 1 3.5 19.25v-6.5Zm9-8A1.75 1.75 0 0 1 14.25 3h4.5A1.75 1.75 0 0 1 20.5 4.75v4.5A1.75 1.75 0 0 1 18.75 11h-4.5A1.75 1.75 0 0 1 12.5 9.25v-4.5ZM3.5 4.75A1.75 1.75 0 0 1 5.25 3h5.5A1.75 1.75 0 0 1 12.5 4.75v2A1.75 1.75 0 0 1 10.75 8.5h-5.5A1.75 1.75 0 0 1 3.5 6.75v-2ZM13.5 13.75a1.75 1.75 0 0 1 1.75-1.75h3.5A1.75 1.75 0 0 1 20.5 13.75v5.5A1.75 1.75 0 0 1 18.75 21h-3.5A1.75 1.75 0 0 1 13.5 19.25v-5.5Z" /></svg>
-          {:else if item.icon === 'documents'}
-            <svg viewBox="0 0 24 24"><path d="M7 2.75A2.75 2.75 0 0 0 4.25 5.5v13A2.75 2.75 0 0 0 7 21.25h10A2.75 2.75 0 0 0 19.75 18.5V9.81a2.75 2.75 0 0 0-.81-1.94l-4.06-4.06A2.75 2.75 0 0 0 12.94 3H7Zm9.5 6.75H13a1 1 0 0 1-1-1V4.5" /></svg>
-          {:else if item.icon === 'exams'}
-            <svg viewBox="0 0 24 24"><path d="M5.5 4.25A2.25 2.25 0 0 1 7.75 2h8.5A2.25 2.25 0 0 1 18.5 4.25v15.5a.25.25 0 0 1-.38.21L12 16.65l-6.12 3.31a.25.25 0 0 1-.38-.21V4.25Z" /></svg>
-          {:else if item.icon === 'flashcards'}
-            <svg viewBox="0 0 24 24"><path d="M4.75 5.5A2.75 2.75 0 0 1 7.5 2.75h11A2.75 2.75 0 0 1 21.25 5.5v9a2.75 2.75 0 0 1-2.75 2.75h-11A2.75 2.75 0 0 1 4.5 14.5v-9Zm-2 4.75A2.25 2.25 0 0 1 5 8H6v6.5a4.25 4.25 0 0 0 4.25 4.25h8.5a2.25 2.25 0 0 1-2.25 2.25h-11A2.25 2.25 0 0 1 3 18.75v-8.5Z" /></svg>
-          {:else if item.icon === 'settings'}
-            <svg viewBox="0 0 24 24"><path d="M12 8.25A3.75 3.75 0 1 1 8.25 12 3.75 3.75 0 0 1 12 8.25Zm8.5 3a1 1 0 0 1 .95.68 8.41 8.41 0 0 1 0 6.14 1 1 0 0 1-.95.68h-1.11a1 1 0 0 0-.94.67l-.25.77a1 1 0 0 1-1.52.52l-.95-.69a1 1 0 0 0-1.05-.05L13.5 21a1 1 0 0 1-1 0l-.94-.53a1 1 0 0 0-1.05.05l-.95.69a1 1 0 0 1-1.52-.52l-.25-.77a1 1 0 0 0-.94-.67H5.64a1 1 0 0 1-.95-.68 8.41 8.41 0 0 1 0-6.14 1 1 0 0 1 .95-.68h1.11a1 1 0 0 0 .94-.67l.25-.77a1 1 0 0 1 1.52-.52l.95.69a1 1 0 0 0 1.05.05l.94-.53a1 1 0 0 1 1 0l.94.53a1 1 0 0 0 1.05-.05l.95-.69a1 1 0 0 1 1.52.52l.25.77a1 1 0 0 0 .94.67Z" /></svg>
-          {:else if item.icon === 'plan'}
-            <svg viewBox="0 0 24 24"><path d="M5 5.75A2.75 2.75 0 0 1 7.75 3h8.5A2.75 2.75 0 0 1 19 5.75v12.5A2.75 2.75 0 0 1 16.25 21h-8.5A2.75 2.75 0 0 1 5 18.25V5.75Zm3.5 3.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5Zm0 4a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5Z" /></svg>
-          {:else if item.icon === 'admin'}
-            <svg viewBox="0 0 24 24"><path d="M12 2a3.25 3.25 0 0 1 2.79 1.58l.38.63 2.37.46a3.25 3.25 0 0 1 2.6 3.53l-.09.73.57.9a3.25 3.25 0 0 1-.55 4.08l-.58.59.1.82a3.25 3.25 0 0 1-2.62 3.53l-2.37.46-.38.63a3.25 3.25 0 0 1-5.58 0l-.38-.63-2.37-.46a3.25 3.25 0 0 1-2.6-3.53l.09-.73-.57-.9a3.25 3.25 0 0 1 .55-4.08l.58-.59-.1-.82a3.25 3.25 0 0 1 2.62-3.53l2.37-.46.38-.63A3.25 3.25 0 0 1 12 2Zm0 6a3 3 0 1 0 3 3 3 3 0 0 0-3-3Z" /></svg>
+          {#if IconComponent}
+            <svelte:component this={IconComponent} size={16} strokeWidth={1.75} />
           {/if}
         </span>
 
@@ -104,14 +111,13 @@
     box-sizing: border-box;
     display: flex;
     height: 100dvh;
-    width: var(--shell-sidebar-width, 16rem);
+    width: var(--shell-sidebar-width, 15rem);
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-gutter: stable;
-    background: color-mix(in srgb, var(--sidebar, var(--ui-surface-card)) 92%, black);
+    background: color-mix(in srgb, var(--sidebar, var(--ui-surface-card)) 96%, black);
     border-inline-end: 1px solid var(--ui-border-default);
-    box-shadow: none;
     transition: width var(--motion-default) var(--ease-standard);
   }
 
@@ -136,7 +142,6 @@
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.625rem;
     min-width: 0;
     width: 100%;
     color: var(--ui-text-primary);
@@ -145,26 +150,11 @@
     -webkit-user-select: none;
   }
 
-  .brand-mark {
-    display: inline-flex;
-    width: 28px;
-    height: 28px;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--ui-text-primary);
-    color: var(--ui-bg-page);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
   .brand-wordmark {
     min-width: 0;
     font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -174,17 +164,17 @@
     flex: 1;
     display: grid;
     align-content: start;
-    gap: 0.25rem;
-    padding: 0.9rem 0.75rem;
+    gap: 0.125rem;
+    padding: 0.75rem;
     min-height: 0;
   }
 
   .nav-item {
     display: flex;
-    min-height: 40px;
+    min-height: 36px;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
+    gap: 0.625rem;
+    padding: 0.375rem 0.625rem;
     border-radius: var(--ui-radius-sm);
     color: var(--ui-text-muted);
     text-decoration: none;
@@ -197,14 +187,13 @@
   }
 
   .nav-item:hover {
-    background: color-mix(in srgb, var(--sidebar-accent) 58%, transparent);
+    background: color-mix(in srgb, var(--ui-text-primary) 5%, transparent);
     color: var(--ui-text-primary);
   }
 
   .nav-item.active {
-    background: var(--sidebar-accent);
+    background: color-mix(in srgb, var(--ui-text-primary) 8%, transparent);
     color: var(--ui-text-primary);
-    box-shadow: none;
   }
 
   .nav-item:focus-visible,
@@ -221,12 +210,6 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-  }
-
-  .nav-icon svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
   }
 
   .nav-label {
@@ -248,14 +231,14 @@
 
   .sidebar-footer {
     display: grid;
-    gap: 0.75rem;
-    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    gap: 0.5rem;
+    padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--ui-border-default);
   }
 
   .sidebar.collapsed .sidebar-header {
     justify-content: center;
-    padding: 0 0.75rem;
+    padding: 0 0.625rem;
   }
 
   .sidebar.collapsed .brand {
@@ -271,43 +254,43 @@
   }
 
   .sidebar.collapsed .sidebar-nav {
-    padding-inline: 0.625rem;
+    padding-inline: 0.5rem;
   }
 
   .sidebar.collapsed .nav-item {
     justify-content: center;
     gap: 0;
-    padding-inline: 0.75rem;
+    padding-inline: 0.625rem;
   }
 
   .sidebar.collapsed .sidebar-footer {
-    padding: 0.75rem;
+    padding: 0.625rem;
     min-height: 0;
   }
 
   .footer-links {
     display: grid;
-    gap: 0.25rem;
+    gap: 0.125rem;
   }
 
   .footer-link {
-    min-height: 36px;
+    min-height: 32px;
   }
 
   .plan-card {
     display: grid;
-    gap: 0.2rem;
-    padding: 0.85rem 0.9rem;
+    gap: 0.125rem;
+    padding: 0.75rem 0.875rem;
     border-radius: var(--ui-radius-md);
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    background: color-mix(in srgb, var(--sidebar-accent) 64%, transparent);
-    box-shadow: none;
-    color: var(--foreground);
+    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 8%, var(--ui-border-default) 92%);
+    background: color-mix(in srgb, var(--ui-text-primary) 4%, transparent);
+    color: var(--ui-text-primary);
     text-decoration: none;
+    transition: background var(--motion-fast) var(--ease-standard);
   }
 
   .plan-card:hover {
-    background: var(--sidebar-accent);
+    background: color-mix(in srgb, var(--ui-text-primary) 7%, transparent);
   }
 
   .plan-label,
@@ -316,8 +299,8 @@
   }
 
   .plan-label {
-    font-size: 0.75rem;
-    color: var(--muted-foreground);
+    font-size: 0.6875rem;
+    color: var(--ui-text-muted);
   }
 
   .plan-value {
