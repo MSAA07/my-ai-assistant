@@ -1,0 +1,1767 @@
+{
+  "generatedAt": "2026-04-29T07:30:56.367Z",
+  "authNote": "Live provided credential admin@ai.ccom/admin123 was rejected by staging; screenshots use mocked admin API/session responses for deterministic UI validation.",
+  "reports": [
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-overview.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-users.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1194,
+            "overflow": 90,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-usage.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1104,
+            "overflow": 0,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 528,
+            "scrollWidth": 720,
+            "overflow": 192,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 528,
+            "scrollWidth": 953,
+            "overflow": 425,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 528,
+            "scrollWidth": 874,
+            "overflow": 346,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 528,
+            "scrollWidth": 763,
+            "overflow": 235,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-limits.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-jobs.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1480,
+            "overflow": 376,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-sessions.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1104,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-storage.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1104,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-desktop-1440x900-audit-logs.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1183,
+            "overflow": 79,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-overview.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-users.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 1194,
+            "overflow": 250,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-usage.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 944,
+            "overflow": 0,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 448,
+            "scrollWidth": 720,
+            "overflow": 272,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 448,
+            "scrollWidth": 953,
+            "overflow": 505,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 448,
+            "scrollWidth": 874,
+            "overflow": 426,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 448,
+            "scrollWidth": 763,
+            "overflow": 315,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-limits.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-jobs.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 1480,
+            "overflow": 536,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-sessions.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 944,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-storage.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 944,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "dark",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-laptop-1280x720-audit-logs.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 1183,
+            "overflow": 239,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-overview.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-users.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 1194,
+            "overflow": 746,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-usage.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 840,
+            "overflow": 392,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 448,
+            "scrollWidth": 720,
+            "overflow": 272,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 448,
+            "scrollWidth": 953,
+            "overflow": 505,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 448,
+            "scrollWidth": 874,
+            "overflow": 426,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 448,
+            "scrollWidth": 763,
+            "overflow": 315,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-limits.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-jobs.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 1480,
+            "overflow": 1032,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-sessions.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 860,
+            "overflow": 412,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-storage.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 760,
+            "overflow": 312,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "dark",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-tablet-768x1024-audit-logs.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 1183,
+            "overflow": 735,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-overview.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-users.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 573
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 1194,
+            "overflow": 868,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-usage.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 573
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 840,
+            "overflow": 514,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 326,
+            "scrollWidth": 720,
+            "overflow": 394,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 326,
+            "scrollWidth": 953,
+            "overflow": 627,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 326,
+            "scrollWidth": 874,
+            "overflow": 548,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 326,
+            "scrollWidth": 763,
+            "overflow": 437,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-limits.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-jobs.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 573
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 1480,
+            "overflow": 1154,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-sessions.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 860,
+            "overflow": 534,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-storage.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 760,
+            "overflow": 434,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/dark-mobile-390x844-audit-logs.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 1183,
+            "overflow": 857,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-overview.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-users.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1194,
+            "overflow": 90,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-usage.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1104,
+            "overflow": 0,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 528,
+            "scrollWidth": 720,
+            "overflow": 192,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 528,
+            "scrollWidth": 953,
+            "overflow": 425,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 528,
+            "scrollWidth": 874,
+            "overflow": 346,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 528,
+            "scrollWidth": 763,
+            "overflow": 235,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-limits.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-jobs.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1480,
+            "overflow": 376,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-sessions.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1104,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-storage.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1104,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-desktop-1440x900-audit-logs.png",
+      "metrics": {
+        "vw": 1440,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 1104,
+            "scrollWidth": 1183,
+            "overflow": 79,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-overview.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-users.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 1194,
+            "overflow": 250,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-usage.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 944,
+            "overflow": 0,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 448,
+            "scrollWidth": 720,
+            "overflow": 272,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 448,
+            "scrollWidth": 953,
+            "overflow": 505,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 448,
+            "scrollWidth": 874,
+            "overflow": 426,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 448,
+            "scrollWidth": 763,
+            "overflow": 315,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-limits.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-jobs.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 1480,
+            "overflow": 536,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-sessions.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 944,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-storage.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 596,
+          "scrollWidth": 596
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 944,
+            "overflow": 0,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "laptop-1280x720",
+      "theme": "light",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-laptop-1280x720-audit-logs.png",
+      "metrics": {
+        "vw": 1280,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 597,
+          "scrollWidth": 597
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 944,
+            "scrollWidth": 1183,
+            "overflow": 239,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-overview.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-users.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 1194,
+            "overflow": 746,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-usage.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 840,
+            "overflow": 392,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 448,
+            "scrollWidth": 720,
+            "overflow": 272,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 448,
+            "scrollWidth": 953,
+            "overflow": 505,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 448,
+            "scrollWidth": 874,
+            "overflow": 426,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 448,
+            "scrollWidth": 763,
+            "overflow": 315,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-limits.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-jobs.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 500
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 1480,
+            "overflow": 1032,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-sessions.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 860,
+            "overflow": 412,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-storage.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 760,
+            "overflow": 312,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-tablet-768x1024-audit-logs.png",
+      "metrics": {
+        "vw": 768,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 480,
+          "scrollWidth": 501
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 448,
+            "scrollWidth": 1183,
+            "overflow": 735,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Overview",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-overview.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Users",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-users.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 573
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 1194,
+            "overflow": 868,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Usage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-usage.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 573
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 840,
+            "overflow": 514,
+            "hasTable": true
+          },
+          {
+            "index": 1,
+            "clientWidth": 326,
+            "scrollWidth": 720,
+            "overflow": 394,
+            "hasTable": true
+          },
+          {
+            "index": 2,
+            "clientWidth": 326,
+            "scrollWidth": 953,
+            "overflow": 627,
+            "hasTable": true
+          },
+          {
+            "index": 3,
+            "clientWidth": 326,
+            "scrollWidth": 874,
+            "overflow": 548,
+            "hasTable": true
+          },
+          {
+            "index": 4,
+            "clientWidth": 326,
+            "scrollWidth": 763,
+            "overflow": 437,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Limits",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-limits.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Jobs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-jobs.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 573
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 1480,
+            "overflow": 1154,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Sessions",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-sessions.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 860,
+            "overflow": 534,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Storage",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-storage.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 760,
+            "overflow": 434,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "tab": "Audit Logs",
+      "file": "/Users/mymac/My Ai/frontend/audit-screenshots/admin-ui/light-mobile-390x844-audit-logs.png",
+      "metrics": {
+        "vw": 390,
+        "pageOverflowX": 0,
+        "tablist": {
+          "clientWidth": 358,
+          "scrollWidth": 574
+        },
+        "tableWraps": [
+          {
+            "index": 0,
+            "clientWidth": 326,
+            "scrollWidth": 1183,
+            "overflow": 857,
+            "hasTable": true
+          }
+        ],
+        "outsideViewport": [],
+        "clippedCandidates": [],
+        "stateText": []
+      }
+    }
+  ],
+  "consoleMessages": []
+}

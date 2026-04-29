@@ -582,6 +582,7 @@
     margin: 0.2rem 0 0;
     font-size: var(--font-size-xs);
     display: block;
+    overflow-wrap: anywhere;
   }
 
   :global(.create-user) {
@@ -669,7 +670,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    min-width: 230px;
+    min-width: 188px;
   }
 
   :global(.ui-data-table td:first-child) {
@@ -677,11 +678,11 @@
   }
 
   :global(.ui-data-table td:nth-child(2)) {
-    min-width: 190px;
+    min-width: 170px;
   }
 
   :global(.ui-data-table td:nth-child(8)) {
-    min-width: 168px;
+    min-width: 150px;
   }
 
   @media (max-width: 768px) {
