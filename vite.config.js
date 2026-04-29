@@ -50,6 +50,11 @@ export default defineConfig({
           });
         },
       },
+      '/auth': {
+        target: STAGING_API_TARGET,
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
 });

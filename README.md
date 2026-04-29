@@ -42,9 +42,10 @@ Current frontend for the Study Maxing public entry, auth experience, and authent
 Shared behavior:
 
 - `VITE_API_BASE_URL` overrides all host-derived backend resolution.
-- Auth verification and password reset callbacks default to the current frontend origin and can be overridden with:
+- Auth verification and password reset final frontend destinations default to the current frontend origin and can be overridden with:
   - `VITE_AUTH_VERIFICATION_CALLBACK_URL`
   - `VITE_AUTH_PASSWORD_RESET_CALLBACK_URL`
+- Better Auth receives backend-owned `/auth/verify-email` and `/auth/reset-password` bridge URLs so preview frontend hosts do not get rejected during callback validation.
 
 Stage:
 

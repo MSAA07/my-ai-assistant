@@ -75,8 +75,8 @@ export function isAuthChallengeEnabled() {
   return Boolean(AUTH_TURNSTILE_SITE_KEY);
 }
 
-export function getEmailVerificationCallbackUrl() {
-  const envOverride = normalizeAbsoluteUrl(import.meta.env?.VITE_AUTH_VERIFICATION_CALLBACK_URL || "");
+function getFrontendActionCallbackUrl(envName, action) {
+  const envOverride = normalizeAbsoluteUrl(import.meta.env?.[envName] || "");
   if (envOverride) {
     return envOverride;
   }
@@ -85,18 +85,35 @@ export function getEmailVerificationCallbackUrl() {
     return "";
   }
 
-  return `${window.location.origin}/?auth_action=verify-email`;
+  return `${window.location.origin}/?auth_action=${action}`;
+}
+
+function getBackendAuthBridgeUrl(path, nextUrl) {
+  if (!nextUrl) {
+    return "";
+  }
+
+  try {
+    const bridgeUrl = new URL(`${API_BASE}${path}`);
+    bridgeUrl.searchParams.set("next", nextUrl);
+    return bridgeUrl.toString();
+  } catch {
+    return "";
+  }
+}
+
+export function getEmailVerificationCallbackUrl() {
+  const nextUrl = getFrontendActionCallbackUrl(
+    "VITE_AUTH_VERIFICATION_CALLBACK_URL",
+    "verify-email",
+  );
+  return getBackendAuthBridgeUrl("/auth/verify-email", nextUrl);
 }
 
 export function getPasswordResetCallbackUrl() {
-  const envOverride = normalizeAbsoluteUrl(import.meta.env?.VITE_AUTH_PASSWORD_RESET_CALLBACK_URL || "");
-  if (envOverride) {
-    return envOverride;
-  }
-
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  return `${window.location.origin}/?auth_action=reset-password`;
+  const nextUrl = getFrontendActionCallbackUrl(
+    "VITE_AUTH_PASSWORD_RESET_CALLBACK_URL",
+    "reset-password",
+  );
+  return getBackendAuthBridgeUrl("/auth/reset-password", nextUrl);
 }
