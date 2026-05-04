@@ -918,28 +918,10 @@ const LEGAL_PAGES_BY_LANGUAGE = Object.freeze({
 
 export const LEGAL_PAGE_MAP = Object.fromEntries(LEGAL_PAGES.map((p) => [p.slug, p]));
 
-export const LEGAL_HUB_META = [
-  { slug: 'privacy-policy',    title: 'Privacy Policy',         description: 'How we collect, use, and protect your personal data.',    effectiveDate: 'May 2026' },
-  { slug: 'terms-of-service',  title: 'Terms of Service',        description: 'Rules and responsibilities for using StudyMaxing.',        effectiveDate: 'May 2026' },
-  { slug: 'cookie-policy',     title: 'Cookie Policy',           description: 'What cookies we use and how to manage them.',             effectiveDate: 'May 2026' },
-  { slug: 'refund-policy',     title: 'Refund Policy',           description: 'Billing and refund terms for paid plans.',               effectiveDate: 'May 2026' },
-  { slug: 'disclaimer',        title: 'Disclaimer',              description: 'Limitations on AI-generated content and our liability.',  effectiveDate: 'May 2026' },
-  { slug: 'acceptable-use',    title: 'Acceptable Use Policy',   description: 'What you may and may not do on the platform.',           effectiveDate: 'May 2026' },
-];
-
 export function getLegalPages(language = 'en') {
   return LEGAL_PAGES_BY_LANGUAGE[language] ?? LEGAL_PAGES;
 }
 
 export function getLegalPageMap(language = 'en') {
   return Object.fromEntries(getLegalPages(language).map((page) => [page.slug, page]));
-}
-
-export function getLegalHubMeta(language = 'en') {
-  return getLegalPages(language).map(({ slug, title, description, effectiveDate }) => ({
-    slug,
-    title,
-    description,
-    effectiveDate,
-  }));
 }

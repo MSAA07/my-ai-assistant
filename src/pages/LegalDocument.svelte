@@ -1,5 +1,5 @@
 <script>
-  import { getLegalPageMap } from '../lib/legal/content.js';
+  import { getLegalPageMap, getLegalPages } from '../lib/legal/content.js';
   import { t } from '../lib/i18n/t.js';
   import { language } from '../lib/stores/language.js';
 
@@ -8,6 +8,7 @@
   let activeSectionId = '';
 
   $: pageMap = getLegalPageMap($language);
+  $: legalDocs = getLegalPages($language);
   $: page = pageMap[slug] ?? null;
   $: isRTL = $language === 'ar';
   $: backArrow = isRTL ? '→' : '←';
@@ -20,6 +21,13 @@
     activeSectionId = id;
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+
+  function handleDocumentClick() {
+    activeSectionId = '';
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
+  }
 </script>
 
 {#if page}
@@ -27,24 +35,41 @@
     <div class="legal-doc-page__inner">
       <div class="legal-doc-layout">
         <aside class="legal-outline" aria-label={t('publicLegal.outline.ariaLabel')}>
-          <p class="legal-outline__label">{t('publicLegal.outline.title')}</p>
-          <nav class="legal-outline__nav">
-            {#each page.sections as section, index}
-              {@const id = sectionId(index)}
-              <button
-                type="button"
-                class:active={activeSectionId === id}
-                on:click={() => scrollToSection(id)}
-              >
-                {section.heading}
-              </button>
-            {/each}
-          </nav>
+          <div class="legal-outline__group">
+            <p class="legal-outline__label">{t('publicLegal.documents.title')}</p>
+            <nav class="legal-outline__nav" aria-label={t('publicLegal.documents.ariaLabel')}>
+              {#each legalDocs as doc}
+                <a
+                  href="#/legal/{doc.slug}"
+                  class:active={doc.slug === page.slug}
+                  on:click={handleDocumentClick}
+                >
+                  {doc.title}
+                </a>
+              {/each}
+            </nav>
+          </div>
+
+          <div class="legal-outline__group">
+            <p class="legal-outline__label">{t('publicLegal.outline.title')}</p>
+            <nav class="legal-outline__nav" aria-label={t('publicLegal.outline.ariaLabel')}>
+              {#each page.sections as section, index}
+                {@const id = sectionId(index)}
+                <button
+                  type="button"
+                  class:active={activeSectionId === id}
+                  on:click={() => scrollToSection(id)}
+                >
+                  {section.heading}
+                </button>
+              {/each}
+            </nav>
+          </div>
         </aside>
 
         <div class="legal-doc-content">
           <nav class="legal-doc-page__breadcrumb" aria-label={t('publicLegal.breadcrumbLabel')}>
-            <a href="#/legal" class="legal-back">{backArrow} {t('publicLegal.backToLegal')}</a>
+            <a href="#/" class="legal-back">{backArrow} {t('publicLegal.backToLanding')}</a>
           </nav>
 
           <header class="legal-doc-page__header">
@@ -88,12 +113,12 @@
   <main class="legal-doc-page">
     <div class="legal-doc-page__inner">
       <nav class="legal-doc-page__breadcrumb" aria-label={t('publicLegal.breadcrumbLabel')}>
-        <a href="#/legal" class="legal-back">{backArrow} {t('publicLegal.backToLegal')}</a>
+        <a href="#/" class="legal-back">{backArrow} {t('publicLegal.backToLanding')}</a>
       </nav>
       <section class="legal-not-found" aria-labelledby="legal-not-found-title">
         <h1 id="legal-not-found-title">{t('publicLegal.notFound.title')}</h1>
         <p>{t('publicLegal.notFound.body')}</p>
-        <a href="#/legal" class="legal-not-found__link">{t('publicLegal.notFound.cta')}</a>
+        <a href="#/" class="legal-not-found__link">{t('publicLegal.notFound.cta')}</a>
       </section>
     </div>
   </main>
@@ -130,7 +155,7 @@
     position: sticky;
     top: 6.25rem;
     display: grid;
-    gap: 0.75rem;
+    gap: 1.5rem;
     max-height: calc(100vh - 7rem);
     overflow: auto;
     padding: 0.25rem 0 0.5rem;
@@ -152,6 +177,12 @@
     padding-inline-start: 0.75rem;
   }
 
+  .legal-outline__group {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .legal-outline a,
   .legal-outline button {
     width: 100%;
     border: 0;
@@ -164,17 +195,21 @@
     line-height: 1.45;
     padding: 0.45rem 0.55rem;
     text-align: start;
+    text-decoration: none;
     transition:
       background var(--motion-fast) var(--ease-standard),
       color var(--motion-fast) var(--ease-standard);
   }
 
+  .legal-outline a:hover,
+  .legal-outline a.active,
   .legal-outline button:hover,
   .legal-outline button.active {
     background: color-mix(in srgb, var(--ui-surface-secondary) 58%, transparent);
     color: var(--ui-text-primary);
   }
 
+  .legal-outline a:focus-visible,
   .legal-outline button:focus-visible {
     outline: none;
     box-shadow: var(--ui-focus-ring-strong);
@@ -370,6 +405,7 @@
       scrollbar-width: thin;
     }
 
+    .legal-outline a,
     .legal-outline button {
       width: auto;
       flex: 0 0 auto;

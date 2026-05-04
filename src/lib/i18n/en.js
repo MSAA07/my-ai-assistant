@@ -904,12 +904,7 @@ export default {
   publicLegal: {
     eyebrow: 'StudyMaxing',
     breadcrumbLabel: 'Breadcrumb',
-    backToLegal: 'Legal',
-    hub: {
-      title: 'Legal',
-      subtitle: 'Policies and legal documents governing use of the StudyMaxing platform.',
-      effective: 'Effective {date}'
-    },
+    backToLanding: 'Back to landing',
     meta: {
       effectiveDate: 'Effective date',
       appliesTo: 'Applies to',
@@ -919,10 +914,14 @@ export default {
       title: 'Sections',
       ariaLabel: 'Legal document sections'
     },
+    documents: {
+      title: 'Legal',
+      ariaLabel: 'Legal documents'
+    },
     notFound: {
       title: 'Legal document not found',
-      body: 'The legal document you requested is not available. Return to the legal hub to view current policies.',
-      cta: 'Back to Legal'
+      body: 'The legal document you requested is not available. Use the footer links to view current policies.',
+      cta: 'Back to landing'
     }
   }
 };

@@ -3,7 +3,6 @@
   import PublicFooter from './components/public/PublicFooter.svelte';
   import PublicHeader from './components/public/PublicHeader.svelte';
   import Landing from './pages/Landing.svelte';
-  import LegalHub from './pages/LegalHub.svelte';
   import LegalDocument from './pages/LegalDocument.svelte';
   import ForgotPassword from './components/auth/ForgotPassword.svelte';
   import ResetPassword from './components/auth/ResetPassword.svelte';
@@ -328,11 +327,7 @@
     {:else if isLegalPath(normalizedPath)}
       <div class="public-shell">
         <PublicHeader />
-        {#if normalizedPath === '/legal'}
-          <LegalHub />
-        {:else}
-          <LegalDocument slug={normalizedPath.replace('/legal/', '')} />
-        {/if}
+        <LegalDocument slug={normalizedPath === '/legal' ? 'privacy-policy' : normalizedPath.replace('/legal/', '')} />
         <PublicFooter />
       </div>
     {:else if !isAuthenticated && (isAuthRoute || shouldRedirectUnauthenticated)}
