@@ -1,9 +1,6 @@
 <script>
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
-  import Badge from '../lib/components/ui/Badge.svelte';
-  import Card from '../lib/components/ui/Card.svelte';
   import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
-  import MetaPill from '../lib/components/ui/MetaPill.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import FieldShell from '../lib/components/ui/FieldShell.svelte';
@@ -33,7 +30,8 @@
   $: userEmail = $session?.user?.email ?? t('settings.account.noEmail');
   $: plan = $session?.user?.plan ?? 'free';
   $: planLabel = plan === 'pro' || plan === 'premium' ? t('nav.proBadge') : t('nav.freeBadge');
-  $: currentThemeLabel = $theme === 'light' ? t('settings.theme.light') : t('settings.theme.dark');
+  $: userInitial = (userName?.[0] ?? '?').toUpperCase();
+
   $: passwordErrors = {
     currentPassword: passwordTouched.currentPassword && !currentPassword ? t('auth.validation.currentPasswordRequired') : '',
     newPassword: passwordTouched.newPassword ? validatePassword(newPassword, t) : '',
@@ -102,108 +100,69 @@
 {:else}
   <PageLayout class="settings-page" width="wide" gap="compact">
     <PageHeader
-      className="settings-header"
       eyebrow={t('settings.eyebrow')}
       title={t('settings.title')}
       subtitle={t('settings.subtitle')}
-    >
-      <div slot="meta" class="hero-meta">
-        <MetaPill label={t('settings.account.title')}>
-          <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
-        </MetaPill>
-        <MetaPill label={t('settings.theme.title')}>
-          <Badge tone="neutral" variant="outline" size="sm">{currentThemeLabel}</Badge>
-        </MetaPill>
-      </div>
-    </PageHeader>
+    />
 
     <div class="settings-grid">
+
+      <!-- Account -->
+      <Section
+        id="account"
+        title={t('settings.account.title')}
+        description={t('settings.account.description')}
+      >
+        <div slot="actions">
+          <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
+        </div>
+
+        <div class="account-row">
+          <div class="account-avatar" aria-hidden="true">{userInitial}</div>
+          <div class="account-info">
+            <p class="account-name">{userName}</p>
+            <p class="account-email">{userEmail}</p>
+          </div>
+          <div class="account-actions">
+            <Button
+              type="button"
+              variant="danger"
+              size="sm"
+              on:click={handleLogout}
+              loading={loggingOut}
+            >
+              {loggingOut ? t('settings.account.actions.loggingOut') : t('settings.account.actions.logout')}
+            </Button>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Appearance -->
+      <Section
+        title={t('settings.theme.title')}
+        description={t('settings.theme.description')}
+      >
+        <ThemeToggle value={$theme} on:change={handleThemeChange} />
+      </Section>
+
+      <!-- Language -->
       <Section
         id="language"
-        className="settings-section settings-section-language"
         title={t('settings.language.title')}
         description={t('settings.language.description')}
       >
-        <div slot="header" class="section-copy">
-          <p class="section-eyebrow">{t('settings.language.title')}</p>
-          <h2>{t('settings.language.title')}</h2>
-          <p>{t('settings.language.description')}</p>
-        </div>
-
-        <div class="settings-block">
+        <div class="lang-block">
           <LanguageToggle />
           <p class="helper">{t('settings.language.helper')}</p>
         </div>
       </Section>
 
-      <Section
-        className="settings-section settings-section-theme"
-        title={t('settings.theme.title')}
-        description={t('settings.theme.description')}
-      >
-        <div slot="header" class="section-copy">
-          <p class="section-eyebrow">{t('settings.theme.title')}</p>
-          <h2>{t('settings.theme.title')}</h2>
-          <p>{t('settings.theme.description')}</p>
-        </div>
-
-        <div class="theme-row">
-          <ThemeToggle value={$theme} on:change={handleThemeChange} />
-          <div class="theme-summary">
-            <p class="theme-current">{t('settings.theme.current', { theme: currentThemeLabel })}</p>
-            <p class="helper">{t('settings.theme.helper')}</p>
-          </div>
-        </div>
-      </Section>
-
-      <Section
-        id="plan"
-        className="settings-section settings-section-account"
-        title={t('settings.account.title')}
-        description={t('settings.account.description')}
-      >
-        <div slot="header" class="section-copy">
-          <p class="section-eyebrow">{t('settings.account.title')}</p>
-          <h2>{t('settings.account.title')}</h2>
-          <p>{t('settings.account.description')}</p>
-        </div>
-
-        <div slot="actions">
-          <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
-        </div>
-
-        <article class="account-card">
-          <div class="account-copy">
-            <p class="account-label">{t('settings.account.title')}</p>
-            <h3>{userName}</h3>
-            <p>{userEmail}</p>
-          </div>
-
-          <div class="account-side">
-            <div class="account-plan">
-              <span>{t('nav.plan')}</span>
-              <Badge tone={plan === 'free' ? 'info' : 'success'} variant="soft" size="sm">{planLabel}</Badge>
-            </div>
-
-            <Button type="button" variant="danger" size="sm" className="signout-button" on:click={handleLogout} loading={loggingOut}>
-              {loggingOut ? t('settings.account.actions.loggingOut') : t('settings.account.actions.logout')}
-            </Button>
-          </div>
-        </article>
-      </Section>
-
+      <!-- Security -->
       <Section
         id="security"
-        className="settings-section settings-section-security"
         title={t('settings.security.title')}
         description={t('settings.security.description')}
       >
-        <div slot="header" class="section-copy">
-          <p class="section-eyebrow">{t('settings.security.title')}</p>
-          <h2>{t('settings.security.title')}</h2>
-          <p>{t('settings.security.description')}</p>
-        </div>
-
         <div class="password-form">
           <FieldShell
             label={t('auth.changePassword.fields.currentPassword')}
@@ -258,17 +217,26 @@
           </FieldShell>
 
           {#if passwordFeedback}
-            <p class={`password-feedback password-feedback--${passwordFeedbackTone}`} role="status">{passwordFeedback}</p>
+            <p class="password-feedback password-feedback--{passwordFeedbackTone}" role="status">
+              {passwordFeedback}
+            </p>
           {/if}
 
           <div class="password-actions">
-            <Button type="button" variant="primary" loading={changingPassword} disabled={changingPassword || passwordHasErrors} on:click={handleChangePassword}>
+            <Button
+              type="button"
+              variant="primary"
+              loading={changingPassword}
+              disabled={changingPassword || passwordHasErrors}
+              on:click={handleChangePassword}
+            >
               {changingPassword ? t('auth.changePassword.actions.loading') : t('auth.changePassword.actions.submit')}
             </Button>
             <p class="helper">{t('auth.changePassword.sessionNote')}</p>
           </div>
         </div>
       </Section>
+
     </div>
   </PageLayout>
 {/if}
@@ -280,84 +248,82 @@
     min-width: 0;
   }
 
-  .hero-meta {
-    display: grid;
-    gap: var(--ui-space-2);
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-
   .settings-grid {
     display: grid;
     gap: var(--ui-space-3);
-    grid-template-columns: minmax(0, 1fr);
     min-width: 0;
   }
 
-  :global(.settings-section) {
-    min-width: 0;
+  /* Account row */
+  .account-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
-  :global(.settings-section p) {
-    margin: 0;
-    color: var(--color-text-secondary);
-  }
-
-  .section-copy {
-    display: grid;
-    gap: var(--ui-space-1);
-  }
-
-  .section-eyebrow {
-    margin: 0;
-    color: var(--ui-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: var(--ui-type-label);
-    font-weight: 600;
-  }
-
-  .section-copy h2 {
-    margin: 0;
-    font-size: var(--ui-type-title-sm);
-    font-weight: 600;
-    letter-spacing: -0.02em;
+  .account-avatar {
+    flex: 0 0 auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--ui-accent-primary) 18%, var(--ui-surface-secondary) 82%);
     color: var(--ui-text-primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0;
+    user-select: none;
   }
 
-  .settings-block {
+  .account-info {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .account-name {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .account-email {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .account-actions {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+  }
+
+  /* Language */
+  .lang-block {
     display: grid;
     gap: var(--ui-space-2);
   }
 
-  .theme-row {
-    display: grid;
-    gap: var(--ui-space-3);
-    max-width: 34rem;
-  }
-
-  .theme-current {
-    font-size: 0.72rem;
-    color: var(--color-text-primary);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .theme-summary {
-    display: grid;
-    gap: var(--ui-space-1);
-    padding: var(--ui-space-3);
-    border: 1px solid color-mix(in srgb, var(--foreground) 8%, var(--border) 92%);
-    border-radius: 0.9rem;
-    background: color-mix(in srgb, var(--muted) 72%, transparent);
-  }
-
   .helper {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
+    margin: 0;
+    font-size: var(--ui-type-label);
+    color: var(--ui-text-muted);
     line-height: 1.55;
   }
 
+  /* Password form */
   .password-form {
     display: grid;
     gap: var(--ui-space-3);
@@ -374,7 +340,7 @@
     margin: 0;
     border-radius: var(--ui-radius-md);
     padding: 0.75rem 0.85rem;
-    font-size: var(--font-size-sm);
+    font-size: var(--ui-type-body-sm);
   }
 
   .password-feedback--success {
@@ -389,81 +355,14 @@
     color: var(--color-danger-soft);
   }
 
-  .account-card {
-    border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
-    border-radius: 1rem;
-    padding: var(--ui-space-4);
-    background: color-mix(in srgb, var(--card) 72%, var(--muted) 28%);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--ui-space-3);
-    box-shadow: var(--shadow-inline-control);
-  }
-
-  .account-copy {
-    display: grid;
-    gap: 0.35rem;
-  }
-
-  .account-label {
-    color: var(--muted-foreground);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .account-card h3 {
-    margin: 0;
-    color: var(--color-text-primary);
-    font-size: clamp(1.1rem, 2vw, 1.35rem);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-
-  .account-card p {
-    margin: 0;
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
-  }
-
-  .account-side {
-    display: grid;
-    gap: var(--ui-space-3);
-    min-width: min(100%, 280px);
-  }
-
-  .account-plan {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.75rem;
-    align-items: center;
-    flex-wrap: wrap;
-    color: var(--muted-foreground);
-    font-size: var(--font-size-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  :global(.signout-button.ui-button) {
-    width: 100%;
-    min-height: var(--ui-control-height-sm);
-    box-shadow: none;
-  }
-
-  @media (max-width: 900px) {
-    .settings-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
   @media (max-width: 640px) {
-    .hero-meta {
-      grid-template-columns: 1fr;
+    .account-actions {
+      width: 100%;
+      margin-inline-start: 0;
     }
 
-    .account-side {
-      min-width: 100%;
+    :global(.account-actions .ui-button) {
+      width: 100%;
     }
   }
 </style>
