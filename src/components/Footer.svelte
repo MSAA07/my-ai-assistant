@@ -1,31 +1,46 @@
-<script>
-  const productLinks = [
-    { label: 'Features', href: '#features' },
-    { label: 'How it works', href: '#how-it-works' },
-    { label: 'Study flow', href: '#study-flow' },
-    { label: 'FAQ', href: '#faq' }
-  ];
-</script>
-
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-brand">
-      <div class="footer-mark">AI</div>
-      <div>
-        <p class="footer-title">AI Study Assistant</p>
-        <p class="footer-copy">Turn uploaded documents into summaries, flashcards, and exam prep with one clean workflow.</p>
-      </div>
+      <div class="footer-mark">SM</div>
+      <p class="footer-title">StudyMaxing</p>
     </div>
 
-    <nav class="footer-nav" aria-label="Footer">
-      {#each productLinks as link}
-        <a href={link.href}>{link.label}</a>
-      {/each}
-    </nav>
+    <div class="footer-columns">
+      <div class="footer-col">
+        <p class="footer-col-heading">PRODUCT</p>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="/signin">Sign in</a>
+        <a href="/signup">Get started</a>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-heading">LEGAL</p>
+        <a href="/legal/privacy-policy">Privacy policy</a>
+        <a href="/legal/terms-of-service">Terms of service</a>
+        <a href="/legal/cookie-policy">Cookie policy</a>
+        <a href="/legal/refund-policy">Refund policy</a>
+        <a href="/legal/disclaimer">Disclaimer</a>
+        <a href="/legal/acceptable-use">Acceptable use</a>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-heading">SUPPORT</p>
+        <a href="mailto:contact@studymaxing.com">contact@studymaxing.com</a>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-heading">SOCIAL</p>
+        <a href="#">X (Twitter)</a>
+        <a href="#">Whatsapp</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Telegram</a>
+      </div>
+    </div>
   </div>
 
   <div class="footer-meta">
-    <p class="footer-text">Premium document study workspace.</p>
+    <p class="footer-text">© {new Date().getFullYear()} StudyMaxing. All rights reserved.</p>
   </div>
 </footer>
 
@@ -49,8 +64,9 @@
 
   .footer-brand {
     display: flex;
+    align-items: center;
     gap: var(--space-3);
-    max-width: 420px;
+    flex-shrink: 0;
   }
 
   .footer-mark {
@@ -66,37 +82,41 @@
     letter-spacing: 0.06em;
   }
 
-  .footer-title,
-  .footer-copy {
-    margin: 0;
-  }
-
   .footer-title {
+    margin: 0;
     color: var(--color-text-primary);
     font-size: 0.92rem;
     font-weight: 600;
   }
 
-  .footer-copy {
-    margin-top: 0.38rem;
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
-    line-height: 1.6;
-  }
-
-  .footer-nav {
+  .footer-columns {
     display: flex;
+    gap: var(--space-7);
     flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: flex-end;
   }
 
-  .footer-nav a {
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    min-width: 120px;
+  }
+
+  .footer-col-heading {
+    margin: 0 0 0.25rem;
+    color: var(--color-text-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .footer-col a {
     color: var(--color-text-muted);
     font-size: var(--font-size-sm);
+    text-decoration: none;
   }
 
-  .footer-nav a:hover {
+  .footer-col a:hover {
     color: var(--color-text-primary);
   }
 
@@ -116,8 +136,8 @@
       flex-direction: column;
     }
 
-    .footer-nav {
-      justify-content: flex-start;
+    .footer-columns {
+      gap: var(--space-5);
     }
   }
 </style>
