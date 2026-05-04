@@ -23,7 +23,8 @@ For current runtime guidance, prefer:
 - `../SYSTEM_OVERVIEW.md`
 - `../PROJECT_STRUCTURE.md`
 - `../UI_POST_ROLLOUT.md`
-- `../README.md`
 - `../src/lib/components/ui/PRIMITIVES.md`
 
-Last Updated: April 2, 2026
+Use `../README.md` only as the high-level repo entry point.
+
+Last Updated: April 30, 2026

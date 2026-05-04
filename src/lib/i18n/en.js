@@ -53,11 +53,14 @@ export default {
     logout: 'Log out'
   },
   status: {
-    processing: 'Processing',
+    notStarted: 'Not started',
     queued: 'Queued',
-    ready: 'Ready',
+    processing: 'Processing',
+    running: 'Generating',
+    complete: 'Complete',
     failed: 'Failed',
-    info: 'Info'
+    info: 'Info',
+    ready: 'Complete',
   },
   emptyState: {
     title: 'No items yet',

@@ -258,6 +258,15 @@ Environment differences:
 - The verified long-term environment difference in this repo is frontend host to backend mapping.
 - Support email, Turnstile site key, and auth callback URLs are environment-configurable through env vars, but this codebase alone does not verify distinct stage versus production values.
 
+Environment variables used by the frontend:
+
+- `VITE_API_BASE_URL`
+- `VITE_AUTH_SUPPORT_EMAIL`
+- `VITE_AUTH_TURNSTILE_SITE_KEY`
+- `VITE_AUTH_VERIFICATION_CALLBACK_URL`
+- `VITE_AUTH_PASSWORD_RESET_CALLBACK_URL`
+- `VITE_FEATURE_APPSHELL`
+
 ## Maintenance Triggers
 
 Update this file when any of these change:
@@ -270,4 +279,4 @@ Update this file when any of these change:
 - host-derived API base mapping
 - frontend-visible auth callbacks, verification flow, I18N rules, or lifecycle semantics
 
-Last Updated: April 17, 2026
+Last Updated: April 30, 2026

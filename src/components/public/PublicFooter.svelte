@@ -4,7 +4,6 @@
   const productLinks = [
     { label: 'Features', href: '#/?section=features' },
     { label: 'How it works', href: '#/?section=how-it-works' },
-    { label: 'FAQ', href: '#/?section=faq' },
     { label: 'Sign in', href: '#/sign-in' },
     { label: 'Get started', href: '#/sign-up' }
   ];
@@ -14,11 +13,13 @@
     'Product updates and school support coming soon'
   ];
 
-  const legalItems = [
-    'Privacy policy',
-    'Terms of service',
-    'Cookie policy',
-    'Refund policy'
+  const legalLinks = [
+    { label: 'Privacy policy',       href: '#/legal/privacy-policy' },
+    { label: 'Terms of service',     href: '#/legal/terms-of-service' },
+    { label: 'Cookie policy',        href: '#/legal/cookie-policy' },
+    { label: 'Refund policy',        href: '#/legal/refund-policy' },
+    { label: 'Disclaimer',           href: '#/legal/disclaimer' },
+    { label: 'Acceptable use',       href: '#/legal/acceptable-use' },
   ];
 
   const supportItems = [
@@ -36,10 +37,10 @@
     <div class="public-footer__lead">
       <div class="public-footer__brand">
         <div>
-          <p class="public-footer__title">Study Maxing</p>
+          <p class="public-footer__title">StudyMaxing</p>
         </div>
       </div>
-      <p class="public-footer__meta">© 2026 Study Maxing. All rights reserved.</p>
+      <p class="public-footer__meta">© 2026 StudyMaxing. All rights reserved.</p>
     </div>
 
     <div class="public-footer__grid">
@@ -63,11 +64,11 @@
 
       <section>
         <h2>Legal</h2>
-        <ul>
-          {#each legalItems as item}
-            <li>{item}</li>
+        <nav aria-label="Footer legal links">
+          {#each legalLinks as link}
+            <a href={link.href}>{link.label}</a>
           {/each}
-        </ul>
+        </nav>
       </section>
 
       <section>

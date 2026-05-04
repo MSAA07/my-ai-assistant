@@ -6,7 +6,7 @@
     FileText,
     FolderOpen,
     Infinity as InfinityIcon,
-    Layers3,
+    Layers,
   } from "@lucide/svelte";
   import { formatNumber, t } from "../lib/i18n/t.js";
   import { language as languageStore } from "../lib/stores/language.js";
@@ -62,7 +62,7 @@
     flashcards: {
       titleKey: "document.hub.features.flashcards",
       descriptionKey: "home.guided.features.flashcards",
-      icon: Layers3,
+      icon: Layers,
       options: { includeExplanations: false },
     },
     exam: {
@@ -913,7 +913,7 @@
               on:click={() => toggleFeature(card.key)}
             >
               <div slot="icon">
-                <Icon />
+                <Icon size={20} strokeWidth={1.5} />
               </div>
 
               <svelte:fragment slot="description">

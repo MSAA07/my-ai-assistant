@@ -6,7 +6,8 @@ This file reflects the current verified post-rollout UI state from the synced `s
 
 ## Current Source of Truth
 
-- Source-of-truth order for current frontend docs is: `SYSTEM_OVERVIEW.md` -> `PROJECT_STRUCTURE.md` -> `UI_POST_ROLLOUT.md` -> `README.md`.
+- Source-of-truth order for current frontend docs is: `SYSTEM_OVERVIEW.md` -> `PROJECT_STRUCTURE.md` -> `UI_POST_ROLLOUT.md`.
+- `README.md` is the high-level repo entry point, not the runtime source of truth.
 - `src/lib/styles/tokens.css` is the default token source of truth.
 - `src/styles/global.css` is foundation-only.
 - `src/lib/components/ui/*` is the default shared UI primitive layer.
@@ -70,4 +71,4 @@ Environment differences:
 - `PublicFooter.svelte` is implemented and shared, but several footer content areas still contain explicit placeholder copy.
 - The refreshed public shell copy is implemented directly in the public surface components rather than through the authenticated i18n contract.
 
-Last Updated: April 17, 2026
+Last Updated: April 30, 2026

@@ -4,11 +4,11 @@
   import { LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH } from '../../routes.js';
   import { currentPath, routeParams, router } from '../../stores/router.js';
   import { theme } from '../../stores/theme.js';
+  import { language, availableLanguages } from '../../lib/stores/language.js';
 
   const sectionLinks = [
     { id: 'features', label: 'Features' },
-    { id: 'how-it-works', label: 'How it works' },
-    { id: 'faq', label: 'FAQ' }
+    { id: 'how-it-works', label: 'How it works' }
   ];
 
   $: activePath = $currentPath;
@@ -45,9 +45,9 @@
 
 <header class="public-header">
   <div class="public-header__inner">
-    <button type="button" class="brand" on:click={navigateHome} aria-label="Study Maxing home">
+    <button type="button" class="brand" on:click={navigateHome} aria-label="StudyMaxing home">
       <span class="brand-copy">
-        <span class="brand-title">Study Maxing</span>
+        <span class="brand-title">StudyMaxing</span>
         <span class="brand-subtitle">Fast document-to-study workflow</span>
       </span>
     </button>
@@ -65,6 +65,19 @@
     </nav>
 
     <div class="public-header__actions">
+      {#if availableLanguages.length > 1}
+        <div class="lang-toggle" role="group" aria-label="Language">
+          {#each availableLanguages as lang}
+            <button
+              class="lang-toggle__btn"
+              class:lang-toggle__btn--active={$language === lang.code}
+              type="button"
+              on:click={() => language.set(lang.code)}
+              aria-pressed={$language === lang.code}
+            >{lang.shortLabel}</button>
+          {/each}
+        </div>
+      {/if}
       <div class="theme-toggle-wrap">
         <ThemeToggle value={$theme} on:change={handleThemeChange} />
       </div>
@@ -183,6 +196,43 @@
 
   .theme-toggle-wrap {
     min-width: 76px;
+  }
+
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-pill);
+    overflow: hidden;
+    gap: 0;
+  }
+
+  .lang-toggle__btn {
+    padding: 0.3rem 0.7rem;
+    border: none;
+    background: transparent;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-label);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+    line-height: 1.5;
+  }
+
+  .lang-toggle__btn:hover {
+    color: var(--ui-text-primary);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 60%, transparent);
+  }
+
+  .lang-toggle__btn--active {
+    background: var(--ui-surface-secondary);
+    color: var(--ui-text-primary);
+  }
+
+  .lang-toggle__btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
   @media (max-width: 1024px) {

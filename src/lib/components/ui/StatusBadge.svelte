@@ -3,22 +3,15 @@
   import { t } from '../../i18n/t.js';
 
   const map = {
-    info: {
-      key: 'status.processing',
-      tone: 'info',
-    },
-    processing: {
-      key: 'status.processing',
-      tone: 'warning',
-    },
-    ready: {
-      key: 'status.ready',
-      tone: 'success',
-    },
-    failed: {
-      key: 'status.failed',
-      tone: 'destructive',
-    },
+    not_requested: { key: 'status.notStarted', tone: 'neutral' },
+    queued:        { key: 'status.queued',     tone: 'neutral' },
+    processing:    { key: 'status.processing', tone: 'warning' },
+    running:       { key: 'status.running',    tone: 'warning' },
+    complete:      { key: 'status.complete',   tone: 'success' },
+    failed:        { key: 'status.failed',     tone: 'destructive' },
+    // backward-compat aliases
+    info:          { key: 'status.processing', tone: 'info' },
+    ready:         { key: 'status.complete',   tone: 'success' },
   };
 
   export let status = 'processing';

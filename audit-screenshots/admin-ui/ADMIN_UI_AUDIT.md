@@ -1,6 +1,9 @@
 # Admin UI Design Audit
 
 Date: 2026-04-29
+Status: Archival visual QA evidence
+
+This file preserves one admin-console audit run and its screenshot evidence. It is not a current runtime source of truth. For current frontend ownership and UI guidance, use `../../SYSTEM_OVERVIEW.md`, `../../PROJECT_STRUCTURE.md`, `../../UI_POST_ROLLOUT.md`, and `../../src/lib/components/ui/DATA_SURFACE_PATTERN.md`.
 
 ## PASS/FAIL Summary
 
@@ -67,3 +70,5 @@ Optional future polish: Add a subtle horizontal-scroll affordance to dense table
 - Light and dark themes both rendered with acceptable hierarchy and contrast in sampled screenshots.
 - Focusable controls use visible browser/design-system focus states.
 - No backend API contracts, admin authorization behavior, canonical routes, jobs, study records, or document lifecycle code were changed.
+
+Last Updated: April 30, 2026

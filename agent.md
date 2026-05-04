@@ -24,8 +24,9 @@ Single source of truth for AI-driven work in `frontend/`. Follow this file befor
 - Session is bootstrapped in `src/stores/auth.js`.
 - API base URL is resolved in `src/config.js` from `VITE_API_BASE_URL` or approved host-derived defaults.
 - `src/lib/components/layout/AppShell.svelte` is the shared authenticated dashboard frame.
-- `src/pages/DocumentView.svelte` drives consolidated summary, flashcards, and exam UX plus legacy activity polling.
-- `src/pages/StudyHubDocument.svelte` is the canonical document hub for `/study/:id/:section?`.
+- `src/pages/StudyHubIndex.svelte` and `src/pages/StudyHubDocument.svelte` are the canonical Study Hub surfaces for `#/study` and `#/study/:id/:section?`.
+- `src/pages/DocumentView.svelte` is a legacy compatibility wrapper only.
+- `src/lib/components/study/DocumentActivityView.svelte` owns the shared summary, flashcards, and exam activity implementation used by canonical and legacy surfaces.
 
 ### Important Flows
 
@@ -35,12 +36,14 @@ Single source of truth for AI-driven work in `frontend/`. Follow this file befor
 
 2. Upload
 - `src/pages/Home.svelte` posts multipart form data to `/api/upload`.
-- On success, navigate to `/study?highlight=:id`.
+- On success, the guided upload flow can request generation and then hands off to `#/study/:documentId`.
 
 3. Document Processing and Generation
 - Poll `GET /api/document/:id` while extraction or generation is active.
 - Load excerpts from `/api/document/:id/excerpts`.
 - Queue on-demand generation with `POST /api/document/:id/generations`.
+- Treat `Document.processingStatus`, `DocumentGeneration` via `document.generationState`, and compatibility content together as readiness truth.
+- Treat `Job.status` and `/api/jobs/:id` as execution/progress visibility only.
 
 4. Learning Interactions
 - Save flashcard progress with `/api/flashcard/progress`.
@@ -62,7 +65,8 @@ Single source of truth for AI-driven work in `frontend/`. Follow this file befor
 - `Home.svelte`: dashboard landing, stats, and upload surface
 - `StudyHubIndex.svelte`: library grid of uploaded documents
 - `StudyHubDocument.svelte`: document hub with Summary, Flashcards, and Mock Exam entry points
-- `DocumentView.svelte`: consolidated study states for summary, flashcards, and exam
+- `DocumentView.svelte`: legacy compatibility route wrapper only
+- `DocumentActivityView.svelte`: shared summary, flashcards, and exam activity states
 - `Settings.svelte`: account, theme, and language settings
 - `AdminDashboard.svelte`: admin shell and tabs
 
@@ -116,6 +120,7 @@ Behavior rules:
 - Preserve document lifecycle exactly: `queued -> processing -> complete | failed`.
 - Do not change job lifecycle states, transitions, or backend job semantics.
 - Do not introduce frontend behavior that assumes new backend fields, new statuses, or new endpoints without approval.
+- Do not use `Job.status` or `/api/jobs/:id` as canonical readiness truth for Study Hub content.
 
 ## Frontend Architecture Rules
 
@@ -267,4 +272,4 @@ After completing any task, always report:
 - Keep changes narrow.
 - Report exactly what changed and what stayed untouched.
 
-Last Updated: March 17, 2026
+Last Updated: April 30, 2026

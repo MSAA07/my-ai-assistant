@@ -71,10 +71,14 @@ const ar = {
     logout: 'تسجيل الخروج'
   },
   status: {
+    notStarted: 'لم يبدأ',
+    queued: 'في الانتظار',
     processing: 'قيد المعالجة',
-    ready: 'جاهز',
+    running: 'قيد الإنشاء',
+    complete: 'مكتمل',
     failed: 'فشل',
-    info: 'معلومة'
+    info: 'معلومة',
+    ready: 'مكتمل',
   },
   emptyState: {
     title: 'لا توجد عناصر بعد',
@@ -840,7 +844,6 @@ const ar = {
 
 ar.status = {
   ...(ar.status ?? {}),
-  queued: 'في الانتظار',
 };
 
 ar.document = {

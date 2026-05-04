@@ -19,6 +19,7 @@ my-ai-assistant/
 |-- PROJECT_STRUCTURE.md
 |-- UI_POST_ROLLOUT.md
 |-- docs/
+|-- audit-screenshots/
 |-- index.html
 |-- package.json
 |-- postcss.config.cjs
@@ -160,5 +161,6 @@ Environment differences:
 - `README.md`: high-level entry only; should defer detail to the three files above
 - `docs/VERCEL_STYLE_UI_SPEC_PHASE1.md`: archival phase-1 audit/spec, not current runtime source of truth
 - `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`: archival rollout checklist, not current runtime source of truth
+- `audit-screenshots/admin-ui/ADMIN_UI_AUDIT.md`: archival visual QA evidence for the admin console, not current runtime source of truth
 
-Last Updated: April 17, 2026
+Last Updated: April 30, 2026

@@ -3,6 +3,8 @@
   import PublicFooter from './components/public/PublicFooter.svelte';
   import PublicHeader from './components/public/PublicHeader.svelte';
   import Landing from './pages/Landing.svelte';
+  import LegalHub from './pages/LegalHub.svelte';
+  import LegalDocument from './pages/LegalDocument.svelte';
   import ForgotPassword from './components/auth/ForgotPassword.svelte';
   import ResetPassword from './components/auth/ResetPassword.svelte';
   import SignIn from './components/auth/SignIn.svelte';
@@ -32,7 +34,8 @@
     isPublicRoutePath,
     isAuthRoutePath,
     needsAdminAccess,
-    getNavIdForRoute
+    getNavIdForRoute,
+    isLegalPath
   } from './routes.js';
   import './styles/global.css';
 
@@ -244,7 +247,7 @@
         <main class="auth-wrapper">
           <section class="auth-stage">
             <div class="auth-intro">
-              <p class="auth-intro__eyebrow">Study Maxing</p>
+              <p class="auth-intro__eyebrow">StudyMaxing</p>
               <h1>One clean place to turn documents into study output.</h1>
               <p>
                 Upload notes, generate summaries, flashcards, and exam prep, then move straight into the study hub without bouncing between tools.
@@ -274,7 +277,7 @@
         <main class="auth-wrapper">
           <section class="auth-stage">
             <div class="auth-intro">
-              <p class="auth-intro__eyebrow">Study Maxing</p>
+              <p class="auth-intro__eyebrow">StudyMaxing</p>
               <h1>One clean place to turn documents into study output.</h1>
               <p>
                 Upload notes, generate summaries, flashcards, and exam prep, then move straight into the study hub without bouncing between tools.
@@ -299,7 +302,7 @@
         <main class="auth-wrapper">
           <section class="auth-stage">
             <div class="auth-intro">
-              <p class="auth-intro__eyebrow">Study Maxing</p>
+              <p class="auth-intro__eyebrow">StudyMaxing</p>
               <h1>One clean place to turn documents into study output.</h1>
               <p>
                 Upload notes, generate summaries, flashcards, and exam prep, then move straight into the study hub without bouncing between tools.
@@ -322,13 +325,23 @@
         </main>
         <PublicFooter compact />
       </div>
+    {:else if isLegalPath(normalizedPath)}
+      <div class="public-shell">
+        <PublicHeader />
+        {#if normalizedPath === '/legal'}
+          <LegalHub />
+        {:else}
+          <LegalDocument slug={normalizedPath.replace('/legal/', '')} />
+        {/if}
+        <PublicFooter />
+      </div>
     {:else if !isAuthenticated && (isAuthRoute || shouldRedirectUnauthenticated)}
       <div class="public-shell">
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
             <div class="auth-intro">
-              <p class="auth-intro__eyebrow">Study Maxing</p>
+              <p class="auth-intro__eyebrow">StudyMaxing</p>
               <h1>Upload once. Review summaries, flashcards, and exam prep in one flow.</h1>
               <p>
                 The public experience now matches the real product: document upload, generated study assets, and a focused study hub under <code>#/study</code>.
