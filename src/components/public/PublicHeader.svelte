@@ -5,10 +5,11 @@
   import { currentPath, routeParams, router } from '../../stores/router.js';
   import { theme } from '../../stores/theme.js';
   import { language, availableLanguages } from '../../lib/stores/language.js';
+  import { t } from '../../lib/i18n/t.js';
 
   const sectionLinks = [
-    { id: 'features', label: 'Features' },
-    { id: 'how-it-works', label: 'How it works' }
+    { id: 'features', labelKey: 'publicHeader.links.features' },
+    { id: 'how-it-works', labelKey: 'publicHeader.links.howItWorks' }
   ];
 
   $: activePath = $currentPath;
@@ -45,28 +46,28 @@
 
 <header class="public-header">
   <div class="public-header__inner">
-    <button type="button" class="brand" on:click={navigateHome} aria-label="StudyMaxing home">
+    <button type="button" class="brand" on:click={navigateHome} aria-label={t('publicHeader.brandHome')}>
       <span class="brand-copy">
         <span class="brand-title">StudyMaxing</span>
-        <span class="brand-subtitle">Fast document-to-study workflow</span>
+        <span class="brand-subtitle">{t('publicHeader.brandSubtitle')}</span>
       </span>
     </button>
 
-    <nav class="public-nav" aria-label="Public">
+    <nav class="public-nav" aria-label={t('publicHeader.navLabel')}>
       {#each sectionLinks as link}
         <button
           type="button"
           class:active={isLanding && activeSection === link.id}
           on:click={() => navigateToSection(link.id)}
         >
-          {link.label}
+          {t(link.labelKey)}
         </button>
       {/each}
     </nav>
 
     <div class="public-header__actions">
       {#if availableLanguages.length > 1}
-        <div class="lang-toggle" role="group" aria-label="Language">
+        <div class="lang-toggle" role="group" aria-label={t('publicHeader.languageLabel')}>
           {#each availableLanguages as lang}
             <button
               class="lang-toggle__btn"
@@ -83,17 +84,17 @@
       </div>
 
       {#if activePath === SIGN_IN_PATH}
-        <Button variant="ghost" size="sm" type="button" on:click={navigateHome}>Back to landing</Button>
-        <Button variant="primary" size="sm" type="button" on:click={() => navigateTo(SIGN_UP_PATH)}>Get started</Button>
+        <Button variant="ghost" size="sm" type="button" on:click={navigateHome}>{t('publicHeader.actions.backToLanding')}</Button>
+        <Button variant="primary" size="sm" type="button" on:click={() => navigateTo(SIGN_UP_PATH)}>{t('publicHeader.actions.getStarted')}</Button>
       {:else if activePath === SIGN_UP_PATH}
-        <Button variant="ghost" size="sm" type="button" on:click={navigateHome}>Back to landing</Button>
-        <Button variant="secondary" size="sm" type="button" on:click={() => navigateTo(SIGN_IN_PATH)}>Sign in</Button>
+        <Button variant="ghost" size="sm" type="button" on:click={navigateHome}>{t('publicHeader.actions.backToLanding')}</Button>
+        <Button variant="secondary" size="sm" type="button" on:click={() => navigateTo(SIGN_IN_PATH)}>{t('publicHeader.actions.signIn')}</Button>
       {:else if !isLanding}
-        <Button variant="ghost" size="sm" type="button" on:click={navigateHome}>Back to landing</Button>
-        <Button variant="secondary" size="sm" type="button" on:click={() => navigateTo(SIGN_IN_PATH)}>Sign in</Button>
+        <Button variant="ghost" size="sm" type="button" on:click={navigateHome}>{t('publicHeader.actions.backToLanding')}</Button>
+        <Button variant="secondary" size="sm" type="button" on:click={() => navigateTo(SIGN_IN_PATH)}>{t('publicHeader.actions.signIn')}</Button>
       {:else}
-        <Button variant="ghost" size="sm" type="button" on:click={() => navigateTo(SIGN_IN_PATH)}>Sign in</Button>
-        <Button variant="primary" size="sm" type="button" on:click={() => navigateTo(SIGN_UP_PATH)}>Get started</Button>
+        <Button variant="ghost" size="sm" type="button" on:click={() => navigateTo(SIGN_IN_PATH)}>{t('publicHeader.actions.signIn')}</Button>
+        <Button variant="primary" size="sm" type="button" on:click={() => navigateTo(SIGN_UP_PATH)}>{t('publicHeader.actions.getStarted')}</Button>
       {/if}
     </div>
   </div>
@@ -130,7 +131,7 @@
     padding: 0;
     color: var(--ui-text-primary);
     cursor: pointer;
-    text-align: left;
+    text-align: start;
   }
 
   .brand-copy {

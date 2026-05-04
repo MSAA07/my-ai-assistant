@@ -1,25 +1,30 @@
 <script>
-  import { LEGAL_HUB_META } from '../lib/legal/content.js';
+  import { getLegalHubMeta } from '../lib/legal/content.js';
+  import { t } from '../lib/i18n/t.js';
+  import { language } from '../lib/stores/language.js';
+
+  $: legalDocs = getLegalHubMeta($language);
+  $: isRTL = $language === 'ar';
 </script>
 
 <main class="legal-hub">
   <div class="legal-hub__inner">
     <header class="legal-hub__header">
-      <p class="legal-hub__eyebrow">StudyMaxing</p>
-      <h1 class="legal-hub__title">Legal</h1>
-      <p class="legal-hub__subtitle">Policies and legal documents governing use of the StudyMaxing platform.</p>
+      <p class="legal-hub__eyebrow">{t('publicLegal.eyebrow')}</p>
+      <h1 class="legal-hub__title">{t('publicLegal.hub.title')}</h1>
+      <p class="legal-hub__subtitle">{t('publicLegal.hub.subtitle')}</p>
     </header>
 
     <div class="legal-hub__grid">
-      {#each LEGAL_HUB_META as doc}
+      {#each legalDocs as doc}
         <a class="legal-card" href="#/legal/{doc.slug}">
           <div class="legal-card__body">
             <h2 class="legal-card__title">{doc.title}</h2>
             <p class="legal-card__desc">{doc.description}</p>
           </div>
           <div class="legal-card__footer">
-            <span class="legal-card__date">Effective {doc.effectiveDate}</span>
-            <span class="legal-card__arrow" aria-hidden="true">→</span>
+            <span class="legal-card__date">{t('publicLegal.hub.effective', { date: doc.effectiveDate })}</span>
+            <span class="legal-card__arrow" aria-hidden="true">{isRTL ? '←' : '→'}</span>
           </div>
         </a>
       {/each}
@@ -145,6 +150,10 @@
   .legal-card:hover .legal-card__arrow {
     transform: translateX(3px);
     color: var(--ui-text-secondary);
+  }
+
+  :global([dir="rtl"]) .legal-card:hover .legal-card__arrow {
+    transform: translateX(-3px);
   }
 
   @media (max-width: 900px) {

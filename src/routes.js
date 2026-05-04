@@ -13,7 +13,15 @@ export const FORGOT_PASSWORD_PATH = '/forgot-password';
 export const RESET_PASSWORD_PATH = '/reset-password';
 export const VERIFY_EMAIL_PATH = '/verify-email';
 export const LEGAL_HUB_PATH = '/legal';
-export const PUBLIC_ROUTE_PATHS = new Set([LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH, FORGOT_PASSWORD_PATH, RESET_PASSWORD_PATH, VERIFY_EMAIL_PATH]);
+export const PUBLIC_ROUTE_PATHS = new Set([
+  LANDING_PATH,
+  SIGN_IN_PATH,
+  SIGN_UP_PATH,
+  FORGOT_PASSWORD_PATH,
+  RESET_PASSWORD_PATH,
+  VERIFY_EMAIL_PATH,
+  LEGAL_HUB_PATH
+]);
 export const AUTH_ROUTE_PATHS = new Set([SIGN_IN_PATH, SIGN_UP_PATH, FORGOT_PASSWORD_PATH]);
 
 export function isLegalPath(path) {
@@ -227,7 +235,7 @@ export function sanitizeRedirectPath(path) {
   const normalized = normalizeAppPath(candidatePath);
   if (isAuthRoutePath(normalized)) return null;
 
-  if (normalized === LANDING_PATH || resolveRoute(normalized)) {
+  if (normalized === LANDING_PATH || isLegalPath(normalized) || resolveRoute(normalized)) {
     return normalized;
   }
 

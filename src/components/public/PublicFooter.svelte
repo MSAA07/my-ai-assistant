@@ -1,38 +1,61 @@
 <script>
+  import { t } from '../../lib/i18n/t.js';
+  import { language } from '../../lib/stores/language.js';
+  import { router } from '../../stores/router.js';
+
   export let compact = false;
 
   const productLinks = [
-    { label: 'Features', href: '#/?section=features' },
-    { label: 'How it works', href: '#/?section=how-it-works' },
-    { label: 'Sign in', href: '#/sign-in' },
-    { label: 'Get started', href: '#/sign-up' }
+    { labelKey: 'publicFooter.productLinks.features', href: '#/?section=features' },
+    { labelKey: 'publicFooter.productLinks.howItWorks', href: '#/?section=how-it-works' },
+    { labelKey: 'publicFooter.productLinks.signIn', href: '#/sign-in' },
+    { labelKey: 'publicFooter.productLinks.getStarted', href: '#/sign-up' }
   ];
 
   const companyItems = [
-    'Built for focused document-based study',
-    'Product updates and school support coming soon'
+    'publicFooter.companyItems.focusedStudy',
+    'publicFooter.companyItems.updates'
   ];
 
   const legalLinks = [
-    { label: 'Privacy policy',       href: '#/legal/privacy-policy' },
-    { label: 'Terms of service',     href: '#/legal/terms-of-service' },
-    { label: 'Cookie policy',        href: '#/legal/cookie-policy' },
-    { label: 'Refund policy',        href: '#/legal/refund-policy' },
-    { label: 'Disclaimer',           href: '#/legal/disclaimer' },
-    { label: 'Acceptable use',       href: '#/legal/acceptable-use' },
+    { labelKey: 'publicFooter.legalLinks.privacyPolicy',   href: '#/legal/privacy-policy' },
+    { labelKey: 'publicFooter.legalLinks.termsOfService',  href: '#/legal/terms-of-service' },
+    { labelKey: 'publicFooter.legalLinks.cookiePolicy',    href: '#/legal/cookie-policy' },
+    { labelKey: 'publicFooter.legalLinks.refundPolicy',    href: '#/legal/refund-policy' },
+    { labelKey: 'publicFooter.legalLinks.disclaimer',      href: '#/legal/disclaimer' },
+    { labelKey: 'publicFooter.legalLinks.acceptableUse',   href: '#/legal/acceptable-use' },
   ];
 
   const supportItems = [
-    'contact@studymaxing.com',
-    'Use this email for support, feedback, and account questions'
+    'publicFooter.supportItems.email',
+    'publicFooter.supportItems.detail'
   ];
 
   const socialItems = [
-    'Social links coming soon'
+    'publicFooter.socialItems.comingSoon'
   ];
+
+  $: currentLanguage = $language;
+
+  function navigateInternal(event, href) {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      !href.startsWith('#/')
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    router.navigate(href.slice(1));
+  }
 </script>
 
-<footer class:compact class="public-footer">
+<footer class:compact class="public-footer" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
   <div class="public-footer__inner">
     <div class="public-footer__lead">
       <div class="public-footer__brand">
@@ -40,51 +63,51 @@
           <p class="public-footer__title">StudyMaxing</p>
         </div>
       </div>
-      <p class="public-footer__meta">© 2026 StudyMaxing. All rights reserved.</p>
+      <p class="public-footer__meta">{t('publicFooter.copyright')}</p>
     </div>
 
     <div class="public-footer__grid">
       <section>
-        <h2>Product</h2>
-        <nav aria-label="Footer product links">
+        <h2>{t('publicFooter.sections.product')}</h2>
+        <nav aria-label={t('publicFooter.aria.productLinks')}>
           {#each productLinks as link}
-            <a href={link.href}>{link.label}</a>
+            <a href={link.href} on:click={(event) => navigateInternal(event, link.href)}>{t(link.labelKey)}</a>
           {/each}
         </nav>
       </section>
 
       <section>
-        <h2>Company</h2>
+        <h2>{t('publicFooter.sections.company')}</h2>
         <ul>
           {#each companyItems as item}
-            <li>{item}</li>
+            <li>{t(item)}</li>
           {/each}
         </ul>
       </section>
 
       <section>
-        <h2>Legal</h2>
-        <nav aria-label="Footer legal links">
+        <h2>{t('publicFooter.sections.legal')}</h2>
+        <nav aria-label={t('publicFooter.aria.legalLinks')}>
           {#each legalLinks as link}
-            <a href={link.href}>{link.label}</a>
+            <a href={link.href} on:click={(event) => navigateInternal(event, link.href)}>{t(link.labelKey)}</a>
           {/each}
         </nav>
       </section>
 
       <section>
-        <h2>Support</h2>
+        <h2>{t('publicFooter.sections.support')}</h2>
         <ul>
           {#each supportItems as item}
-            <li>{item}</li>
+            <li>{t(item)}</li>
           {/each}
         </ul>
       </section>
 
       <section>
-        <h2>Social</h2>
+        <h2>{t('publicFooter.sections.social')}</h2>
         <ul>
           {#each socialItems as item}
-            <li>{item}</li>
+            <li>{t(item)}</li>
           {/each}
         </ul>
       </section>

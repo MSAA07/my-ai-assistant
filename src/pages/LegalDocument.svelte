@@ -1,34 +1,39 @@
 <script>
-  import { LEGAL_PAGE_MAP } from '../lib/legal/content.js';
+  import { getLegalPageMap } from '../lib/legal/content.js';
+  import { t } from '../lib/i18n/t.js';
+  import { language } from '../lib/stores/language.js';
 
   export let slug = '';
 
-  $: page = LEGAL_PAGE_MAP[slug] ?? null;
+  $: pageMap = getLegalPageMap($language);
+  $: page = pageMap[slug] ?? null;
+  $: isRTL = $language === 'ar';
+  $: backArrow = isRTL ? '→' : '←';
 </script>
 
 {#if page}
   <main class="legal-doc-page">
     <div class="legal-doc-page__inner">
-      <nav class="legal-doc-page__breadcrumb" aria-label="Breadcrumb">
-        <a href="#/legal" class="legal-back">← Legal</a>
+      <nav class="legal-doc-page__breadcrumb" aria-label={t('publicLegal.breadcrumbLabel')}>
+        <a href="#/legal" class="legal-back">{backArrow} {t('publicLegal.backToLegal')}</a>
       </nav>
 
       <header class="legal-doc-page__header">
         <h1 class="legal-doc-page__title">{page.title}</h1>
         <div class="legal-doc-page__meta">
-          <span>Effective date: {page.effectiveDate}</span>
+          <span>{t('publicLegal.meta.effectiveDate')}: {page.effectiveDate}</span>
           {#if page.appliesTo}
             <span class="legal-meta-sep" aria-hidden="true">·</span>
-            <span>Applies to: {page.appliesTo}</span>
+            <span>{t('publicLegal.meta.appliesTo')}: {page.appliesTo}</span>
           {/if}
           {#if page.governingLaw}
             <span class="legal-meta-sep" aria-hidden="true">·</span>
-            <span>Governing law: {page.governingLaw}</span>
+            <span>{t('publicLegal.meta.governingLaw')}: {page.governingLaw}</span>
           {/if}
         </div>
       </header>
 
-      <article class="legal-doc">
+      <article class="legal-doc" dir={isRTL ? 'rtl' : 'ltr'}>
         {#each page.sections as section}
           <section class="legal-doc__section">
             <h2 class="legal-doc__heading">{section.heading}</h2>
@@ -51,10 +56,14 @@
 {:else}
   <main class="legal-doc-page">
     <div class="legal-doc-page__inner">
-      <nav class="legal-doc-page__breadcrumb" aria-label="Breadcrumb">
-        <a href="#/legal" class="legal-back">← Legal</a>
+      <nav class="legal-doc-page__breadcrumb" aria-label={t('publicLegal.breadcrumbLabel')}>
+        <a href="#/legal" class="legal-back">{backArrow} {t('publicLegal.backToLegal')}</a>
       </nav>
-      <p style="color: var(--ui-text-secondary); margin-top: 2rem;">Document not found.</p>
+      <section class="legal-not-found" aria-labelledby="legal-not-found-title">
+        <h1 id="legal-not-found-title">{t('publicLegal.notFound.title')}</h1>
+        <p>{t('publicLegal.notFound.body')}</p>
+        <a href="#/legal" class="legal-not-found__link">{t('publicLegal.notFound.cta')}</a>
+      </section>
     </div>
   </main>
 {/if}
@@ -167,6 +176,57 @@
     font-size: var(--ui-type-body-sm);
     line-height: 1.65;
     padding-inline-start: 0.25rem;
+  }
+
+  .legal-not-found {
+    display: grid;
+    gap: 0.85rem;
+    max-width: 560px;
+    padding: 1.5rem;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface-card);
+  }
+
+  .legal-not-found h1,
+  .legal-not-found p {
+    margin: 0;
+  }
+
+  .legal-not-found h1 {
+    color: var(--ui-text-primary);
+    font-size: clamp(1.25rem, 3vw, 1.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  .legal-not-found p {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.6;
+  }
+
+  .legal-not-found__link {
+    justify-self: start;
+    color: var(--ui-text-primary);
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .legal-not-found__link:hover {
+    color: var(--ui-text-secondary);
+  }
+
+  .legal-not-found__link:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
+    border-radius: 3px;
+  }
+
+  :global([dir="rtl"]) .legal-not-found__link {
+    justify-self: end;
   }
 
   @media (max-width: 580px) {

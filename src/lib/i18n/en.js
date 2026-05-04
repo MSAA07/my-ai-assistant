@@ -846,4 +846,79 @@ export default {
       unavailable: 'The security check is unavailable right now. Refresh and try again.'
     }
   }
+  ,
+  publicHeader: {
+    brandHome: 'StudyMaxing home',
+    brandSubtitle: 'Fast document-to-study workflow',
+    navLabel: 'Public',
+    languageLabel: 'Language',
+    links: {
+      features: 'Features',
+      howItWorks: 'How it works'
+    },
+    actions: {
+      backToLanding: 'Back to landing',
+      getStarted: 'Get started',
+      signIn: 'Sign in'
+    }
+  },
+  publicFooter: {
+    copyright: '© 2026 StudyMaxing. All rights reserved.',
+    sections: {
+      product: 'Product',
+      company: 'Company',
+      legal: 'Legal',
+      support: 'Support',
+      social: 'Social'
+    },
+    aria: {
+      productLinks: 'Footer product links',
+      legalLinks: 'Footer legal links'
+    },
+    productLinks: {
+      features: 'Features',
+      howItWorks: 'How it works',
+      signIn: 'Sign in',
+      getStarted: 'Get started'
+    },
+    companyItems: {
+      focusedStudy: 'Built for focused document-based study',
+      updates: 'Product updates and school support coming soon'
+    },
+    legalLinks: {
+      privacyPolicy: 'Privacy policy',
+      termsOfService: 'Terms of service',
+      cookiePolicy: 'Cookie policy',
+      refundPolicy: 'Refund policy',
+      disclaimer: 'Disclaimer',
+      acceptableUse: 'Acceptable use'
+    },
+    supportItems: {
+      email: 'contact@studymaxing.com',
+      detail: 'Use this email for support, feedback, and account questions'
+    },
+    socialItems: {
+      comingSoon: 'Social links coming soon'
+    }
+  },
+  publicLegal: {
+    eyebrow: 'StudyMaxing',
+    breadcrumbLabel: 'Breadcrumb',
+    backToLegal: 'Legal',
+    hub: {
+      title: 'Legal',
+      subtitle: 'Policies and legal documents governing use of the StudyMaxing platform.',
+      effective: 'Effective {date}'
+    },
+    meta: {
+      effectiveDate: 'Effective date',
+      appliesTo: 'Applies to',
+      governingLaw: 'Governing law'
+    },
+    notFound: {
+      title: 'Legal document not found',
+      body: 'The legal document you requested is not available. Return to the legal hub to view current policies.',
+      cta: 'Back to Legal'
+    }
+  }
 };

@@ -20,6 +20,7 @@ function createRouter() {
     }
 
     window.location.hash = path;
+    set(parseHash());
   }
 
   function navigate(path, options) {

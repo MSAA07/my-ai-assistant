@@ -842,6 +842,83 @@ const ar = {
   }
 };
 
+ar.publicHeader = {
+  brandHome: 'العودة إلى الصفحة الرئيسية لـ StudyMaxing',
+  brandSubtitle: 'مسار سريع من المستند إلى الدراسة',
+  navLabel: 'عام',
+  languageLabel: 'اللغة',
+  links: {
+    features: 'المزايا',
+    howItWorks: 'طريقة العمل'
+  },
+  actions: {
+    backToLanding: 'العودة إلى الصفحة الرئيسية',
+    getStarted: 'ابدأ الآن',
+    signIn: 'تسجيل الدخول'
+  }
+};
+
+ar.publicFooter = {
+  copyright: '© 2026 StudyMaxing. جميع الحقوق محفوظة.',
+  sections: {
+    product: 'المنتج',
+    company: 'الشركة',
+    legal: 'القانوني',
+    support: 'الدعم',
+    social: 'التواصل'
+  },
+  aria: {
+    productLinks: 'روابط المنتج في التذييل',
+    legalLinks: 'روابط قانونية في التذييل'
+  },
+  productLinks: {
+    features: 'المزايا',
+    howItWorks: 'طريقة العمل',
+    signIn: 'تسجيل الدخول',
+    getStarted: 'ابدأ الآن'
+  },
+  companyItems: {
+    focusedStudy: 'مصمم للدراسة المركزة المعتمدة على المستندات',
+    updates: 'تحديثات المنتج ودعم المدارس قريبًا'
+  },
+  legalLinks: {
+    privacyPolicy: 'سياسة الخصوصية',
+    termsOfService: 'شروط الخدمة',
+    cookiePolicy: 'سياسة ملفات تعريف الارتباط',
+    refundPolicy: 'سياسة الاسترداد',
+    disclaimer: 'إخلاء المسؤولية',
+    acceptableUse: 'الاستخدام المقبول'
+  },
+  supportItems: {
+    email: 'contact@studymaxing.com',
+    detail: 'استخدم هذا البريد للدعم والملاحظات وأسئلة الحساب'
+  },
+  socialItems: {
+    comingSoon: 'روابط التواصل قريبًا'
+  }
+};
+
+ar.publicLegal = {
+  eyebrow: 'StudyMaxing',
+  breadcrumbLabel: 'مسار التنقل',
+  backToLegal: 'القانوني',
+  hub: {
+    title: 'القانوني',
+    subtitle: 'السياسات والمستندات القانونية التي تحكم استخدام منصة StudyMaxing.',
+    effective: 'تاريخ السريان {date}'
+  },
+  meta: {
+    effectiveDate: 'تاريخ السريان',
+    appliesTo: 'ينطبق على',
+    governingLaw: 'القانون الحاكم'
+  },
+  notFound: {
+    title: 'المستند القانوني غير موجود',
+    body: 'المستند القانوني الذي طلبته غير متاح. عد إلى المركز القانوني لعرض السياسات الحالية.',
+    cta: 'العودة إلى القانوني'
+  }
+};
+
 ar.status = {
   ...(ar.status ?? {}),
 };
