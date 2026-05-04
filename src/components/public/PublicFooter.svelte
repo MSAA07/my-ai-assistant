@@ -12,11 +12,6 @@
     { labelKey: 'publicFooter.productLinks.getStarted', href: '#/sign-up' }
   ];
 
-  const companyItems = [
-    'publicFooter.companyItems.focusedStudy',
-    'publicFooter.companyItems.updates'
-  ];
-
   const legalLinks = [
     { labelKey: 'publicFooter.legalLinks.privacyPolicy',   href: '#/legal/privacy-policy' },
     { labelKey: 'publicFooter.legalLinks.termsOfService',  href: '#/legal/terms-of-service' },
@@ -26,13 +21,11 @@
     { labelKey: 'publicFooter.legalLinks.acceptableUse',   href: '#/legal/acceptable-use' },
   ];
 
-  const supportItems = [
-    'publicFooter.supportItems.email',
-    'publicFooter.supportItems.detail'
-  ];
-
-  const socialItems = [
-    'publicFooter.socialItems.comingSoon'
+  const socialLinks = [
+    { label: 'X (Twitter)',  href: '#' },
+    { label: 'Whatsapp',    href: '#' },
+    { label: 'LinkedIn',    href: '#' },
+    { label: 'Telegram',    href: '#' },
   ];
 
   $: currentLanguage = $language;
@@ -82,15 +75,6 @@
       </section>
 
       <section>
-        <h2>{t('publicFooter.sections.company')}</h2>
-        <ul>
-          {#each companyItems as item}
-            <li>{t(item)}</li>
-          {/each}
-        </ul>
-      </section>
-
-      <section>
         <h2>{t('publicFooter.sections.legal')}</h2>
         <nav aria-label={t('publicFooter.aria.legalLinks')}>
           {#each legalLinks as link}
@@ -101,20 +85,18 @@
 
       <section>
         <h2>{t('publicFooter.sections.support')}</h2>
-        <ul>
-          {#each supportItems as item}
-            <li>{t(item)}</li>
-          {/each}
-        </ul>
+        <nav aria-label={t('publicFooter.aria.supportLinks')}>
+          <a href="mailto:contact@studymaxing.com">contact@studymaxing.com</a>
+        </nav>
       </section>
 
       <section>
         <h2>{t('publicFooter.sections.social')}</h2>
-        <ul>
-          {#each socialItems as item}
-            <li>{t(item)}</li>
+        <nav aria-label={t('publicFooter.aria.socialLinks')}>
+          {#each socialLinks as link}
+            <a href={link.href}>{link.label}</a>
           {/each}
-        </ul>
+        </nav>
       </section>
     </div>
   </div>
@@ -174,7 +156,7 @@
 
   .public-footer__grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1.5rem;
   }
 
