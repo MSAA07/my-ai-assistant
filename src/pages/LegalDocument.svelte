@@ -5,52 +5,83 @@
 
   export let slug = '';
 
+  let activeSectionId = '';
+
   $: pageMap = getLegalPageMap($language);
   $: page = pageMap[slug] ?? null;
   $: isRTL = $language === 'ar';
   $: backArrow = isRTL ? '→' : '←';
+
+  function sectionId(index) {
+    return `legal-section-${index + 1}`;
+  }
+
+  function scrollToSection(id) {
+    activeSectionId = id;
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 </script>
 
 {#if page}
   <main class="legal-doc-page">
     <div class="legal-doc-page__inner">
-      <nav class="legal-doc-page__breadcrumb" aria-label={t('publicLegal.breadcrumbLabel')}>
-        <a href="#/legal" class="legal-back">{backArrow} {t('publicLegal.backToLegal')}</a>
-      </nav>
-
-      <header class="legal-doc-page__header">
-        <h1 class="legal-doc-page__title">{page.title}</h1>
-        <div class="legal-doc-page__meta">
-          <span>{t('publicLegal.meta.effectiveDate')}: {page.effectiveDate}</span>
-          {#if page.appliesTo}
-            <span class="legal-meta-sep" aria-hidden="true">·</span>
-            <span>{t('publicLegal.meta.appliesTo')}: {page.appliesTo}</span>
-          {/if}
-          {#if page.governingLaw}
-            <span class="legal-meta-sep" aria-hidden="true">·</span>
-            <span>{t('publicLegal.meta.governingLaw')}: {page.governingLaw}</span>
-          {/if}
-        </div>
-      </header>
-
-      <article class="legal-doc" dir={isRTL ? 'rtl' : 'ltr'}>
-        {#each page.sections as section}
-          <section class="legal-doc__section">
-            <h2 class="legal-doc__heading">{section.heading}</h2>
-            {#each section.body as block}
-              {#if block.type === 'p'}
-                <p class="legal-doc__p">{block.text}</p>
-              {:else if block.type === 'ul'}
-                <ul class="legal-doc__list">
-                  {#each block.items as item}
-                    <li>{@html item}</li>
-                  {/each}
-                </ul>
-              {/if}
+      <div class="legal-doc-layout">
+        <aside class="legal-outline" aria-label={t('publicLegal.outline.ariaLabel')}>
+          <p class="legal-outline__label">{t('publicLegal.outline.title')}</p>
+          <nav class="legal-outline__nav">
+            {#each page.sections as section, index}
+              {@const id = sectionId(index)}
+              <button
+                type="button"
+                class:active={activeSectionId === id}
+                on:click={() => scrollToSection(id)}
+              >
+                {section.heading}
+              </button>
             {/each}
-          </section>
-        {/each}
-      </article>
+          </nav>
+        </aside>
+
+        <div class="legal-doc-content">
+          <nav class="legal-doc-page__breadcrumb" aria-label={t('publicLegal.breadcrumbLabel')}>
+            <a href="#/legal" class="legal-back">{backArrow} {t('publicLegal.backToLegal')}</a>
+          </nav>
+
+          <header class="legal-doc-page__header">
+            <h1 class="legal-doc-page__title">{page.title}</h1>
+            <div class="legal-doc-page__meta">
+              <span>{t('publicLegal.meta.effectiveDate')}: {page.effectiveDate}</span>
+              {#if page.appliesTo}
+                <span class="legal-meta-sep" aria-hidden="true">·</span>
+                <span>{t('publicLegal.meta.appliesTo')}: {page.appliesTo}</span>
+              {/if}
+              {#if page.governingLaw}
+                <span class="legal-meta-sep" aria-hidden="true">·</span>
+                <span>{t('publicLegal.meta.governingLaw')}: {page.governingLaw}</span>
+              {/if}
+            </div>
+          </header>
+
+          <article class="legal-doc" dir={isRTL ? 'rtl' : 'ltr'}>
+            {#each page.sections as section, index}
+              <section class="legal-doc__section" id={sectionId(index)}>
+                <h2 class="legal-doc__heading">{section.heading}</h2>
+                {#each section.body as block}
+                  {#if block.type === 'p'}
+                    <p class="legal-doc__p">{block.text}</p>
+                  {:else if block.type === 'ul'}
+                    <ul class="legal-doc__list">
+                      {#each block.items as item}
+                        <li>{@html item}</li>
+                      {/each}
+                    </ul>
+                  {/if}
+                {/each}
+              </section>
+            {/each}
+          </article>
+        </div>
+      </div>
     </div>
   </main>
 {:else}
@@ -75,10 +106,78 @@
   }
 
   .legal-doc-page__inner {
-    width: min(760px, calc(100% - 2rem));
+    width: min(1120px, calc(100% - 2rem));
     margin: 0 auto;
     display: grid;
     gap: 2rem;
+  }
+
+  .legal-doc-layout {
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) minmax(0, 760px);
+    justify-content: center;
+    gap: 3.5rem;
+    align-items: start;
+  }
+
+  .legal-doc-content {
+    display: grid;
+    gap: 2rem;
+    min-width: 0;
+  }
+
+  .legal-outline {
+    position: sticky;
+    top: 6.25rem;
+    display: grid;
+    gap: 0.75rem;
+    max-height: calc(100vh - 7rem);
+    overflow: auto;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .legal-outline__label {
+    margin: 0;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-type-label);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .legal-outline__nav {
+    display: grid;
+    gap: 0.2rem;
+    border-inline-start: 1px solid var(--ui-border-default);
+    padding-inline-start: 0.75rem;
+  }
+
+  .legal-outline button {
+    width: 100%;
+    border: 0;
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+    color: var(--ui-text-secondary);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--ui-type-label);
+    line-height: 1.45;
+    padding: 0.45rem 0.55rem;
+    text-align: start;
+    transition:
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+
+  .legal-outline button:hover,
+  .legal-outline button.active {
+    background: color-mix(in srgb, var(--ui-surface-secondary) 58%, transparent);
+    color: var(--ui-text-primary);
+  }
+
+  .legal-outline button:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
   .legal-doc-page__breadcrumb {
@@ -145,6 +244,7 @@
   .legal-doc__section {
     display: grid;
     gap: 0.75rem;
+    scroll-margin-top: 6.25rem;
   }
 
   .legal-doc__heading {
@@ -246,6 +346,36 @@
 
     .legal-meta-sep {
       display: none;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .legal-doc-layout {
+      grid-template-columns: minmax(0, 760px);
+      gap: 2rem;
+    }
+
+    .legal-outline {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .legal-outline__nav {
+      display: flex;
+      gap: 0.35rem;
+      overflow-x: auto;
+      border-inline-start: 0;
+      padding: 0 0 0.35rem;
+      scrollbar-width: thin;
+    }
+
+    .legal-outline button {
+      width: auto;
+      flex: 0 0 auto;
+      max-width: 14rem;
+      border: 1px solid var(--ui-border-default);
+      background: var(--ui-surface-card);
     }
   }
 </style>

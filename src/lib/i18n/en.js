@@ -915,6 +915,10 @@ export default {
       appliesTo: 'Applies to',
       governingLaw: 'Governing law'
     },
+    outline: {
+      title: 'Sections',
+      ariaLabel: 'Legal document sections'
+    },
     notFound: {
       title: 'Legal document not found',
       body: 'The legal document you requested is not available. Return to the legal hub to view current policies.',
