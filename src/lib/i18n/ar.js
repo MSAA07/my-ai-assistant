@@ -459,7 +459,24 @@ const ar = {
         next: 'التالي',
         startExam: 'بدء الاختبار',
         submitExam: 'إرسال الاختبار',
-        retakeExam: 'إعادة الاختبار'
+        retakeExam: 'إعادة الاختبار',
+        sendFlashcardsToTelegram: 'إرسال البطاقات إلى Telegram',
+        sendExamToTelegram: 'إرسال الاختبار كاملًا إلى Telegram',
+        sendingToTelegram: 'جارٍ الإرسال إلى Telegram...',
+        connectTelegram: 'ربط Telegram',
+        refreshTelegram: 'تحديث الحالة',
+        openTelegram: 'فتح Telegram'
+      },
+      telegram: {
+        notConnected: 'اربط Telegram أولًا، ثم حدّث الحالة بعد الضغط على Start في Telegram.',
+        connected: 'Telegram متصل.',
+        linkCreated: 'افتح Telegram واضغط Start لإكمال الربط.',
+        refreshAfterStart: 'بعد الضغط على Start في Telegram، حدّث الحالة هنا.',
+        flashcardsSent: 'تم إرسال البطاقات التعليمية إلى Telegram.',
+        examSent: 'تم إرسال الاختبار كاملًا إلى Telegram.',
+        statusError: 'تعذر التحقق من حالة Telegram.',
+        linkError: 'تعذر إنشاء رابط Telegram.',
+        sendError: 'تعذر إرسال هذه المادة الدراسية إلى Telegram.'
       },
       summary: {
         title: 'الملخص',
@@ -644,6 +661,59 @@ const ar = {
         profile: 'الملف الشخصي',
         logout: 'تسجيل الخروج',
         loggingOut: 'جارٍ تسجيل الخروج...'
+      }
+    },
+    dataExport: {
+      title: 'بياناتك',
+      description: 'نزّل نسخة من بيانات حسابك تشمل المستندات وتقدم الدراسة وسجل الاستخدام.',
+      download: 'تنزيل بياناتي',
+      downloading: 'جارٍ تجهيز الملف...',
+      successNote: 'بدأ تنزيل ملف البيانات.',
+      clarification: 'تنزيل بياناتك لا يحذف حسابك.',
+      errors: {
+        failed: 'تعذّر إنشاء ملف التصدير. يرجى المحاولة مرة أخرى.'
+      }
+    },
+    sessions: {
+      title: 'الجلسات النشطة',
+      description: 'الأجهزة المسجّلة دخولها حاليًا في حسابك.',
+      current: 'هذا الجهاز',
+      signedIn: 'تسجيل الدخول',
+      revokeOthers: 'تسجيل الخروج من جميع الأجهزة الأخرى',
+      revokeOthersLoading: 'جارٍ تسجيل الخروج...',
+      revokeOthersSuccess: 'تم تسجيل الخروج من جميع الجلسات الأخرى.',
+      revoke: 'إلغاء',
+      revoking: 'جارٍ الإلغاء...',
+      unknownDevice: 'جهاز غير معروف',
+      noOtherSessions: 'لا توجد جلسات نشطة أخرى.',
+      errors: {
+        load: 'تعذّر تحميل الجلسات.',
+        revoke: 'تعذّر إلغاء هذه الجلسة.',
+        revokeOthers: 'تعذّر تسجيل الخروج من الجلسات الأخرى.'
+      }
+    },
+    telegram: {
+      title: 'Telegram',
+      description: 'اربط حسابك في Telegram لاستلام البطاقات التعليمية والاختبارات الكاملة من مركز الدراسة.',
+      loading: 'جارٍ التحقق من اتصال Telegram...',
+      connected: 'متصل',
+      disconnectedStatus: 'غير متصل',
+      connectedMeta: 'تم الربط في {date}.',
+      connectHelper: 'استخدم {bot} لربط حسابك في Telegram. لا يستطيع البوت مراسلتك إلا بعد الضغط على Start.',
+      lastSend: 'آخر إرسال: {date}',
+      connect: 'ربط Telegram',
+      creatingLink: 'جارٍ إنشاء الرابط...',
+      disconnect: 'قطع الربط',
+      disconnecting: 'جارٍ قطع الربط...',
+      refresh: 'تحديث الحالة',
+      openTelegram: 'فتح Telegram',
+      afterStart: 'اضغط Start في Telegram، ثم عُد إلى هنا وحدّث الحالة.',
+      linkCreated: 'تم إنشاء رابط Telegram. اضغط Start في Telegram لإكمال الربط.',
+      disconnected: 'تم قطع ربط Telegram.',
+      errors: {
+        status: 'تعذر تحميل حالة Telegram.',
+        link: 'تعذر إنشاء رابط Telegram.',
+        disconnect: 'تعذر قطع ربط Telegram.'
       }
     }
   },

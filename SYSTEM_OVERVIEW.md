@@ -169,6 +169,21 @@ Study activities:
   - `POST /api/flashcard/progress`
   - `POST /api/exam/attempt`
 - canonical study artifact APIs are wrapped in `src/lib/api/studyHub.js`
+- flashcards and exam activity surfaces can send ready canonical study content to Telegram through:
+  - `GET /api/telegram/status`
+  - `POST /api/telegram/link-token`
+  - `POST /api/document/:id/telegram/flashcards/send`
+  - `POST /api/document/:id/telegram/exam/send`
+- Summary does not expose Telegram delivery actions
+
+Settings:
+
+- `Settings.svelte` loads Telegram connection state from `GET /api/telegram/status`
+- users can create a Telegram deep link with `POST /api/telegram/link-token`, refresh status after pressing Start in Telegram, or disconnect with `DELETE /api/telegram/link`
+
+Admin:
+
+- admin user list/detail views display read-only Telegram connection and delivery usage fields returned by the admin user APIs
 
 ## I18N Rules
 
@@ -176,6 +191,7 @@ Study activities:
 - New user-facing copy must not be hardcoded in components in English or Arabic on canonical authenticated application surfaces.
 - `App.svelte` remounts on language change with `{#key $language}`, and `src/lib/stores/language.js` reapplies `lang`, `dir`, and font settings, so language switching fully re-renders the canonical application UI.
 - Mixed-language UI state is not allowed on canonical authenticated application surfaces.
+- Telegram UI labels use the translation layer; generated flashcard/exam content sent to Telegram is not translated by the frontend.
 - The refreshed public landing and auth shell currently contain product copy directly in `Landing.svelte` and `App.svelte`; that public copy is implemented and intentional in the current stage build.
 
 ## Shared UI System
@@ -199,6 +215,10 @@ Notable current primitives:
 - `PromptModal`
 - `ThemeToggle`
 - `LanguageToggle`
+
+Integration API wrappers:
+
+- `src/lib/api/studyHub.js` owns authenticated study API calls with `credentials: include`, including Telegram status/link/disconnect/send wrappers.
 
 ## Theme and Session
 
@@ -278,5 +298,6 @@ Update this file when any of these change:
 - shared UI primitive or token ownership
 - host-derived API base mapping
 - frontend-visible auth callbacks, verification flow, I18N rules, or lifecycle semantics
+- frontend-visible Telegram connection or delivery behavior
 
-Last Updated: April 30, 2026
+Last Updated: May 11, 2026

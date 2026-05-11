@@ -159,3 +159,34 @@ export function createExamExport(payload) {
 export function getExportDownloadUrl(artifactId) {
   return `${API_BASE}/api/exports/${artifactId}/download`;
 }
+
+export function getTelegramStatus() {
+  return requestJson('/api/telegram/status');
+}
+
+export function createTelegramLinkToken() {
+  return requestJson('/api/telegram/link-token', {
+    method: 'POST',
+    body: {}
+  });
+}
+
+export function disconnectTelegram() {
+  return requestJson('/api/telegram/link', {
+    method: 'DELETE'
+  });
+}
+
+export function sendDocumentFlashcardsToTelegram(documentId) {
+  return requestJson(`/api/document/${documentId}/telegram/flashcards/send`, {
+    method: 'POST',
+    body: {}
+  });
+}
+
+export function sendDocumentExamToTelegram(documentId) {
+  return requestJson(`/api/document/${documentId}/telegram/exam/send`, {
+    method: 'POST',
+    body: {}
+  });
+}

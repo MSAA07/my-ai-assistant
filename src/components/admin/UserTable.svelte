@@ -78,6 +78,13 @@
     return `This user will use the ${planName} plan defaults: ${docs} documents and ${cost} cost cap${token}.`;
   }
 
+  function formatTelegramCounts(telegram = {}) {
+    const flashcards = Number(telegram.flashcardSendCount || 0);
+    const exams = Number(telegram.examSendCount || 0);
+    if (flashcards === 0 && exams === 0) return 'No sends';
+    return `${flashcards} flashcards / ${exams} exams`;
+  }
+
   function parseOptionalInteger(value, label) {
     if (value === '' || value === null || value === undefined) return { valid: true };
     const parsed = Number(value);
@@ -505,6 +512,7 @@
             <th>Role</th>
             <th>Status</th>
             <th>Plan</th>
+            <th>Telegram</th>
             <th>Docs</th>
             <th>Storage</th>
             <th>Last Active</th>
@@ -535,6 +543,12 @@
                 <Badge tone={(user.plan || 'free') === 'premium' ? 'accent' : 'neutral'} size="xs">
                   {user.plan || 'free'}
                 </Badge>
+              </td>
+              <td>
+                <Badge tone={user.telegram?.connected ? 'success' : 'neutral'} size="xs">
+                  {user.telegram?.connected ? 'Connected' : 'Not connected'}
+                </Badge>
+                <span class="muted">{formatTelegramCounts(user.telegram)}</span>
               </td>
               <td>{user.documentCount ?? 0}</td>
               <td>{formatBytes(user.storageUsed)}</td>

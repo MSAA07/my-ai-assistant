@@ -113,7 +113,7 @@ Legacy routes:
 
 - legacy compatibility only, not primary UX
 - `src/pages/DocumentView.svelte`: legacy route wrapper
-- `src/lib/components/study/DocumentActivityView.svelte`: shared activity implementation used by canonical study routes and legacy routes
+- `src/lib/components/study/DocumentActivityView.svelte`: shared activity implementation used by canonical study routes and legacy routes, including Telegram send actions for flashcards and exams
 
 Shared UI system:
 
@@ -128,13 +128,15 @@ Data and integration:
 - `src/stores/theme.js`: theme persistence and DOM sync
 - `src/stores/pageCache.js`: page-level caching helpers
 - `src/config.js`: backend resolution, support email, Turnstile site key, and auth callback URL helpers
-- `src/lib/api/studyHub.js`: wrappers for canonical study APIs, legacy compatibility writes, and guided upload polling helpers for `/api/document/:id` and `/api/jobs/:id`
+- `src/lib/api/studyHub.js`: wrappers for canonical study APIs, legacy compatibility writes, guided upload polling helpers for `/api/document/:id` and `/api/jobs/:id`, and Telegram status/link/disconnect/send APIs
 
 ## Notes on Legacy Files
 
 - `Documents.svelte`, `Flashcards.svelte`, and `Exams.svelte` are non-canonical legacy compatibility files, not primary UX.
 - `DocumentView.svelte` is the only legacy route surface that remains connected to current canonical study behavior.
 - `AppHeader.svelte` and `Footer.svelte` remain only for the shell fallback path when `VITE_FEATURE_APPSHELL=false`.
+- `Settings.svelte` owns the authenticated Telegram account connection panel.
+- `src/components/admin/UserTable.svelte` and `src/components/admin/UserDetail.svelte` display read-only Telegram usage indicators from admin APIs.
 
 ## Environment Mapping Notes
 
@@ -163,4 +165,4 @@ Environment differences:
 - `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`: archival rollout checklist, not current runtime source of truth
 - `audit-screenshots/admin-ui/ADMIN_UI_AUDIT.md`: archival visual QA evidence for the admin console, not current runtime source of truth
 
-Last Updated: April 30, 2026
+Last Updated: May 11, 2026

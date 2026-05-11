@@ -52,6 +52,7 @@
   $: usageModels = usageDetail?.models || [];
   $: usageDocuments = usageDetail?.documents || [];
   $: usageSeries = usageDetail?.series || [];
+  $: telegramUsage = user?.telegram || stats?.telegram || {};
   $: limitConsumed = allowance?.consumed || {};
   $: limitCaps = allowance?.caps || {};
   $: limitRemaining = allowance?.remaining || {};
@@ -377,6 +378,11 @@
             <div><dt>Sessions</dt><dd>{stats?.sessions ?? 0}</dd></div>
             <div><dt>Exam Attempts</dt><dd>{stats?.examAttempts ?? 0}</dd></div>
             <div><dt>Flashcard Progress</dt><dd>{stats?.flashcardProgress ?? 0}</dd></div>
+            <div><dt>Telegram Connected</dt><dd>{telegramUsage.connected ? 'Yes' : 'No'}</dd></div>
+            <div><dt>Used Telegram Send</dt><dd>{telegramUsage.usedTelegramSend ? 'Yes' : 'No'}</dd></div>
+            <div><dt>Last Telegram Send</dt><dd>{formatDate(telegramUsage.lastTelegramSendAt)}</dd></div>
+            <div><dt>Telegram Flashcards</dt><dd>{formatNumber(telegramUsage.flashcardSendCount)}</dd></div>
+            <div><dt>Telegram Exams</dt><dd>{formatNumber(telegramUsage.examSendCount)}</dd></div>
             <div>
               <dt>Last Active</dt>
               <dd>{user.lastActive ? new Date(user.lastActive).toLocaleString() : '-'}</dd>

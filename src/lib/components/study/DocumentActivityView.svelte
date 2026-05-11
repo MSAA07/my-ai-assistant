@@ -1,6 +1,6 @@
 <script>
   import { onDestroy } from 'svelte';
-  import { Check, ChevronLeft, ChevronRight, Download, Play, RotateCcw, X } from '@lucide/svelte';
+  import { Check, ChevronLeft, ChevronRight, Download, ExternalLink, Play, RefreshCw, RotateCcw, Send, X } from '@lucide/svelte';
   import { t } from '../../i18n/t.js';
   import Badge from '../ui/Badge.svelte';
   import Button from '../ui/Button.svelte';
@@ -16,10 +16,14 @@
   import { router } from '../../../stores/router.js';
   import {
     exportStudyMaterialPdf,
+    createTelegramLinkToken,
     getDocument,
+    getTelegramStatus,
     requestGeneration,
     saveLegacyExamAttempt,
     saveFlashcardProgress,
+    sendDocumentExamToTelegram,
+    sendDocumentFlashcardsToTelegram,
   } from '../../api/studyHub.js';
 
   const POLL_INTERVAL_MS = 2500;
@@ -54,6 +58,14 @@
   let generationErrors = mapByFeature('');
   let exportBusy = mapByFeature(false);
   let exportErrors = mapByFeature('');
+  let telegramStatus = null;
+  let telegramStatusLoading = false;
+  let telegramStatusRequestedFor = '';
+  let telegramConnecting = false;
+  let telegramDeepLink = '';
+  let telegramSendBusy = mapByFeature(false);
+  let telegramFeedback = mapByFeature('');
+  let telegramFeedbackTone = mapByFeature('info');
 
   let regenerateModalOpen = false;
   let regenerateFeatureKey = 'summary';
@@ -87,6 +99,9 @@
   $: examFeature = featureState('exam', { document: docData, extractionStatus, pendingGeneration, generationErrors });
   $: activeFeature = activeFeatureKey === 'summary' ? summaryFeature : activeFeatureKey === 'flashcards' ? flashcardsFeature : examFeature;
   $: activeExportError = text(exportErrors?.[activeFeatureKey]);
+  $: activeTelegramMessage = text(telegramFeedback?.[activeFeatureKey]);
+  $: activeTelegramTone = telegramFeedbackTone?.[activeFeatureKey] || 'info';
+  $: telegramConnected = Boolean(telegramStatus?.connected);
 
   $: modeLabel = mode === 'summary'
     ? t('document.activity.section.summary')
@@ -109,6 +124,7 @@
   $: currentFlashcardLanguage = currentFlashcardDirection === 'rtl' ? 'ar' : 'en';
   $: resolvedDocumentId = text(documentId) || text(docData?.id) || currentDocumentId;
   $: hubPath = resolvedDocumentId ? `/study/${encodeURIComponent(resolvedDocumentId)}` : '';
+  $: showTelegramPanel = mode !== 'summary' && activeFeature.hasContent && (activeTelegramMessage || (!telegramConnected && telegramDeepLink));
 
   $: summaryBlocks = parseSummaryBlocks(docData?.summary);
 
@@ -202,6 +218,15 @@
       loading = false;
     }
     void fetchDocumentState({ background: Boolean(cached?.loaded && cached?.docData) });
+  }
+
+  $: if (
+    currentDocumentId
+    && mode !== 'summary'
+    && telegramStatusRequestedFor !== currentDocumentId
+  ) {
+    telegramStatusRequestedFor = currentDocumentId;
+    void loadTelegramStatus({ background: Boolean(telegramStatus) });
   }
 
   onDestroy(() => {
@@ -549,6 +574,88 @@
     exportErrors = { ...exportErrors, [featureKey]: value };
   }
 
+  function setTelegramBusy(featureKey, value) {
+    telegramSendBusy = { ...telegramSendBusy, [featureKey]: value };
+  }
+
+  function setTelegramMessage(featureKey, value = '', tone = 'info') {
+    telegramFeedback = { ...telegramFeedback, [featureKey]: value };
+    telegramFeedbackTone = { ...telegramFeedbackTone, [featureKey]: tone };
+  }
+
+  async function loadTelegramStatus({ background = false } = {}) {
+    if (telegramStatusLoading) return;
+    telegramStatusLoading = true;
+    if (!background) {
+      setTelegramMessage(activeFeatureKey, '');
+    }
+
+    try {
+      telegramStatus = await getTelegramStatus();
+      if (telegramStatus?.connected) {
+        telegramDeepLink = '';
+      }
+    } catch (error) {
+      setTelegramMessage(activeFeatureKey, text(error?.message) || t('document.activity.telegram.statusError'), 'error');
+    } finally {
+      telegramStatusLoading = false;
+    }
+  }
+
+  async function ensureTelegramConnected(featureKey) {
+    if (telegramConnected) return true;
+
+    if (telegramDeepLink) {
+      window.open(telegramDeepLink, '_blank', 'noopener,noreferrer');
+      setTelegramMessage(featureKey, t('document.activity.telegram.refreshAfterStart'), 'info');
+      return false;
+    }
+
+    telegramConnecting = true;
+    setTelegramMessage(featureKey, t('document.activity.telegram.notConnected'), 'info');
+
+    try {
+      const response = await createTelegramLinkToken();
+      telegramDeepLink = text(response?.deepLink);
+      setTelegramMessage(featureKey, t('document.activity.telegram.linkCreated'), 'success');
+      if (telegramDeepLink) {
+        window.open(telegramDeepLink, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      setTelegramMessage(featureKey, text(error?.message) || t('document.activity.telegram.linkError'), 'error');
+    } finally {
+      telegramConnecting = false;
+    }
+
+    return false;
+  }
+
+  async function sendFeatureToTelegram(featureKey) {
+    const target = featureState(featureKey, { document: docData, extractionStatus, pendingGeneration, generationErrors });
+    if (!currentDocumentId || !target.hasContent || target.busy || telegramSendBusy[featureKey] || telegramConnecting) return;
+
+    const connected = await ensureTelegramConnected(featureKey);
+    if (!connected) return;
+
+    setTelegramBusy(featureKey, true);
+    setTelegramMessage(featureKey, '');
+
+    try {
+      if (featureKey === 'flashcards') {
+        await sendDocumentFlashcardsToTelegram(currentDocumentId);
+        setTelegramMessage(featureKey, t('document.activity.telegram.flashcardsSent'), 'success');
+      } else {
+        await sendDocumentExamToTelegram(currentDocumentId);
+        setTelegramMessage(featureKey, t('document.activity.telegram.examSent'), 'success');
+      }
+      await loadTelegramStatus({ background: true });
+    } catch (error) {
+      setTelegramMessage(featureKey, text(error?.message) || t('document.activity.telegram.sendError'), 'error');
+    } finally {
+      setTelegramBusy(featureKey, false);
+    }
+  }
+
   function clearPollTimer() {
     if (pollTimer) {
       clearTimeout(pollTimer);
@@ -583,6 +690,10 @@
     generationErrors = mapByFeature('');
     exportBusy = mapByFeature(false);
     exportErrors = mapByFeature('');
+    telegramDeepLink = '';
+    telegramSendBusy = mapByFeature(false);
+    telegramFeedback = mapByFeature('');
+    telegramFeedbackTone = mapByFeature('info');
     regenerateModalOpen = false;
     regenerateFeatureKey = 'summary';
     regenerateSubmitting = false;
@@ -1093,6 +1204,32 @@
       {/if}
     </svelte:fragment>
 
+    {#if showTelegramPanel}
+      <div class={`telegram-inline telegram-inline--${activeTelegramTone}`}>
+        {#if activeTelegramMessage}
+          <p>{activeTelegramMessage}</p>
+        {/if}
+        {#if !telegramConnected && telegramDeepLink}
+          <div class="telegram-inline__actions">
+            <a href={telegramDeepLink} target="_blank" rel="noreferrer" class="telegram-inline__link">
+              <ExternalLink aria-hidden="true" />
+              {t('document.activity.actions.openTelegram')}
+            </a>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              on:click={() => loadTelegramStatus({ background: true })}
+              disabled={telegramStatusLoading}
+            >
+              <span slot="icon" aria-hidden="true"><RefreshCw /></span>
+              {t('document.activity.actions.refreshTelegram')}
+            </Button>
+          </div>
+        {/if}
+      </div>
+    {/if}
+
     {#if mode === 'summary'}
       <div class="activity-content-head activity-content-head--summary">
         <div class="activity-content-head__copy">
@@ -1231,6 +1368,18 @@
         </div>
         {#if flashcardsFeature.hasContent}
           <div class="activity-content-head__actions">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => sendFeatureToTelegram('flashcards')}
+              loading={telegramSendBusy.flashcards || telegramConnecting}
+              disabled={!flashcardsFeature.hasContent || flashcardsFeature.busy || telegramStatusLoading || telegramSendBusy.flashcards || telegramConnecting}
+            >
+              <span slot="icon" aria-hidden="true"><Send /></span>
+              {telegramSendBusy.flashcards ? t('document.activity.actions.sendingToTelegram') : t('document.activity.actions.sendFlashcardsToTelegram')}
+            </Button>
             <Button
               type="button"
               variant="secondary"
@@ -1420,6 +1569,18 @@
         </div>
         {#if examFeature.hasContent}
           <div class="activity-content-head__actions">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="summary-regenerate-button"
+              on:click={() => sendFeatureToTelegram('exam')}
+              loading={telegramSendBusy.exam || telegramConnecting}
+              disabled={!examFeature.hasContent || examFeature.busy || telegramStatusLoading || telegramSendBusy.exam || telegramConnecting}
+            >
+              <span slot="icon" aria-hidden="true"><Send /></span>
+              {telegramSendBusy.exam ? t('document.activity.actions.sendingToTelegram') : t('document.activity.actions.sendExamToTelegram')}
+            </Button>
             <Button
               type="button"
               variant="secondary"
@@ -1678,6 +1839,61 @@
   .activity-inline-error {
     width: 100%;
     margin: 0 auto;
+  }
+
+  .telegram-inline {
+    width: min(100%, var(--study-flow-session-width));
+    margin-inline: auto;
+    display: grid;
+    gap: var(--ui-space-2);
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-md);
+    padding: 0.75rem 0.85rem;
+    background: color-mix(in srgb, var(--ui-surface-card) 94%, transparent);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.5;
+  }
+
+  .telegram-inline--success {
+    border-color: color-mix(in srgb, var(--ui-accent-success-strong) 30%, var(--ui-border-subtle) 70%);
+    background: color-mix(in srgb, var(--ui-surface-card) 84%, #dff4e8 16%);
+    color: var(--ui-text-primary);
+  }
+
+  .telegram-inline--error {
+    border-color: var(--color-danger-border);
+    background: var(--color-danger-surface);
+    color: var(--color-danger-soft);
+  }
+
+  .telegram-inline p {
+    margin: 0;
+  }
+
+  .telegram-inline__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    flex-wrap: wrap;
+  }
+
+  .telegram-inline__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--ui-text-primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .telegram-inline__link:hover {
+    color: var(--ui-accent-primary);
+  }
+
+  .telegram-inline__link svg {
+    width: 1rem;
+    height: 1rem;
   }
 
   :global(.chrome-back-link) {

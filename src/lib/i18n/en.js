@@ -465,7 +465,24 @@ export default {
         next: 'Next',
         startExam: 'Start exam',
         submitExam: 'Submit exam',
-        retakeExam: 'Retake exam'
+        retakeExam: 'Retake exam',
+        sendFlashcardsToTelegram: 'Send flashcards to Telegram',
+        sendExamToTelegram: 'Send full exam to Telegram',
+        sendingToTelegram: 'Sending to Telegram...',
+        connectTelegram: 'Connect Telegram',
+        refreshTelegram: 'Refresh status',
+        openTelegram: 'Open Telegram'
+      },
+      telegram: {
+        notConnected: 'Connect Telegram first, then refresh the status after pressing Start in Telegram.',
+        connected: 'Telegram is connected.',
+        linkCreated: 'Open Telegram and press Start to finish connecting.',
+        refreshAfterStart: 'After pressing Start in Telegram, refresh the status here.',
+        flashcardsSent: 'Flashcards were sent to Telegram.',
+        examSent: 'The full exam was sent to Telegram.',
+        statusError: 'Could not check Telegram status.',
+        linkError: 'Could not create a Telegram link.',
+        sendError: 'Could not send this study material to Telegram.'
       },
       summary: {
         title: 'Summary',
@@ -650,6 +667,59 @@ export default {
         profile: 'Profile',
         logout: 'Sign out',
         loggingOut: 'Signing out...'
+      }
+    },
+    dataExport: {
+      title: 'Your Data',
+      description: 'Download a copy of your account data including documents, study progress, and usage history.',
+      download: 'Download my data',
+      downloading: 'Preparing export...',
+      successNote: 'Your export is downloading.',
+      clarification: 'Downloading your data does not delete your account.',
+      errors: {
+        failed: 'Could not generate your export. Please try again.'
+      }
+    },
+    sessions: {
+      title: 'Active Sessions',
+      description: 'Devices currently signed in to your account.',
+      current: 'This device',
+      signedIn: 'Signed in',
+      revokeOthers: 'Sign out all other devices',
+      revokeOthersLoading: 'Signing out...',
+      revokeOthersSuccess: 'All other sessions have been signed out.',
+      revoke: 'Revoke',
+      revoking: 'Revoking...',
+      unknownDevice: 'Unknown device',
+      noOtherSessions: 'No other active sessions.',
+      errors: {
+        load: 'Could not load sessions.',
+        revoke: 'Could not revoke that session.',
+        revokeOthers: 'Could not sign out other sessions.'
+      }
+    },
+    telegram: {
+      title: 'Telegram',
+      description: 'Connect your Telegram account to receive flashcards and full exams from Study Hub.',
+      loading: 'Checking Telegram connection...',
+      connected: 'Connected',
+      disconnectedStatus: 'Not connected',
+      connectedMeta: 'Connected on {date}.',
+      connectHelper: 'Use {bot} to connect your Telegram account. The bot can message you only after you press Start.',
+      lastSend: 'Last send: {date}',
+      connect: 'Connect Telegram',
+      creatingLink: 'Creating link...',
+      disconnect: 'Disconnect',
+      disconnecting: 'Disconnecting...',
+      refresh: 'Refresh status',
+      openTelegram: 'Open Telegram',
+      afterStart: 'Press Start in Telegram, then return here and refresh the status.',
+      linkCreated: 'Telegram link created. Press Start in Telegram to finish connecting.',
+      disconnected: 'Telegram disconnected.',
+      errors: {
+        status: 'Could not load Telegram status.',
+        link: 'Could not create a Telegram link.',
+        disconnect: 'Could not disconnect Telegram.'
       }
     }
   },
