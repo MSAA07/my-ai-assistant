@@ -604,6 +604,18 @@ export async function changePassword(currentPassword, newPassword, { revokeOther
   return result;
 }
 
+export async function listSessions() {
+  return request('/list-sessions');
+}
+
+export async function revokeSession(token) {
+  return request('/revoke-session', { method: 'POST', body: { token } });
+}
+
+export async function revokeOtherSessions() {
+  return request('/revoke-other-sessions', { method: 'POST' });
+}
+
 export async function signOut({ broadcast = true, redirect = true } = {}) {
   updateMeta({ action: "sign_out", errorCode: "" });
 
