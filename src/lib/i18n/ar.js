@@ -347,9 +347,24 @@ const ar = {
       },
       actions: {
         open: 'فتح',
-        startSummary: 'بدء الملخص',
-        startFlashcards: 'بدء البطاقات التعليمية',
-        startMockExam: 'بدء الاختبار التجريبي'
+        startSummary: 'فتح الملخص',
+        startFlashcards: 'فتح البطاقات التعليمية',
+        startMockExam: 'بدء الاختبار'
+      },
+      details: {
+        empty: 'لا توجد بيانات بعد - أنشئها لعرض التفاصيل',
+        section: '{count} قسم',
+        sections: '{count} أقسام',
+        readTime: 'حوالي {minutes} دقيقة قراءة',
+        card: '{count} بطاقة',
+        cards: '{count} بطاقات',
+        explanation: '{count} شرح',
+        explanations: '{count} شروحات',
+        question: '{count} سؤال',
+        questions: '{count} أسئلة',
+        multipleChoice: '{count} اختيار من متعدد',
+        trueFalse: '{count} صح / خطأ',
+        lastScore: 'آخر نتيجة'
       },
       meta: {
         fileType: 'نوع الملف'

@@ -287,6 +287,123 @@
     return Array.isArray(document?.examQuestions) && document.examQuestions.length > 0;
   }
 
+  function numberOrZero(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  function pluralize(count, singularKey, pluralKey) {
+    return t(count === 1 ? singularKey : pluralKey, { count: formatNumber(count) });
+  }
+
+  function getSummaryText(document = documentData) {
+    return text(document?.generationState?.summary?.output?.text) || text(document?.summary);
+  }
+
+  function getSummarySectionCount(summary) {
+    const source = text(summary);
+    if (!source) return 0;
+
+    const markdownHeadingCount = source
+      .split(/\n+/)
+      .filter((line) => /^\s{0,3}#{1,6}\s+\S/.test(line))
+      .length;
+
+    if (markdownHeadingCount > 0) return markdownHeadingCount;
+
+    const labeledSectionCount = source
+      .split(/\n+/)
+      .filter((line) => {
+        const normalized = line.trim();
+        return normalized.length > 2
+          && normalized.length <= 80
+          && /[:：]$/.test(normalized)
+          && !/^[-*\u2022\d.)\s]+/.test(normalized);
+      })
+      .length;
+
+    return labeledSectionCount > 0 ? labeledSectionCount : 1;
+  }
+
+  function getSummaryReadMinutes(summary, document = documentData) {
+    const source = text(summary);
+    if (!source) return 0;
+    const wordCount = source.split(/\s+/).filter(Boolean).length;
+    const language = text(document?.language).toLowerCase();
+    const wordsPerMinute = language === 'arabic' ? 180 : 220;
+    return Math.max(1, Math.round(wordCount / wordsPerMinute));
+  }
+
+  function normalizeQuestionType(value) {
+    const normalized = text(value).toLowerCase();
+    if (normalized === 'mcq' || normalized === 'multiple_choice') return 'mcq';
+    if (normalized === 'true_false' || normalized === 'truefalse') return 'true_false';
+    return normalized;
+  }
+
+  function buildFeatureDetails(featureKey, phase) {
+    if (phase !== 'ready') {
+      return {
+        empty: true,
+        emptyLabel: t('document.hub.details.empty'),
+        items: [],
+        score: null,
+      };
+    }
+
+    if (featureKey === 'summary') {
+      const summary = getSummaryText();
+      const sectionCount = getSummarySectionCount(summary);
+      const readMinutes = getSummaryReadMinutes(summary);
+      return {
+        empty: false,
+        items: [
+          { label: pluralize(sectionCount, 'document.hub.details.section', 'document.hub.details.sections') },
+          { label: t('document.hub.details.readTime', { minutes: formatNumber(readMinutes) }) },
+        ],
+        score: null,
+      };
+    }
+
+    if (featureKey === 'flashcards') {
+      const flashcards = Array.isArray(documentData?.flashcards) ? documentData.flashcards : [];
+      const explanationCount = flashcards.filter((card) => text(card?.explanation)).length;
+      return {
+        empty: false,
+        items: [
+          { label: pluralize(flashcards.length, 'document.hub.details.card', 'document.hub.details.cards') },
+          ...(explanationCount > 0
+            ? [{ label: pluralize(explanationCount, 'document.hub.details.explanation', 'document.hub.details.explanations') }]
+            : []),
+        ],
+        score: null,
+      };
+    }
+
+    const questions = Array.isArray(documentData?.examQuestions) ? documentData.examQuestions : [];
+    const multipleChoiceCount = questions.filter((question) => normalizeQuestionType(question?.questionType ?? question?.type) === 'mcq').length;
+    const trueFalseCount = questions.filter((question) => normalizeQuestionType(question?.questionType ?? question?.type) === 'true_false').length;
+    const latestAttempt = documentData?.latestExamAttempt;
+    const scorePercent = numberOrZero(latestAttempt?.scorePercent);
+    const hasScore = latestAttempt && Number.isFinite(Number(latestAttempt.scorePercent));
+
+    return {
+      empty: false,
+      items: [
+        { label: pluralize(questions.length, 'document.hub.details.question', 'document.hub.details.questions') },
+        { label: t('document.hub.details.multipleChoice', { count: formatNumber(multipleChoiceCount) }) },
+        { label: t('document.hub.details.trueFalse', { count: formatNumber(trueFalseCount) }) },
+      ],
+      score: hasScore
+        ? {
+            label: t('document.hub.details.lastScore'),
+            value: formatNumber(scorePercent),
+            percent: scorePercent,
+          }
+        : null,
+    };
+  }
+
   function getFeaturePhase(featureKey) {
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
     if (pendingGeneration[featureKey] || generationStatus === 'running') return 'generating';
@@ -310,7 +427,7 @@
     }
     if (phase === 'generating') return t('document.hub.states.generating');
     if (phase === 'failed') return t('status.failed');
-    return t('document.hub.states.notRequested');
+    return t('document.hub.states.notGenerated');
   }
 
   function getFeatureTone(phase) {
@@ -448,6 +565,7 @@
       canPrimaryAction: !progress.visible && phase !== 'queued' && phase !== 'generating',
       shouldRegenerate: hasFeatureContent(featureKey) || generationStatus === 'complete',
       statusCopy: getFeatureStatusCopy(phase, errorMessage),
+      details: buildFeatureDetails(featureKey, phase),
       errorMessage: phase === 'failed' ? errorMessage : '',
       actualProgressPct: progress.actualProgressPct,
       displayedProgressPct: visualProgressValue,

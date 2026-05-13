@@ -2,7 +2,7 @@
   import Button from '../ui/Button.svelte';
   import ProgressBar from '../ui/ProgressBar.svelte';
   import StudyActionCard from '../ui/StudyActionCard.svelte';
-  import { Sparkles } from '@lucide/svelte';
+  import { Play, Sparkles } from '@lucide/svelte';
 
   export let card = {};
   export let icon;
@@ -24,11 +24,17 @@
     progressIndeterminate: false,
     canPrimaryAction: false,
     primaryLabel: '',
+    details: {
+      empty: true,
+      emptyLabel: '',
+      items: [],
+      score: null,
+    },
     ...card,
   };
 </script>
 
-<StudyActionCard class="study-hub-feature-card" title={resolvedCard.title} status={resolvedCard.stateTone} statusLabel={resolvedCard.stateLabel}>
+<StudyActionCard class={`study-hub-feature-card study-hub-feature-card--${resolvedCard.key || 'feature'}`.trim()} title={resolvedCard.title} status={resolvedCard.stateTone} statusLabel={resolvedCard.stateLabel}>
   <svelte:fragment slot="icon">
     {#if Icon}
       <svelte:component this={Icon} />
@@ -36,8 +42,32 @@
   </svelte:fragment>
 
   <svelte:fragment slot="description">
-    <p>{resolvedCard.description}</p>
-    <p class="study-hub-feature-card__support-copy">{resolvedCard.statusCopy}</p>
+    {#if resolvedCard.details?.empty}
+      <p class="study-hub-feature-card__empty">{resolvedCard.details.emptyLabel || resolvedCard.statusCopy || resolvedCard.description}</p>
+    {:else}
+      <dl class="study-hub-feature-card__details">
+        {#each resolvedCard.details?.items ?? [] as item}
+          <div class="study-hub-feature-card__detail">
+            <dt aria-hidden="true"></dt>
+            <dd>{item.label}</dd>
+          </div>
+        {/each}
+      </dl>
+      {#if resolvedCard.details?.score}
+        <div class="study-hub-feature-card__score">
+          <div class="study-hub-feature-card__score-meta">
+            <span>{resolvedCard.details.score.label}</span>
+            <strong>{resolvedCard.details.score.value}%</strong>
+          </div>
+          <ProgressBar
+            value={resolvedCard.details.score.percent}
+            max={100}
+            ariaLabel={`${resolvedCard.title} ${resolvedCard.details.score.label}`}
+            className="study-hub-feature-card__score-bar"
+          />
+        </div>
+      {/if}
+    {/if}
     {#if resolvedCard.errorMessage}<p class="study-hub-feature-card__error">{resolvedCard.errorMessage}</p>{/if}
   </svelte:fragment>
 
@@ -66,12 +96,18 @@
     {:else}
       <Button
         type="button"
-        variant={resolvedCard.phase === 'ready' ? 'primary' : 'secondary'}
+        variant="secondary"
         className="study-hub-feature-card__button"
         on:click={() => onPrimaryAction(resolvedCard)}
         disabled={!resolvedCard.canPrimaryAction}
       >
-        <span slot="icon" aria-hidden="true"><Sparkles /></span>
+        <span slot="icon" aria-hidden="true">
+          {#if resolvedCard.phase === 'ready'}
+            <Play />
+          {:else}
+            <Sparkles />
+          {/if}
+        </span>
         {resolvedCard.primaryLabel}
       </Button>
     {/if}
@@ -80,7 +116,48 @@
 
 <style>
   :global(.study-hub-feature-card) {
-    min-height: 0;
+    min-height: 17.35rem;
+    border-color: color-mix(in srgb, var(--ui-text-primary) 18%, transparent);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 72%, var(--ui-surface-card) 28%);
+    --study-feature-card-accent: var(--ui-text-primary);
+    --study-feature-card-icon-bg: color-mix(in srgb, var(--ui-text-primary) 12%, var(--ui-surface-secondary) 88%);
+    --study-feature-card-icon-fg: var(--ui-text-primary);
+  }
+
+  :global(.study-hub-feature-card--summary) {
+    --study-feature-card-accent: #93c5fd;
+    --study-feature-card-icon-bg: #dbeafe;
+    --study-feature-card-icon-fg: #1d4ed8;
+  }
+
+  :global(.study-hub-feature-card--flashcards) {
+    --study-feature-card-accent: #a5b4fc;
+    --study-feature-card-icon-bg: #e0e7ff;
+    --study-feature-card-icon-fg: #4338ca;
+  }
+
+  :global(.study-hub-feature-card--exam) {
+    --study-feature-card-accent: #bbf7d0;
+    --study-feature-card-icon-bg: #dcfce7;
+    --study-feature-card-icon-fg: #15803d;
+  }
+
+  :global(.study-hub-feature-card .ui-study-action-card__icon) {
+    background: var(--study-feature-card-icon-bg);
+    color: var(--study-feature-card-icon-fg);
+  }
+
+  :global(.study-hub-feature-card .ui-study-action-card__copy h2) {
+    font-weight: 650;
+  }
+
+  :global(.study-hub-feature-card .ui-study-action-card__description) {
+    padding-top: 0.9rem;
+    border-top: 1px solid color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
+  }
+
+  :global(.study-hub-feature-card .ui-study-action-card__status) {
+    border-radius: var(--ui-radius-pill);
   }
 
   .study-hub-feature-card__support-copy {
@@ -89,6 +166,76 @@
     color: var(--ui-text-secondary);
     line-height: 1.5;
     font-size: 0.8125rem;
+  }
+
+  .study-hub-feature-card__empty {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.8125rem;
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  .study-hub-feature-card__details {
+    display: grid;
+    gap: 0.42rem;
+    margin: 0;
+  }
+
+  .study-hub-feature-card__detail {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 560;
+    line-height: 1.3;
+  }
+
+  .study-hub-feature-card__detail dt {
+    width: 0.7rem;
+    height: 0.7rem;
+    flex: 0 0 auto;
+    margin: 0;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--study-feature-card-accent) 70%, var(--ui-text-secondary) 30%);
+    box-shadow: inset 0 0 0 0.16rem var(--ui-surface-card);
+  }
+
+  .study-hub-feature-card__detail dd {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .study-hub-feature-card__score {
+    display: grid;
+    gap: 0.38rem;
+    margin-top: 0.7rem;
+  }
+
+  .study-hub-feature-card__score-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: var(--ui-text-secondary);
+    font-size: 0.74rem;
+    font-weight: 560;
+    line-height: 1.2;
+  }
+
+  .study-hub-feature-card__score-meta strong {
+    color: var(--ui-text-primary);
+    font-size: 0.75rem;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  :global(.study-hub-feature-card__score-bar.ui-progress) {
+    --ui-progress-track: color-mix(in srgb, var(--ui-text-primary) 13%, transparent);
+    --ui-progress-fill: color-mix(in srgb, var(--ui-accent-success) 78%, #3f6212 22%);
+    height: 0.25rem;
   }
 
   .study-hub-feature-card__error {
@@ -153,7 +300,10 @@
 
   :global(.study-hub-feature-card__button) {
     width: 100%;
-    --button-shadow: none;
+    --button-bg: transparent;
+    --button-bg-hover: color-mix(in srgb, var(--ui-text-primary) 7%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--ui-text-primary) 11%, transparent);
+    --button-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 22%, var(--ui-border-default) 78%);
   }
 
   :global(.study-hub-feature-card__button .ui-button__icon svg) {
