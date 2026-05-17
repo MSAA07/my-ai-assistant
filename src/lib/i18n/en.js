@@ -339,24 +339,9 @@ export default {
       },
       actions: {
         open: 'Open',
-        startSummary: 'Open summary',
-        startFlashcards: 'Open flashcards',
-        startMockExam: 'Start exam'
-      },
-      details: {
-        empty: 'No data yet - generate to see details',
-        section: '{count} section',
-        sections: '{count} sections',
-        readTime: '~{minutes} min read',
-        card: '{count} card',
-        cards: '{count} cards',
-        explanation: '{count} explanation',
-        explanations: '{count} explanations',
-        question: '{count} question',
-        questions: '{count} questions',
-        multipleChoice: '{count} multiple choice',
-        trueFalse: '{count} true / false',
-        lastScore: 'Last score'
+        startSummary: 'Start Summary',
+        startFlashcards: 'Start Flashcards',
+        startMockExam: 'Start Mock Exam'
       },
       meta: {
         fileType: 'File type'
