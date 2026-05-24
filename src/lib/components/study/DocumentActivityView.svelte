@@ -66,6 +66,8 @@
   let telegramSendBusy = mapByFeature(false);
   let telegramFeedback = mapByFeature('');
   let telegramFeedbackTone = mapByFeature('info');
+  let telegramSent = mapByFeature(false);
+  let telegramSentTimers = {};
 
   let regenerateModalOpen = false;
   let regenerateFeatureKey = 'summary';
@@ -231,6 +233,7 @@
 
   onDestroy(() => {
     clearPollTimer();
+    clearTelegramSentTimers();
   });
 
   function mapByFeature(value) {
@@ -583,6 +586,31 @@
     telegramFeedbackTone = { ...telegramFeedbackTone, [featureKey]: tone };
   }
 
+  function clearTelegramSentTimer(featureKey) {
+    if (!telegramSentTimers[featureKey]) return;
+    clearTimeout(telegramSentTimers[featureKey]);
+    telegramSentTimers = { ...telegramSentTimers, [featureKey]: null };
+  }
+
+  function clearTelegramSentTimers() {
+    Object.values(telegramSentTimers).forEach((timer) => {
+      if (timer) clearTimeout(timer);
+    });
+    telegramSentTimers = {};
+  }
+
+  function showTelegramSentState(featureKey) {
+    clearTelegramSentTimer(featureKey);
+    telegramSent = { ...telegramSent, [featureKey]: true };
+    telegramSentTimers = {
+      ...telegramSentTimers,
+      [featureKey]: setTimeout(() => {
+        telegramSent = { ...telegramSent, [featureKey]: false };
+        telegramSentTimers = { ...telegramSentTimers, [featureKey]: null };
+      }, 2500),
+    };
+  }
+
   async function loadTelegramStatus({ background = false } = {}) {
     if (telegramStatusLoading) return;
     telegramStatusLoading = true;
@@ -632,7 +660,7 @@
 
   async function sendFeatureToTelegram(featureKey) {
     const target = featureState(featureKey, { document: docData, extractionStatus, pendingGeneration, generationErrors });
-    if (!currentDocumentId || !target.hasContent || target.busy || telegramSendBusy[featureKey] || telegramConnecting) return;
+    if (!currentDocumentId || !target.hasContent || target.busy || telegramSendBusy[featureKey] || telegramConnecting || telegramSent[featureKey]) return;
 
     const connected = await ensureTelegramConnected(featureKey);
     if (!connected) return;
@@ -643,7 +671,9 @@
     try {
       if (featureKey === 'flashcards') {
         await sendDocumentFlashcardsToTelegram(currentDocumentId);
-        setTelegramMessage(featureKey, t('document.activity.telegram.flashcardsSent'), 'success');
+        revealAnswer = false;
+        setTelegramMessage(featureKey, '');
+        showTelegramSentState(featureKey);
       } else {
         await sendDocumentExamToTelegram(currentDocumentId);
         setTelegramMessage(featureKey, t('document.activity.telegram.examSent'), 'success');
@@ -694,6 +724,8 @@
     telegramSendBusy = mapByFeature(false);
     telegramFeedback = mapByFeature('');
     telegramFeedbackTone = mapByFeature('info');
+    telegramSent = mapByFeature(false);
+    clearTelegramSentTimers();
     regenerateModalOpen = false;
     regenerateFeatureKey = 'summary';
     regenerateSubmitting = false;
@@ -1370,15 +1402,25 @@
           <div class="activity-content-head__actions">
             <Button
               type="button"
-              variant="secondary"
+              variant={telegramSent.flashcards ? 'success' : 'secondary'}
               size="sm"
               className="summary-regenerate-button"
               on:click={() => sendFeatureToTelegram('flashcards')}
               loading={telegramSendBusy.flashcards || telegramConnecting}
               disabled={!flashcardsFeature.hasContent || flashcardsFeature.busy || telegramStatusLoading || telegramSendBusy.flashcards || telegramConnecting}
             >
-              <span slot="icon" aria-hidden="true"><Send /></span>
-              {telegramSendBusy.flashcards ? t('document.activity.actions.sendingToTelegram') : t('document.activity.actions.sendFlashcardsToTelegram')}
+              <span slot="icon" aria-hidden="true">
+                {#if telegramSent.flashcards}
+                  <Check />
+                {:else}
+                  <Send />
+                {/if}
+              </span>
+              {#if telegramSent.flashcards}
+                Sent!
+              {:else}
+                {telegramSendBusy.flashcards ? t('document.activity.actions.sendingToTelegram') : t('document.activity.actions.sendFlashcardsToTelegram')}
+              {/if}
             </Button>
             <Button
               type="button"
