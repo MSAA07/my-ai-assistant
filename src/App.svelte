@@ -47,10 +47,10 @@
     password_reset: 'auth.notices.passwordReset',
   };
 
-  function logAuthBridge(event, details = {}) {
+  function logAuthBridge(message) {
     if (typeof window === 'undefined') return;
 
-    console.info(`[auth-bridge] ${event}`, details);
+    console.log(`[auth] ${message}`);
   }
 
   function consumeVerificationBridge() {
@@ -68,14 +68,7 @@
       const callbackUrl = getEmailVerificationCallbackUrl();
       handoffUrl.searchParams.set('callbackURL', callbackUrl);
 
-      logAuthBridge('verification-handoff', {
-        browserUrl: window.location.href,
-        tokenPresent: true,
-        callbackUrl,
-        callbackHost: new URL(callbackUrl).host,
-        handoffOrigin: handoffUrl.origin,
-        handoffPath: handoffUrl.pathname,
-      });
+      logAuthBridge('verification flow triggered');
 
       window.location.replace(handoffUrl.toString());
       return;
@@ -90,14 +83,7 @@
     }
 
     const nextPath = `${VERIFY_EMAIL_PATH}?${nextParams.toString()}`;
-    const nextHash = `#${nextPath}`;
-    logAuthBridge('verification-complete', {
-      browserUrl: window.location.href,
-      tokenPresent: false,
-      status: nextParams.get('status'),
-      error: nextParams.get('error') || '',
-      nextHash,
-    });
+    logAuthBridge('verification flow completed');
     router.replace(nextPath);
   }
 
@@ -115,19 +101,11 @@
 
     if (token) {
       nextParams.set('token', token);
-      logAuthBridge('reset-password-handoff', {
-        browserUrl: window.location.href,
-        tokenPresent: true,
-        nextHash: `#${RESET_PASSWORD_PATH}?${nextParams.toString()}`,
-      });
+      logAuthBridge('password reset flow triggered');
     } else {
       nextParams.set('status', 'error');
       nextParams.set('error', (error || 'invalid_token').toLowerCase());
-      logAuthBridge('reset-password-error', {
-        browserUrl: window.location.href,
-        tokenPresent: false,
-        error: nextParams.get('error'),
-      });
+      logAuthBridge('password reset flow error');
     }
 
     const nextPath = `${RESET_PASSWORD_PATH}?${nextParams.toString()}`;

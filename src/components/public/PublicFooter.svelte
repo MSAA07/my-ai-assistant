@@ -21,13 +21,6 @@
     { labelKey: 'publicFooter.legalLinks.acceptableUse',   href: '#/legal/acceptable-use' },
   ];
 
-  const socialLinks = [
-    { label: 'X (Twitter)',  href: '#' },
-    { label: 'Whatsapp',    href: '#' },
-    { label: 'LinkedIn',    href: '#' },
-    { label: 'Telegram',    href: '#' },
-  ];
-
   $: currentLanguage = $language;
 
   function navigateInternal(event, href) {
@@ -90,14 +83,6 @@
         </nav>
       </section>
 
-      <section>
-        <h2>{t('publicFooter.sections.social')}</h2>
-        <nav aria-label={t('publicFooter.aria.socialLinks')}>
-          {#each socialLinks as link}
-            <a href={link.href}>{link.label}</a>
-          {/each}
-        </nav>
-      </section>
     </div>
   </div>
 </footer>

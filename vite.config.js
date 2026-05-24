@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
-const STAGING_API_TARGET = 'https://ai-assistant-backend-staging.up.railway.app';
+// Dev proxy should use an explicit env target, falling back to the local backend so local work never hits staging by accident.
+const DEV_API_TARGET = process.env.VITE_API_BASE_URL || process.env.LOCAL_API_BASE_URL || 'http://localhost:3001';
 const STAGING_SESSION_COOKIE = '__Secure-better-auth.session_token';
 const LOCAL_SESSION_COOKIE = 'better-auth.session_token';
 
@@ -21,7 +22,7 @@ export default defineConfig({
     strictPort: false,
     proxy: {
       '/api': {
-        target: STAGING_API_TARGET,
+        target: DEV_API_TARGET,
         changeOrigin: true,
         secure: true,
         configure(proxy) {
@@ -51,7 +52,7 @@ export default defineConfig({
         },
       },
       '/auth': {
-        target: STAGING_API_TARGET,
+        target: DEV_API_TARGET,
         changeOrigin: true,
         secure: true,
       },

@@ -1,8 +1,4 @@
-const DEPLOYMENT_API_BASES = {
-  local: "http://localhost:3001",
-  staging: "https://ai-assistant-backend-staging.up.railway.app",
-  production: "https://ai-assistant-backend-production-ddf0.up.railway.app",
-};
+const MISSING_API_BASE_URL_ERROR = "VITE_API_BASE_URL is not set — check your environment variables";
 
 function normalizeAbsoluteUrl(value = "") {
   const trimmed = value.trim();
@@ -14,47 +10,13 @@ function normalizeEnvValue(value = "") {
   return String(value || "").trim();
 }
 
-const PRODUCTION_FRONTEND_HOSTS = new Set([
-  "studymaxing.com",
-  "www.studymaxing.com",
-  "my-ai-assistant.vercel.app",
-]);
-
-function isKnownPreviewHost(hostname) {
-  return hostname.endsWith(".vercel.app") && hostname.includes("my-ai-assistant");
-}
-
-function getHostDerivedApiBaseUrl() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const hostname = window.location.hostname.toLowerCase();
-  const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
-
-  if (import.meta.env?.DEV && isLocalHost) {
-    return window.location.origin;
-  }
-
-  if (isLocalHost) {
-    return DEPLOYMENT_API_BASES.staging;
-  }
-
-  if (PRODUCTION_FRONTEND_HOSTS.has(hostname) || hostname.includes("git-production")) {
-    return DEPLOYMENT_API_BASES.production;
-  }
-
-  if (isKnownPreviewHost(hostname)) {
-    return DEPLOYMENT_API_BASES.staging;
-  }
-
-  return DEPLOYMENT_API_BASES.production;
-}
-
 export const getApiBaseUrl = () => {
-  let apiBaseUrl = import.meta.env?.VITE_API_BASE_URL
-    || getHostDerivedApiBaseUrl()
-    || DEPLOYMENT_API_BASES.local;
+  let apiBaseUrl = normalizeEnvValue(import.meta.env?.VITE_API_BASE_URL || "");
+
+  if (!apiBaseUrl) {
+    console.error(MISSING_API_BASE_URL_ERROR);
+    throw new Error(MISSING_API_BASE_URL_ERROR);
+  }
 
   if (!apiBaseUrl.startsWith("http://") && !apiBaseUrl.startsWith("https://")) {
     apiBaseUrl = `https://${apiBaseUrl}`;
