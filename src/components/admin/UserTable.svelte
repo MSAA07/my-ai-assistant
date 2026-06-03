@@ -694,6 +694,7 @@
 
   .modal-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
   }
 
   :global(.create-user-modal .modal-field-full) {
@@ -720,6 +721,14 @@
     border: none;
     border-radius: inherit;
     background-color: var(--ui-surface-base);
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+      linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 14px) calc(50% - 2px),
+      calc(100% - 9px) calc(50% - 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
     color: var(--color-text-primary);
     font: inherit;
     font-size: var(--font-size-sm);
@@ -729,6 +738,12 @@
 
   :global(.create-user-modal .ui-field__control:focus-within select) {
     background-color: var(--ui-surface-raised);
+  }
+
+  :global(html[dir='rtl'] .create-user-modal .ui-field__control select) {
+    background-position:
+      14px calc(50% - 2px),
+      19px calc(50% - 2px);
   }
 
   .limit-settings,
