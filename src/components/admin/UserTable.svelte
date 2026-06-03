@@ -1,33 +1,18 @@
 <script>
   import { onDestroy, onMount } from 'svelte';
+  import { Plus, RefreshCw } from '@lucide/svelte';
   import Badge from '../../lib/components/ui/Badge.svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import ModalSurface from '../../lib/components/ui/ModalSurface.svelte';
   import UserDetail from './UserDetail.svelte';
   import { API_BASE } from '../../config.js';
   import { readPageCache, writePageCache } from '../../stores/pageCache.js';
 
   const CACHE_KEY = 'page:admin:users';
-
-  let users = [];
-  let loading = true;
-  let refreshing = false;
-  let error = '';
-  let search = '';
-  let roleFilter = 'all';
-  let statusFilter = 'all';
-  let planFilter = 'all';
-  let selectedUserId = null;
-  let searchTimeout = null;
-  let selectedUserIds = [];
-  let capDefaults = {
-    free: { plan: 'free', documentCap: 5, costCapUsd: 1.5, tokenCap: null },
-    premium: { plan: 'premium', documentCap: 100, costCapUsd: null, tokenCap: null }
-  };
-
-  let newUser = {
+  const createBlankUser = () => ({
     name: '',
     email: '',
     password: '',
@@ -37,7 +22,29 @@
     documentCapOverride: '',
     costCapUsdOverride: '',
     tokenCapOverride: ''
+  });
+
+  let users = [];
+  let loading = true;
+  let refreshing = false;
+  let error = '';
+  let createError = '';
+  let search = '';
+  let roleFilter = 'all';
+  let statusFilter = 'all';
+  let planFilter = 'all';
+  let selectedUserId = null;
+  let createModalOpen = false;
+  let creatingUser = false;
+  let roleUpdatingId = null;
+  let searchTimeout = null;
+  let selectedUserIds = [];
+  let capDefaults = {
+    free: { plan: 'free', documentCap: 5, costCapUsd: 1.5, tokenCap: null },
+    premium: { plan: 'premium', documentCap: 100, costCapUsd: null, tokenCap: null }
   };
+
+  let newUser = createBlankUser();
 
   $: selectedPlanCap = capDefaults[newUser.plan] || capDefaults.free;
   $: defaultLimitCopy = buildDefaultLimitCopy(newUser.plan, selectedPlanCap);
@@ -176,15 +183,30 @@
     await fetchUsers({ background: true });
   }
 
-  async function toggleRole(user) {
-    const role = user.role === 'admin' ? 'user' : 'admin';
-    await fetch(`${API_BASE}/api/admin/users/${user.id}`, {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role })
-    });
-    await fetchUsers({ background: true });
+  async function updateUserRole(user, role) {
+    if (!role || role === (user.role || 'user')) return;
+
+    roleUpdatingId = user.id;
+    error = '';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/users/${user.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update role');
+      }
+    } catch (err) {
+      error = err.message;
+    } finally {
+      roleUpdatingId = null;
+      await fetchUsers({ background: true });
+    }
   }
 
   async function deleteUser(user) {
@@ -235,31 +257,44 @@
     await fetchUsers({ background: true });
   }
 
+  function openCreateModal() {
+    createError = '';
+    createModalOpen = true;
+  }
+
+  function closeCreateModal() {
+    if (creatingUser) return;
+    createModalOpen = false;
+    createError = '';
+    newUser = createBlankUser();
+  }
+
   async function createUser() {
+    createError = '';
     const email = newUser.email.trim();
 
     if (!email || !newUser.name.trim()) {
-      error = 'Name and email are required.';
+      createError = 'Name and email are required.';
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      error = 'Enter a valid email address.';
+      createError = 'Enter a valid email address.';
       return;
     }
 
     if (!newUser.password.trim()) {
-      error = 'Temporary password is required.';
+      createError = 'Temporary password is required.';
       return;
     }
 
     if (!newUser.role) {
-      error = 'Role is required.';
+      createError = 'Role is required.';
       return;
     }
 
     if (!newUser.plan) {
-      error = 'Plan is required.';
+      createError = 'Plan is required.';
       return;
     }
 
@@ -274,19 +309,19 @@
     if (!newUser.usePlanDefaultLimits) {
       const documentCap = parseOptionalInteger(newUser.documentCapOverride, 'Document cap override');
       if (!documentCap.valid) {
-        error = documentCap.error;
+        createError = documentCap.error;
         return;
       }
 
       const costCap = parseOptionalNumber(newUser.costCapUsdOverride, 'Cost cap override');
       if (!costCap.valid) {
-        error = costCap.error;
+        createError = costCap.error;
         return;
       }
 
       const tokenCap = parseOptionalInteger(newUser.tokenCapOverride, 'Token cap override');
       if (!tokenCap.valid) {
-        error = tokenCap.error;
+        createError = tokenCap.error;
         return;
       }
 
@@ -295,32 +330,31 @@
       if (tokenCap.value !== undefined) payload.tokenCapOverride = tokenCap.value;
     }
 
-    const response = await fetch(`${API_BASE}/api/admin/users`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    creatingUser = true;
 
-    const data = await response.json();
-    if (!response.ok) {
-      error = data.error || 'Failed to create user';
-      return;
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/users`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        createError = data.error || 'Failed to create user';
+        return;
+      }
+
+      newUser = createBlankUser();
+      createModalOpen = false;
+      error = '';
+      await fetchUsers({ background: users.length > 0 });
+    } catch (err) {
+      createError = err.message || 'Failed to create user';
+    } finally {
+      creatingUser = false;
     }
-
-    newUser = {
-      name: '',
-      email: '',
-      password: '',
-      role: 'user',
-      plan: 'free',
-      usePlanDefaultLimits: true,
-      documentCapOverride: '',
-      costCapUsdOverride: '',
-      tokenCapOverride: ''
-    };
-    error = '';
-    await fetchUsers();
   }
 
   function handleSearchInput() {
@@ -353,13 +387,24 @@
   });
 </script>
 
-<DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="1020px">
-  <Button slot="actions" type="button" variant="secondary" size="sm" on:click={() => fetchUsers({ background: users.length > 0 })} disabled={loading || refreshing}>
-    {refreshing ? 'Refreshing...' : 'Refresh'}
-  </Button>
+<DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="1080px">
+  <svelte:fragment slot="actions">
+    <Button type="button" variant="secondary" size="sm" on:click={() => fetchUsers({ background: users.length > 0 })} disabled={loading || refreshing}>
+      <svelte:fragment slot="icon">
+        <RefreshCw aria-hidden="true" />
+      </svelte:fragment>
+      {refreshing ? 'Refreshing...' : 'Refresh'}
+    </Button>
+    <Button type="button" variant="primary" size="sm" on:click={openCreateModal}>
+      <svelte:fragment slot="icon">
+        <Plus aria-hidden="true" />
+      </svelte:fragment>
+      Create User
+    </Button>
+  </svelte:fragment>
 
   <svelte:fragment slot="filters">
-    <FieldShell className="filter-field" label="Search">
+    <FieldShell className="filter-field search-field" label="Search">
       <input
         type="search"
         placeholder="Search name or email"
@@ -392,73 +437,6 @@
       </select>
     </FieldShell>
   </svelte:fragment>
-
-  <Card slot="panels" class="create-user" variant="base" padding="md" border="subtle">
-    <header class="create-header">
-      <h3>Create User</h3>
-      <p class="muted">Add a login-ready account with plan-based usage caps.</p>
-    </header>
-
-    <div class="form-grid">
-      <FieldShell label="Full name" forId="create-name" required>
-        <input id="create-name" placeholder="Full name" bind:value={newUser.name} required />
-      </FieldShell>
-      <FieldShell label="Email" forId="create-email" required>
-        <input id="create-email" placeholder="Email" type="email" bind:value={newUser.email} required />
-      </FieldShell>
-      <FieldShell
-        label="Temporary password"
-        forId="create-password"
-        hint="The user can sign in with this password. Use a temporary password and ask them to change it later."
-        required
-      >
-        <input id="create-password" placeholder="Temporary password" type="password" bind:value={newUser.password} required />
-      </FieldShell>
-      <FieldShell label="Role" forId="create-role" required>
-        <select id="create-role" bind:value={newUser.role} required>
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-      </FieldShell>
-      <FieldShell label="Plan" forId="create-plan" required>
-        <select id="create-plan" bind:value={newUser.plan} required>
-          <option value="free">Free</option>
-          <option value="premium">Premium</option>
-        </select>
-      </FieldShell>
-    </div>
-
-    <div class="limit-settings">
-      <label class="check-row" for="create-use-default-limits">
-        <input id="create-use-default-limits" type="checkbox" bind:checked={newUser.usePlanDefaultLimits} />
-        <span>
-          <strong>Use plan default limits</strong>
-          <small>{defaultLimitCopy}</small>
-        </span>
-      </label>
-
-      {#if !newUser.usePlanDefaultLimits}
-        <div class="custom-limits">
-          <p class="muted">Custom limits override the plan defaults only for this user.</p>
-          <div class="form-grid">
-            <FieldShell label="Document cap override" forId="create-document-cap" hint="Leave empty to use the selected plan default.">
-              <input id="create-document-cap" placeholder="Plan default" type="number" min="0" step="1" bind:value={newUser.documentCapOverride} />
-            </FieldShell>
-            <FieldShell label="Cost cap override (USD)" forId="create-cost-cap" hint="Leave empty to use the selected plan default.">
-              <input id="create-cost-cap" placeholder="Plan default" type="number" min="0" step="0.01" bind:value={newUser.costCapUsdOverride} />
-            </FieldShell>
-            <FieldShell label="Token cap override" forId="create-token-cap" hint="Leave empty to use the selected plan default.">
-              <input id="create-token-cap" placeholder="Plan default" type="number" min="0" step="1" bind:value={newUser.tokenCapOverride} />
-            </FieldShell>
-          </div>
-        </div>
-      {/if}
-    </div>
-
-    <div class="create-actions">
-      <Button type="button" variant="primary" on:click={createUser}>Create User</Button>
-    </div>
-  </Card>
 
   <svelte:fragment slot="bulk">
     {#if !loading}
@@ -529,10 +507,17 @@
                 <strong>{user.name || 'Unnamed user'}</strong>
                 <span class="muted">{user.email}</span>
               </td>
-              <td>
-                <Badge tone={(user.role || 'user') === 'admin' ? 'accent' : 'neutral'} size="xs" uppercase>
-                  {user.role || 'user'}
-                </Badge>
+              <td class="role-cell">
+                <select
+                  class="role-select"
+                  aria-label={`Role for ${user.email}`}
+                  value={user.role || 'user'}
+                  disabled={roleUpdatingId === user.id}
+                  on:change={(event) => updateUserRole(user, event.currentTarget.value)}
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
               </td>
               <td>
                 <Badge tone={user.banned ? 'danger' : 'success'} size="xs">
@@ -560,9 +545,6 @@
                 <Button type="button" variant={user.banned ? 'success' : 'secondary'} size="sm" on:click={() => toggleBan(user)}>
                   {user.banned ? 'Unban' : 'Ban'}
                 </Button>
-                <Button type="button" variant="secondary" size="sm" on:click={() => toggleRole(user)}>
-                  {user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
-                </Button>
                 <Button type="button" variant="danger" size="sm" on:click={() => deleteUser(user)}>
                   Delete
                 </Button>
@@ -575,6 +557,89 @@
   </svelte:fragment>
 </DataSurface>
 
+<ModalSurface
+  open={createModalOpen}
+  width="min(720px, 100%)"
+  labelledBy="create-user-heading"
+  describedBy="create-user-description"
+  className="create-user-modal"
+  on:close={closeCreateModal}
+>
+  <form class="create-user-form" on:submit|preventDefault={createUser}>
+    <header class="create-modal-header">
+      <div>
+        <h2 id="create-user-heading">Create User</h2>
+        <p id="create-user-description" class="muted">Add a login-ready account with plan-based usage caps.</p>
+      </div>
+    </header>
+
+    {#if createError}
+      <Card class="create-error" variant="soft" border="strong" padding="sm">{createError}</Card>
+    {/if}
+
+    <div class="form-grid modal-form-grid">
+      <FieldShell label="Full name" forId="create-name" required>
+        <input id="create-name" placeholder="Full name" bind:value={newUser.name} autocomplete="name" required />
+      </FieldShell>
+      <FieldShell label="Email" forId="create-email" required>
+        <input id="create-email" placeholder="Email" type="email" bind:value={newUser.email} autocomplete="email" required />
+      </FieldShell>
+      <FieldShell
+        label="Temporary password"
+        forId="create-password"
+        hint="The user can sign in with this password. Use a temporary password and ask them to change it later."
+        required
+      >
+        <input id="create-password" placeholder="Temporary password" type="password" bind:value={newUser.password} autocomplete="new-password" required />
+      </FieldShell>
+      <FieldShell label="Role" forId="create-role" required>
+        <select id="create-role" bind:value={newUser.role} required>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </FieldShell>
+      <FieldShell label="Plan" forId="create-plan" required>
+        <select id="create-plan" bind:value={newUser.plan} required>
+          <option value="free">Free</option>
+          <option value="premium">Premium</option>
+        </select>
+      </FieldShell>
+    </div>
+
+    <div class="limit-settings">
+      <label class="check-row" for="create-use-default-limits">
+        <input id="create-use-default-limits" type="checkbox" bind:checked={newUser.usePlanDefaultLimits} />
+        <span>
+          <strong>Use plan default limits</strong>
+          <small>{defaultLimitCopy}</small>
+        </span>
+      </label>
+
+      {#if !newUser.usePlanDefaultLimits}
+        <div class="custom-limits">
+          <p class="muted">Custom limits override the plan defaults only for this user.</p>
+          <div class="form-grid modal-form-grid">
+            <FieldShell label="Document cap override" forId="create-document-cap" hint="Leave empty to use the selected plan default.">
+              <input id="create-document-cap" placeholder="Plan default" type="number" min="0" step="1" bind:value={newUser.documentCapOverride} />
+            </FieldShell>
+            <FieldShell label="Cost cap override (USD)" forId="create-cost-cap" hint="Leave empty to use the selected plan default.">
+              <input id="create-cost-cap" placeholder="Plan default" type="number" min="0" step="0.01" bind:value={newUser.costCapUsdOverride} />
+            </FieldShell>
+            <FieldShell label="Token cap override" forId="create-token-cap" hint="Leave empty to use the selected plan default.">
+              <input id="create-token-cap" placeholder="Plan default" type="number" min="0" step="1" bind:value={newUser.tokenCapOverride} />
+            </FieldShell>
+          </div>
+        </div>
+      {/if}
+    </div>
+
+    <footer class="modal-actions">
+      <Button type="button" variant="secondary" on:click={closeCreateModal} disabled={creatingUser}>Cancel</Button>
+      <Button type="submit" variant="primary" loading={creatingUser}>Create User</Button>
+    </footer>
+  </form>
+</ModalSurface>
+
 {#if selectedUserId}
   <UserDetail
     userId={selectedUserId}
@@ -584,11 +649,12 @@
 {/if}
 
 <style>
-  h3 {
+  h2 {
     margin: 0;
     color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
+    font-size: 1rem;
     font-weight: 600;
+    letter-spacing: 0;
   }
 
   .muted {
@@ -599,19 +665,35 @@
     overflow-wrap: anywhere;
   }
 
-  :global(.create-user) {
-    gap: var(--space-3);
+  :global(.ui-data-surface__filters .search-field) {
+    flex: 2 1 340px;
+    min-width: min(100%, 280px);
   }
 
-  .create-header {
+  :global(.create-user-modal.ui-modal) {
+    gap: 0;
+  }
+
+  .create-user-form {
     display: grid;
-    gap: 0.15rem;
+    gap: var(--space-4);
+  }
+
+  .create-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
   }
 
   .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: var(--space-2);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .modal-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .limit-settings,
@@ -656,9 +738,18 @@
     line-height: 1.45;
   }
 
-  .create-actions {
+  .modal-actions {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding-top: var(--space-1);
+  }
+
+  :global(.create-error) {
+    color: color-mix(in srgb, var(--ui-accent-danger) 78%, var(--ui-text-primary) 22%);
+    border-color: color-mix(in srgb, var(--ui-accent-danger) 34%, var(--ui-border-default) 66%);
   }
 
   .bulk-actions {
@@ -680,11 +771,46 @@
     accent-color: var(--color-accent-primary);
   }
 
+  .role-cell {
+    min-width: 122px;
+  }
+
+  .role-select {
+    width: 112px;
+    min-height: 2rem;
+    padding-block: 0;
+    padding-inline-start: 0.65rem;
+    padding-inline-end: 1.8rem;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-surface-card);
+    color: var(--ui-text-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: capitalize;
+    cursor: pointer;
+    box-shadow: inset 0 0 0 1px transparent;
+  }
+
+  .role-select:hover:not(:disabled) {
+    border-color: var(--ui-border-strong);
+    background-color: var(--ui-surface-secondary);
+  }
+
+  .role-select:focus-visible {
+    border-color: var(--ui-border-focus);
+    box-shadow: var(--ui-focus-ring-strong);
+  }
+
   .actions-cell {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    min-width: 188px;
+    min-width: 170px;
+  }
+
+  .actions-cell :global(.ui-button) {
+    min-width: 4.25rem;
   }
 
   :global(.ui-data-table td:first-child) {
@@ -699,6 +825,10 @@
     min-width: 150px;
   }
 
+  :global(.ui-data-table td:nth-child(9)) {
+    min-width: 170px;
+  }
+
   @media (max-width: 768px) {
     .bulk-actions {
       align-items: stretch;
@@ -709,11 +839,15 @@
       min-width: 0;
     }
 
-    .create-actions {
+    .modal-form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-actions {
       justify-content: stretch;
     }
 
-    .create-actions :global(.ui-button) {
+    .modal-actions :global(.ui-button) {
       width: 100%;
     }
   }
