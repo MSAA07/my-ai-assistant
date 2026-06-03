@@ -598,7 +598,7 @@
           <option value="admin">Admin</option>
         </select>
       </FieldShell>
-      <FieldShell label="Plan" forId="create-plan" required>
+      <FieldShell className="modal-field-full" label="Plan" forId="create-plan" required>
         <select id="create-plan" bind:value={newUser.plan} required>
           <option value="free">Free</option>
           <option value="premium">Premium</option>
@@ -694,6 +694,41 @@
 
   .modal-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :global(.create-user-modal .modal-field-full) {
+    grid-column: 1 / -1;
+  }
+
+  :global(.create-user-modal .ui-field__label) {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+  }
+
+  :global(.create-user-modal .ui-field__required) {
+    color: var(--color-danger);
+  }
+
+  :global(.create-user-modal .ui-field__meta) {
+    max-width: 100%;
+  }
+
+  :global(.create-user-modal .ui-field__control select) {
+    min-height: var(--ui-control-height-md);
+    padding: 0.5rem 0.75rem;
+    padding-inline-end: 2rem;
+    border: none;
+    border-radius: inherit;
+    background-color: var(--ui-surface-base);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    line-height: 1.35;
+    box-shadow: none;
+  }
+
+  :global(.create-user-modal .ui-field__control:focus-within select) {
+    background-color: var(--ui-surface-raised);
   }
 
   .limit-settings,
