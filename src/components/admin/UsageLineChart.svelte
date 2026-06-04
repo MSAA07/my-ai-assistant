@@ -15,7 +15,7 @@
     tooltipLabel: formatTooltipBucket(point.bucketStart, groupBy),
     costUsd: Number(point.costUsd || 0)
   }));
-  $: if (chart) renderChart();
+  $: if (chart && preparedPoints) renderChart(preparedPoints);
 
   function formatBucket(value, bucketType) {
     const date = new Date(value);
@@ -70,12 +70,12 @@
     return { primary, muted, border, surface, page };
   }
 
-  function renderChart() {
+  function renderChart(activePoints = preparedPoints) {
     if (!chart || !canvas) return;
 
     const colors = getChartColors();
-    chart.data.labels = preparedPoints.map((point) => point.label);
-    chart.data.datasets[0].data = preparedPoints.map((point) => point.costUsd);
+    chart.data.labels = activePoints.map((point) => point.label);
+    chart.data.datasets[0].data = activePoints.map((point) => point.costUsd);
     chart.data.datasets[0].borderColor = colors.primary;
     chart.data.datasets[0].pointBackgroundColor = colors.primary;
     chart.data.datasets[0].pointBorderColor = colors.page;
@@ -178,7 +178,7 @@
     });
 
     renderChart();
-    themeObserver = new MutationObserver(renderChart);
+    themeObserver = new MutationObserver(() => renderChart());
     themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'data-theme', 'dir']

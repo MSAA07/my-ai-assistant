@@ -13,6 +13,8 @@
   const MIN_LOADING_MS = 300;
   const SAR_RATE = 3.75;
   const USAGE_LOAD_ERROR = 'Failed to load usage data. Please try again.';
+  const DEFAULT_RANGE = '7d';
+  const DEFAULT_GROUP_BY = 'day';
   const rangeOptions = [
     { value: '7d', label: '7 Days', subtitle: 'Last 7 days' },
     { value: '30d', label: '30 Days', subtitle: 'Last 30 days' },
@@ -35,14 +37,14 @@
   let refreshing = false;
   let error = '';
   let sectionErrors = createEmptySectionErrors();
-  let range = '30d';
-  let groupBy = 'day';
+  let range = DEFAULT_RANGE;
+  let groupBy = DEFAULT_GROUP_BY;
   let abortController = null;
   let debounceTimer = null;
   let fetchSequence = 0;
   const batchCache = new Map();
 
-  $: activeRange = rangeOptions.find((item) => item.value === range) || rangeOptions[1];
+  $: activeRange = rangeOptions.find((item) => item.value === range) || rangeOptions[0];
   $: activeGroupBy = groupByOptions.find((item) => item.value === groupBy) || groupByOptions[0];
   $: totals = summary?.totals || {};
   $: sarRate = Number(summary?.sarRate || SAR_RATE);
@@ -77,11 +79,11 @@
   }
 
   function normalizeRange(value) {
-    return rangeOptions.some((item) => item.value === value) ? value : '30d';
+    return rangeOptions.some((item) => item.value === value) ? value : DEFAULT_RANGE;
   }
 
   function normalizeGroupBy(value) {
-    return groupByOptions.some((item) => item.value === value) ? value : 'day';
+    return groupByOptions.some((item) => item.value === value) ? value : DEFAULT_GROUP_BY;
   }
 
   function createEmptySectionErrors() {
@@ -95,21 +97,25 @@
     };
   }
 
-  function getFilterSnapshot(overrides = {}) {
+  function normalizeFilters(rangeValue = DEFAULT_RANGE, groupByValue = DEFAULT_GROUP_BY) {
     return {
-      range: normalizeRange(overrides.range ?? range),
-      groupBy: normalizeGroupBy(overrides.groupBy ?? groupBy)
+      range: normalizeRange(rangeValue),
+      groupBy: normalizeGroupBy(groupByValue)
     };
   }
 
-  function getBatchKey(filters = getFilterSnapshot()) {
+  function getCurrentFilters() {
+    return normalizeFilters(range, groupBy);
+  }
+
+  function getBatchKey(filters = getCurrentFilters()) {
     return JSON.stringify({
       range: filters.range,
       groupBy: filters.groupBy
     });
   }
 
-  function setRangeDates(params, selectedRange = normalizeRange(range)) {
+  function setRangeDates(params, selectedRange = DEFAULT_RANGE) {
     const now = new Date();
     const from = new Date(now);
 
@@ -125,7 +131,7 @@
     params.set('to', now.toISOString());
   }
 
-  function buildQuery(extra = {}, filters = getFilterSnapshot()) {
+  function buildQuery(extra = {}, filters = getCurrentFilters()) {
     const params = new URLSearchParams();
     setRangeDates(params, filters.range);
     for (const [key, value] of Object.entries(extra)) {
@@ -167,7 +173,7 @@
     series = Array.isArray(snapshot.series) ? snapshot.series : [];
   }
 
-  function writeUsageCache(snapshot, filters = getFilterSnapshot()) {
+  function writeUsageCache(snapshot, filters = getCurrentFilters()) {
     writePageCache(CACHE_KEY, {
       loaded: true,
       ...snapshot,
@@ -193,13 +199,13 @@
     }
   }
 
-  async function fetchAllData({ background = false, force = false, filters = getFilterSnapshot() } = {}) {
+  async function fetchAllData(requestRange, requestGroupBy, { background = false, force = false } = {}) {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
       debounceTimer = null;
     }
 
-    const requestFilters = getFilterSnapshot(filters);
+    const requestFilters = normalizeFilters(requestRange, requestGroupBy);
     abortController?.abort();
     abortController = new AbortController();
     const signal = abortController.signal;
@@ -275,8 +281,8 @@
     }
   }
 
-  function scheduleFetchAllData(filters = getFilterSnapshot()) {
-    const scheduledFilters = getFilterSnapshot(filters);
+  function scheduleFetchAllData(nextRange = range, nextGroupBy = groupBy) {
+    const scheduledFilters = normalizeFilters(nextRange, nextGroupBy);
     if (debounceTimer) clearTimeout(debounceTimer);
     fetchSequence += 1;
     abortController?.abort();
@@ -285,10 +291,9 @@
     error = '';
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
-      void fetchAllData({
+      void fetchAllData(scheduledFilters.range, scheduledFilters.groupBy, {
         background: Boolean(summary),
-        force: true,
-        filters: scheduledFilters
+        force: true
       });
     }, FILTER_DEBOUNCE_MS);
   }
@@ -297,30 +302,32 @@
     const nextRange = normalizeRange(value);
     if (range === nextRange) return;
     range = nextRange;
-    scheduleFetchAllData({ range: nextRange, groupBy });
+    scheduleFetchAllData(nextRange, groupBy);
   }
 
   function selectGroupBy(value) {
     const nextGroupBy = normalizeGroupBy(value);
     if (groupBy === nextGroupBy) return;
     groupBy = nextGroupBy;
-    scheduleFetchAllData({ range, groupBy: nextGroupBy });
+    scheduleFetchAllData(range, nextGroupBy);
   }
 
   onMount(() => {
     const cached = readPageCache(CACHE_KEY);
-    if (cached?.loaded) {
+    const initialFilters = getCurrentFilters();
+    const cachedFilters = normalizeFilters(cached?.range, cached?.groupBy || cached?.granularity);
+    const canUseCache = cached?.loaded && getBatchKey(cachedFilters) === getBatchKey(initialFilters);
+
+    if (canUseCache) {
       summary = cached.summary || null;
       users = Array.isArray(cached.users) ? cached.users : [];
       documents = Array.isArray(cached.documents) ? cached.documents : [];
       models = Array.isArray(cached.models) ? cached.models : [];
       features = Array.isArray(cached.features) ? cached.features : [];
       series = Array.isArray(cached.series) ? cached.series : [];
-      range = normalizeRange(cached.range);
-      groupBy = normalizeGroupBy(cached.groupBy || cached.granularity);
       loading = false;
     }
-    void fetchAllData({ background: Boolean(cached?.loaded) });
+    void fetchAllData(initialFilters.range, initialFilters.groupBy, { background: Boolean(canUseCache) });
   });
 
   onDestroy(() => {
@@ -337,7 +344,7 @@
         <h2>Usage & Cost</h2>
         <p>Ledger-backed model usage, token volume, and cost.</p>
       </div>
-      <Button type="button" variant="secondary" size="sm" on:click={() => fetchAllData({ background: Boolean(summary), force: true })} disabled={loading || refreshing}>
+      <Button type="button" variant="secondary" size="sm" on:click={() => fetchAllData(range, groupBy, { background: Boolean(summary), force: true })} disabled={loading || refreshing}>
         <span slot="icon" aria-hidden="true"><RefreshCw /></span>
         {refreshing ? 'Refreshing...' : 'Refresh'}
       </Button>
@@ -382,7 +389,7 @@
     <Card padding="sm" border="strong" variant="soft" className="usage-error-card">
       <AlertCircle aria-hidden="true" />
       <p>{error}</p>
-      <Button type="button" variant="secondary" size="sm" on:click={() => fetchAllData({ force: true })}>Retry</Button>
+      <Button type="button" variant="secondary" size="sm" on:click={() => fetchAllData(range, groupBy, { force: true })}>Retry</Button>
     </Card>
   {/if}
 
@@ -432,7 +439,7 @@
         <div class="section-error-state">
           <AlertCircle aria-hidden="true" />
           <p>{sectionErrors.series}</p>
-          <button type="button" on:click={() => fetchAllData({ force: true })}>Retry</button>
+          <button type="button" on:click={() => fetchAllData(range, groupBy, { force: true })}>Retry</button>
         </div>
       {:else if series.length > 0}
         <div class="chart-shell">
@@ -454,7 +461,7 @@
       paginated
       itemLabel="users"
       errorMessage={sectionErrors.users}
-      retry={() => fetchAllData({ force: true })}
+      retry={() => fetchAllData(range, groupBy, { force: true })}
     />
 
     <UsageBreakdownTable
@@ -465,7 +472,7 @@
       paginated
       itemLabel="documents"
       errorMessage={sectionErrors.documents}
-      retry={() => fetchAllData({ force: true })}
+      retry={() => fetchAllData(range, groupBy, { force: true })}
     />
 
     <div class="stacked-breakdowns">
@@ -476,7 +483,7 @@
         type="features"
         compact
         errorMessage={sectionErrors.features}
-        retry={() => fetchAllData({ force: true })}
+        retry={() => fetchAllData(range, groupBy, { force: true })}
       />
       <UsageBreakdownTable
         title="Models"
@@ -485,7 +492,7 @@
         type="models"
         compact
         errorMessage={sectionErrors.models}
-        retry={() => fetchAllData({ force: true })}
+        retry={() => fetchAllData(range, groupBy, { force: true })}
       />
     </div>
   {/if}
