@@ -387,7 +387,7 @@
   });
 </script>
 
-<DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="1080px">
+<DataSurface title="Users" description="Search, filter, and manage accounts." tableMinWidth="1160px">
   <svelte:fragment slot="actions">
     <Button type="button" variant="secondary" size="sm" on:click={() => fetchUsers({ background: users.length > 0 })} disabled={loading || refreshing}>
       <svelte:fragment slot="icon">
@@ -585,6 +585,7 @@
         <input id="create-email" placeholder="Email" type="email" bind:value={newUser.email} autocomplete="email" required />
       </FieldShell>
       <FieldShell
+        className="modal-password-field"
         label="Temporary password"
         forId="create-password"
         hint="The user can sign in with this password. Use a temporary password and ask them to change it later."
@@ -635,7 +636,7 @@
 
     <footer class="modal-actions">
       <Button type="button" variant="secondary" on:click={closeCreateModal} disabled={creatingUser}>Cancel</Button>
-      <Button type="submit" variant="primary" loading={creatingUser}>Create User</Button>
+      <Button type="submit" variant="primary" className="modal-submit-button" loading={creatingUser}>Create User</Button>
     </footer>
   </form>
 </ModalSurface>
@@ -710,8 +711,15 @@
     color: var(--color-danger);
   }
 
-  :global(.create-user-modal .ui-field__meta) {
+  :global(.create-user-modal .modal-password-field) {
+    min-width: 0;
+  }
+
+  :global(.create-user-modal .modal-password-field .ui-field__meta) {
+    width: 100%;
     max-width: 100%;
+    justify-self: stretch;
+    overflow-wrap: anywhere;
   }
 
   :global(.create-user-modal .ui-field__control select) {
@@ -797,6 +805,15 @@
     padding-top: var(--space-1);
   }
 
+  :global(.create-user-modal .modal-submit-button.ui-button) {
+    --button-bg: var(--ui-accent-info);
+    --button-bg-hover: color-mix(in srgb, var(--ui-accent-info) 88%, black 12%);
+    --button-bg-active: color-mix(in srgb, var(--ui-accent-info) 78%, black 22%);
+    --button-fg: #ffffff;
+    --button-fg-hover: #ffffff;
+    --button-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 14%, transparent);
+  }
+
   :global(.create-error) {
     color: color-mix(in srgb, var(--ui-accent-danger) 78%, var(--ui-text-primary) 22%);
     border-color: color-mix(in srgb, var(--ui-accent-danger) 34%, var(--ui-border-default) 66%);
@@ -856,11 +873,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    min-width: 170px;
+    min-width: 230px;
+    overflow: visible;
   }
 
   .actions-cell :global(.ui-button) {
-    min-width: 4.25rem;
+    min-width: 4.75rem;
+    white-space: nowrap;
   }
 
   :global(.ui-data-table td:first-child) {
@@ -875,8 +894,9 @@
     min-width: 150px;
   }
 
-  :global(.ui-data-table td:nth-child(9)) {
-    min-width: 170px;
+  :global(.ui-data-table td:nth-child(10)),
+  :global(.ui-data-table th:nth-child(10)) {
+    min-width: 230px;
   }
 
   @media (max-width: 768px) {
