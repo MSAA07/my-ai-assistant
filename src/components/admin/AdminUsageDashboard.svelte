@@ -14,7 +14,7 @@
   const SAR_RATE = 3.75;
   const USAGE_LOAD_ERROR = 'Failed to load usage data. Please try again.';
   const DEFAULT_RANGE = '7d';
-  const DEFAULT_GROUP_BY = 'day';
+  const DEFAULT_GROUP_BY = 'week';
   const rangeOptions = [
     { value: '7d', label: '7 Days', subtitle: 'Last 7 days' },
     { value: '30d', label: '30 Days', subtitle: 'Last 30 days' },
