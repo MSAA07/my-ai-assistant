@@ -95,15 +95,21 @@
     };
   }
 
-  function getBatchKey() {
+  function getFilterSnapshot(overrides = {}) {
+    return {
+      range: normalizeRange(overrides.range ?? range),
+      groupBy: normalizeGroupBy(overrides.groupBy ?? groupBy)
+    };
+  }
+
+  function getBatchKey(filters = getFilterSnapshot()) {
     return JSON.stringify({
-      range: normalizeRange(range),
-      groupBy: normalizeGroupBy(groupBy)
+      range: filters.range,
+      groupBy: filters.groupBy
     });
   }
 
-  function setRangeDates(params) {
-    const selectedRange = normalizeRange(range);
+  function setRangeDates(params, selectedRange = normalizeRange(range)) {
     const now = new Date();
     const from = new Date(now);
 
@@ -119,9 +125,9 @@
     params.set('to', now.toISOString());
   }
 
-  function buildQuery(extra = {}) {
+  function buildQuery(extra = {}, filters = getFilterSnapshot()) {
     const params = new URLSearchParams();
-    setRangeDates(params);
+    setRangeDates(params, filters.range);
     for (const [key, value] of Object.entries(extra)) {
       if (value !== undefined && value !== null && value !== '') params.set(key, value);
     }
@@ -161,12 +167,12 @@
     series = Array.isArray(snapshot.series) ? snapshot.series : [];
   }
 
-  function writeUsageCache(snapshot) {
+  function writeUsageCache(snapshot, filters = getFilterSnapshot()) {
     writePageCache(CACHE_KEY, {
       loaded: true,
       ...snapshot,
-      range,
-      groupBy
+      range: filters.range,
+      groupBy: filters.groupBy
     });
   }
 
@@ -187,12 +193,13 @@
     }
   }
 
-  async function fetchAllData({ background = false, force = false } = {}) {
+  async function fetchAllData({ background = false, force = false, filters = getFilterSnapshot() } = {}) {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
       debounceTimer = null;
     }
 
+    const requestFilters = getFilterSnapshot(filters);
     abortController?.abort();
     abortController = new AbortController();
     const signal = abortController.signal;
@@ -204,9 +211,9 @@
     error = '';
 
     try {
-      const baseQuery = buildQuery();
-      const seriesQuery = buildQuery({ granularity: normalizeGroupBy(groupBy) });
-      const batchKey = getBatchKey();
+      const baseQuery = buildQuery({}, requestFilters);
+      const seriesQuery = buildQuery({ granularity: requestFilters.groupBy }, requestFilters);
+      const batchKey = getBatchKey(requestFilters);
 
       if (!force && batchCache.has(batchKey)) {
         applyUsageSnapshot(batchCache.get(batchKey));
@@ -253,7 +260,7 @@
 
       if (failedSections === 0) {
         batchCache.set(batchKey, nextSnapshot);
-        writeUsageCache(nextSnapshot);
+        writeUsageCache(nextSnapshot, requestFilters);
       }
     } catch (err) {
       if (!isAbortError(err)) {
@@ -268,7 +275,8 @@
     }
   }
 
-  function scheduleFetchAllData() {
+  function scheduleFetchAllData(filters = getFilterSnapshot()) {
+    const scheduledFilters = getFilterSnapshot(filters);
     if (debounceTimer) clearTimeout(debounceTimer);
     fetchSequence += 1;
     abortController?.abort();
@@ -277,20 +285,26 @@
     error = '';
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
-      void fetchAllData({ background: Boolean(summary) });
+      void fetchAllData({
+        background: Boolean(summary),
+        force: true,
+        filters: scheduledFilters
+      });
     }, FILTER_DEBOUNCE_MS);
   }
 
   function selectRange(value) {
-    if (range === value) return;
-    range = value;
-    scheduleFetchAllData();
+    const nextRange = normalizeRange(value);
+    if (range === nextRange) return;
+    range = nextRange;
+    scheduleFetchAllData({ range: nextRange, groupBy });
   }
 
   function selectGroupBy(value) {
-    if (groupBy === value) return;
-    groupBy = value;
-    scheduleFetchAllData();
+    const nextGroupBy = normalizeGroupBy(value);
+    if (groupBy === nextGroupBy) return;
+    groupBy = nextGroupBy;
+    scheduleFetchAllData({ range, groupBy: nextGroupBy });
   }
 
   onMount(() => {
