@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { Activity, AlertCircle, DollarSign, RefreshCw, TrendingUp, Zap } from '@lucide/svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
@@ -9,7 +9,10 @@
   import { readPageCache, writePageCache } from '../../stores/pageCache.js';
 
   const CACHE_KEY = 'page:admin:usage';
+  const FILTER_DEBOUNCE_MS = 500;
+  const MIN_LOADING_MS = 300;
   const SAR_RATE = 3.75;
+  const USAGE_LOAD_ERROR = 'Failed to load usage data. Please try again.';
   const rangeOptions = [
     { value: '7d', label: '7 Days', subtitle: 'Last 7 days' },
     { value: '30d', label: '30 Days', subtitle: 'Last 30 days' },
@@ -31,8 +34,13 @@
   let loading = true;
   let refreshing = false;
   let error = '';
+  let sectionErrors = createEmptySectionErrors();
   let range = '30d';
   let groupBy = 'day';
+  let abortController = null;
+  let debounceTimer = null;
+  let fetchSequence = 0;
+  const batchCache = new Map();
 
   $: activeRange = rangeOptions.find((item) => item.value === range) || rangeOptions[1];
   $: activeGroupBy = groupByOptions.find((item) => item.value === groupBy) || groupByOptions[0];
@@ -76,6 +84,24 @@
     return groupByOptions.some((item) => item.value === value) ? value : 'day';
   }
 
+  function createEmptySectionErrors() {
+    return {
+      summary: '',
+      users: '',
+      documents: '',
+      models: '',
+      features: '',
+      series: ''
+    };
+  }
+
+  function getBatchKey() {
+    return JSON.stringify({
+      range: normalizeRange(range),
+      groupBy: normalizeGroupBy(groupBy)
+    });
+  }
+
   function setRangeDates(params) {
     const selectedRange = normalizeRange(range);
     const now = new Date();
@@ -106,72 +132,165 @@
     return query ? `${path}?${query}` : path;
   }
 
-  async function fetchJson(path) {
-    const response = await fetch(`${API_BASE}${path}`, { credentials: 'include' });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Failed to fetch usage data');
+  async function fetchJson(path, signal) {
+    const response = await fetch(`${API_BASE}${path}`, { credentials: 'include', signal });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const requestError = new Error(response.status === 429 ? USAGE_LOAD_ERROR : data.error || USAGE_LOAD_ERROR);
+      requestError.status = response.status;
+      throw requestError;
+    }
     return data;
   }
 
-  async function fetchUsage({ background = false } = {}) {
-    if (background) {
-      refreshing = true;
-    } else {
-      loading = true;
-      error = '';
+  function isAbortError(err) {
+    return err?.name === 'AbortError';
+  }
+
+  function mapSectionError(err) {
+    if (err?.status === 429) return USAGE_LOAD_ERROR;
+    return USAGE_LOAD_ERROR;
+  }
+
+  function applyUsageSnapshot(snapshot) {
+    summary = snapshot.summary || null;
+    users = Array.isArray(snapshot.users) ? snapshot.users : [];
+    documents = Array.isArray(snapshot.documents) ? snapshot.documents : [];
+    models = Array.isArray(snapshot.models) ? snapshot.models : [];
+    features = Array.isArray(snapshot.features) ? snapshot.features : [];
+    series = Array.isArray(snapshot.series) ? snapshot.series : [];
+  }
+
+  function writeUsageCache(snapshot) {
+    writePageCache(CACHE_KEY, {
+      loaded: true,
+      ...snapshot,
+      range,
+      groupBy
+    });
+  }
+
+  async function waitForMinimumLoading(startedAt) {
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < MIN_LOADING_MS) {
+      await new Promise((resolve) => setTimeout(resolve, MIN_LOADING_MS - elapsed));
     }
+  }
+
+  async function fetchSection({ key, path, select }, signal) {
+    try {
+      const data = await fetchJson(path, signal);
+      return { key, data: select(data) };
+    } catch (err) {
+      if (isAbortError(err)) throw err;
+      return { key, error: mapSectionError(err) };
+    }
+  }
+
+  async function fetchAllData({ background = false, force = false } = {}) {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+
+    abortController?.abort();
+    abortController = new AbortController();
+    const signal = abortController.signal;
+    const sequence = ++fetchSequence;
+    const startedAt = Date.now();
+
+    loading = true;
+    refreshing = background || Boolean(summary);
+    error = '';
 
     try {
       const baseQuery = buildQuery();
       const seriesQuery = buildQuery({ granularity: normalizeGroupBy(groupBy) });
-      const [summaryData, usersData, documentsData, modelsData, featuresData, timeData] = await Promise.all([
-        fetchJson(withQuery('/api/admin/usage/summary', baseQuery)),
-        fetchJson(withQuery('/api/admin/usage/users', baseQuery)),
-        fetchJson(withQuery('/api/admin/usage/documents', baseQuery)),
-        fetchJson(withQuery('/api/admin/usage/models', baseQuery)),
-        fetchJson(withQuery('/api/admin/usage/features', baseQuery)),
-        fetchJson(withQuery('/api/admin/usage/timeseries', seriesQuery))
+      const batchKey = getBatchKey();
+
+      if (!force && batchCache.has(batchKey)) {
+        applyUsageSnapshot(batchCache.get(batchKey));
+        sectionErrors = createEmptySectionErrors();
+        return;
+      }
+
+      const results = await Promise.all([
+        fetchSection({ key: 'summary', path: withQuery('/api/admin/usage/summary', baseQuery), select: (data) => data }, signal),
+        fetchSection({ key: 'users', path: withQuery('/api/admin/usage/users', baseQuery), select: (data) => data.users || [] }, signal),
+        fetchSection({ key: 'documents', path: withQuery('/api/admin/usage/documents', baseQuery), select: (data) => data.documents || [] }, signal),
+        fetchSection({ key: 'models', path: withQuery('/api/admin/usage/models', baseQuery), select: (data) => data.models || [] }, signal),
+        fetchSection({ key: 'features', path: withQuery('/api/admin/usage/features', baseQuery), select: (data) => data.features || [] }, signal),
+        fetchSection({ key: 'series', path: withQuery('/api/admin/usage/timeseries', seriesQuery), select: (data) => data.series || [] }, signal)
       ]);
 
-      summary = summaryData;
-      users = usersData.users || [];
-      documents = documentsData.documents || [];
-      models = modelsData.models || [];
-      features = featuresData.features || [];
-      series = timeData.series || [];
-      writePageCache(CACHE_KEY, {
-        loaded: true,
+      if (signal.aborted || sequence !== fetchSequence) return;
+
+      const nextErrors = createEmptySectionErrors();
+      const nextSnapshot = {
         summary,
         users,
         documents,
         models,
         features,
-        series,
-        range,
-        groupBy
-      });
-      error = '';
+        series
+      };
+
+      for (const result of results) {
+        if (result.error) {
+          nextErrors[result.key] = result.error;
+        } else {
+          nextSnapshot[result.key] = result.data;
+        }
+      }
+
+      applyUsageSnapshot(nextSnapshot);
+      sectionErrors = nextErrors;
+
+      const failedSections = Object.values(nextErrors).filter(Boolean).length;
+      if (nextErrors.summary || failedSections === results.length) {
+        error = USAGE_LOAD_ERROR;
+      }
+
+      if (failedSections === 0) {
+        batchCache.set(batchKey, nextSnapshot);
+        writeUsageCache(nextSnapshot);
+      }
     } catch (err) {
-      error = err.message;
+      if (!isAbortError(err)) {
+        error = USAGE_LOAD_ERROR;
+      }
     } finally {
-      if (background) {
-        refreshing = false;
-      } else {
+      await waitForMinimumLoading(startedAt);
+      if (sequence === fetchSequence) {
         loading = false;
+        refreshing = false;
       }
     }
+  }
+
+  function scheduleFetchAllData() {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    fetchSequence += 1;
+    abortController?.abort();
+    loading = true;
+    refreshing = Boolean(summary);
+    error = '';
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      void fetchAllData({ background: Boolean(summary) });
+    }, FILTER_DEBOUNCE_MS);
   }
 
   function selectRange(value) {
     if (range === value) return;
     range = value;
-    void fetchUsage({ background: Boolean(summary) });
+    scheduleFetchAllData();
   }
 
   function selectGroupBy(value) {
     if (groupBy === value) return;
     groupBy = value;
-    void fetchUsage({ background: Boolean(summary) });
+    scheduleFetchAllData();
   }
 
   onMount(() => {
@@ -187,7 +306,13 @@
       groupBy = normalizeGroupBy(cached.groupBy || cached.granularity);
       loading = false;
     }
-    void fetchUsage({ background: Boolean(cached?.loaded) });
+    void fetchAllData({ background: Boolean(cached?.loaded) });
+  });
+
+  onDestroy(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    fetchSequence += 1;
+    abortController?.abort();
   });
 </script>
 
@@ -198,7 +323,7 @@
         <h2>Usage & Cost</h2>
         <p>Ledger-backed model usage, token volume, and cost.</p>
       </div>
-      <Button type="button" variant="secondary" size="sm" on:click={() => fetchUsage({ background: Boolean(summary) })} disabled={loading || refreshing}>
+      <Button type="button" variant="secondary" size="sm" on:click={() => fetchAllData({ background: Boolean(summary), force: true })} disabled={loading || refreshing}>
         <span slot="icon" aria-hidden="true"><RefreshCw /></span>
         {refreshing ? 'Refreshing...' : 'Refresh'}
       </Button>
@@ -243,11 +368,13 @@
     <Card padding="sm" border="strong" variant="soft" className="usage-error-card">
       <AlertCircle aria-hidden="true" />
       <p>{error}</p>
+      <Button type="button" variant="secondary" size="sm" on:click={() => fetchAllData({ force: true })}>Retry</Button>
     </Card>
   {/if}
 
   {#if loading && !summary}
     <Card padding="md" border="default" className="usage-state-card">
+      <span class="loading-spinner" aria-hidden="true"></span>
       <p>Loading usage data...</p>
     </Card>
   {:else if summary}
@@ -287,7 +414,13 @@
         <p>USD spend grouped by {activeGroupBy.label.toLowerCase()}.</p>
       </header>
 
-      {#if series.length > 0}
+      {#if sectionErrors.series}
+        <div class="section-error-state">
+          <AlertCircle aria-hidden="true" />
+          <p>{sectionErrors.series}</p>
+          <button type="button" on:click={() => fetchAllData({ force: true })}>Retry</button>
+        </div>
+      {:else if series.length > 0}
         <div class="chart-shell">
           <UsageLineChart points={series} groupBy={groupBy} />
         </div>
@@ -306,6 +439,8 @@
       type="users"
       paginated
       itemLabel="users"
+      errorMessage={sectionErrors.users}
+      retry={() => fetchAllData({ force: true })}
     />
 
     <UsageBreakdownTable
@@ -315,6 +450,8 @@
       type="documents"
       paginated
       itemLabel="documents"
+      errorMessage={sectionErrors.documents}
+      retry={() => fetchAllData({ force: true })}
     />
 
     <div class="stacked-breakdowns">
@@ -324,6 +461,8 @@
         rows={features}
         type="features"
         compact
+        errorMessage={sectionErrors.features}
+        retry={() => fetchAllData({ force: true })}
       />
       <UsageBreakdownTable
         title="Models"
@@ -331,6 +470,8 @@
         rows={models}
         type="models"
         compact
+        errorMessage={sectionErrors.models}
+        retry={() => fetchAllData({ force: true })}
       />
     </div>
   {/if}
@@ -461,6 +602,12 @@
     color: color-mix(in srgb, var(--ui-accent-danger) 76%, var(--ui-text-primary) 24%);
   }
 
+  :global(.usage-state-card) {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
   :global(.usage-error-card) :global(svg) {
     width: 1rem;
     height: 1rem;
@@ -472,6 +619,26 @@
     margin: 0;
     color: inherit;
     font-size: var(--ui-type-body-sm);
+  }
+
+  :global(.usage-error-card) p {
+    flex: 1 1 auto;
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid color-mix(in srgb, var(--ui-text-primary) 24%, transparent);
+    border-top-color: var(--ui-text-primary);
+    border-radius: var(--ui-radius-pill);
+    animation: usage-spin 700ms linear infinite;
+  }
+
+  @keyframes usage-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .metric-grid {
@@ -568,6 +735,46 @@
     margin: 0;
     color: var(--ui-text-secondary);
     font-size: var(--ui-type-body-sm);
+  }
+
+  .section-error-state {
+    display: grid;
+    place-items: center;
+    gap: var(--ui-space-2);
+    min-height: 12rem;
+    border: 1px dashed color-mix(in srgb, var(--ui-accent-danger) 28%, var(--ui-border-default) 72%);
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-accent-danger) 8%, var(--ui-surface-secondary) 92%);
+    color: color-mix(in srgb, var(--ui-accent-danger) 76%, var(--ui-text-primary) 24%);
+    padding: var(--ui-space-5);
+    text-align: center;
+  }
+
+  .section-error-state :global(svg) {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .section-error-state p {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+  }
+
+  .section-error-state button {
+    min-height: 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 36%, var(--ui-border-default) 64%);
+    border-radius: var(--ui-radius-md);
+    background: transparent;
+    color: var(--ui-text-primary);
+    cursor: pointer;
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
+    padding: 0 0.75rem;
+  }
+
+  .section-error-state button:hover {
+    background: color-mix(in srgb, var(--ui-text-primary) 8%, transparent);
   }
 
   .stacked-breakdowns {

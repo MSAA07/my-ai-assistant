@@ -10,6 +10,8 @@
   export let pageSize = 10;
   export let itemLabel = 'rows';
   export let compact = false;
+  export let errorMessage = '';
+  export let retry = null;
 
   const numberColumns = ['events', 'inputTokens', 'outputTokens', 'totalTokens', 'costUsd', 'costSar'];
   let sortKey = 'costUsd';
@@ -204,7 +206,14 @@
 
 <DataSurface {title} {description} {compact} padding="md" tableMinWidth={config.tableMinWidth} className={surfaceClass}>
   <svelte:fragment slot="table">
-    {#if rows.length > 0}
+    {#if errorMessage}
+      <div class="table-error-state">
+        <p>{errorMessage}</p>
+        {#if retry}
+          <button type="button" on:click={retry}>Retry</button>
+        {/if}
+      </div>
+    {:else if rows.length > 0}
       <table class="ui-data-table usage-breakdown-table">
         <thead>
           <tr>
@@ -417,6 +426,40 @@
     margin: 0;
     color: var(--ui-text-secondary);
     font-size: var(--ui-type-body-sm);
+  }
+
+  .table-error-state {
+    display: grid;
+    place-items: center;
+    gap: var(--ui-space-2);
+    min-height: 9rem;
+    border: 1px dashed color-mix(in srgb, var(--ui-accent-danger) 28%, var(--ui-border-default) 72%);
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-accent-danger) 8%, var(--ui-surface-secondary) 92%);
+    padding: var(--ui-space-5);
+    text-align: center;
+  }
+
+  .table-error-state p {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+  }
+
+  .table-error-state button {
+    min-height: 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 36%, var(--ui-border-default) 64%);
+    border-radius: var(--ui-radius-md);
+    background: transparent;
+    color: var(--ui-text-primary);
+    cursor: pointer;
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
+    padding: 0 0.75rem;
+  }
+
+  .table-error-state button:hover {
+    background: color-mix(in srgb, var(--ui-text-primary) 8%, transparent);
   }
 
   @media (max-width: 640px) {
