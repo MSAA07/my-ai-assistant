@@ -221,7 +221,7 @@
         </div>
       </div>
 
-      <div class="filter-group">
+      <div class="filter-group filter-group--compact">
         <span class="filter-label">Group by</span>
         <div class="segmented-control" role="group" aria-label="Group by">
           {#each groupByOptions as option}
@@ -317,7 +317,7 @@
       itemLabel="documents"
     />
 
-    <div class="split-grid">
+    <div class="stacked-breakdowns">
       <UsageBreakdownTable
         title="Features"
         description="AI usage by feature type"
@@ -339,7 +339,8 @@
 <style>
   .usage-dashboard {
     display: grid;
-    gap: var(--ui-space-5);
+    row-gap: var(--ui-space-8);
+    column-gap: var(--ui-space-5);
     min-width: 0;
   }
 
@@ -397,7 +398,13 @@
   .filter-group {
     display: grid;
     gap: var(--ui-space-2);
+    justify-items: start;
     min-width: min(100%, 18rem);
+  }
+
+  .filter-group--compact {
+    min-width: 0;
+    width: fit-content;
   }
 
   .filter-label {
@@ -411,6 +418,8 @@
   .segmented-control {
     display: inline-flex;
     align-items: center;
+    justify-self: start;
+    width: max-content;
     max-width: 100%;
     overflow-x: auto;
     border: 1px solid var(--ui-border-default);
@@ -531,7 +540,9 @@
   }
 
   .chart-shell {
-    min-height: 22rem;
+    height: 280px;
+    max-height: 280px;
+    min-height: 0;
     min-width: 0;
   }
 
@@ -559,10 +570,10 @@
     font-size: var(--ui-type-body-sm);
   }
 
-  .split-grid {
+  .stacked-breakdowns {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--ui-space-4);
+    grid-template-columns: 1fr;
+    gap: var(--ui-space-8);
     min-width: 0;
   }
 
@@ -572,15 +583,9 @@
     }
   }
 
-  @media (max-width: 900px) {
-    .split-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
   @media (max-width: 640px) {
     .usage-dashboard {
-      gap: var(--ui-space-4);
+      row-gap: var(--ui-space-6);
     }
 
     .usage-header {
@@ -594,6 +599,12 @@
 
     .filter-group {
       min-width: 0;
+      width: 100%;
+    }
+
+    .segmented-control {
+      max-width: 100%;
+      overflow-x: auto;
     }
 
     .metric-grid {
@@ -601,7 +612,8 @@
     }
 
     .chart-shell {
-      min-height: 18rem;
+      height: 240px;
+      max-height: 240px;
     }
   }
 </style>

@@ -1,6 +1,5 @@
 <script>
   import { ArrowUpDown, ChevronDown, ChevronUp } from '@lucide/svelte';
-  import Button from '../../lib/components/ui/Button.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
 
   export let title = '';
@@ -23,10 +22,18 @@
     page = 1;
   }
   $: config = getConfig(type);
+  $: surfaceClass = [
+    'usage-breakdown-surface',
+    type === 'features' || type === 'models' ? 'usage-breakdown-surface--fit-table' : ''
+  ]
+    .filter(Boolean)
+    .join(' ');
   $: sortedRows = sortRows(rows, sortKey, sortDirection);
   $: totalRows = sortedRows.length;
   $: totalPages = paginated ? Math.max(1, Math.ceil(totalRows / pageSize)) : 1;
   $: if (page > totalPages) page = totalPages;
+  $: hasPreviousPage = page > 1;
+  $: hasNextPage = page < totalPages;
   $: visibleRows = paginated
     ? sortedRows.slice((page - 1) * pageSize, page * pageSize)
     : sortedRows;
@@ -54,7 +61,7 @@
 
     if (tableType === 'features') {
       return {
-        tableMinWidth: '860px',
+        tableMinWidth: '100%',
         emptyMessage: 'No feature usage for this period.',
         columns: [
           { key: 'label', label: 'Feature Name' },
@@ -70,7 +77,7 @@
 
     if (tableType === 'models') {
       return {
-        tableMinWidth: '860px',
+        tableMinWidth: '100%',
         emptyMessage: 'No model usage for this period.',
         columns: [
           { key: 'label', label: 'Model' },
@@ -126,7 +133,7 @@
   }
 
   function getDocumentSecondary(row) {
-    return row.document?.originalName && row.documentId ? row.documentId : '';
+    return '';
   }
 
   function getLabel(row) {
@@ -185,15 +192,17 @@
   }
 
   function nextPage() {
-    page = Math.min(page + 1, totalPages);
+    if (!hasNextPage) return;
+    page += 1;
   }
 
   function previousPage() {
-    page = Math.max(page - 1, 1);
+    if (!hasPreviousPage) return;
+    page -= 1;
   }
 </script>
 
-<DataSurface {title} {description} {compact} padding="md" tableMinWidth={config.tableMinWidth} className="usage-breakdown-surface">
+<DataSurface {title} {description} {compact} padding="md" tableMinWidth={config.tableMinWidth} className={surfaceClass}>
   <svelte:fragment slot="table">
     {#if rows.length > 0}
       <table class="ui-data-table usage-breakdown-table">
@@ -250,8 +259,8 @@
         <div class="pagination-bar">
           <p>Showing {showingStart}-{showingEnd} of {totalRows} {itemLabel}</p>
           <div class="pagination-actions">
-            <Button type="button" variant="secondary" size="sm" on:click={previousPage} disabled={page <= 1}>Previous</Button>
-            <Button type="button" variant="secondary" size="sm" on:click={nextPage} disabled={page >= totalPages}>Next</Button>
+            <button type="button" class="pagination-button" on:click={previousPage} disabled={!hasPreviousPage}>Previous</button>
+            <button type="button" class="pagination-button" on:click={nextPage} disabled={!hasNextPage}>Next</button>
           </div>
         </div>
       {/if}
@@ -266,6 +275,18 @@
 <style>
   :global(.usage-breakdown-surface) {
     border-radius: var(--ui-radius-lg);
+  }
+
+  :global(.usage-breakdown-surface--fit-table .ui-data-surface__table-wrap) {
+    overflow-x: hidden;
+  }
+
+  :global(.usage-breakdown-surface--fit-table .usage-breakdown-table) {
+    table-layout: fixed;
+  }
+
+  :global(.usage-breakdown-surface--fit-table .identity-cell strong) {
+    overflow-wrap: anywhere;
   }
 
   .sort-button {
@@ -349,6 +370,38 @@
     gap: var(--ui-space-2);
   }
 
+  .pagination-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 36%, var(--ui-border-default) 64%);
+    border-radius: var(--ui-radius-md);
+    background: transparent;
+    color: var(--ui-text-primary);
+    cursor: pointer;
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
+    padding: 0 0.75rem;
+    transition:
+      background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard),
+      opacity var(--motion-fast) var(--ease-standard);
+  }
+
+  .pagination-button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ui-text-primary) 8%, transparent);
+  }
+
+  .pagination-button:disabled {
+    border-color: var(--ui-border-default);
+    background: transparent;
+    color: var(--ui-text-muted);
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
   .table-empty-state {
     display: grid;
     place-items: center;
@@ -375,7 +428,7 @@
       width: 100%;
     }
 
-    .pagination-actions :global(.ui-button) {
+    .pagination-button {
       flex: 1;
     }
   }
