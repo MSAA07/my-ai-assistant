@@ -1014,4 +1014,39 @@ ar.document = {
   },
 };
 
+ar.adminQA = {
+  tab: 'ضمان الجودة',
+  title: 'مشغل ضمان الجودة',
+  subtitle: 'شغّل اختبارات آلية على بيئتك قبل النشر',
+  targetLabel: 'الهدف',
+  targets: {
+    staging: 'المرحلة التجريبية',
+    production: 'الإنتاج'
+  },
+  liveEnvironment: 'بيئة مباشرة',
+  run: 'تشغيل QA',
+  running: 'جارٍ تشغيل QA',
+  loading: 'جارٍ تشغيل اختبارات QA... قد يستغرق ذلك حتى 3 دقائق',
+  resultsTitle: 'نتائج QA',
+  ranAt: 'وقت التشغيل: {time}',
+  summary: {
+    passed: 'نجح',
+    failed: 'فشل',
+    totalTime: 'الوقت الإجمالي',
+    estimatedCost: 'التكلفة التقديرية'
+  },
+  allSystemsGo: 'كل الأنظمة جاهزة',
+  issuesDetected: 'تم اكتشاف مشاكل: {count}',
+  status: {
+    pass: 'نجاح',
+    fail: 'فشل',
+    skip: 'تخطي'
+  },
+  durationMs: '{duration} مللي ثانية',
+  rateLimit: 'تم تشغيل QA مؤخرًا. يرجى الانتظار {minutes} دقائق قبل التشغيل مرة أخرى.',
+  errors: {
+    failed: 'تعذر تشغيل QA.'
+  }
+};
+
 export default mergeDictionaries(en, ar);

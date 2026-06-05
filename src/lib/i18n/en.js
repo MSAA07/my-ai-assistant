@@ -917,6 +917,40 @@ export default {
     }
   }
   ,
+  adminQA: {
+    tab: 'QA',
+    title: 'QA Runner',
+    subtitle: 'Run automated tests against your environment before deploying',
+    targetLabel: 'Target',
+    targets: {
+      staging: 'Staging',
+      production: 'Production'
+    },
+    liveEnvironment: 'Live environment',
+    run: 'Run QA',
+    running: 'Running QA',
+    loading: 'Running QA tests... this may take up to 3 minutes',
+    resultsTitle: 'QA Results',
+    ranAt: 'Run timestamp: {time}',
+    summary: {
+      passed: 'Passed',
+      failed: 'Failed',
+      totalTime: 'Total time',
+      estimatedCost: 'Estimated cost'
+    },
+    allSystemsGo: 'All systems go',
+    issuesDetected: 'Issues detected: {count}',
+    status: {
+      pass: 'PASS',
+      fail: 'FAIL',
+      skip: 'SKIP'
+    },
+    durationMs: '{duration} ms',
+    rateLimit: 'QA was run recently. Please wait {minutes} minutes before running again.',
+    errors: {
+      failed: 'Failed to run QA.'
+    }
+  },
   publicHeader: {
     brandHome: 'StudyMaxing home',
     brandSubtitle: 'Fast document-to-study workflow',

@@ -10,13 +10,18 @@
   import AdminJobs from './admin/AdminJobs.svelte';
   import AdminUsageDashboard from './admin/AdminUsageDashboard.svelte';
   import AdminLimits from './admin/AdminLimits.svelte';
+  import AdminQA from './admin/AdminQA.svelte';
+  import { t } from '../lib/i18n/t.js';
+  import { language } from '../lib/stores/language.js';
 
-  const tabs = [
+  $: $language;
+  $: tabs = [
     { value: 'overview', label: 'Overview' },
     { value: 'users', label: 'Users' },
     { value: 'usage', label: 'Usage' },
     { value: 'limits', label: 'Limits' },
     { value: 'jobs', label: 'Jobs' },
+    { value: 'qa', label: t('adminQA.tab') },
     { value: 'sessions', label: 'Sessions' },
     { value: 'storage', label: 'Storage' },
     { value: 'audit', label: 'Audit Logs' }
@@ -58,6 +63,8 @@
       <AdminLimits />
     {:else if activeTab === 'jobs'}
       <AdminJobs />
+    {:else if activeTab === 'qa'}
+      <AdminQA />
     {:else if activeTab === 'sessions'}
       <SessionManager />
     {:else if activeTab === 'storage'}
