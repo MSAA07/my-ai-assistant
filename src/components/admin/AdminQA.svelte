@@ -107,6 +107,17 @@
   }
 
   function getTestTags(item) {
+    const name = String(item?.name || item?.testName || '').toLowerCase();
+
+    if (name.includes('pdf export')) return ['pdfExport'];
+    if (name.includes('admin endpoints') || name.includes('sign out')) return ['system'];
+    if (name.includes('oversized') || name.includes('corrupt')) return ['edgeCase'];
+    if (name.includes('arabic pdf')) return ['arabic', 'ocr'];
+    if (name.includes('arabic pptx')) return ['arabic', 'pptx'];
+    if (name.includes('docx')) return ['docx'];
+    if (name.includes('pptx')) return ['pptx'];
+    if (name.includes('english pdf') || name.includes('test pdf')) return ['pdf'];
+
     const order = Number(item?.order);
 
     if (order >= 3 && order <= 5) return ['pdf'];
