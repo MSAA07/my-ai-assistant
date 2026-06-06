@@ -1,4 +1,5 @@
 <script>
+  import { onDestroy, onMount } from 'svelte';
   import Badge from '../../lib/components/ui/Badge.svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
@@ -9,44 +10,66 @@
   import { language } from '../../lib/stores/language.js';
 
   const statusMeta = {
-    pass: { tone: 'success', symbol: '✅', labelKey: 'adminQA.status.pass' },
-    fail: { tone: 'danger', symbol: '❌', labelKey: 'adminQA.status.fail' },
-    skip: { tone: 'neutral', symbol: '⏭', labelKey: 'adminQA.status.skip' }
+    pass: { tone: 'success', labelKey: 'adminQA.status.pass' },
+    fail: { tone: 'danger', labelKey: 'adminQA.status.fail' },
+    skip: { tone: 'neutral', labelKey: 'adminQA.status.skip' }
   };
 
   let target = 'staging';
   let running = false;
   let result = null;
+  let progress = null;
+  let progressRunStartedAt = 0;
+  let progressReceivedAt = 0;
+  let liveNow = Date.now();
   let error = '';
   let rateLimitMessage = '';
+  let history = [];
+  let historyLoading = true;
+  let historyError = '';
+  let expandedRunId = '';
+  let progressInterval = null;
+  let liveTimer = null;
 
   $: $language;
   $: hasFailures = Number(result?.failed || 0) > 0;
+  $: liveElapsedMs = progress?.inProgress && progressRunStartedAt
+    ? Math.max(0, liveNow - progressRunStartedAt)
+    : 0;
+  $: liveRemainingMs = progress?.inProgress
+    ? Math.max(0, Number(progress.estimatedRemainingMs || 0) - Math.max(0, liveNow - progressReceivedAt))
+    : 0;
 
   function formatDuration(ms) {
     const value = Number(ms);
     if (!Number.isFinite(value)) return '-';
-    if (value < 1000) return t('adminQA.durationMs', { duration: formatNumber(Math.round(value)) });
-    const seconds = value / 1000;
-    if (seconds < 60) return `${formatNumber(seconds, { maximumFractionDigits: seconds >= 10 ? 0 : 1 })}s`;
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.round(seconds % 60);
-    return `${formatNumber(minutes)}m ${formatNumber(remainingSeconds)}s`;
+    return t('adminQA.durationMs', { duration: formatNumber(Math.max(0, Math.round(value))) });
+  }
+
+  function formatDurationShort(ms) {
+    const value = Math.max(0, Math.round(Number(ms) || 0));
+    const totalSeconds = Math.round(value / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    if (minutes <= 0) return `${formatNumber(seconds)}s`;
+    return `${formatNumber(minutes)}m ${formatNumber(seconds)}s`;
   }
 
   function formatCost(value) {
     const amount = Number(value);
-    return formatNumber(Number.isFinite(amount) ? amount : 0, {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 4,
-      maximumFractionDigits: 4
-    });
+    return `$${(Number.isFinite(amount) ? amount : 0).toFixed(4)}`;
   }
 
   function formatRunDate(value) {
     return value
-      ? formatDate(value, { dateStyle: 'medium', timeStyle: 'short' })
+      ? formatDate(value, {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        })
       : '-';
   }
 
@@ -55,16 +78,80 @@
   }
 
   function getStatusLabel(status) {
-    const meta = getStatusMeta(status);
-    return `${meta.symbol} ${t(meta.labelKey)}`;
+    return t(getStatusMeta(status).labelKey);
+  }
+
+  function getRunResults(run) {
+    return Array.isArray(run?.results) ? run.results : [];
+  }
+
+  function toggleExpanded(runId) {
+    expandedRunId = expandedRunId === runId ? '' : runId;
+  }
+
+  async function fetchHistory({ expandRunId = '' } = {}) {
+    historyError = '';
+    historyLoading = history.length === 0;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/qa/history`, {
+        credentials: 'include'
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || t('adminQA.errors.historyFailed'));
+
+      history = Array.isArray(data?.runs) ? data.runs : [];
+      expandedRunId = expandRunId || expandedRunId || history[0]?.id || '';
+    } catch (err) {
+      historyError = err?.message || t('adminQA.errors.historyFailed');
+    } finally {
+      historyLoading = false;
+    }
+  }
+
+  async function fetchProgress() {
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/qa/progress`, {
+        credentials: 'include'
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.inProgress) {
+        progress = data || { inProgress: false };
+        return;
+      }
+
+      progress = data;
+      progressRunStartedAt = Date.now() - Number(data.elapsedMs || 0);
+      progressReceivedAt = Date.now();
+    } catch {
+      progress = null;
+    }
+  }
+
+  function startProgressPolling() {
+    stopProgressPolling();
+    void fetchProgress();
+    progressInterval = setInterval(fetchProgress, 2000);
+  }
+
+  function stopProgressPolling() {
+    if (progressInterval) {
+      clearInterval(progressInterval);
+      progressInterval = null;
+    }
   }
 
   async function runQa() {
     if (running) return;
 
     running = true;
+    result = null;
     error = '';
     rateLimitMessage = '';
+    progress = null;
+    progressRunStartedAt = 0;
+    progressReceivedAt = 0;
+    startProgressPolling();
 
     try {
       const response = await fetch(`${API_BASE}/api/admin/qa/run`, {
@@ -87,12 +174,27 @@
       }
 
       result = data;
+      await fetchHistory({ expandRunId: data?.id || '' });
     } catch (err) {
       error = err?.message || t('adminQA.errors.failed');
     } finally {
       running = false;
+      stopProgressPolling();
+      progress = null;
     }
   }
+
+  onMount(() => {
+    void fetchHistory();
+    liveTimer = setInterval(() => {
+      liveNow = Date.now();
+    }, 1000);
+  });
+
+  onDestroy(() => {
+    stopProgressPolling();
+    if (liveTimer) clearInterval(liveTimer);
+  });
 </script>
 
 <div class="admin-qa">
@@ -128,6 +230,22 @@
           <span class="qa-spinner" aria-hidden="true"></span>
           <span>{t('adminQA.loading')}</span>
         </div>
+
+        {#if progress?.inProgress}
+          <div class="qa-progress" aria-label={t('adminQA.progress.label')}>
+            <div class="qa-progress__header">
+              <strong>{t('adminQA.progress.running', { test: progress.currentTest })}</strong>
+              <span>{t('adminQA.progress.testCounter', { current: formatNumber(progress.currentTestIndex || 0), total: formatNumber(progress.totalTests || 8) })}</span>
+            </div>
+            <div class="qa-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress.percentComplete || 0}>
+              <span style={`width: ${Math.max(0, Math.min(100, Number(progress.percentComplete || 0)))}%;`}></span>
+            </div>
+            <div class="qa-progress__meta">
+              <span>{t('adminQA.progress.elapsed', { time: formatDurationShort(liveElapsedMs) })}</span>
+              <span>{t('adminQA.progress.remaining', { time: formatDurationShort(liveRemainingMs) })}</span>
+            </div>
+          </div>
+        {/if}
       {:else if rateLimitMessage}
         <Card class="ui-data-state-error qa-rate-limit" variant="soft" border="strong" padding="sm">
           {rateLimitMessage}
@@ -160,7 +278,7 @@
         </div>
         <div>
           <span>{t('adminQA.summary.totalTime')}</span>
-          <strong>{formatDuration(result.totalDurationMs)}</strong>
+          <strong>{formatDurationShort(result.totalDurationMs)}</strong>
         </div>
         <div>
           <span>{t('adminQA.summary.estimatedCost')}</span>
@@ -182,20 +300,92 @@
         {#each result.results || [] as item}
           <Card className={`qa-test-card qa-test-card--${item.status}`} variant="base" border="strong" padding="sm">
             <div class="qa-test-card__header">
-              <h3>{item.name}</h3>
+              <h3>{item.name || item.testName}</h3>
               <Badge tone={getStatusMeta(item.status).tone} size="sm">
                 {getStatusLabel(item.status)}
               </Badge>
             </div>
             <p>{item.message}</p>
             <span class="qa-test-card__duration">
-              {t('adminQA.durationMs', { duration: formatNumber(item.durationMs || 0) })}
+              {formatDuration(item.durationMs || 0)}
             </span>
           </Card>
         {/each}
       </div>
     </section>
   {/if}
+
+  <DataSurface title={t('adminQA.history.title')} description={t('adminQA.history.description')} tableMinWidth="980px">
+    <svelte:fragment slot="state">
+      {#if historyLoading}
+        <p class="ui-data-state-note">{t('adminQA.history.loading')}</p>
+      {:else if historyError}
+        <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">
+          {historyError}
+        </Card>
+      {:else if history.length === 0}
+        <p class="ui-data-state-note">{t('adminQA.history.empty')}</p>
+      {/if}
+    </svelte:fragment>
+
+    <svelte:fragment slot="table">
+      {#if !historyLoading && !historyError && history.length > 0}
+        <table class="ui-data-table qa-history-table">
+          <thead>
+            <tr>
+              <th>{t('adminQA.history.columns.dateTime')}</th>
+              <th>{t('adminQA.history.columns.target')}</th>
+              <th>{t('adminQA.history.columns.passed')}</th>
+              <th>{t('adminQA.history.columns.failed')}</th>
+              <th>{t('adminQA.history.columns.duration')}</th>
+              <th>{t('adminQA.history.columns.cost')}</th>
+              <th>{t('adminQA.history.columns.triggeredBy')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each history as run}
+              <tr class="qa-history-row" class:expanded={expandedRunId === run.id} on:click={() => toggleExpanded(run.id)}>
+                <td>
+                  <button type="button" aria-expanded={expandedRunId === run.id} aria-label={expandedRunId === run.id ? t('adminQA.history.collapse') : t('adminQA.history.expand')}>
+                    {formatRunDate(run.ranAt)}
+                  </button>
+                </td>
+                <td>{t(`adminQA.targets.${run.target}`)}</td>
+                <td><strong>{formatNumber(run.passed || 0)}</strong></td>
+                <td><strong>{formatNumber(run.failed || 0)}</strong></td>
+                <td>{formatDurationShort(run.totalDurationMs)}</td>
+                <td>{formatCost(run.estimatedCostUsd)}</td>
+                <td>{run.triggeredBy || '-'}</td>
+              </tr>
+              {#if expandedRunId === run.id}
+                <tr class="qa-history-detail-row">
+                  <td colspan="7">
+                    <div class="qa-history-detail">
+                      <h3>{t('adminQA.history.breakdown')}</h3>
+                      <div class="qa-history-detail__list">
+                        {#each getRunResults(run) as item}
+                          <div class="qa-history-detail__item">
+                            <div>
+                              <strong>{item.name || item.testName}</strong>
+                              <p>{item.message}</p>
+                            </div>
+                            <Badge tone={getStatusMeta(item.status).tone} size="sm">
+                              {getStatusLabel(item.status)}
+                            </Badge>
+                            <span>{formatDuration(item.durationMs || 0)}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              {/if}
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+    </svelte:fragment>
+  </DataSurface>
 </div>
 
 <style>
@@ -232,6 +422,51 @@
     animation: qa-spin 700ms linear infinite;
   }
 
+  .qa-progress {
+    display: grid;
+    gap: var(--ui-space-2);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 70%, transparent);
+    padding: var(--ui-space-3);
+  }
+
+  .qa-progress__header,
+  .qa-progress__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    flex-wrap: wrap;
+  }
+
+  .qa-progress__header strong {
+    color: var(--ui-text-primary);
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
+  }
+
+  .qa-progress__header span,
+  .qa-progress__meta {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+  }
+
+  .qa-progress__bar {
+    height: 0.55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
+  }
+
+  .qa-progress__bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ui-text-primary);
+    transition: width 220ms var(--ease-standard);
+  }
+
   :global(.qa-rate-limit) {
     color: color-mix(in srgb, var(--ui-accent-warning) 82%, var(--ui-text-primary) 18%);
     border-color: color-mix(in srgb, var(--ui-accent-warning) 34%, var(--ui-border-default) 66%);
@@ -245,7 +480,8 @@
     min-width: 0;
   }
 
-  .qa-results__header h2 {
+  .qa-results__header h2,
+  .qa-history-detail h3 {
     margin: 0;
     color: var(--ui-text-primary);
     font-size: var(--ui-type-title-sm);
@@ -355,6 +591,63 @@
     border-color: color-mix(in srgb, var(--ui-accent-success) 24%, var(--ui-border-default) 76%);
   }
 
+  .qa-history-row {
+    cursor: pointer;
+  }
+
+  .qa-history-row.expanded {
+    background: color-mix(in srgb, var(--ui-surface-secondary) 52%, transparent);
+  }
+
+  .qa-history-row button {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--ui-text-primary);
+    font: inherit;
+    font-weight: 600;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .qa-history-detail-row td {
+    background: color-mix(in srgb, var(--ui-surface-secondary) 38%, transparent);
+  }
+
+  .qa-history-detail {
+    display: grid;
+    gap: var(--ui-space-3);
+    min-width: 0;
+  }
+
+  .qa-history-detail__list {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .qa-history-detail__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: start;
+    gap: var(--ui-space-3);
+    border-top: 1px solid var(--ui-border-default);
+    padding-top: var(--ui-space-2);
+  }
+
+  .qa-history-detail__item p {
+    margin: 0.25rem 0 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.55;
+  }
+
+  .qa-history-detail__item > span {
+    color: var(--ui-text-muted);
+    font-size: var(--ui-type-body-sm);
+    white-space: nowrap;
+  }
+
   @keyframes qa-spin {
     to {
       transform: rotate(360deg);
@@ -364,6 +657,10 @@
   @media (max-width: 860px) {
     .qa-summary-grid,
     .qa-test-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .qa-history-detail__item {
       grid-template-columns: 1fr;
     }
   }

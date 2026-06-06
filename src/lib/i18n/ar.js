@@ -1044,8 +1044,34 @@ ar.adminQA = {
   },
   durationMs: '{duration} مللي ثانية',
   rateLimit: 'تم تشغيل QA مؤخرًا. يرجى الانتظار {minutes} دقائق قبل التشغيل مرة أخرى.',
+  progress: {
+    label: 'تقدم تشغيل QA',
+    running: 'قيد التشغيل: {test}',
+    testCounter: 'الاختبار {current} من {total}',
+    elapsed: 'المنقضي: {time}',
+    remaining: 'المتبقي التقديري: {time}'
+  },
+  history: {
+    title: 'سجل التشغيل',
+    description: 'فحوص QA السابقة مرتبة من الأحدث إلى الأقدم',
+    loading: 'جارٍ تحميل سجل تشغيل QA...',
+    empty: 'لا توجد تشغيلات QA بعد. شغّل أول فحص QA أعلاه.',
+    expand: 'توسيع تفاصيل تشغيل QA',
+    collapse: 'طي تفاصيل تشغيل QA',
+    breakdown: 'تفاصيل كل اختبار',
+    columns: {
+      dateTime: 'التاريخ والوقت',
+      target: 'الهدف',
+      passed: 'نجح',
+      failed: 'فشل',
+      duration: 'المدة',
+      cost: 'التكلفة',
+      triggeredBy: 'شغّله'
+    }
+  },
   errors: {
-    failed: 'تعذر تشغيل QA.'
+    failed: 'تعذر تشغيل QA.',
+    historyFailed: 'تعذر تحميل سجل تشغيل QA.'
   }
 };
 

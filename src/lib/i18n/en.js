@@ -947,8 +947,34 @@ export default {
     },
     durationMs: '{duration} ms',
     rateLimit: 'QA was run recently. Please wait {minutes} minutes before running again.',
+    progress: {
+      label: 'QA run progress',
+      running: 'Running: {test}',
+      testCounter: 'Test {current} of {total}',
+      elapsed: 'Elapsed: {time}',
+      remaining: 'Estimated remaining: {time}'
+    },
+    history: {
+      title: 'Run History',
+      description: 'Previous QA checks ordered from newest to oldest',
+      loading: 'Loading QA run history...',
+      empty: 'No QA runs yet. Run your first QA check above.',
+      expand: 'Expand QA run details',
+      collapse: 'Collapse QA run details',
+      breakdown: 'Per-test breakdown',
+      columns: {
+        dateTime: 'Date & Time',
+        target: 'Target',
+        passed: 'Passed',
+        failed: 'Failed',
+        duration: 'Duration',
+        cost: 'Cost',
+        triggeredBy: 'Triggered by'
+      }
+    },
     errors: {
-      failed: 'Failed to run QA.'
+      failed: 'Failed to run QA.',
+      historyFailed: 'Failed to load QA run history.'
     }
   },
   publicHeader: {
