@@ -136,6 +136,10 @@
     expandedRunId = expandedRunId === runId ? '' : runId;
   }
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   async function fetchHistory({ expandRunId = '' } = {}) {
     historyError = '';
     historyLoading = history.length === 0;
@@ -149,8 +153,10 @@
 
       history = Array.isArray(data?.runs) ? data.runs : [];
       expandedRunId = expandRunId || expandedRunId || history[0]?.id || '';
+      return history;
     } catch (err) {
       historyError = err?.message || t('adminQA.errors.historyFailed');
+      return [];
     } finally {
       historyLoading = false;
     }
@@ -164,14 +170,16 @@
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.inProgress) {
         progress = data || { inProgress: false };
-        return;
+        return progress;
       }
 
       progress = data;
       progressRunStartedAt = Date.now() - Number(data.elapsedMs || 0);
       progressReceivedAt = Date.now();
+      return progress;
     } catch {
       progress = null;
+      return null;
     }
   }
 
@@ -186,6 +194,30 @@
       clearInterval(progressInterval);
       progressInterval = null;
     }
+  }
+
+  async function waitForQaCompletion() {
+    let sawInProgress = false;
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < 20 * 60 * 1000) {
+      await sleep(2000);
+      const currentProgress = await fetchProgress();
+
+      if (currentProgress?.inProgress) {
+        sawInProgress = true;
+        continue;
+      }
+
+      if (!sawInProgress && Date.now() - startedAt < 10_000) {
+        continue;
+      }
+
+      const runs = await fetchHistory();
+      return runs[0] || null;
+    }
+
+    throw new Error(t('adminQA.errors.failed'));
   }
 
   async function runQa() {
@@ -218,6 +250,14 @@
 
       if (!response.ok) {
         throw new Error(data?.error || t('adminQA.errors.failed'));
+      }
+
+      if (data?.started) {
+        result = await waitForQaCompletion();
+        if (result?.id) {
+          await fetchHistory({ expandRunId: result.id });
+        }
+        return;
       }
 
       result = data;
