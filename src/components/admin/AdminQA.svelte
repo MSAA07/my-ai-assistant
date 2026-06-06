@@ -199,29 +199,31 @@
 
 <div class="admin-qa">
   <DataSurface title={t('adminQA.title')} description={t('adminQA.subtitle')} tableMinWidth="720px">
-    <Button
-      slot="actions"
-      type="button"
-      variant="primary"
-      size="sm"
-      loading={running}
-      disabled={running}
-      on:click={runQa}
-    >
-      {running ? t('adminQA.running') : t('adminQA.run')}
-    </Button>
-
     <svelte:fragment slot="filters">
-      <FieldShell className="filter-field" label={t('adminQA.targetLabel')} forId="admin-qa-target">
-        <select id="admin-qa-target" bind:value={target} disabled={running}>
-          <option value="staging">{t('adminQA.targets.staging')}</option>
-          <option value="production">{t('adminQA.targets.production')}</option>
-        </select>
-      </FieldShell>
+      <div class="qa-run-controls">
+        <FieldShell className="filter-field" label={t('adminQA.targetLabel')} forId="admin-qa-target">
+          <select id="admin-qa-target" bind:value={target} disabled={running}>
+            <option value="staging">{t('adminQA.targets.staging')}</option>
+            <option value="production">{t('adminQA.targets.production')}</option>
+          </select>
+        </FieldShell>
 
-      {#if target === 'production'}
-        <Badge tone="warning" size="sm">{t('adminQA.liveEnvironment')}</Badge>
-      {/if}
+        {#if target === 'production'}
+          <Badge tone="warning" size="sm">{t('adminQA.liveEnvironment')}</Badge>
+        {/if}
+
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          className="qa-run-controls__button"
+          loading={running}
+          disabled={running}
+          on:click={runQa}
+        >
+          {running ? t('adminQA.running') : t('adminQA.run')}
+        </Button>
+      </div>
     </svelte:fragment>
 
     <svelte:fragment slot="state">
@@ -346,8 +348,9 @@
             {#each history as run}
               <tr class="qa-history-row" class:expanded={expandedRunId === run.id} on:click={() => toggleExpanded(run.id)}>
                 <td>
-                  <button type="button" aria-expanded={expandedRunId === run.id} aria-label={expandedRunId === run.id ? t('adminQA.history.collapse') : t('adminQA.history.expand')}>
-                    {formatRunDate(run.ranAt)}
+                  <button class="qa-history-toggle" type="button" aria-expanded={expandedRunId === run.id} aria-label={expandedRunId === run.id ? t('adminQA.history.collapse') : t('adminQA.history.expand')}>
+                    <span class="qa-history-chevron" aria-hidden="true">{expandedRunId === run.id ? '▼' : '▶'}</span>
+                    <span>{formatRunDate(run.ranAt)}</span>
                   </button>
                 </td>
                 <td>{t(`adminQA.targets.${run.target}`)}</td>
@@ -357,9 +360,9 @@
                 <td>{formatCost(run.estimatedCostUsd)}</td>
                 <td>{run.triggeredBy || '-'}</td>
               </tr>
-              {#if expandedRunId === run.id}
-                <tr class="qa-history-detail-row">
-                  <td colspan="7">
+              <tr class="qa-history-detail-row" class:expanded={expandedRunId === run.id} aria-hidden={expandedRunId !== run.id}>
+                <td colspan="7">
+                  <div class="qa-history-detail-shell">
                     <div class="qa-history-detail">
                       <h3>{t('adminQA.history.breakdown')}</h3>
                       <div class="qa-history-detail__list">
@@ -377,9 +380,9 @@
                         {/each}
                       </div>
                     </div>
-                  </td>
-                </tr>
-              {/if}
+                  </div>
+                </td>
+              </tr>
             {/each}
           </tbody>
         </table>
@@ -420,6 +423,23 @@
     border: 2px solid color-mix(in srgb, var(--ui-text-secondary) 24%, transparent);
     border-top-color: var(--ui-text-primary);
     animation: qa-spin 700ms linear infinite;
+  }
+
+  .qa-run-controls {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--ui-space-3);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .qa-run-controls :global(.filter-field) {
+    flex: 0 1 22rem;
+    min-width: 12rem;
+  }
+
+  :global(.qa-run-controls__button) {
+    margin-inline-start: auto;
   }
 
   .qa-progress {
@@ -599,7 +619,11 @@
     background: color-mix(in srgb, var(--ui-surface-secondary) 52%, transparent);
   }
 
-  .qa-history-row button {
+  .qa-history-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    max-width: 100%;
     appearance: none;
     border: 0;
     padding: 0;
@@ -611,8 +635,39 @@
     cursor: pointer;
   }
 
+  .qa-history-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.9rem;
+    flex: 0 0 auto;
+    color: var(--ui-text-muted);
+    font-size: 0.72rem;
+    line-height: 1;
+  }
+
   .qa-history-detail-row td {
     background: color-mix(in srgb, var(--ui-surface-secondary) 38%, transparent);
+  }
+
+  .qa-history-detail-row:not(.expanded) td {
+    padding-top: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .qa-history-detail-shell {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      max-height 260ms var(--ease-standard),
+      opacity 180ms var(--ease-standard);
+  }
+
+  .qa-history-detail-row.expanded .qa-history-detail-shell {
+    max-height: 42rem;
+    opacity: 1;
   }
 
   .qa-history-detail {
@@ -658,6 +713,16 @@
     .qa-summary-grid,
     .qa-test-grid {
       grid-template-columns: 1fr;
+    }
+
+    .qa-run-controls {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    :global(.qa-run-controls__button) {
+      width: 100%;
+      margin-inline-start: 0;
     }
 
     .qa-history-detail__item {
