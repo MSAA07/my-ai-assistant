@@ -220,6 +220,32 @@
     throw new Error(t('adminQA.errors.failed'));
   }
 
+  async function resumeActiveQaRun() {
+    if (running) return;
+
+    const currentProgress = await fetchProgress();
+    if (!currentProgress?.inProgress) return;
+
+    running = true;
+    result = null;
+    error = '';
+    rateLimitMessage = '';
+    startProgressPolling();
+
+    try {
+      result = await waitForQaCompletion();
+      if (result?.id) {
+        await fetchHistory({ expandRunId: result.id });
+      }
+    } catch (err) {
+      error = err?.message || t('adminQA.errors.failed');
+    } finally {
+      running = false;
+      stopProgressPolling();
+      progress = null;
+    }
+  }
+
   async function runQa() {
     if (running) return;
 
@@ -273,6 +299,7 @@
 
   onMount(() => {
     void fetchHistory();
+    void resumeActiveQaRun();
     liveTimer = setInterval(() => {
       liveNow = Date.now();
     }, 1000);
