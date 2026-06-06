@@ -15,6 +15,10 @@
     skip: { tone: 'neutral', labelKey: 'adminQA.status.skip' }
   };
 
+  const TOTAL_QA_TESTS = 18;
+  const FILE_TYPE_PASS_ORDERS = [5, 7, 9, 11, 13];
+  const EDGE_CASE_ORDERS = [14, 15];
+
   let target = 'staging';
   let running = false;
   let result = null;
@@ -83,6 +87,38 @@
 
   function getRunResults(run) {
     return Array.isArray(run?.results) ? run.results : [];
+  }
+
+  function getPassedOrders(run) {
+    return new Set(
+      getRunResults(run)
+        .filter((item) => item?.status === 'pass')
+        .map((item) => Number(item?.order))
+        .filter(Number.isFinite)
+    );
+  }
+
+  function getRunMetrics(run) {
+    const passedOrders = getPassedOrders(run);
+    return {
+      fileTypesTested: FILE_TYPE_PASS_ORDERS.filter((order) => passedOrders.has(order)).length,
+      edgeCasesPassed: EDGE_CASE_ORDERS.filter((order) => passedOrders.has(order)).length
+    };
+  }
+
+  function getTestTags(item) {
+    const order = Number(item?.order);
+
+    if (order >= 3 && order <= 5) return ['pdf'];
+    if (order >= 6 && order <= 7) return ['docx'];
+    if (order >= 8 && order <= 9) return ['pptx'];
+    if (order >= 10 && order <= 11) return ['arabic', 'ocr'];
+    if (order >= 12 && order <= 13) return ['arabic', 'pptx'];
+    if (order >= 14 && order <= 15) return ['edgeCase'];
+    if (order === 16) return ['pdfExport'];
+    if (order >= 17 && order <= 18) return ['system'];
+
+    return [];
   }
 
   function toggleExpanded(runId) {
@@ -237,7 +273,7 @@
           <div class="qa-progress" aria-label={t('adminQA.progress.label')}>
             <div class="qa-progress__header">
               <strong>{t('adminQA.progress.running', { test: progress.currentTest })}</strong>
-              <span>{t('adminQA.progress.testCounter', { current: formatNumber(progress.currentTestIndex || 0), total: formatNumber(progress.totalTests || 8) })}</span>
+              <span>{t('adminQA.progress.testCounter', { current: formatNumber(progress.currentTestIndex || 0), total: formatNumber(progress.totalTests || TOTAL_QA_TESTS) })}</span>
             </div>
             <div class="qa-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress.percentComplete || 0}>
               <span style={`width: ${Math.max(0, Math.min(100, Number(progress.percentComplete || 0)))}%;`}></span>
@@ -285,6 +321,14 @@
         <div>
           <span>{t('adminQA.summary.estimatedCost')}</span>
           <strong>{formatCost(result.estimatedCostUsd)}</strong>
+        </div>
+        <div>
+          <span>{t('adminQA.summary.fileTypesTested')}</span>
+          <strong>{formatNumber(getRunMetrics(result).fileTypesTested)}</strong>
+        </div>
+        <div>
+          <span>{t('adminQA.summary.edgeCases')}</span>
+          <strong>{t('adminQA.summary.edgeCasesValue', { passed: formatNumber(getRunMetrics(result).edgeCasesPassed), total: formatNumber(EDGE_CASE_ORDERS.length) })}</strong>
         </div>
       </div>
 
@@ -369,7 +413,12 @@
                         {#each getRunResults(run) as item}
                           <div class="qa-history-detail__item">
                             <div>
-                              <strong>{item.name || item.testName}</strong>
+                              <div class="qa-history-detail__name">
+                                <strong>{item.name || item.testName}</strong>
+                                {#each getTestTags(item) as tag}
+                                  <span class="qa-history-tag">{t(`adminQA.tags.${tag}`)}</span>
+                                {/each}
+                              </div>
                               <p>{item.message}</p>
                             </div>
                             <Badge tone={getStatusMeta(item.status).tone} size="sm">
@@ -518,7 +567,7 @@
 
   .qa-summary-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: var(--ui-space-3);
   }
 
@@ -681,6 +730,29 @@
     gap: var(--ui-space-2);
   }
 
+  .qa-history-detail__name {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .qa-history-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--ui-text-muted) 18%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ui-surface-secondary) 78%, transparent);
+    color: var(--ui-text-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.18rem 0.46rem;
+    white-space: nowrap;
+  }
+
   .qa-history-detail__item {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -710,9 +782,12 @@
   }
 
   @media (max-width: 860px) {
-    .qa-summary-grid,
     .qa-test-grid {
       grid-template-columns: 1fr;
+    }
+
+    .qa-summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .qa-run-controls {
@@ -726,6 +801,12 @@
     }
 
     .qa-history-detail__item {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .qa-summary-grid {
       grid-template-columns: 1fr;
     }
   }

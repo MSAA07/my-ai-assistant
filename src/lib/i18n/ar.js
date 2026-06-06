@@ -1033,7 +1033,10 @@ ar.adminQA = {
     passed: 'نجح',
     failed: 'فشل',
     totalTime: 'الوقت الإجمالي',
-    estimatedCost: 'التكلفة التقديرية'
+    estimatedCost: 'التكلفة التقديرية',
+    fileTypesTested: 'أنواع الملفات المختبرة',
+    edgeCases: 'الحالات الحدية',
+    edgeCasesValue: '{passed}/{total}'
   },
   allSystemsGo: 'كل الأنظمة جاهزة',
   issuesDetected: 'تم اكتشاف مشاكل: {count}',
@@ -1068,6 +1071,16 @@ ar.adminQA = {
       cost: 'التكلفة',
       triggeredBy: 'شغّله'
     }
+  },
+  tags: {
+    pdf: 'PDF',
+    docx: 'DOCX',
+    pptx: 'PPTX',
+    arabic: 'عربي',
+    ocr: 'OCR',
+    edgeCase: 'حالة حدية',
+    pdfExport: 'تصدير PDF',
+    system: 'النظام'
   },
   errors: {
     failed: 'تعذر تشغيل QA.',

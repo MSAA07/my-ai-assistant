@@ -936,7 +936,10 @@ export default {
       passed: 'Passed',
       failed: 'Failed',
       totalTime: 'Total time',
-      estimatedCost: 'Estimated cost'
+      estimatedCost: 'Estimated cost',
+      fileTypesTested: 'File types tested',
+      edgeCases: 'Edge cases',
+      edgeCasesValue: '{passed}/{total}'
     },
     allSystemsGo: 'All systems go',
     issuesDetected: 'Issues detected: {count}',
@@ -971,6 +974,16 @@ export default {
         cost: 'Cost',
         triggeredBy: 'Triggered by'
       }
+    },
+    tags: {
+      pdf: 'PDF',
+      docx: 'DOCX',
+      pptx: 'PPTX',
+      arabic: 'Arabic',
+      ocr: 'OCR',
+      edgeCase: 'Edge case',
+      pdfExport: 'PDF export',
+      system: 'System'
     },
     errors: {
       failed: 'Failed to run QA.',
