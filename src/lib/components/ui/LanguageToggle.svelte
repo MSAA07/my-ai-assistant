@@ -49,7 +49,7 @@
   :global(.language-toggle__button.ui-button) {
     min-width: 0;
     box-shadow: none;
-    min-height: 2rem;
+    min-height: 2.75rem;
     padding-inline: var(--ui-space-3);
   }
 

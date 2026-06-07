@@ -29,7 +29,7 @@
 
   $: normalizedSize = sizeClasses[size] ? size : 'md';
   $: resolvedClass = [
-    'ui-toggle inline-flex items-center gap-3 text-sm text-foreground',
+    'ui-toggle inline-flex min-h-[44px] items-center gap-3 text-sm text-foreground',
     className,
     $$props.class ?? '',
   ]

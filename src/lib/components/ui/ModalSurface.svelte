@@ -83,7 +83,7 @@
     width: var(--ui-modal-width);
     max-width: 100%;
     max-height: min(92vh, 960px);
-    overflow: auto;
+    overflow-y: auto;
     border-radius: var(--ui-radius-md);
     border: 1px solid var(--ui-border-strong);
     background: var(--ui-surface-overlay);
@@ -104,13 +104,25 @@
     padding: var(--space-4);
   }
 
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .ui-modal {
+      max-width: 90vw;
+    }
+  }
+
   @media (max-width: 640px) {
     .ui-modal-overlay {
-      padding: var(--space-3);
+      padding: 0;
+      align-items: end;
     }
 
-    .ui-modal--padding-lg {
-      padding: var(--space-4);
+    .ui-modal {
+      width: 100%;
+      max-width: 100%;
+      max-height: 100dvh;
+      overflow-y: auto;
+      border-radius: 1rem 1rem 0 0;
+      margin: 0;
     }
   }
 </style>

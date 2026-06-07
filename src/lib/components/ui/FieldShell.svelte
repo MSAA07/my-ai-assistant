@@ -86,7 +86,7 @@
   .ui-field__control :global(textarea),
   .ui-field__control :global(select) {
     width: 100%;
-    min-height: var(--ui-control-height-md);
+    min-height: 2.5rem;
     padding: 0.5rem 0.68rem;
     border: none;
     border-radius: inherit;
@@ -100,6 +100,13 @@
   .ui-field__control :global(textarea) {
     min-height: 100px;
     resize: vertical;
+  }
+
+  @media (max-width: 768px) {
+    .ui-field__control :global(input),
+    .ui-field__control :global(select) {
+      min-height: 2.75rem;
+    }
   }
 
   .ui-field__control :global(input:focus),

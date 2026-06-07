@@ -170,8 +170,8 @@
 
   .sidebar-toggle {
     display: inline-flex;
-    width: 32px;
-    min-height: 32px;
+    min-width: 44px;
+    min-height: 44px;
     align-items: center;
     justify-content: center;
     gap: 0;
@@ -229,8 +229,8 @@
 
   .account-trigger {
     display: inline-flex;
-    width: 32px;
-    height: 32px;
+    min-width: 44px;
+    min-height: 44px;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--ui-border-default);
@@ -259,8 +259,8 @@
   }
 
   .account-trigger {
-    width: 32px;
-    height: 32px;
+    min-width: 44px;
+    min-height: 44px;
     border-color: color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     background: color-mix(in srgb, var(--card) 78%, var(--muted) 22%);
     color: var(--foreground);

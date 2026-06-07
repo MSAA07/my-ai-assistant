@@ -21,7 +21,7 @@
       ? 'flex items-end gap-5 border-b border-border bg-transparent p-0'
       : 'inline-flex items-center gap-1 rounded-xl border border-border bg-muted/70 p-[4px] text-muted-foreground shadow-inline-control',
     fullWidth ? 'w-full' : 'w-fit',
-    mobileScrollable ? 'max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none]' : '',
+    'max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none]',
     className,
     $$props.class ?? '',
   ]
@@ -49,7 +49,7 @@
       type="button"
       class={`ui-tabs__tab ${fullWidth ? 'flex-1' : ''} ${variant === 'underline'
         ? 'relative inline-flex min-h-0 items-center justify-center gap-1.5 border-0 bg-transparent px-0 pb-3 pt-0 text-sm shadow-none appearance-none'
-        : 'inline-flex h-[calc(100%-1px)] min-h-9 items-center justify-center gap-1.5 rounded-md border border-transparent px-3.5 py-1.5 text-sm shadow-none'}`}
+        : 'inline-flex h-[calc(100%-1px)] min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-md border border-transparent px-3.5 py-1.5 text-sm shadow-none'}`}
       role="tab"
       aria-selected={selectedValue === item.value}
       tabindex={selectedValue === item.value ? 0 : -1}
@@ -65,6 +65,10 @@
 </div>
 
 <style>
+  .ui-tabs {
+    -webkit-overflow-scrolling: touch;
+  }
+
   .ui-tabs::-webkit-scrollbar {
     display: none;
   }
@@ -141,13 +145,15 @@
   }
 
   .ui-tabs[data-size='sm'] .ui-tabs__tab {
-    min-height: 32px;
+    min-height: 44px;
+    min-width: 44px;
     padding-inline: 0.625rem;
     font-size: 0.75rem;
   }
 
   .ui-tabs[data-size='lg'] .ui-tabs__tab {
-    min-height: 40px;
+    min-height: 44px;
+    min-width: 44px;
     padding-inline: 1rem;
     font-size: 0.875rem;
   }
@@ -159,7 +165,7 @@
   }
 
   .ui-tabs__meta {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     opacity: 0.86;

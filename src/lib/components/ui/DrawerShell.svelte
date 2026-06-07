@@ -123,6 +123,7 @@
 
   .drawer__close {
     min-inline-size: 70px;
+    min-block-size: 2.75rem;
     justify-self: end;
   }
 

@@ -28,7 +28,7 @@
 <style>
   .ui-menu-item {
     width: 100%;
-    min-height: 34px;
+    min-height: 44px;
     border: 1px solid transparent;
     border-radius: var(--ui-radius-sm);
     background: transparent;
@@ -36,7 +36,7 @@
     font: inherit;
     font-size: var(--font-size-xs);
     font-weight: 500;
-    padding: 0.3rem 0.5rem;
+    padding: 0.75rem 0.5rem;
     text-align: start;
     cursor: pointer;
     transition: background var(--motion-fast) var(--ease-standard),

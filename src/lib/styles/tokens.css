@@ -103,9 +103,9 @@
   --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
 
   /* Layout */
-  --ui-control-height-sm: 2rem;
-  --ui-control-height-md: 2.5rem;
-  --ui-control-height-lg: 3rem;
+  --ui-control-height-sm: 2.75rem; /* 44px — min touch target */
+  --ui-control-height-md: 2.75rem; /* 44px — min touch target */
+  --ui-control-height-lg: 3rem; /* 48px */
   --size-topbar: 3.5rem;
   --size-bottom-nav: 4.5rem;
   --size-sidebar: 15rem;
@@ -140,8 +140,8 @@
   --study-flow-reading-width: var(--size-page-study-compact);
   --study-flow-session-width: var(--size-page-study-session);
   --study-flow-session-content-width: var(--size-page-study-session-content);
-  --study-flow-session-progress-width: 14rem;
-  --study-flow-session-nav-button-min-width: 10.5rem;
+  --study-flow-session-progress-width: 14rem; /* desktop value — will be addressed in Phase 3 */
+  --study-flow-session-nav-button-min-width: 10.5rem; /* desktop value — will be addressed in Phase 3 */
   --study-flow-session-nav-button-height: 3rem;
   --study-flow-shell-width: var(--size-page-study-session-shell);
   --study-flow-hub-width: var(--size-page-study-hub);

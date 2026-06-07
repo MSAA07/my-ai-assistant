@@ -13,7 +13,7 @@
   };
 
   const sizeClasses = {
-    sm: 'h-8 rounded-md px-3 text-xs',
+    sm: 'h-8 rounded-md px-3 text-sm',
     md: 'h-9 rounded-md px-4 py-2 text-sm',
     lg: 'h-10 rounded-md px-6 text-sm',
     icon: 'size-9 rounded-md p-0',
@@ -153,6 +153,21 @@
   @keyframes ui-button-spin {
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 767px) {
+    :global(.ui-button[data-size='sm']) {
+      min-height: 2.75rem;
+    }
+
+    :global(.ui-button[data-size='icon']),
+    :global(.ui-button[data-size='icon-sm']) {
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 </style>
