@@ -927,32 +927,88 @@ export default {
       production: 'Production'
     },
     liveEnvironment: 'Live environment',
-    run: 'Run QA',
-    running: 'Running QA',
-    loading: 'Running QA tests... this may take up to 3 minutes',
-    resultsTitle: 'QA Results',
-    ranAt: 'Run timestamp: {time}',
-    summary: {
-      passed: 'Passed',
-      failed: 'Failed',
-      totalTime: 'Total time',
-      estimatedCost: 'Estimated cost',
-      fileTypesTested: 'File types tested',
-      edgeCases: 'Edge cases',
-      edgeCasesValue: '{passed}/{total}'
+    loading: 'Starting QA run...',
+    tiers: {
+      health: 'Health',
+      pipeline: 'Pipeline',
+      optimized: 'Optimized',
+      full: 'Full'
     },
-    allSystemsGo: 'All systems go',
-    issuesDetected: 'Issues detected: {count}',
+    monitor: {
+      title: 'Auto Health Monitor',
+      on: 'On',
+      off: 'Off',
+      frequencyLabel: 'Frequency',
+      enabledStatus: 'Monitoring every {frequency}',
+      disabledStatus: 'Monitoring disabled',
+      saving: 'Saving...',
+      noAutoRun: 'No automatic run yet',
+      lastAutoRun: 'Last automatic run: {time}',
+      frequencies: {
+        30: '30 min',
+        60: '1 hour',
+        180: '3 hours',
+        360: '6 hours',
+        720: '12 hours',
+        1440: '24 hours'
+      },
+      frequencyLabels: {
+        30: '30 min',
+        60: '1 hour',
+        180: '3 hours',
+        360: '6 hours',
+        720: '12 hours',
+        1440: '24 hours'
+      }
+    },
+    runSection: {
+      title: 'Run QA',
+      subtitle: 'Choose the environment once, then run the tier you need.'
+    },
+    cards: {
+      health: {
+        label: 'Health Check',
+        subtitle: 'API keys, database, storage - no AI calls',
+        cost: '$0.00',
+        speed: '~10 seconds',
+        run: 'Run Health Check'
+      },
+      pipeline: {
+        label: 'Pipeline Check',
+        subtitle: 'Full upload -> generate -> export flow',
+        cost: '~$0.05',
+        speed: '~3 minutes',
+        run: 'Run Pipeline Check'
+      },
+      full: {
+        label: 'Full QA',
+        subtitle: 'All file types, quality checks, edge cases',
+        runOptimized: 'Run Optimized (~$0.30)',
+        runFull: 'Run Full (~$1.50)'
+      }
+    },
+    confirm: {
+      title: 'Run full QA?',
+      message: 'This will run full QA and cost approximately {cost}. Continue?',
+      cancel: 'Cancel',
+      confirm: 'Confirm'
+    },
     status: {
       pass: 'PASS',
       fail: 'FAIL',
       skip: 'SKIP'
     },
+    speed: {
+      fast: 'Fast',
+      slow: 'Slow',
+      very_slow: 'Very slow'
+    },
     durationMs: '{duration} ms',
     rateLimit: 'QA was run recently. Please wait {minutes} minutes before running again.',
     progress: {
       label: 'QA run progress',
-      running: 'Running: {test}',
+      runningTier: 'Running: {tier}',
+      unknownTier: 'QA',
       testCounter: 'Test {current} of {total}',
       elapsed: 'Elapsed: {time}',
       remaining: 'Estimated remaining: {time}'
@@ -968,12 +1024,26 @@ export default {
       columns: {
         dateTime: 'Date & Time',
         target: 'Target',
+        tier: 'Tier',
         passed: 'Passed',
         failed: 'Failed',
         duration: 'Duration',
         cost: 'Cost',
-        triggeredBy: 'Triggered by'
+        triggeredBy: 'Triggered by',
+        report: 'Report'
       }
+    },
+    report: {
+      title: 'Failure Report',
+      view: 'View Report',
+      copy: 'Copy for Codex',
+      copied: 'Copied',
+      copyFailed: 'Copy failed'
+    },
+    legend: {
+      fast: 'Fast - within expected threshold',
+      slow: 'Slow - worth monitoring',
+      verySlow: 'Very slow - likely bottleneck'
     },
     tags: {
       pdf: 'PDF',
@@ -987,7 +1057,9 @@ export default {
     },
     errors: {
       failed: 'Failed to run QA.',
-      historyFailed: 'Failed to load QA run history.'
+      historyFailed: 'Failed to load QA run history.',
+      scheduleFailed: 'Failed to load QA schedule.',
+      scheduleSaveFailed: 'Failed to save QA schedule.'
     }
   },
   publicHeader: {
@@ -1006,7 +1078,7 @@ export default {
     }
   },
   publicFooter: {
-    copyright: '© 2026 StudyMaxing. All rights reserved.',
+    copyright: '© 2025 Studymaxing. All rights reserved.',
     sections: {
       product: 'Product',
       company: 'Company',
@@ -1016,7 +1088,8 @@ export default {
     },
     aria: {
       productLinks: 'Footer product links',
-      legalLinks: 'Footer legal links'
+      legalLinks: 'Footer legal links',
+      supportLinks: 'Footer support links'
     },
     productLinks: {
       features: 'Features',
@@ -1024,20 +1097,16 @@ export default {
       signIn: 'Sign in',
       getStarted: 'Get started'
     },
-    companyItems: {
-      focusedStudy: 'Built for focused document-based study',
-      updates: 'Product updates and school support coming soon'
-    },
     legalLinks: {
-      privacyPolicy: 'Privacy policy',
-      termsOfService: 'Terms of service',
-      cookiePolicy: 'Cookie policy',
-      refundPolicy: 'Refund policy',
+      privacyPolicy: 'Privacy Policy',
+      termsOfService: 'Terms of Service',
+      cookiePolicy: 'Cookie Policy',
+      refundPolicy: 'Refund Policy',
       disclaimer: 'Disclaimer',
       acceptableUse: 'Acceptable use'
     },
     supportItems: {
-      email: 'contact@studymaxing.com',
+      email: 'support@studymaxing.com',
       detail: 'Use this email for support, feedback, and account questions'
     },
     socialItems: {

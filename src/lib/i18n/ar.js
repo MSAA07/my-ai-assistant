@@ -929,7 +929,7 @@ ar.publicHeader = {
 };
 
 ar.publicFooter = {
-  copyright: '© 2026 StudyMaxing. جميع الحقوق محفوظة.',
+  copyright: '© 2025 Studymaxing. All rights reserved.',
   sections: {
     product: 'المنتج',
     company: 'الشركة',
@@ -939,7 +939,8 @@ ar.publicFooter = {
   },
   aria: {
     productLinks: 'روابط المنتج في التذييل',
-    legalLinks: 'روابط قانونية في التذييل'
+    legalLinks: 'روابط قانونية في التذييل',
+    supportLinks: 'روابط الدعم في التذييل'
   },
   productLinks: {
     features: 'المزايا',
@@ -947,20 +948,16 @@ ar.publicFooter = {
     signIn: 'تسجيل الدخول',
     getStarted: 'ابدأ الآن'
   },
-  companyItems: {
-    focusedStudy: 'مصمم للدراسة المركزة المعتمدة على المستندات',
-    updates: 'تحديثات المنتج ودعم المدارس قريبًا'
-  },
   legalLinks: {
-    privacyPolicy: 'سياسة الخصوصية',
-    termsOfService: 'شروط الخدمة',
-    cookiePolicy: 'سياسة ملفات تعريف الارتباط',
-    refundPolicy: 'سياسة الاسترداد',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    cookiePolicy: 'Cookie Policy',
+    refundPolicy: 'Refund Policy',
     disclaimer: 'إخلاء المسؤولية',
     acceptableUse: 'الاستخدام المقبول'
   },
   supportItems: {
-    email: 'contact@studymaxing.com',
+    email: 'support@studymaxing.com',
     detail: 'استخدم هذا البريد للدعم والملاحظات وأسئلة الحساب'
   },
   socialItems: {
@@ -1085,6 +1082,152 @@ ar.adminQA = {
   errors: {
     failed: 'تعذر تشغيل QA.',
     historyFailed: 'تعذر تحميل سجل تشغيل QA.'
+  }
+};
+
+ar.adminQA = {
+  tab: 'ضمان الجودة',
+  title: 'مشغل ضمان الجودة',
+  subtitle: 'شغل اختبارات آلية على بيئتك قبل النشر',
+  targetLabel: 'الهدف',
+  targets: {
+    staging: 'المرحلة التجريبية',
+    production: 'الإنتاج'
+  },
+  liveEnvironment: 'بيئة مباشرة',
+  loading: 'جار بدء تشغيل ضمان الجودة...',
+  tiers: {
+    health: 'الصحة',
+    pipeline: 'المسار',
+    optimized: 'محسن',
+    full: 'كامل'
+  },
+  monitor: {
+    title: 'مراقب الصحة التلقائي',
+    on: 'تشغيل',
+    off: 'إيقاف',
+    frequencyLabel: 'التكرار',
+    enabledStatus: 'المراقبة كل {frequency}',
+    disabledStatus: 'المراقبة معطلة',
+    saving: 'جار الحفظ...',
+    noAutoRun: 'لا يوجد تشغيل تلقائي بعد',
+    lastAutoRun: 'آخر تشغيل تلقائي: {time}',
+    frequencies: {
+      30: '30 دقيقة',
+      60: 'ساعة واحدة',
+      180: '3 ساعات',
+      360: '6 ساعات',
+      720: '12 ساعة',
+      1440: '24 ساعة'
+    },
+    frequencyLabels: {
+      30: '30 دقيقة',
+      60: 'ساعة واحدة',
+      180: '3 ساعات',
+      360: '6 ساعات',
+      720: '12 ساعة',
+      1440: '24 ساعة'
+    }
+  },
+  runSection: {
+    title: 'تشغيل ضمان الجودة',
+    subtitle: 'اختر البيئة مرة واحدة، ثم شغل المستوى المطلوب.'
+  },
+  cards: {
+    health: {
+      label: 'فحص الصحة',
+      subtitle: 'مفاتيح API وقاعدة البيانات والتخزين - بدون استدعاءات ذكاء اصطناعي',
+      cost: '$0.00',
+      speed: '~10 ثوان',
+      run: 'تشغيل فحص الصحة'
+    },
+    pipeline: {
+      label: 'فحص المسار',
+      subtitle: 'مسار الرفع ثم الإنشاء ثم التصدير بالكامل',
+      cost: '~$0.05',
+      speed: '~3 دقائق',
+      run: 'تشغيل فحص المسار'
+    },
+    full: {
+      label: 'فحص كامل',
+      subtitle: 'كل أنواع الملفات وفحوص الجودة والحالات الحدية',
+      runOptimized: 'تشغيل المحسن (~$0.30)',
+      runFull: 'تشغيل الكامل (~$1.50)'
+    }
+  },
+  confirm: {
+    title: 'تشغيل الفحص الكامل؟',
+    message: 'سيشغل هذا الفحص الكامل بتكلفة تقريبية {cost}. هل تريد المتابعة؟',
+    cancel: 'إلغاء',
+    confirm: 'تأكيد'
+  },
+  status: {
+    pass: 'نجاح',
+    fail: 'فشل',
+    skip: 'تخطي'
+  },
+  speed: {
+    fast: 'سريع',
+    slow: 'بطيء',
+    very_slow: 'بطيء جدا'
+  },
+  durationMs: '{duration} مللي ثانية',
+  rateLimit: 'تم تشغيل ضمان الجودة مؤخرا. يرجى الانتظار {minutes} دقائق قبل التشغيل مرة أخرى.',
+  progress: {
+    label: 'تقدم تشغيل ضمان الجودة',
+    runningTier: 'قيد التشغيل: {tier}',
+    unknownTier: 'ضمان الجودة',
+    testCounter: 'الاختبار {current} من {total}',
+    elapsed: 'المنقضي: {time}',
+    remaining: 'المتبقي التقديري: {time}'
+  },
+  history: {
+    title: 'سجل التشغيل',
+    description: 'فحوص ضمان الجودة السابقة مرتبة من الأحدث إلى الأقدم',
+    loading: 'جار تحميل سجل تشغيل ضمان الجودة...',
+    empty: 'لا توجد تشغيلات ضمان جودة بعد. شغل أول فحص أعلاه.',
+    expand: 'توسيع تفاصيل تشغيل ضمان الجودة',
+    collapse: 'طي تفاصيل تشغيل ضمان الجودة',
+    breakdown: 'تفاصيل كل اختبار',
+    columns: {
+      dateTime: 'التاريخ والوقت',
+      target: 'الهدف',
+      tier: 'المستوى',
+      passed: 'نجح',
+      failed: 'فشل',
+      duration: 'المدة',
+      cost: 'التكلفة',
+      triggeredBy: 'شغله',
+      report: 'التقرير'
+    }
+  },
+  report: {
+    title: 'تقرير الفشل',
+    view: 'عرض التقرير',
+    copy: 'نسخ لـ Codex',
+    copied: 'تم النسخ',
+    copyFailed: 'فشل النسخ'
+  },
+  legend: {
+    fast: 'سريع - ضمن الحد المتوقع',
+    slow: 'بطيء - يستحق المراقبة',
+    verySlow: 'بطيء جدا - غالبا عنق زجاجة'
+  },
+  tags: {
+    pdf: 'PDF',
+    docx: 'DOCX',
+    pptx: 'PPTX',
+    arabic: 'عربي',
+    ocr: 'OCR',
+    edgeCase: 'حالة حدية',
+    pdfExport: 'تصدير PDF',
+    system: 'النظام'
+  },
+  errors: {
+    failed: 'تعذر تشغيل ضمان الجودة.',
+    historyFailed: 'تعذر تحميل سجل تشغيل ضمان الجودة.',
+    scheduleFailed: 'تعذر تحميل جدول ضمان الجودة.',
+    scheduleSaveFailed: 'تعذر حفظ جدول ضمان الجودة.'
   }
 };
 

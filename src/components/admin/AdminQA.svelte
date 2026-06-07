@@ -5,6 +5,8 @@
   import Card from '../../lib/components/ui/Card.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
+  import ModalSurface from '../../lib/components/ui/ModalSurface.svelte';
+  import Toggle from '../../lib/components/ui/Toggle.svelte';
   import { API_BASE } from '../../config.js';
   import { formatDate, formatNumber, t } from '../../lib/i18n/t.js';
   import { language } from '../../lib/stores/language.js';
@@ -15,13 +17,25 @@
     skip: { tone: 'neutral', labelKey: 'adminQA.status.skip' }
   };
 
-  const TOTAL_QA_TESTS = 18;
-  const FILE_TYPE_PASS_ORDERS = [5, 7, 9, 11, 13];
-  const EDGE_CASE_ORDERS = [14, 15];
+  const tierMeta = {
+    health: { labelKey: 'adminQA.tiers.health', tone: 'info' },
+    pipeline: { labelKey: 'adminQA.tiers.pipeline', tone: 'accent' },
+    optimized: { labelKey: 'adminQA.tiers.optimized', tone: 'warning' },
+    full: { labelKey: 'adminQA.tiers.full', tone: 'danger' }
+  };
+
+  const frequencyOptions = [
+    { value: 30, labelKey: 'adminQA.monitor.frequencies.30' },
+    { value: 60, labelKey: 'adminQA.monitor.frequencies.60' },
+    { value: 180, labelKey: 'adminQA.monitor.frequencies.180' },
+    { value: 360, labelKey: 'adminQA.monitor.frequencies.360' },
+    { value: 720, labelKey: 'adminQA.monitor.frequencies.720' },
+    { value: 1440, labelKey: 'adminQA.monitor.frequencies.1440' }
+  ];
 
   let target = 'staging';
   let running = false;
-  let result = null;
+  let activeRunLabel = '';
   let progress = null;
   let progressRunStartedAt = 0;
   let progressReceivedAt = 0;
@@ -34,15 +48,23 @@
   let expandedRunId = '';
   let progressInterval = null;
   let liveTimer = null;
+  let schedule = { enabled: false, frequencyMins: 60, tier: 'health' };
+  let scheduleLoading = true;
+  let scheduleSaving = false;
+  let scheduleError = '';
+  let confirmFullMode = '';
+  let reportRun = null;
+  let copyState = '';
 
   $: $language;
-  $: hasFailures = Number(result?.failed || 0) > 0;
+  $: lastAutoRun = history.find((run) => run?.triggeredBy === 'auto');
   $: liveElapsedMs = progress?.inProgress && progressRunStartedAt
     ? Math.max(0, liveNow - progressRunStartedAt)
     : 0;
   $: liveRemainingMs = progress?.inProgress
     ? Math.max(0, Number(progress.estimatedRemainingMs || 0) - Math.max(0, liveNow - progressReceivedAt))
     : 0;
+  $: currentTierLabel = progress?.tierLabel || activeRunLabel || t('adminQA.progress.unknownTier');
 
   function formatDuration(ms) {
     const value = Number(ms);
@@ -85,30 +107,22 @@
     return t(getStatusMeta(status).labelKey);
   }
 
+  function getTierMeta(tier) {
+    return tierMeta[tier] || tierMeta.full;
+  }
+
+  function getTierLabel(tier) {
+    return t(getTierMeta(tier).labelKey);
+  }
+
   function getRunResults(run) {
     return Array.isArray(run?.results) ? run.results : [];
-  }
-
-  function getPassedOrders(run) {
-    return new Set(
-      getRunResults(run)
-        .filter((item) => item?.status === 'pass')
-        .map((item) => Number(item?.order))
-        .filter(Number.isFinite)
-    );
-  }
-
-  function getRunMetrics(run) {
-    const passedOrders = getPassedOrders(run);
-    return {
-      fileTypesTested: FILE_TYPE_PASS_ORDERS.filter((order) => passedOrders.has(order)).length,
-      edgeCasesPassed: EDGE_CASE_ORDERS.filter((order) => passedOrders.has(order)).length
-    };
   }
 
   function getTestTags(item) {
     const name = String(item?.name || item?.testName || '').toLowerCase();
 
+    if (name.includes('backend') || name.includes('database') || name.includes('api key') || name.includes('storage')) return ['system'];
     if (name.includes('pdf export')) return ['pdfExport'];
     if (name.includes('admin endpoints') || name.includes('sign out')) return ['system'];
     if (name.includes('oversized') || name.includes('corrupt')) return ['edgeCase'];
@@ -116,18 +130,7 @@
     if (name.includes('arabic pptx')) return ['arabic', 'pptx'];
     if (name.includes('docx')) return ['docx'];
     if (name.includes('pptx')) return ['pptx'];
-    if (name.includes('english pdf') || name.includes('test pdf')) return ['pdf'];
-
-    const order = Number(item?.order);
-
-    if (order >= 3 && order <= 5) return ['pdf'];
-    if (order >= 6 && order <= 7) return ['docx'];
-    if (order >= 8 && order <= 9) return ['pptx'];
-    if (order >= 10 && order <= 11) return ['arabic', 'ocr'];
-    if (order >= 12 && order <= 13) return ['arabic', 'pptx'];
-    if (order >= 14 && order <= 15) return ['edgeCase'];
-    if (order === 16) return ['pdfExport'];
-    if (order >= 17 && order <= 18) return ['system'];
+    if (name.includes('pdf')) return ['pdf'];
 
     return [];
   }
@@ -138,6 +141,69 @@
 
   function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function fetchSchedule() {
+    scheduleError = '';
+    scheduleLoading = true;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/qa/schedule`, {
+        credentials: 'include'
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || t('adminQA.errors.scheduleFailed'));
+      schedule = {
+        enabled: Boolean(data?.enabled),
+        frequencyMins: Number(data?.frequencyMins || 60),
+        tier: data?.tier || 'health'
+      };
+    } catch (err) {
+      scheduleError = err?.message || t('adminQA.errors.scheduleFailed');
+    } finally {
+      scheduleLoading = false;
+    }
+  }
+
+  async function saveSchedule(nextSchedule) {
+    scheduleSaving = true;
+    scheduleError = '';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/qa/schedule`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nextSchedule)
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || t('adminQA.errors.scheduleSaveFailed'));
+      schedule = {
+        enabled: Boolean(data?.enabled),
+        frequencyMins: Number(data?.frequencyMins || 60),
+        tier: data?.tier || 'health'
+      };
+    } catch (err) {
+      scheduleError = err?.message || t('adminQA.errors.scheduleSaveFailed');
+      await fetchSchedule();
+    } finally {
+      scheduleSaving = false;
+    }
+  }
+
+  function handleScheduleToggle(event) {
+    void saveSchedule({
+      enabled: Boolean(event.detail?.checked),
+      frequencyMins: schedule.frequencyMins
+    });
+  }
+
+  function handleFrequencyChange(event) {
+    const frequencyMins = Number(event.currentTarget.value);
+    void saveSchedule({
+      enabled: schedule.enabled,
+      frequencyMins
+    });
   }
 
   async function fetchHistory({ expandRunId = '' } = {}) {
@@ -174,6 +240,7 @@
       }
 
       progress = data;
+      activeRunLabel = data.tierLabel || '';
       progressRunStartedAt = Date.now() - Number(data.elapsedMs || 0);
       progressReceivedAt = Date.now();
       return progress;
@@ -200,7 +267,7 @@
     let sawInProgress = false;
     const startedAt = Date.now();
 
-    while (Date.now() - startedAt < 20 * 60 * 1000) {
+    while (Date.now() - startedAt < 25 * 60 * 1000) {
       await sleep(2000);
       const currentProgress = await fetchProgress();
 
@@ -227,15 +294,14 @@
     if (!currentProgress?.inProgress) return;
 
     running = true;
-    result = null;
     error = '';
     rateLimitMessage = '';
     startProgressPolling();
 
     try {
-      result = await waitForQaCompletion();
-      if (result?.id) {
-        await fetchHistory({ expandRunId: result.id });
+      const latest = await waitForQaCompletion();
+      if (latest?.id) {
+        await fetchHistory({ expandRunId: latest.id });
       }
     } catch (err) {
       error = err?.message || t('adminQA.errors.failed');
@@ -243,14 +309,23 @@
       running = false;
       stopProgressPolling();
       progress = null;
+      activeRunLabel = '';
     }
   }
 
-  async function runQa() {
+  function getRunEndpoint(tier, mode) {
+    if (tier === 'health') return { path: '/health', body: { target } };
+    if (tier === 'pipeline') return { path: '/pipeline', body: { target } };
+    return { path: '/full', body: { target, mode } };
+  }
+
+  async function runQa(tier, mode = '') {
     if (running) return;
 
+    const endpoint = getRunEndpoint(tier, mode);
+    const runTier = tier === 'full' ? mode : tier;
     running = true;
-    result = null;
+    activeRunLabel = getTierLabel(runTier);
     error = '';
     rateLimitMessage = '';
     progress = null;
@@ -259,11 +334,11 @@
     startProgressPolling();
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/qa/run`, {
+      const response = await fetch(`${API_BASE}/api/admin/qa${endpoint.path}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target })
+        body: JSON.stringify(endpoint.body)
       });
       const data = await response.json().catch(() => null);
 
@@ -278,26 +353,59 @@
         throw new Error(data?.error || t('adminQA.errors.failed'));
       }
 
-      if (data?.started) {
-        result = await waitForQaCompletion();
-        if (result?.id) {
-          await fetchHistory({ expandRunId: result.id });
-        }
-        return;
+      const latest = await waitForQaCompletion();
+      if (latest?.id) {
+        await fetchHistory({ expandRunId: latest.id });
       }
-
-      result = data;
-      await fetchHistory({ expandRunId: data?.id || '' });
     } catch (err) {
       error = err?.message || t('adminQA.errors.failed');
     } finally {
       running = false;
       stopProgressPolling();
       progress = null;
+      activeRunLabel = '';
+    }
+  }
+
+  function requestFullRun(mode) {
+    confirmFullMode = mode;
+  }
+
+  function cancelFullRun() {
+    confirmFullMode = '';
+  }
+
+  function confirmFullRun() {
+    const mode = confirmFullMode;
+    confirmFullMode = '';
+    void runQa('full', mode);
+  }
+
+  function openReport(run, event) {
+    event?.stopPropagation();
+    reportRun = run;
+    copyState = '';
+  }
+
+  function closeReport() {
+    reportRun = null;
+    copyState = '';
+  }
+
+  async function copyReport() {
+    const text = reportRun?.failureReport || '';
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      copyState = t('adminQA.report.copied');
+    } catch {
+      copyState = t('adminQA.report.copyFailed');
     }
   }
 
   onMount(() => {
+    void fetchSchedule();
     void fetchHistory();
     void resumeActiveQaRun();
     liveTimer = setInterval(() => {
@@ -312,139 +420,149 @@
 </script>
 
 <div class="admin-qa">
-  <DataSurface title={t('adminQA.title')} description={t('adminQA.subtitle')} tableMinWidth="720px">
-    <svelte:fragment slot="filters">
-      <div class="qa-run-controls">
-        <FieldShell className="filter-field" label={t('adminQA.targetLabel')} forId="admin-qa-target">
+  <Card className="qa-monitor" variant="base" border="strong" padding="md">
+    <div class="qa-section-header">
+      <div>
+        <h2>{t('adminQA.monitor.title')}</h2>
+        <p>
+          {schedule.enabled
+            ? t('adminQA.monitor.enabledStatus', { frequency: t(`adminQA.monitor.frequencyLabels.${schedule.frequencyMins}`) })
+            : t('adminQA.monitor.disabledStatus')}
+        </p>
+      </div>
+
+      <Toggle
+        checked={schedule.enabled}
+        disabled={scheduleLoading || scheduleSaving}
+        label={schedule.enabled ? t('adminQA.monitor.on') : t('adminQA.monitor.off')}
+        on:change={handleScheduleToggle}
+      />
+    </div>
+
+    {#if schedule.enabled}
+      <FieldShell className="qa-monitor__frequency" label={t('adminQA.monitor.frequencyLabel')} forId="qa-monitor-frequency">
+        <select id="qa-monitor-frequency" value={schedule.frequencyMins} disabled={scheduleSaving} on:change={handleFrequencyChange}>
+          {#each frequencyOptions as option}
+            <option value={option.value}>{t(option.labelKey)}</option>
+          {/each}
+        </select>
+      </FieldShell>
+    {/if}
+
+    <div class="qa-monitor__meta">
+      <span>{lastAutoRun ? t('adminQA.monitor.lastAutoRun', { time: formatRunDate(lastAutoRun.ranAt) }) : t('adminQA.monitor.noAutoRun')}</span>
+      {#if scheduleSaving}
+        <span>{t('adminQA.monitor.saving')}</span>
+      {/if}
+    </div>
+
+    {#if scheduleError}
+      <p class="qa-error-text">{scheduleError}</p>
+    {/if}
+  </Card>
+
+  <Card className="qa-run-panel" variant="base" border="strong" padding="md">
+    <div class="qa-section-header qa-run-panel__header">
+      <div>
+        <h2>{t('adminQA.runSection.title')}</h2>
+        <p>{t('adminQA.runSection.subtitle')}</p>
+      </div>
+
+      <div class="qa-target-control">
+        <FieldShell label={t('adminQA.targetLabel')} forId="admin-qa-target">
           <select id="admin-qa-target" bind:value={target} disabled={running}>
             <option value="staging">{t('adminQA.targets.staging')}</option>
             <option value="production">{t('adminQA.targets.production')}</option>
           </select>
         </FieldShell>
-
         {#if target === 'production'}
           <Badge tone="warning" size="sm">{t('adminQA.liveEnvironment')}</Badge>
         {/if}
-
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          className="qa-run-controls__button"
-          loading={running}
-          disabled={running}
-          on:click={runQa}
-        >
-          {running ? t('adminQA.running') : t('adminQA.run')}
-        </Button>
       </div>
-    </svelte:fragment>
+    </div>
 
-    <svelte:fragment slot="state">
-      {#if running}
-        <div class="qa-loading" role="status">
-          <span class="qa-spinner" aria-hidden="true"></span>
-          <span>{t('adminQA.loading')}</span>
-        </div>
-
-        {#if progress?.inProgress}
-          <div class="qa-progress" aria-label={t('adminQA.progress.label')}>
-            <div class="qa-progress__header">
-              <strong>{t('adminQA.progress.running', { test: progress.currentTest })}</strong>
-              <span>{t('adminQA.progress.testCounter', { current: formatNumber(progress.currentTestIndex || 0), total: formatNumber(progress.totalTests || TOTAL_QA_TESTS) })}</span>
-            </div>
-            <div class="qa-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress.percentComplete || 0}>
-              <span style={`width: ${Math.max(0, Math.min(100, Number(progress.percentComplete || 0)))}%;`}></span>
-            </div>
-            <div class="qa-progress__meta">
-              <span>{t('adminQA.progress.elapsed', { time: formatDurationShort(liveElapsedMs) })}</span>
-              <span>{t('adminQA.progress.remaining', { time: formatDurationShort(liveRemainingMs) })}</span>
-            </div>
+    <div class="qa-card-grid">
+      <Card className="qa-tier-card" variant="soft" border="default" padding="sm">
+        <div class="qa-tier-card__heading">
+          <h3>{t('adminQA.cards.health.label')}</h3>
+          <div class="qa-tier-card__badges">
+            <Badge tone="success" size="sm">{t('adminQA.cards.health.cost')}</Badge>
+            <Badge tone="info" size="sm">{t('adminQA.cards.health.speed')}</Badge>
           </div>
-        {/if}
-      {:else if rateLimitMessage}
-        <Card class="ui-data-state-error qa-rate-limit" variant="soft" border="strong" padding="sm">
-          {rateLimitMessage}
-        </Card>
-      {:else if error}
-        <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">
-          {error}
-        </Card>
-      {/if}
-    </svelte:fragment>
-  </DataSurface>
+        </div>
+        <p>{t('adminQA.cards.health.subtitle')}</p>
+        <Button type="button" variant="primary" size="sm" loading={running && activeRunLabel === getTierLabel('health')} disabled={running} on:click={() => runQa('health')}>
+          {t('adminQA.cards.health.run')}
+        </Button>
+      </Card>
 
-  {#if result}
-    <section class="qa-results" aria-live="polite">
-      <header class="qa-results__header">
-        <div>
-          <h2>{t('adminQA.resultsTitle')}</h2>
-          <p>{t('adminQA.ranAt', { time: formatRunDate(result.ranAt) })}</p>
+      <Card className="qa-tier-card" variant="soft" border="default" padding="sm">
+        <div class="qa-tier-card__heading">
+          <h3>{t('adminQA.cards.pipeline.label')}</h3>
+          <div class="qa-tier-card__badges">
+            <Badge tone="success" size="sm">{t('adminQA.cards.pipeline.cost')}</Badge>
+            <Badge tone="info" size="sm">{t('adminQA.cards.pipeline.speed')}</Badge>
+          </div>
         </div>
-      </header>
+        <p>{t('adminQA.cards.pipeline.subtitle')}</p>
+        <Button type="button" variant="primary" size="sm" loading={running && activeRunLabel === getTierLabel('pipeline')} disabled={running} on:click={() => runQa('pipeline')}>
+          {t('adminQA.cards.pipeline.run')}
+        </Button>
+      </Card>
 
-      <div class="qa-summary-grid">
-        <div>
-          <span>{t('adminQA.summary.passed')}</span>
-          <strong>{formatNumber(result.passed || 0)}</strong>
+      <Card className="qa-tier-card" variant="soft" border="default" padding="sm">
+        <div class="qa-tier-card__heading">
+          <h3>{t('adminQA.cards.full.label')}</h3>
         </div>
-        <div>
-          <span>{t('adminQA.summary.failed')}</span>
-          <strong>{formatNumber(result.failed || 0)}</strong>
+        <p>{t('adminQA.cards.full.subtitle')}</p>
+        <div class="qa-tier-card__actions">
+          <Button type="button" variant="warning" size="sm" disabled={running} on:click={() => requestFullRun('optimized')}>
+            {t('adminQA.cards.full.runOptimized')}
+          </Button>
+          <Button type="button" variant="danger" size="sm" disabled={running} on:click={() => requestFullRun('full')}>
+            {t('adminQA.cards.full.runFull')}
+          </Button>
         </div>
-        <div>
-          <span>{t('adminQA.summary.totalTime')}</span>
-          <strong>{formatDurationShort(result.totalDurationMs)}</strong>
+      </Card>
+    </div>
+
+    {#if running && progress?.inProgress}
+      <div class="qa-progress" aria-label={t('adminQA.progress.label')}>
+        <div class="qa-progress__header">
+          <strong>{t('adminQA.progress.runningTier', { tier: currentTierLabel })}</strong>
+          <span>{t('adminQA.progress.testCounter', { current: formatNumber(progress.currentTestIndex || 0), total: formatNumber(progress.totalTests || 0) })}</span>
         </div>
-        <div>
-          <span>{t('adminQA.summary.estimatedCost')}</span>
-          <strong>{formatCost(result.estimatedCostUsd)}</strong>
+        <p>{progress.currentTest}</p>
+        <div class="qa-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress.percentComplete || 0}>
+          <span style={`width: ${Math.max(0, Math.min(100, Number(progress.percentComplete || 0)))}%;`}></span>
         </div>
-        <div>
-          <span>{t('adminQA.summary.fileTypesTested')}</span>
-          <strong>{formatNumber(getRunMetrics(result).fileTypesTested)}</strong>
-        </div>
-        <div>
-          <span>{t('adminQA.summary.edgeCases')}</span>
-          <strong>{t('adminQA.summary.edgeCasesValue', { passed: formatNumber(getRunMetrics(result).edgeCasesPassed), total: formatNumber(EDGE_CASE_ORDERS.length) })}</strong>
+        <div class="qa-progress__meta">
+          <span>{t('adminQA.progress.elapsed', { time: formatDurationShort(liveElapsedMs) })}</span>
+          <span>{t('adminQA.progress.remaining', { time: formatDurationShort(liveRemainingMs) })}</span>
         </div>
       </div>
-
-      {#if hasFailures}
-        <div class="qa-banner qa-banner--danger" role="status">
-          {t('adminQA.issuesDetected', { count: formatNumber(result.failed || 0) })}
-        </div>
-      {:else}
-        <div class="qa-banner qa-banner--success" role="status">
-          {t('adminQA.allSystemsGo')}
-        </div>
-      {/if}
-
-      <div class="qa-test-grid">
-        {#each result.results || [] as item}
-          <Card className={`qa-test-card qa-test-card--${item.status}`} variant="base" border="strong" padding="sm">
-            <div class="qa-test-card__header">
-              <h3>{item.name || item.testName}</h3>
-              <Badge tone={getStatusMeta(item.status).tone} size="sm">
-                {getStatusLabel(item.status)}
-              </Badge>
-            </div>
-            <p>{item.message}</p>
-            <span class="qa-test-card__duration">
-              {formatDuration(item.durationMs || 0)}
-            </span>
-          </Card>
-        {/each}
+    {:else if running}
+      <div class="qa-loading" role="status">
+        <span class="qa-spinner" aria-hidden="true"></span>
+        <span>{t('adminQA.loading')}</span>
       </div>
-    </section>
-  {/if}
+    {:else if rateLimitMessage}
+      <Card className="qa-rate-limit" variant="soft" border="strong" padding="sm">
+        {rateLimitMessage}
+      </Card>
+    {:else if error}
+      <Card className="qa-error" variant="soft" border="strong" padding="sm">
+        {error}
+      </Card>
+    {/if}
+  </Card>
 
-  <DataSurface title={t('adminQA.history.title')} description={t('adminQA.history.description')} tableMinWidth="980px">
+  <DataSurface title={t('adminQA.history.title')} description={t('adminQA.history.description')} tableMinWidth="1080px">
     <svelte:fragment slot="state">
       {#if historyLoading}
         <p class="ui-data-state-note">{t('adminQA.history.loading')}</p>
       {:else if historyError}
-        <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">
+        <Card className="qa-error" variant="soft" border="strong" padding="sm">
           {historyError}
         </Card>
       {:else if history.length === 0}
@@ -459,11 +577,13 @@
             <tr>
               <th>{t('adminQA.history.columns.dateTime')}</th>
               <th>{t('adminQA.history.columns.target')}</th>
+              <th>{t('adminQA.history.columns.tier')}</th>
               <th>{t('adminQA.history.columns.passed')}</th>
               <th>{t('adminQA.history.columns.failed')}</th>
               <th>{t('adminQA.history.columns.duration')}</th>
               <th>{t('adminQA.history.columns.cost')}</th>
               <th>{t('adminQA.history.columns.triggeredBy')}</th>
+              <th>{t('adminQA.history.columns.report')}</th>
             </tr>
           </thead>
           <tbody>
@@ -476,14 +596,28 @@
                   </button>
                 </td>
                 <td>{t(`adminQA.targets.${run.target}`)}</td>
+                <td>
+                  <Badge tone={getTierMeta(run.tier).tone} size="sm" className={`qa-tier-badge qa-tier-badge--${run.tier || 'full'}`}>
+                    {getTierLabel(run.tier || 'full')}
+                  </Badge>
+                </td>
                 <td><strong>{formatNumber(run.passed || 0)}</strong></td>
                 <td><strong>{formatNumber(run.failed || 0)}</strong></td>
                 <td>{formatDurationShort(run.totalDurationMs)}</td>
                 <td>{formatCost(run.estimatedCostUsd)}</td>
                 <td>{run.triggeredBy || '-'}</td>
+                <td>
+                  {#if run.failureReport}
+                    <Button type="button" variant="secondary" size="sm" on:click={(event) => openReport(run, event)}>
+                      {t('adminQA.report.view')}
+                    </Button>
+                  {:else}
+                    <span class="qa-muted">-</span>
+                  {/if}
+                </td>
               </tr>
               <tr class="qa-history-detail-row" class:expanded={expandedRunId === run.id} aria-hidden={expandedRunId !== run.id}>
-                <td colspan="7">
+                <td colspan="9">
                   <div class="qa-history-detail-shell">
                     <div class="qa-history-detail">
                       <h3>{t('adminQA.history.breakdown')}</h3>
@@ -503,6 +637,7 @@
                               {getStatusLabel(item.status)}
                             </Badge>
                             <span>{formatDuration(item.durationMs || 0)}</span>
+                            <span class={`qa-speed qa-speed--${item.speedVerdict || 'fast'}`}>{t(`adminQA.speed.${item.speedVerdict || 'fast'}`)}</span>
                           </div>
                         {/each}
                       </div>
@@ -516,57 +651,143 @@
       {/if}
     </svelte:fragment>
   </DataSurface>
+
+  <Card className="qa-speed-legend" variant="soft" border="default" padding="sm">
+    <span><i class="qa-dot qa-dot--fast"></i>{t('adminQA.legend.fast')}</span>
+    <span><i class="qa-dot qa-dot--slow"></i>{t('adminQA.legend.slow')}</span>
+    <span><i class="qa-dot qa-dot--very-slow"></i>{t('adminQA.legend.verySlow')}</span>
+  </Card>
 </div>
 
+<ModalSurface
+  open={Boolean(confirmFullMode)}
+  width="min(420px, 100%)"
+  labelledBy="qa-confirm-title"
+  on:close={cancelFullRun}
+>
+  <div class="qa-modal-content">
+    <h2 id="qa-confirm-title">{t('adminQA.confirm.title')}</h2>
+    <p>{t('adminQA.confirm.message', { cost: confirmFullMode === 'full' ? '~$1.50' : '~$0.30' })}</p>
+    <div class="qa-modal-actions">
+      <Button type="button" variant="ghost" on:click={cancelFullRun}>{t('adminQA.confirm.cancel')}</Button>
+      <Button type="button" variant="danger" on:click={confirmFullRun}>{t('adminQA.confirm.confirm')}</Button>
+    </div>
+  </div>
+</ModalSurface>
+
+<ModalSurface
+  open={Boolean(reportRun)}
+  width="min(760px, 100%)"
+  labelledBy="qa-report-title"
+  on:close={closeReport}
+>
+  <div class="qa-modal-content qa-report-modal">
+    <div class="qa-section-header">
+      <div>
+        <h2 id="qa-report-title">{t('adminQA.report.title')}</h2>
+        <p>{reportRun ? formatRunDate(reportRun.ranAt) : ''}</p>
+      </div>
+      <Button type="button" variant="ghost" size="sm" on:click={closeReport}>{t('common.close')}</Button>
+    </div>
+
+    <pre>{reportRun?.failureReport || ''}</pre>
+
+    <div class="qa-modal-actions">
+      {#if copyState}
+        <span class="qa-copy-state">{copyState}</span>
+      {/if}
+      <Button type="button" variant="primary" on:click={copyReport}>{t('adminQA.report.copy')}</Button>
+    </div>
+  </div>
+</ModalSurface>
+
 <style>
-  .admin-qa,
-  .qa-results {
+  .admin-qa {
     display: grid;
     gap: var(--ui-space-4);
     min-width: 0;
   }
 
-  .qa-loading {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ui-space-2);
-    width: fit-content;
-    max-width: 100%;
-    margin: 0;
-    color: var(--ui-text-secondary);
-    font-size: var(--ui-type-body-sm);
-    line-height: 1.55;
-    border: 1px dashed var(--ui-border-default);
-    border-radius: var(--ui-radius-md);
-    background: color-mix(in srgb, var(--ui-surface-secondary) 62%, transparent);
-    padding: var(--ui-space-3) var(--ui-space-4);
+  :global(.qa-monitor),
+  :global(.qa-run-panel) {
+    gap: var(--ui-space-4);
   }
 
-  .qa-spinner {
-    width: 1rem;
-    height: 1rem;
-    flex: 0 0 auto;
-    border-radius: 999px;
-    border: 2px solid color-mix(in srgb, var(--ui-text-secondary) 24%, transparent);
-    border-top-color: var(--ui-text-primary);
-    animation: qa-spin 700ms linear infinite;
-  }
-
-  .qa-run-controls {
+  .qa-section-header,
+  .qa-run-panel__header,
+  .qa-progress__header,
+  .qa-progress__meta {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
+    justify-content: space-between;
     gap: var(--ui-space-3);
-    width: 100%;
     min-width: 0;
   }
 
-  .qa-run-controls :global(.filter-field) {
-    flex: 0 1 22rem;
-    min-width: 12rem;
+  .qa-section-header h2,
+  .qa-tier-card__heading h3,
+  .qa-history-detail h3,
+  .qa-modal-content h2 {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: var(--ui-type-title-sm);
+    font-weight: 600;
+    letter-spacing: 0;
   }
 
-  :global(.qa-run-controls__button) {
-    margin-inline-start: auto;
+  .qa-section-header p,
+  :global(.qa-tier-card) p,
+  .qa-progress p,
+  .qa-modal-content p,
+  .qa-monitor__meta {
+    margin: 0.35rem 0 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.55;
+  }
+
+  .qa-monitor__frequency {
+    max-width: 18rem;
+  }
+
+  .qa-monitor__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+    flex-wrap: wrap;
+    margin-top: 0;
+  }
+
+  .qa-target-control {
+    display: flex;
+    align-items: end;
+    gap: var(--ui-space-2);
+    flex-wrap: wrap;
+    min-width: min(100%, 18rem);
+  }
+
+  .qa-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ui-space-3);
+  }
+
+  :global(.qa-tier-card) {
+    min-height: 13rem;
+    justify-content: space-between;
+  }
+
+  .qa-tier-card__heading {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .qa-tier-card__badges,
+  .qa-tier-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    flex-wrap: wrap;
   }
 
   .qa-progress {
@@ -576,15 +797,6 @@
     border-radius: var(--ui-radius-md);
     background: color-mix(in srgb, var(--ui-surface-secondary) 70%, transparent);
     padding: var(--ui-space-3);
-  }
-
-  .qa-progress__header,
-  .qa-progress__meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ui-space-3);
-    flex-wrap: wrap;
   }
 
   .qa-progress__header strong {
@@ -614,128 +826,42 @@
     transition: width 220ms var(--ease-standard);
   }
 
-  :global(.qa-rate-limit) {
-    color: color-mix(in srgb, var(--ui-accent-warning) 82%, var(--ui-text-primary) 18%);
-    border-color: color-mix(in srgb, var(--ui-accent-warning) 34%, var(--ui-border-default) 66%);
-  }
-
-  .qa-results__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--ui-space-3);
-    min-width: 0;
-  }
-
-  .qa-results__header h2,
-  .qa-history-detail h3 {
+  .qa-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    width: fit-content;
+    max-width: 100%;
     margin: 0;
-    color: var(--ui-text-primary);
-    font-size: var(--ui-type-title-sm);
-    font-weight: 600;
-    letter-spacing: 0;
-  }
-
-  .qa-results__header p {
-    margin: 0.35rem 0 0;
     color: var(--ui-text-secondary);
     font-size: var(--ui-type-body-sm);
     line-height: 1.55;
-  }
-
-  .qa-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: var(--ui-space-3);
-  }
-
-  .qa-summary-grid > div {
-    display: grid;
-    gap: 0.35rem;
-    min-width: 0;
-    border: 1px solid var(--ui-border-default);
+    border: 1px dashed var(--ui-border-default);
     border-radius: var(--ui-radius-md);
-    background: color-mix(in srgb, var(--ui-surface-secondary) 74%, var(--ui-surface-card) 26%);
-    padding: var(--ui-space-3);
-  }
-
-  .qa-summary-grid span,
-  .qa-test-card__duration {
-    color: var(--ui-text-muted);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .qa-summary-grid strong {
-    min-width: 0;
-    overflow-wrap: anywhere;
-    color: var(--ui-text-primary);
-    font-size: 1.15rem;
-    font-weight: 650;
-    letter-spacing: 0;
-  }
-
-  .qa-banner {
-    border-radius: var(--ui-radius-md);
-    border: 1px solid var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 62%, transparent);
     padding: var(--ui-space-3) var(--ui-space-4);
-    font-size: var(--ui-type-body-sm);
-    font-weight: 600;
   }
 
-  .qa-banner--success {
-    color: color-mix(in srgb, var(--ui-accent-success) 84%, var(--ui-text-primary) 16%);
-    border-color: color-mix(in srgb, var(--ui-accent-success) 30%, var(--ui-border-default) 70%);
-    background: color-mix(in srgb, var(--ui-accent-success) 10%, transparent);
+  .qa-spinner {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    border: 2px solid color-mix(in srgb, var(--ui-text-secondary) 24%, transparent);
+    border-top-color: var(--ui-text-primary);
+    animation: qa-spin 700ms linear infinite;
   }
 
-  .qa-banner--danger {
+  :global(.qa-error),
+  :global(.qa-rate-limit) {
     color: color-mix(in srgb, var(--ui-accent-danger) 84%, var(--ui-text-primary) 16%);
     border-color: color-mix(in srgb, var(--ui-accent-danger) 30%, var(--ui-border-default) 70%);
-    background: color-mix(in srgb, var(--ui-accent-danger) 10%, transparent);
   }
 
-  .qa-test-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--ui-space-3);
-  }
-
-  :global(.qa-test-card) {
-    gap: var(--ui-space-3);
-  }
-
-  .qa-test-card__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--ui-space-3);
-  }
-
-  .qa-test-card__header h3 {
+  .qa-error-text {
     margin: 0;
-    color: var(--ui-text-primary);
-    font-size: var(--ui-type-body-md);
-    font-weight: 600;
-    letter-spacing: 0;
-    line-height: 1.35;
-  }
-
-  :global(.qa-test-card) p {
-    margin: 0;
-    color: var(--ui-text-secondary);
+    color: color-mix(in srgb, var(--ui-accent-danger) 84%, var(--ui-text-primary) 16%);
     font-size: var(--ui-type-body-sm);
-    line-height: 1.55;
-  }
-
-  :global(.qa-test-card--fail) {
-    border-color: color-mix(in srgb, var(--ui-accent-danger) 30%, var(--ui-border-default) 70%);
-  }
-
-  :global(.qa-test-card--pass) {
-    border-color: color-mix(in srgb, var(--ui-accent-success) 24%, var(--ui-border-default) 76%);
   }
 
   .qa-history-row {
@@ -833,7 +959,7 @@
 
   .qa-history-detail__item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
     align-items: start;
     gap: var(--ui-space-3);
     border-top: 1px solid var(--ui-border-default);
@@ -853,39 +979,124 @@
     white-space: nowrap;
   }
 
+  :global(.qa-tier-badge--pipeline) {
+    color: color-mix(in srgb, #8b5cf6 84%, var(--ui-text-primary) 16%);
+    border-color: color-mix(in srgb, #8b5cf6 34%, var(--ui-border-default) 66%);
+    background: color-mix(in srgb, #8b5cf6 14%, transparent);
+  }
+
+  .qa-muted {
+    color: var(--ui-text-muted);
+  }
+
+  .qa-speed {
+    font-weight: 600;
+  }
+
+  .qa-speed--fast {
+    color: color-mix(in srgb, var(--ui-accent-success) 84%, var(--ui-text-primary) 16%) !important;
+  }
+
+  .qa-speed--slow {
+    color: color-mix(in srgb, var(--ui-accent-warning) 84%, var(--ui-text-primary) 16%) !important;
+  }
+
+  .qa-speed--very_slow {
+    color: color-mix(in srgb, var(--ui-accent-danger) 84%, var(--ui-text-primary) 16%) !important;
+  }
+
+  :global(.qa-speed-legend) {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--ui-space-4);
+    flex-wrap: wrap;
+  }
+
+  :global(.qa-speed-legend) span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+  }
+
+  .qa-dot {
+    width: 0.62rem;
+    height: 0.62rem;
+    border-radius: 999px;
+    display: inline-block;
+  }
+
+  .qa-dot--fast {
+    background: var(--ui-accent-success);
+  }
+
+  .qa-dot--slow {
+    background: var(--ui-accent-warning);
+  }
+
+  .qa-dot--very-slow {
+    background: var(--ui-accent-danger);
+  }
+
+  .qa-modal-content {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .qa-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ui-space-2);
+    flex-wrap: wrap;
+  }
+
+  .qa-report-modal pre {
+    max-height: min(56vh, 32rem);
+    overflow: auto;
+    margin: 0;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 70%, transparent);
+    color: var(--ui-text-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    padding: var(--ui-space-3);
+  }
+
+  .qa-copy-state {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+  }
+
   @keyframes qa-spin {
     to {
       transform: rotate(360deg);
     }
   }
 
-  @media (max-width: 860px) {
-    .qa-test-grid {
+  @media (max-width: 980px) {
+    .qa-card-grid {
       grid-template-columns: 1fr;
     }
 
-    .qa-summary-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .qa-run-controls {
+    .qa-section-header,
+    .qa-run-panel__header {
       align-items: stretch;
       flex-direction: column;
     }
+  }
 
-    :global(.qa-run-controls__button) {
-      width: 100%;
-      margin-inline-start: 0;
-    }
-
+  @media (max-width: 720px) {
     .qa-history-detail__item {
       grid-template-columns: 1fr;
     }
-  }
 
-  @media (max-width: 520px) {
-    .qa-summary-grid {
-      grid-template-columns: 1fr;
+    .qa-modal-actions {
+      justify-content: stretch;
     }
   }
 </style>
