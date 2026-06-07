@@ -198,7 +198,7 @@
   }
 
   .ui-data-surface__table-wrap :global(.ui-data-table th) {
-    font-size: 0.67rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--ui-text-muted);

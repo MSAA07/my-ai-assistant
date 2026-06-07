@@ -65,7 +65,7 @@
   }
 
   .source-refs-label {
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-text-muted);

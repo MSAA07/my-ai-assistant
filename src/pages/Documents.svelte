@@ -303,7 +303,7 @@
 
   .meta {
     margin: 0;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
   }
 
@@ -316,7 +316,7 @@
 
   .stats dt {
     margin: 0;
-    font-size: 0.67rem;
+    font-size: 0.8125rem;
     text-transform: uppercase;
     letter-spacing: 0.07em;
     color: var(--color-text-secondary);

@@ -134,7 +134,8 @@
   }
 
   .label {
-    font-size: 0.68rem;
+    font-size: 0.75rem;
+    font-weight: 500;
     letter-spacing: 0;
   }
 

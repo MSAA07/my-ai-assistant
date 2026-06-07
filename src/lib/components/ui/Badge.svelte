@@ -10,7 +10,7 @@
   };
 
   const sizeClasses = {
-    xs: 'min-h-[18px] px-2 py-0.5 text-[11px]',
+    xs: 'min-h-[20px] px-2 py-0.5 text-[11px]',
     sm: 'min-h-[22px] px-2 py-0.5 text-xs',
     md: 'min-h-[26px] px-2.5 py-1 text-sm',
   };

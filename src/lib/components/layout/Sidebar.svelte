@@ -171,7 +171,7 @@
 
   .nav-item {
     display: flex;
-    min-height: 36px;
+    min-height: 44px;
     align-items: center;
     gap: 0.625rem;
     padding: 0.375rem 0.625rem;

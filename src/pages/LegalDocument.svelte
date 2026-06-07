@@ -193,6 +193,7 @@
     font: inherit;
     font-size: var(--ui-type-label);
     line-height: 1.45;
+    min-height: 44px;
     padding: 0.45rem 0.55rem;
     text-align: start;
     text-decoration: none;
@@ -224,6 +225,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+    min-height: 44px;
+    padding-inline: 0.5rem;
     color: var(--ui-text-secondary);
     font-size: var(--ui-type-body-sm);
     font-weight: 500;
@@ -400,16 +403,24 @@
       display: flex;
       gap: 0.35rem;
       overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
       border-inline-start: 0;
       padding: 0 0 0.35rem;
-      scrollbar-width: thin;
+      scrollbar-width: none;
+    }
+
+    .legal-outline__nav::-webkit-scrollbar {
+      display: none;
     }
 
     .legal-outline a,
     .legal-outline button {
       width: auto;
       flex: 0 0 auto;
+      min-width: max-content;
       max-width: 14rem;
+      min-height: 44px;
       border: 1px solid var(--ui-border-default);
       background: var(--ui-surface-card);
     }

@@ -151,7 +151,7 @@
 
   .ui-document-card__copy p {
     color: var(--ui-text-muted);
-    font-size: var(--ui-type-label);
+    font-size: var(--font-size-sm);
   }
 
   :global(.ui-document-card__type-badge) {
@@ -207,6 +207,10 @@
   }
 
   @media (max-width: 640px) {
+    .ui-document-card__copy h2 {
+      -webkit-line-clamp: 3;
+    }
+
     .ui-document-card__content {
       flex-direction: column;
       align-items: flex-start;

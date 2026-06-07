@@ -70,7 +70,7 @@
 
   .ui-stat-card__label {
     color: var(--ui-text-muted);
-    font-size: var(--ui-type-label);
+    font-size: 0.8125rem;
     line-height: 1.2;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -92,7 +92,7 @@
 
   .ui-stat-card__meta {
     color: var(--ui-text-secondary);
-    font-size: var(--ui-type-label);
+    font-size: 0.8125rem;
     line-height: 1.3;
   }
 

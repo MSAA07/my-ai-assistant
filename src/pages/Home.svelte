@@ -1129,7 +1129,7 @@
   .quota-message-secondary {
     margin-top: 0;
     color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
   }
 
   .upload-stack,
@@ -1195,7 +1195,7 @@
   .guided-hero__eyebrow {
     margin: 0;
     color: var(--ui-text-muted);
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -1345,7 +1345,7 @@
 
   .guided-feature-card__state {
     color: var(--ui-text-muted);
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -1425,7 +1425,7 @@
   .progress-rail__value {
     justify-self: end;
     color: var(--ui-text-secondary);
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;

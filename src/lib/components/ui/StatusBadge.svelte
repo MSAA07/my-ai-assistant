@@ -30,7 +30,7 @@
     min-height: 1.5rem;
     padding-inline: 0.5rem;
     border-radius: 0.375rem;
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
     letter-spacing: 0;
   }
 </style>

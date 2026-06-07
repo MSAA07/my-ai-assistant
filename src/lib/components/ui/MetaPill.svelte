@@ -35,7 +35,7 @@
 
   .ui-meta-pill__label {
     color: var(--ui-text-muted);
-    font-size: var(--ui-type-label);
+    font-size: 0.8125rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-weight: 600;

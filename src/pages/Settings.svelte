@@ -705,6 +705,7 @@
     font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: -0.01em;
+    max-width: 200px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -767,6 +768,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
+    padding: 0.5rem 0;
     color: var(--ui-text-primary);
     font-size: var(--ui-type-body-sm);
     font-weight: 600;
@@ -998,6 +1000,10 @@
   }
 
   @media (max-width: 640px) {
+    .account-name {
+      max-width: 100%;
+    }
+
     .account-actions {
       width: 100%;
       margin-inline-start: 0;
