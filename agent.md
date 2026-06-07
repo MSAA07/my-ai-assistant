@@ -1,6 +1,6 @@
 # Frontend Agent Rulebook
 
-Single source of truth for AI-driven work in `frontend/`. Follow this file before making changes.
+Single source of truth for AI-driven work in `my-ai-assistant/`. Follow this file before making changes.
 
 ## Purpose
 
@@ -27,6 +27,7 @@ Single source of truth for AI-driven work in `frontend/`. Follow this file befor
 - `src/pages/StudyHubIndex.svelte` and `src/pages/StudyHubDocument.svelte` are the canonical Study Hub surfaces for `#/study` and `#/study/:id/:section?`.
 - `src/pages/DocumentView.svelte` is a legacy compatibility wrapper only.
 - `src/lib/components/study/DocumentActivityView.svelte` owns the shared summary, flashcards, and exam activity implementation used by canonical and legacy surfaces.
+- `src/components/admin/AdminQA.svelte` owns the connected admin QA tab for `/api/admin/qa/*`.
 
 ### Important Flows
 
@@ -49,6 +50,12 @@ Single source of truth for AI-driven work in `frontend/`. Follow this file befor
 - Save flashcard progress with `/api/flashcard/progress`.
 - Save exam attempts with `/api/exam/attempt`.
 
+5. Admin QA
+- Use `src/components/admin/AdminQA.svelte` for health, pipeline, optimized full, and full QA UI.
+- Read history/progress/schedule through `/api/admin/qa/history`, `/api/admin/qa/progress`, and `/api/admin/qa/schedule`.
+- Start runs through `/api/admin/qa/health`, `/api/admin/qa/pipeline`, and `/api/admin/qa/full`.
+- Keep QA copy in the `adminQA` i18n namespace.
+
 ### Folder Map
 
 - `src/pages`: route-level containers and page behavior
@@ -69,6 +76,7 @@ Single source of truth for AI-driven work in `frontend/`. Follow this file befor
 - `DocumentActivityView.svelte`: shared summary, flashcards, and exam activity states
 - `Settings.svelte`: account, theme, and language settings
 - `AdminDashboard.svelte`: admin shell and tabs
+- `AdminQA.svelte`: admin QA runner, Auto Health Monitor, progress, history, speed verdicts, and failure reports
 
 ## Priority Order
 
@@ -120,6 +128,7 @@ Behavior rules:
 - Preserve document lifecycle exactly: `queued -> processing -> complete | failed`.
 - Do not change job lifecycle states, transitions, or backend job semantics.
 - Do not introduce frontend behavior that assumes new backend fields, new statuses, or new endpoints without approval.
+- For existing admin QA endpoints, preserve current tier labels, cooldown handling, progress polling, schedule controls, and failure-report rendering unless the backend contract is explicitly changed.
 - Do not use `Job.status` or `/api/jobs/:id` as canonical readiness truth for Study Hub content.
 
 ## Frontend Architecture Rules
@@ -272,4 +281,4 @@ After completing any task, always report:
 - Keep changes narrow.
 - Report exactly what changed and what stayed untouched.
 
-Last Updated: April 30, 2026
+Last Updated: June 7, 2026

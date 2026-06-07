@@ -53,6 +53,7 @@ This folder defines the shared visual primitives for the universal frontend desi
 - `Toggle.svelte`
   - Use for compact switch-style binary controls.
   - Controlled by `checked`; emits `change` with `{ checked }`.
+  - Current connected use: the admin QA Auto Health Monitor toggle.
 
 - `StatCard.svelte`
   - Use for dashboard and analytics metrics.
@@ -139,6 +140,7 @@ Stop introducing local one-off classes that duplicate primitives:
 - shared progress rails via `ProgressBar`
 - panel header with status badge for study and admin summaries
 - dense data-table surfaces via `DataSurface`
+- admin QA history, per-test breakdowns, monitor controls, and failure-report dialogs should keep using `DataSurface`, `Badge`, `Button`, `FieldShell`, `Toggle`, and `ModalSurface` rather than local visual shells
 
 ## Deferred redesign work
 
@@ -162,4 +164,4 @@ Route ownership and runtime behavior live in the frontend `SYSTEM_OVERVIEW.md`.
 Primitives consume semantic tokens from `src/lib/styles/tokens.css` (`--ui-*`, `--color-*`, `--space-*`).
 Use `--ui-*` as the authoritative API for new work and treat compatibility aliases as transitional only.
 
-Last Updated: April 2, 2026
+Last Updated: June 7, 2026

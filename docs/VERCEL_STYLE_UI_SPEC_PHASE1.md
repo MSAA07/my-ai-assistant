@@ -28,5 +28,6 @@ Use `../README.md` only as the high-level repo entry point.
 - sticky table headers are not implemented
 - visual regression screenshot automation is not present
 - the fallback non-default shell path remains available when `VITE_FEATURE_APPSHELL=false`
+- the admin QA tab added after this audit now uses the same primitive-first composition model and is documented in current runtime docs
 
-Last Updated: April 30, 2026
+Last Updated: June 7, 2026

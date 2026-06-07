@@ -24,8 +24,11 @@ Use `DataSurface` when a view has one or more of:
 - row selection and bulk actions
 - dense operational actions (refresh/revoke/delete/etc.)
 - stateful data fetch UI (loading/error/empty)
+- admin QA history or per-run detail surfaces
 
 Do not use it for simple marketing cards, single-action forms, or sparse dashboard hero sections.
+
+Current connected examples include admin Users, Usage, Limits, Jobs, Sessions, Storage, Audit Logs, and the admin QA Run History surface.
 
 ## Structural contract
 
@@ -102,4 +105,4 @@ Canonical scaffold:
 1. Optional sticky headers for very large tables.
 2. Optional visual regression snapshots for dense admin routes.
 
-Last Updated: April 2, 2026
+Last Updated: June 7, 2026

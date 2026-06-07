@@ -11,6 +11,7 @@ This file is an archival rollout record. It is not the current runtime source of
 - Phase 3 shared shell and primitive normalization was completed.
 - Phase 4 core user-facing Study Hub and settings surfaces were completed.
 - Phase 5 admin parity and responsive QA pass were completed.
+- As of June 7, 2026, the later admin QA tab uses the completed primitive/data-surface system and is documented in the current runtime docs.
 
 ## Remaining Verified Deferred Items
 
@@ -27,4 +28,4 @@ For current runtime guidance, prefer:
 
 Use `../README.md` only as the high-level repo entry point.
 
-Last Updated: April 30, 2026
+Last Updated: June 7, 2026

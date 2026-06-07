@@ -1,6 +1,6 @@
 # UI Post-Rollout Status
 
-Date: April 17, 2026
+Date: June 7, 2026
 
 This file reflects the current verified post-rollout UI state from the synced `stage` codebase. It is a current-state note, not a future rollout plan.
 
@@ -37,6 +37,8 @@ Route ownership and lifecycle behavior are documented in `SYSTEM_OVERVIEW.md`.
 - Logout clears frontend auth state and session-dependent page cache before redirecting to `#/sign-in`.
 - Redirect handling only accepts safe internal app paths and rejects auth-page loops and external targets.
 - Canonical study surfaces use `Document.processingStatus` and `DocumentGeneration` as UI truth; `Job.status (worker-only)` remains execution tracking only.
+- The admin console includes a QA tab with target selection, Auto Health Monitor controls, health/pipeline/full tier cards, active progress, persisted run history, per-test breakdowns, speed verdicts, and copyable failure reports.
+- The QA tab uses shared primitives including `PageLayout`, `PageHeader`, `Tabs`, `Card`, `DataSurface`, `FieldShell`, `Button`, `Badge`, `Toggle`, and `ModalSurface`.
 
 ## Loading and Progress Rules
 
@@ -70,5 +72,6 @@ Environment differences:
 - The legacy non-default shell path still exists through `AppHeader.svelte` when `VITE_FEATURE_APPSHELL=false`.
 - `PublicFooter.svelte` is implemented and shared, but several footer content areas still contain explicit placeholder copy.
 - The refreshed public shell copy is implemented directly in the public surface components rather than through the authenticated i18n contract.
+- The April 2026 admin visual audit is archival and does not include the later QA tab.
 
-Last Updated: April 30, 2026
+Last Updated: June 7, 2026

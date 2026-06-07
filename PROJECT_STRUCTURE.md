@@ -42,6 +42,8 @@ src/
 |   |-- AppHeader.svelte
 |   |-- Footer.svelte
 |   |-- admin/
+|   |   |-- AdminQA.svelte
+|   |   `-- ...
 |   |-- auth/
 |   `-- public/
 |-- pages/
@@ -115,6 +117,12 @@ Legacy routes:
 - `src/pages/DocumentView.svelte`: legacy route wrapper
 - `src/lib/components/study/DocumentActivityView.svelte`: shared activity implementation used by canonical study routes and legacy routes, including Telegram send actions for flashcards and exams
 
+Admin console:
+
+- `src/components/AdminDashboard.svelte`: tab shell for Overview, Users, Usage, Limits, Jobs, QA, Sessions, Storage, and Audit Logs
+- `src/components/admin/AdminQA.svelte`: admin QA runner UI for target selection, automatic health monitor, health/pipeline/full run cards, active progress polling, persisted history, per-test details, speed verdicts, and copyable failure reports
+- `src/components/admin/*`: admin data views that rely on shared primitives and authenticated requests to backend admin APIs
+
 Shared UI system:
 
 - `src/lib/styles/tokens.css`: tokens and theme semantics
@@ -137,6 +145,7 @@ Data and integration:
 - `AppHeader.svelte` and `Footer.svelte` remain only for the shell fallback path when `VITE_FEATURE_APPSHELL=false`.
 - `Settings.svelte` owns the authenticated Telegram account connection panel.
 - `src/components/admin/UserTable.svelte` and `src/components/admin/UserDetail.svelte` display read-only Telegram usage indicators from admin APIs.
+- `src/components/admin/AdminQA.svelte` is the only connected frontend surface for `/api/admin/qa/*`.
 
 ## Environment Mapping Notes
 
@@ -165,4 +174,4 @@ Environment differences:
 - `docs/PHASES_2_5_VISUAL_MIGRATION_CHECKLIST.md`: archival rollout checklist, not current runtime source of truth
 - `audit-screenshots/admin-ui/ADMIN_UI_AUDIT.md`: archival visual QA evidence for the admin console, not current runtime source of truth
 
-Last Updated: May 11, 2026
+Last Updated: June 7, 2026

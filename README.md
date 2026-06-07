@@ -9,7 +9,7 @@ Current frontend for the Study Maxing public entry, auth experience, and authent
 - refreshed public marketing and auth shell
 - canonical authenticated study flow under `#/study`
 - Better Auth browser-session integration
-- backend API consumption for upload, study, admin, settings, and auth utility flows
+- backend API consumption for upload, study, admin, admin QA, settings, and auth utility flows
 
 ## Quick Orientation
 
@@ -18,6 +18,7 @@ Current frontend for the Study Maxing public entry, auth experience, and authent
 - canonical study routes: `#/study` and `#/study/:id/:section?`
 - canonical Study Hub surfaces: `src/pages/StudyHubIndex.svelte` and `src/pages/StudyHubDocument.svelte`
 - legacy route surface: `src/pages/DocumentView.svelte`, compatibility only
+- admin route: `#/admin`, including the QA tab backed by `/api/admin/qa/*`
 
 ## Environment Notes
 
@@ -46,4 +47,4 @@ npm run preview
 - `docs/*`: archival rollout references, not current runtime source of truth
 - `audit-screenshots/admin-ui/ADMIN_UI_AUDIT.md`: archival admin visual QA evidence
 
-Last Updated: April 30, 2026
+Last Updated: June 7, 2026

@@ -91,6 +91,7 @@ Compatibility normalization also maps older routes like `#/documents/:id/:sectio
 - `src/lib/components/study/DocumentActivityView.svelte`: shared summary/flashcards/exam activity implementation
 - `src/pages/Settings.svelte`: settings and preferences
 - `src/components/AdminDashboard.svelte`: admin console
+- `src/components/admin/AdminQA.svelte`: admin QA runner, progress, history, failure report, and automatic health-monitor UI
 
 Important distinction:
 
@@ -184,6 +185,11 @@ Settings:
 Admin:
 
 - admin user list/detail views display read-only Telegram connection and delivery usage fields returned by the admin user APIs
+- `AdminDashboard.svelte` exposes tabs for Overview, Users, Usage, Limits, Jobs, QA, Sessions, Storage, and Audit Logs
+- `AdminQA.svelte` calls `GET /api/admin/qa/history`, `GET /api/admin/qa/progress`, `GET /api/admin/qa/schedule`, and `POST /api/admin/qa/schedule`
+- `AdminQA.svelte` can start `POST /api/admin/qa/health`, `POST /api/admin/qa/pipeline`, and `POST /api/admin/qa/full`
+- the QA tab displays target selection, Auto Health Monitor controls, tier cards, active progress, persisted run history, per-test details, speed verdicts, and copyable failure reports
+- health, pipeline, optimized full, and full labels are frontend-visible tier states; cooldown text is returned from the backend and displayed through the `adminQA` translation namespace
 
 ## I18N Rules
 
@@ -192,6 +198,7 @@ Admin:
 - `App.svelte` remounts on language change with `{#key $language}`, and `src/lib/stores/language.js` reapplies `lang`, `dir`, and font settings, so language switching fully re-renders the canonical application UI.
 - Mixed-language UI state is not allowed on canonical authenticated application surfaces.
 - Telegram UI labels use the translation layer; generated flashcard/exam content sent to Telegram is not translated by the frontend.
+- Admin QA copy uses the `adminQA` translation namespace in `src/lib/i18n/en.js` and `src/lib/i18n/ar.js`.
 - The refreshed public landing and auth shell currently contain product copy directly in `Landing.svelte` and `App.svelte`; that public copy is implemented and intentional in the current stage build.
 
 ## Shared UI System
@@ -213,8 +220,10 @@ Notable current primitives:
 - `ProgressBar`
 - `ConfirmModal`
 - `PromptModal`
+- `ModalSurface`
 - `ThemeToggle`
 - `LanguageToggle`
+- `Toggle`
 
 Integration API wrappers:
 
@@ -299,5 +308,6 @@ Update this file when any of these change:
 - host-derived API base mapping
 - frontend-visible auth callbacks, verification flow, I18N rules, or lifecycle semantics
 - frontend-visible Telegram connection or delivery behavior
+- frontend-visible admin QA routes, tier labels, schedule controls, progress polling, history columns, or failure-report behavior
 
-Last Updated: May 11, 2026
+Last Updated: June 7, 2026

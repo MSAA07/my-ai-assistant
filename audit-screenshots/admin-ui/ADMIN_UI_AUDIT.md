@@ -5,6 +5,8 @@ Status: Archival visual QA evidence
 
 This file preserves one admin-console audit run and its screenshot evidence. It is not a current runtime source of truth. For current frontend ownership and UI guidance, use `../../SYSTEM_OVERVIEW.md`, `../../PROJECT_STRUCTURE.md`, `../../UI_POST_ROLLOUT.md`, and `../../src/lib/components/ui/DATA_SURFACE_PATTERN.md`.
 
+Current-state note (June 7, 2026): the admin QA tab was added after this audit run. Current docs now describe the QA runner, Auto Health Monitor, progress polling, history table, per-test details, speed verdicts, and failure report modal.
+
 ## PASS/FAIL Summary
 
 **UI status: PASS with one fixed P1 issue.**
@@ -71,4 +73,4 @@ Optional future polish: Add a subtle horizontal-scroll affordance to dense table
 - Focusable controls use visible browser/design-system focus states.
 - No backend API contracts, admin authorization behavior, canonical routes, jobs, study records, or document lifecycle code were changed.
 
-Last Updated: April 30, 2026
+Last Updated: June 7, 2026
