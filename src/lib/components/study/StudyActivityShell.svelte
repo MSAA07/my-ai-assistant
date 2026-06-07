@@ -149,7 +149,7 @@
   .study-activity-shell__progress-label {
     margin: 0;
     color: var(--ui-text-secondary);
-    font-size: 0.72rem;
+    font-size: 0.875rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     font-weight: 600;

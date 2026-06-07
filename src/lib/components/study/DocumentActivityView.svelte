@@ -2212,7 +2212,7 @@
     min-width: 34rem;
     border-collapse: collapse;
     color: var(--ui-text-secondary);
-    font-size: 0.84rem;
+    font-size: 0.9rem;
     line-height: 1.42;
   }
 
@@ -2370,8 +2370,8 @@
   }
 
   :global(.chrome-back-link--session.ui-button) {
-    min-height: auto;
-    padding: 0;
+    min-height: 44px;
+    padding: 0 0.5rem;
     width: auto;
     color: var(--ui-text-secondary);
     font-size: var(--ui-type-body-sm);
@@ -2794,10 +2794,11 @@
   }
 
   .flashcard-stage__answer--visible {
-    max-height: 22rem;
+    max-height: 60vh;
     opacity: 1;
     border-top: 1px solid var(--ui-border-default);
     padding-top: 0.95rem;
+    overflow-y: auto;
   }
 
   .flashcard-stage__answer-copy {
@@ -2851,9 +2852,9 @@
   }
 
   :global(.flashcard-nav-button.ui-button) {
-    flex: 1 1 0;
-    min-width: var(--study-flow-session-nav-button-min-width);
-    min-height: var(--study-flow-session-nav-button-height);
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
     padding-inline: 1.25rem;
     border-radius: calc(var(--ui-radius-md) - 0.05rem);
     background: var(--ui-surface-card);
@@ -3001,6 +3002,8 @@
   }
 
   .option-letter {
+    min-height: 20px;
+    min-width: 20px;
     width: 1.75rem;
     height: 1.75rem;
     flex: 0 0 auto;
@@ -3008,7 +3011,7 @@
     border: 1px solid color-mix(in srgb, var(--foreground) 10%, var(--border) 90%);
     display: grid;
     place-items: center;
-    font-size: 0.67rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     background: color-mix(in srgb, var(--background) 75%, var(--muted) 25%);
     transition: border-color var(--motion-fast) var(--ease-standard),
@@ -3068,7 +3071,7 @@
     }
 
     .exam-progress__meta {
-      font-size: 0.78rem;
+      font-size: 0.875rem;
     }
 
     .exam-nav {

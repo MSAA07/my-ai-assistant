@@ -517,7 +517,7 @@
   .document-card__detail {
     margin: 0;
     color: var(--ui-text-secondary);
-    font-size: 0.82rem;
+    font-size: var(--font-size-sm);
     line-height: 1.55;
   }
 
@@ -565,8 +565,10 @@
 
   :global(.library-page .card-menu-button) {
     opacity: 1;
-    width: 1.75rem;
-    height: 1.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
     transition: opacity var(--motion-fast) var(--ease-standard);
   }
 

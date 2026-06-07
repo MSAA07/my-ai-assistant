@@ -135,7 +135,7 @@
     margin: 0;
     color: var(--color-text-primary);
     font-weight: 500;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
   }
 
   .reasons-list {
@@ -146,6 +146,7 @@
   .reason-option {
     display: flex;
     align-items: center;
+    min-height: 44px;
     gap: 0.5rem;
     padding: 0.5rem 0.62rem;
     border: 1px solid var(--ui-border-subtle);

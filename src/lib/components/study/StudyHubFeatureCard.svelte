@@ -88,14 +88,14 @@
     margin-top: 0.35rem;
     color: var(--ui-text-secondary);
     line-height: 1.5;
-    font-size: 0.8125rem;
+    font-size: var(--font-size-sm);
   }
 
   .study-hub-feature-card__error {
     margin: 0;
     margin-top: 0.35rem;
     color: var(--destructive);
-    font-size: 0.8125rem;
+    font-size: var(--font-size-sm);
     line-height: 1.5;
   }
 
@@ -133,9 +133,15 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     color: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--font-size-sm);
     font-weight: 650;
     line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .study-hub-feature-card__loading-label {
+      white-space: normal;
+    }
   }
 
   .study-hub-feature-card__loading-value {

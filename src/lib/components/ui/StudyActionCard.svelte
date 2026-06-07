@@ -142,7 +142,7 @@
     min-height: var(--study-flow-chip-min-height);
     padding-inline: var(--study-flow-chip-padding-inline);
     border-radius: var(--study-flow-chip-radius);
-    font-size: 0.75rem;
+    font-size: var(--font-size-sm);
     letter-spacing: 0;
     text-transform: none;
   }
@@ -195,7 +195,7 @@
 
   .ui-study-action-card__actions :global(.ui-button) {
     width: 100%;
-    min-height: var(--ui-control-height-sm);
+    min-height: 44px;
     font-size: 0.875rem;
     border-radius: var(--ui-radius-sm);
     box-shadow: none;
