@@ -198,7 +198,7 @@
   .auth-eyebrow {
     margin: 0;
     color: var(--color-text-muted);
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -250,11 +250,14 @@
 
   .password-toggle {
     flex: 0 0 auto;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
     border: none;
     background: transparent;
     color: var(--color-text-secondary);
     font: inherit;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     cursor: pointer;
     padding-inline-end: 0.7rem;
@@ -287,7 +290,7 @@
 
   :global(.forgot-btn) {
     justify-self: start;
-    min-height: auto;
+    min-height: 44px;
     padding-inline: 0.2rem;
     color: var(--color-text-secondary);
     text-decoration: underline;

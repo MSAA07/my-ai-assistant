@@ -174,7 +174,7 @@
   .auth-eyebrow {
     margin: 0;
     color: var(--color-text-muted);
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;

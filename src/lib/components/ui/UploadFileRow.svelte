@@ -102,15 +102,28 @@
     white-space: nowrap;
   }
 
+  @media (max-width: 640px) {
+    .upload-file-row__name {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
+    }
+  }
+
   .upload-file-row__size {
     color: var(--upload-file-size);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
   }
 
   .upload-file-row__remove {
     border: 0;
-    width: 30px;
-    height: 30px;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--ui-radius-sm);
     display: inline-flex;
     align-items: center;
@@ -120,6 +133,7 @@
     background: transparent;
     transition: color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard);
+    flex: 0 0 auto;
   }
 
   .upload-file-row__remove:hover:not(:disabled) {

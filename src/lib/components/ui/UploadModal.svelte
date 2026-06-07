@@ -175,8 +175,10 @@
     border: 1px solid var(--ui-border-subtle);
     background: var(--ui-surface-base);
     color: var(--upload-close-color);
-    width: var(--ui-control-height-md);
-    height: var(--ui-control-height-md);
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--ui-radius-sm);
     display: inline-flex;
     align-items: center;
@@ -184,6 +186,7 @@
     cursor: pointer;
     transition: color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard);
+    flex: 0 0 auto;
   }
 
   .upload-modal__close:hover:not(:disabled) {
@@ -208,13 +211,13 @@
 
   .upload-modal__support {
     color: var(--upload-support-text);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
   }
 
   .upload-modal__error {
     margin: 0;
     color: color-mix(in srgb, var(--color-danger) 72%, var(--color-text-primary) 28%);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
   }
 
   .upload-modal__files {
@@ -234,7 +237,7 @@
 
   .upload-modal__counter {
     color: var(--upload-support-text);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
   }
 
   .upload-modal__actions {

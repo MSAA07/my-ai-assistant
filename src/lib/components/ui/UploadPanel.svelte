@@ -328,7 +328,7 @@
 
   .upload-panel__support {
     color: var(--upload-panel-support);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
     text-align: center;
     line-height: 1.4;
   }
@@ -346,7 +346,7 @@
   .upload-panel__details summary {
     cursor: pointer;
     color: var(--ui-text-muted);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
     font-weight: 600;
     list-style: none;
   }
@@ -358,7 +358,7 @@
   .upload-panel__details-copy {
     margin: 0;
     color: var(--ui-text-secondary);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
     line-height: 1.5;
   }
 
@@ -397,7 +397,7 @@
 
   .upload-panel__counter {
     color: var(--upload-panel-support);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
   }
 
   .upload-panel__actions {
@@ -439,12 +439,12 @@
     }
 
     .upload-panel__actions {
-      width: min(100%, 228px);
+      width: 100%;
       margin-left: auto;
     }
 
     :global(.upload-panel__actions .ui-button) {
-      flex: 1 1 0;
+      flex: 1;
       min-width: 0;
     }
   }

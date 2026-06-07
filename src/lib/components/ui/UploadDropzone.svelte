@@ -287,7 +287,7 @@
     border-radius: var(--ui-radius-pill);
     background: var(--upload-drag-chip-bg);
     color: var(--upload-drag-chip-text);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
     font-weight: 600;
     padding: 0.32rem 0.55rem;
   }
@@ -344,7 +344,7 @@
   .upload-dropzone__support {
     margin: 0;
     color: var(--ui-text-muted);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
     line-height: 1.45;
   }
 
@@ -368,17 +368,18 @@
 
   .upload-dropzone__divider strong {
     color: var(--upload-dropzone-divider-label);
-    font-size: var(--font-size-xs);
+    font-size: 0.8125rem;
     font-weight: 500;
   }
 
   :global(.upload-dropzone__browse.ui-button) {
     min-width: 140px;
+    min-height: 2.75rem;
   }
 
   :global(.upload-dropzone--hero .upload-dropzone__browse.ui-button) {
     min-width: 160px;
-    height: 2.5rem;
+    height: 2.75rem;
     border-radius: 999px;
     padding-inline: var(--ui-space-4);
     --button-shadow:
@@ -393,6 +394,10 @@
   }
 
   @media (max-width: 640px) {
+    .upload-dropzone {
+      min-height: 120px;
+    }
+
     .upload-dropzone__drag-chip {
       position: static;
       max-width: 100%;
@@ -409,6 +414,7 @@
     :global(.upload-dropzone__browse.ui-button) {
       width: 100%;
       min-width: 0;
+      min-height: 2.75rem;
     }
 
     .upload-dropzone--compact {
