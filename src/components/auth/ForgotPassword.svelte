@@ -117,21 +117,25 @@
 
 <style>
   :global(.auth-card) {
-    width: min(440px, 100%);
+    width: min(420px, 100%);
+    gap: var(--ui-space-5);
+    border-color: color-mix(in srgb, var(--ui-border-default) 84%, transparent);
+    background: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-bg-page) 4%);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
   }
 
   .auth-header {
     display: grid;
-    gap: 0.45rem;
-    text-align: left;
+    gap: 0.5rem;
+    text-align: start;
   }
 
   .auth-eyebrow {
     margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-type-label);
+    font-weight: 700;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
@@ -141,32 +145,36 @@
   }
 
   .auth-header h2 {
-    color: var(--color-text-primary);
-    font-size: 1.5rem;
-    letter-spacing: -0.03em;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.75rem, 4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.1;
   }
 
   .auth-header p {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.55;
   }
 
   .auth-form {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--ui-space-4);
   }
 
   .auth-feedback {
     margin: 0;
     border-radius: var(--ui-radius-md);
-    padding: 0.65rem 0.8rem;
-    font-size: var(--font-size-sm);
+    padding: 0.75rem 0.875rem;
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.5;
   }
 
   .auth-feedback--success {
-    background: color-mix(in srgb, var(--ui-surface-card) 82%, #dff4e8 18%);
-    border: 1px solid color-mix(in srgb, #1f8f58 40%, var(--ui-border-subtle) 60%);
-    color: #176640;
+    background: color-mix(in srgb, var(--ui-accent-success) 12%, var(--ui-surface-card) 88%);
+    border: 1px solid color-mix(in srgb, var(--ui-accent-success) 36%, var(--ui-border-subtle) 64%);
+    color: color-mix(in srgb, var(--ui-accent-success) 74%, var(--ui-text-primary) 26%);
   }
 
   .auth-feedback--error {
