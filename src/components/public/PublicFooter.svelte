@@ -22,6 +22,7 @@
   ];
 
   $: currentLanguage = $language;
+  $: supportEmail = t('publicFooter.supportItems.email');
 
   function navigateInternal(event, href) {
     if (
@@ -51,7 +52,7 @@
     <div class="public-footer__lead">
       <div class="public-footer__brand">
         <div>
-          <p class="public-footer__title">StudyMaxing</p>
+          <p class="public-footer__title">{t('publicHeader.brandName')}</p>
         </div>
       </div>
       <p class="public-footer__meta">{t('publicFooter.copyright')}</p>
@@ -79,7 +80,7 @@
       <section>
         <h2>{t('publicFooter.sections.support')}</h2>
         <nav aria-label={t('publicFooter.aria.supportLinks')}>
-          <a href="mailto:contact@studymaxing.com">contact@studymaxing.com</a>
+          <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
         </nav>
       </section>
 
@@ -121,9 +122,7 @@
 
   .public-footer__title,
   .public-footer__meta,
-  .public-footer h2,
-  .public-footer ul,
-  .public-footer li {
+  .public-footer h2 {
     margin: 0;
   }
 
@@ -158,16 +157,14 @@
     text-transform: uppercase;
   }
 
-  .public-footer nav,
-  .public-footer ul {
+  .public-footer nav {
     display: grid;
     gap: 0.55rem;
     padding: 0;
     list-style: none;
   }
 
-  .public-footer a,
-  .public-footer li {
+  .public-footer a {
     color: var(--ui-text-secondary);
     font-size: var(--ui-type-body-sm);
     line-height: 1.5;
