@@ -961,6 +961,7 @@ const ar = {
 };
 
 ar.publicHeader = {
+  brandName: 'StudyMaxing',
   brandHome: 'العودة إلى الصفحة الرئيسية لـ StudyMaxing',
   brandSubtitle: 'مسار سريع من المستند إلى الدراسة',
   navLabel: 'عام',
@@ -971,8 +972,44 @@ ar.publicHeader = {
   },
   actions: {
     backToLanding: 'العودة إلى الصفحة الرئيسية',
-    getStarted: 'ابدأ الآن',
+    getStarted: 'ابدأ مجانًا',
     signIn: 'تسجيل الدخول'
+  }
+};
+
+ar.landing = {
+  ...(ar.landing ?? {}),
+  mockup: {
+    url: 'studymaxing.com/study/biology-midterm',
+    navStudyHub: 'مركز الدراسة',
+    navSettings: 'الإعدادات',
+    documentTitle: 'حزمة اختبار الأحياء',
+    complete: 'مكتمل',
+    tabSummary: 'الملخص',
+    tabFlashcards: 'البطاقات',
+    tabExam: 'الاختبار التجريبي',
+    keyConcepts: 'المفاهيم الأساسية',
+    mainArguments: 'الأفكار الرئيسية',
+    summaryLine1: 'التنفس الخلوي يحول الجلوكوز إلى ATP عبر مراحل أيضية متتابعة.',
+    summaryLine2: 'الميتوكوندريا هي موقع الفسفرة التأكسدية.',
+    summaryLine3: 'المسارات اللاهوائية تنتج اللاكتات عند نقص الأكسجين.',
+    argumentLine1: 'التنفس الهوائي ينتج ATP أكثر بكثير من المسارات اللاهوائية.',
+    argumentLine2: 'توفر الأكسجين يحدد المسار الذي يهيمن داخل الخلية.',
+    flashcardCount: '24',
+    flashcardLabel: 'بطاقة',
+    questionCount: '10',
+    questionLabel: 'أسئلة',
+    buildTime: '~45ث',
+    buildLabel: 'إنشاء',
+    flashcardProgress: 'بطاقة · 7 من 24',
+    flashcardQuestion: 'ما وظيفة الميتوكوندريا؟',
+    flashcardAnswer: 'تنتج ATP من خلال التنفس الخلوي، وهو مصدر الطاقة الأساسي للخلية.',
+    examProgress: 'السؤال 4 من 10',
+    examQuestion: 'أي عملية تنتج أكبر كمية ATP من جزيء جلوكوز واحد؟',
+    optionA: 'التحلل السكري',
+    optionB: 'الفسفرة التأكسدية',
+    optionC: 'تخمر حمض اللاكتيك',
+    optionD: 'دورة حمض الستريك وحدها'
   }
 };
 
