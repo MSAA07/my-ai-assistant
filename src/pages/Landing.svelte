@@ -79,38 +79,41 @@
             <span class="mk__dot"></span>
             <span class="mk__dot"></span>
             <span class="mk__dot"></span>
-            <span class="mk__url">studymaxing.com/study/biology-midterm</span>
+            <span class="mk__url">{t('landing.mockup.url')}</span>
           </div>
           <div class="mk__app">
             <aside class="mk__sidebar">
-              <div class="mk__brand">StudyMaxing</div>
+              <div class="mk__brand">{t('publicHeader.brandName')}</div>
               <div class="mk__nav">
-                <div class="mk__navitem mk__navitem--active">Study Hub</div>
-                <div class="mk__navitem">Settings</div>
+                <div class="mk__navitem mk__navitem--active">{t('landing.mockup.navStudyHub')}</div>
+                <div class="mk__navitem">{t('landing.mockup.navSettings')}</div>
               </div>
             </aside>
             <div class="mk__main">
               <div class="mk__docrow">
-                <span class="mk__doctitle">Biology Midterm Pack</span>
-                <span class="mk__complete">✓ Complete</span>
+                <span class="mk__doctitle">{t('landing.mockup.documentTitle')}</span>
+                <span class="mk__complete">
+                  <span aria-hidden="true">✓</span>
+                  {t('landing.mockup.complete')}
+                </span>
               </div>
               <div class="mk__tabs">
-                <span class="mk__tab mk__tab--active">Summary</span>
-                <span class="mk__tab">Flashcards</span>
-                <span class="mk__tab">Mock Exam</span>
+                <span class="mk__tab mk__tab--active">{t('landing.mockup.tabSummary')}</span>
+                <span class="mk__tab">{t('landing.mockup.tabFlashcards')}</span>
+                <span class="mk__tab">{t('landing.mockup.tabExam')}</span>
               </div>
               <div class="mk__content">
-                <span class="mk__seclabel">Key Concepts</span>
-                <p class="mk__line">Cellular respiration converts glucose into ATP through a series of metabolic stages.</p>
-                <p class="mk__line">Mitochondria are the site of oxidative phosphorylation.</p>
-                <p class="mk__line">Anaerobic pathways produce lactate when oxygen is scarce.</p>
-                <span class="mk__seclabel">Main Arguments</span>
-                <p class="mk__line">Aerobic respiration yields far more ATP than anaerobic routes.</p>
-                <p class="mk__line">Oxygen availability determines which pathway dominates.</p>
+                <span class="mk__seclabel">{t('landing.mockup.keyConcepts')}</span>
+                <p class="mk__line">{t('landing.mockup.summaryLine1')}</p>
+                <p class="mk__line">{t('landing.mockup.summaryLine2')}</p>
+                <p class="mk__line">{t('landing.mockup.summaryLine3')}</p>
+                <span class="mk__seclabel">{t('landing.mockup.mainArguments')}</span>
+                <p class="mk__line">{t('landing.mockup.argumentLine1')}</p>
+                <p class="mk__line">{t('landing.mockup.argumentLine2')}</p>
                 <div class="mk__stats">
-                  <div class="mk__stat"><span>24</span>cards</div>
-                  <div class="mk__stat"><span>10</span>questions</div>
-                  <div class="mk__stat"><span>~45s</span>build</div>
+                  <div class="mk__stat"><span>{t('landing.mockup.flashcardCount')}</span>{t('landing.mockup.flashcardLabel')}</div>
+                  <div class="mk__stat"><span>{t('landing.mockup.questionCount')}</span>{t('landing.mockup.questionLabel')}</div>
+                  <div class="mk__stat"><span>{t('landing.mockup.buildTime')}</span>{t('landing.mockup.buildLabel')}</div>
                 </div>
               </div>
             </div>
@@ -157,31 +160,31 @@
               {#if i === 0}
                 <div class="mk mk--panel">
                   <div class="mk__content">
-                    <span class="mk__seclabel">Key Concepts</span>
-                    <p class="mk__line">Cellular respiration converts glucose into ATP through a series of metabolic stages.</p>
-                    <p class="mk__line">Mitochondria are the site of oxidative phosphorylation.</p>
-                    <p class="mk__line">Anaerobic pathways produce lactate when oxygen is scarce.</p>
-                    <span class="mk__seclabel">Main Arguments</span>
-                    <p class="mk__line">Aerobic respiration yields far more ATP than anaerobic routes.</p>
-                    <p class="mk__line">Oxygen availability determines which pathway dominates.</p>
+                    <span class="mk__seclabel">{t('landing.mockup.keyConcepts')}</span>
+                    <p class="mk__line">{t('landing.mockup.summaryLine1')}</p>
+                    <p class="mk__line">{t('landing.mockup.summaryLine2')}</p>
+                    <p class="mk__line">{t('landing.mockup.summaryLine3')}</p>
+                    <span class="mk__seclabel">{t('landing.mockup.mainArguments')}</span>
+                    <p class="mk__line">{t('landing.mockup.argumentLine1')}</p>
+                    <p class="mk__line">{t('landing.mockup.argumentLine2')}</p>
                   </div>
                 </div>
               {:else if i === 1}
                 <div class="mk mk--panel mk--card">
-                  <span class="mk__seclabel">Flashcard · 7 of 24</span>
-                  <p class="mk__cardq">What is the function of mitochondria?</p>
+                  <span class="mk__seclabel">{t('landing.mockup.flashcardProgress')}</span>
+                  <p class="mk__cardq">{t('landing.mockup.flashcardQuestion')}</p>
                   <div class="mk__carddiv"></div>
-                  <p class="mk__carda">Produces ATP through cellular respiration — the cell's primary energy source.</p>
+                  <p class="mk__carda">{t('landing.mockup.flashcardAnswer')}</p>
                 </div>
               {:else}
                 <div class="mk mk--panel mk--exam">
-                  <span class="mk__seclabel">Question 4 of 10</span>
-                  <p class="mk__cardq">Which process produces the most ATP per glucose molecule?</p>
+                  <span class="mk__seclabel">{t('landing.mockup.examProgress')}</span>
+                  <p class="mk__cardq">{t('landing.mockup.examQuestion')}</p>
                   <ul class="mk__options">
-                    <li class="mk__opt"><span class="mk__optkey">A</span> Glycolysis</li>
-                    <li class="mk__opt mk__opt--correct"><span class="mk__optkey">B</span> Oxidative phosphorylation</li>
-                    <li class="mk__opt"><span class="mk__optkey">C</span> Lactic acid fermentation</li>
-                    <li class="mk__opt"><span class="mk__optkey">D</span> The citric acid cycle alone</li>
+                    <li class="mk__opt"><span class="mk__optkey">A</span> {t('landing.mockup.optionA')}</li>
+                    <li class="mk__opt mk__opt--correct"><span class="mk__optkey">B</span> {t('landing.mockup.optionB')}</li>
+                    <li class="mk__opt"><span class="mk__optkey">C</span> {t('landing.mockup.optionC')}</li>
+                    <li class="mk__opt"><span class="mk__optkey">D</span> {t('landing.mockup.optionD')}</li>
                   </ul>
                 </div>
               {/if}
