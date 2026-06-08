@@ -141,7 +141,39 @@ export default {
     faq6A: 'Yes. Export as PDF, or receive your flashcards directly via Telegram.',
     ctaHeadline: 'Start studying smarter.',
     ctaSub: 'Free during early access. No credit card required.',
-    ctaButton: 'Create your free account'
+    ctaButton: 'Create your free account',
+    mockup: {
+      url: 'studymaxing.com/study/biology-midterm',
+      navStudyHub: 'Study Hub',
+      navSettings: 'Settings',
+      documentTitle: 'Biology Midterm Pack',
+      complete: 'Complete',
+      tabSummary: 'Summary',
+      tabFlashcards: 'Flashcards',
+      tabExam: 'Mock Exam',
+      keyConcepts: 'Key Concepts',
+      mainArguments: 'Main Arguments',
+      summaryLine1: 'Cellular respiration converts glucose into ATP through a series of metabolic stages.',
+      summaryLine2: 'Mitochondria are the site of oxidative phosphorylation.',
+      summaryLine3: 'Anaerobic pathways produce lactate when oxygen is scarce.',
+      argumentLine1: 'Aerobic respiration yields far more ATP than anaerobic routes.',
+      argumentLine2: 'Oxygen availability determines which pathway dominates.',
+      flashcardCount: '24',
+      flashcardLabel: 'cards',
+      questionCount: '10',
+      questionLabel: 'questions',
+      buildTime: '~45s',
+      buildLabel: 'build',
+      flashcardProgress: 'Flashcard · 7 of 24',
+      flashcardQuestion: 'What is the function of mitochondria?',
+      flashcardAnswer: "Produces ATP through cellular respiration — the cell's primary energy source.",
+      examProgress: 'Question 4 of 10',
+      examQuestion: 'Which process produces the most ATP per glucose molecule?',
+      optionA: 'Glycolysis',
+      optionB: 'Oxidative phosphorylation',
+      optionC: 'Lactic acid fermentation',
+      optionD: 'The citric acid cycle alone'
+    }
   },
   home: {
     heroTitle: 'StudyMaxing',
@@ -1111,6 +1143,7 @@ export default {
     }
   },
   publicHeader: {
+    brandName: 'StudyMaxing',
     brandHome: 'StudyMaxing home',
     brandSubtitle: 'Fast document-to-study workflow',
     navLabel: 'Public',
@@ -1121,7 +1154,7 @@ export default {
     },
     actions: {
       backToLanding: 'Back to landing',
-      getStarted: 'Get started',
+      getStarted: 'Get started free',
       signIn: 'Sign in'
     }
   },
