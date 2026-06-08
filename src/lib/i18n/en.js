@@ -862,8 +862,8 @@ export default {
         password: 'Enter your password'
       },
       actions: {
-        submit: 'Login',
-        loading: 'Logging in...',
+        submit: 'Sign in',
+        loading: 'Signing in...',
         forgotPassword: 'Forgot password?'
       },
       switch: {
@@ -885,12 +885,12 @@ export default {
         confirmPassword: 'Confirm your password'
       },
       actions: {
-        submit: 'Sign up',
+        submit: 'Create account',
         loading: 'Creating account...'
       },
       switch: {
         prompt: 'Already have an account?',
-        action: 'Login'
+        action: 'Sign in'
       },
       errors: {
         failed: 'Signup failed'
