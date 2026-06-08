@@ -243,40 +243,47 @@
 
 <style>
   :global(.auth-card) {
-    width: min(440px, 100%);
+    width: min(420px, 100%);
+    gap: var(--ui-space-5);
+    border-color: color-mix(in srgb, var(--ui-border-default) 84%, transparent);
+    background: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-bg-page) 4%);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
   }
 
   .auth-header {
     display: grid;
-    gap: 0.45rem;
-    text-align: left;
+    gap: 0.5rem;
+    text-align: start;
   }
 
   .auth-eyebrow {
     margin: 0;
-    color: var(--color-text-muted);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-type-label);
+    font-weight: 700;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
   .auth-header h2 {
     margin: 0;
-    color: var(--color-text-primary);
-    font-size: 1.5rem;
-    letter-spacing: -0.03em;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.75rem, 4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.1;
   }
 
   .auth-header p {
     margin: 0;
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.55;
   }
 
   .auth-form {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--ui-space-4);
   }
 
   .auth-notice,
@@ -284,14 +291,15 @@
     margin: 0;
     border: 1px solid var(--color-danger-border);
     border-radius: var(--ui-radius-md);
-    padding: 0.65rem 0.8rem;
-    font-size: var(--font-size-sm);
+    padding: 0.75rem 0.875rem;
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.5;
   }
 
   .auth-notice {
-    border-color: color-mix(in srgb, var(--ui-border-accent) 55%, var(--ui-border-subtle) 45%);
-    background: color-mix(in srgb, var(--ui-surface-card) 84%, var(--ui-surface-secondary) 16%);
-    color: var(--color-text-secondary);
+    border-color: var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 52%, transparent);
+    color: var(--ui-text-secondary);
   }
 
   .auth-error {
@@ -302,29 +310,46 @@
   .password-field {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--ui-space-2);
   }
 
   .password-toggle {
     flex: 0 0 auto;
-    min-height: 44px;
+    min-height: 2rem;
     display: flex;
     align-items: center;
-    border: none;
+    border: 1px solid transparent;
+    border-radius: var(--ui-radius-sm);
     background: transparent;
-    color: var(--color-text-secondary);
+    color: var(--ui-text-secondary);
     font: inherit;
-    font-size: var(--font-size-sm);
+    font-size: var(--ui-type-label);
     font-weight: 600;
     cursor: pointer;
-    padding-inline-end: 0.7rem;
+    padding-inline: 0.625rem;
+    transition: background var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard);
+  }
+
+  .password-toggle:hover {
+    border-color: var(--ui-border-default);
+    background: var(--ui-surface-ghost);
+    color: var(--ui-text-primary);
+  }
+
+  .password-toggle:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
   }
 
   .toggle-text {
     margin: 0;
-    color: var(--color-text-muted);
-    text-align: left;
-    font-size: var(--font-size-sm);
+    color: var(--ui-text-muted);
+    text-align: center;
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.5;
   }
 
   .auth-switch-link {
