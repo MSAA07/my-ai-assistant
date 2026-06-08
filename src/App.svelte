@@ -223,19 +223,6 @@
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
-            <div class="auth-intro">
-              <p class="auth-intro__eyebrow">StudyMaxing</p>
-              <h1>One clean place to turn documents into study output.</h1>
-              <p>
-                Upload notes, generate summaries, flashcards, and exam prep, then move straight into the study hub without bouncing between tools.
-              </p>
-              <div class="auth-intro__points">
-                <span>Upload once</span>
-                <span>Generate fast</span>
-                <span>Review in one flow</span>
-              </div>
-            </div>
-
             <div class="auth-card-wrap">
               <VerifyEmail
                 status={params.status ?? 'pending'}
@@ -253,19 +240,6 @@
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
-            <div class="auth-intro">
-              <p class="auth-intro__eyebrow">StudyMaxing</p>
-              <h1>One clean place to turn documents into study output.</h1>
-              <p>
-                Upload notes, generate summaries, flashcards, and exam prep, then move straight into the study hub without bouncing between tools.
-              </p>
-              <div class="auth-intro__points">
-                <span>Upload once</span>
-                <span>Generate fast</span>
-                <span>Review in one flow</span>
-              </div>
-            </div>
-
             <div class="auth-card-wrap">
               <ForgotPassword />
             </div>
@@ -278,19 +252,6 @@
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
-            <div class="auth-intro">
-              <p class="auth-intro__eyebrow">StudyMaxing</p>
-              <h1>One clean place to turn documents into study output.</h1>
-              <p>
-                Upload notes, generate summaries, flashcards, and exam prep, then move straight into the study hub without bouncing between tools.
-              </p>
-              <div class="auth-intro__points">
-                <span>Upload once</span>
-                <span>Generate fast</span>
-                <span>Review in one flow</span>
-              </div>
-            </div>
-
             <div class="auth-card-wrap">
               <ResetPassword
                 token={params.token ?? ''}
@@ -313,19 +274,6 @@
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
-            <div class="auth-intro">
-              <p class="auth-intro__eyebrow">StudyMaxing</p>
-              <h1>Upload once. Review summaries, flashcards, and exam prep in one flow.</h1>
-              <p>
-                The public experience now matches the real product: document upload, generated study assets, and a focused study hub under <code>#/study</code>.
-              </p>
-              <div class="auth-intro__points">
-                <span>PDF, DOCX, PPTX</span>
-                <span>Summary + flashcards + exam prep</span>
-                <span>Study hub under #/study</span>
-              </div>
-            </div>
-
             <div class="auth-card-wrap">
               {#if normalizedPath === SIGN_UP_PATH}
                 <SignUp notice={authNoticeKey ? t(authNoticeKey) : ''} redirectTarget={authScreenRedirectTarget} />
@@ -429,86 +377,20 @@
 
   .auth-wrapper {
     flex: 1;
-    width: min(var(--size-content), calc(100% - 32px));
-    margin: 0 auto;
-    padding: clamp(2rem, 5vw, 4.5rem) 0;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    padding: clamp(2.5rem, 6vw, 5rem) var(--ui-space-4);
   }
 
   .auth-stage {
     display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 440px);
-    gap: clamp(1.5rem, 4vw, 3rem);
-    align-items: center;
-  }
-
-  .auth-intro {
-    display: grid;
-    gap: 1rem;
-    padding: clamp(1.5rem, 3vw, 2.25rem);
-    border: 1px solid color-mix(in srgb, var(--ui-border-default) 88%, transparent);
-    border-radius: calc(var(--ui-radius-md) + 8px);
-    background:
-      radial-gradient(circle at top left, color-mix(in srgb, var(--ui-text-primary) 10%, transparent), transparent 44%),
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-secondary) 74%, var(--ui-surface-card) 26%), color-mix(in srgb, var(--ui-surface-card) 94%, transparent));
-    box-shadow: var(--ui-shadow-1);
-  }
-
-  .auth-intro__eyebrow,
-  .auth-intro h1,
-  .auth-intro p {
-    margin: 0;
-  }
-
-  .auth-intro__eyebrow {
-    color: var(--ui-text-muted);
-    font-size: var(--ui-type-label);
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .auth-intro h1 {
-    color: var(--ui-text-primary);
-    font-size: clamp(2rem, 4.8vw, 3.35rem);
-    line-height: 1;
-    letter-spacing: -0.05em;
-    max-width: 11ch;
-  }
-
-  .auth-intro p {
-    max-width: 56ch;
-    color: var(--ui-text-secondary);
-    font-size: var(--ui-type-body-md);
-    line-height: 1.7;
-  }
-
-  .auth-intro code {
-    color: var(--ui-text-primary);
-    background: color-mix(in srgb, var(--ui-surface-secondary) 78%, transparent);
-    border-radius: var(--ui-radius-xs);
-    padding: 0.12rem 0.35rem;
-  }
-
-  .auth-intro__points {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem;
-  }
-
-  .auth-intro__points span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2rem;
-    padding: 0 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--ui-border-default) 92%, transparent);
-    border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-surface-card) 78%, transparent);
-    color: var(--ui-text-primary);
-    font-size: var(--ui-type-label);
-    font-weight: 600;
+    width: min(440px, 100%);
+    justify-items: stretch;
   }
 
   .auth-card-wrap {
+    width: 100%;
     min-width: 0;
   }
 
@@ -563,26 +445,11 @@
 
   @media (max-width: 640px) {
     .auth-wrapper {
-      width: min(100% - 24px, var(--size-content));
-      padding: 1.5rem 0 2rem;
-    }
-
-    .auth-stage {
-      grid-template-columns: 1fr;
-    }
-
-    .auth-intro {
-      padding: 1.25rem;
+      padding: var(--ui-space-6) var(--ui-space-3);
     }
 
     .content {
       padding: var(--space-3);
-    }
-  }
-
-  @media (max-width: 960px) {
-    .auth-stage {
-      grid-template-columns: 1fr;
     }
   }
 </style>
