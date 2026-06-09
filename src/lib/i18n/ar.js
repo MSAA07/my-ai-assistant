@@ -1013,6 +1013,46 @@ ar.landing = {
   }
 };
 
+ar.landing = {
+  ...(ar.landing ?? {}),
+  mockup: {
+    ...(ar.landing?.mockup ?? {}),
+    url: 'studymaxing.com/home',
+    navHome: 'الرئيسية',
+    navStudyHub: 'مركز الدراسة',
+    navSettings: 'الإعدادات',
+    dashboardEyebrow: 'أول رفع',
+    dashboardTitle: 'ارفع موادك الدراسية',
+    dashboardSubtitle: 'أضف ملف PDF أو DOCX أو PPTX، ثم اختر ما تريد من StudyMaxing إنشاؤه.',
+    uploadTitle: 'اختبار الأحياء.pdf',
+    uploadMeta: 'PDF · 18 صفحة · جاهز',
+    chooseTitle: 'اختر ما تريد إنشاءه',
+    chooseSubtitle: 'حدد صيغ الدراسة التي تريدها قبل فتح مركز الدراسة.',
+    summaryTitle: 'ملخص',
+    summaryText: 'نقاط رئيسية واضحة من الملف المرفوع.',
+    flashcardsTitle: 'بطاقات تعليمية',
+    flashcardsText: 'بطاقات استرجاع نشط من المصدر نفسه.',
+    examTitle: 'اختبار تجريبي',
+    examText: '10 أسئلة تدريبية مبنية على المستند.',
+    selected: 'محدد',
+    generateSelected: 'إنشاء المحدد',
+    progressTitle: 'جارٍ تجهيز مسار الدراسة',
+    progressMeta: 'ملخص · بطاقات تعليمية · اختبار تجريبي',
+    progressValue: '72%',
+    hubTitle: 'مركز الدراسة',
+    hubSubtitle: 'كل ما يخص هذا المستند يبقى في مكان واحد.',
+    documentTitle: 'حزمة اختبار الأحياء',
+    ready: 'جاهز',
+    summaryReady: 'الملخص جاهز',
+    flashcardsReady: '24 بطاقة تعليمية',
+    examReady: '10 أسئلة',
+    open: 'فتح',
+    featureSummaryEyebrow: 'ملخص منشأ',
+    featureFlashcardEyebrow: 'بطاقة · 7 من 24',
+    featureExamEyebrow: 'السؤال 4 من 10'
+  }
+};
+
 ar.publicFooter = {
   copyright: '© 2025 Studymaxing. All rights reserved.',
   sections: {
