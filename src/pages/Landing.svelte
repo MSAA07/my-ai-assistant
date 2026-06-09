@@ -73,98 +73,6 @@
         <p class="lp-hero__trust">{t('landing.heroTrust')}</p>
       </div>
 
-      <div class="lp-hero__visual" aria-hidden="true">
-        <div class="mk">
-          <div class="mk__chrome">
-            <span class="mk__dot"></span>
-            <span class="mk__dot"></span>
-            <span class="mk__dot"></span>
-            <span class="mk__url">{t('landing.mockup.url')}</span>
-          </div>
-          <div class="mk__app">
-            <aside class="mk__sidebar">
-              <div class="mk__brand">{t('publicHeader.brandName')}</div>
-              <div class="mk__nav">
-                <div class="mk__navitem mk__navitem--active">{t('landing.mockup.navHome')}</div>
-                <div class="mk__navitem">{t('landing.mockup.navStudyHub')}</div>
-                <div class="mk__navitem">{t('landing.mockup.navSettings')}</div>
-              </div>
-            </aside>
-            <div class="mk__main">
-              <div class="mk__header">
-                <span class="mk__eyebrow">{t('landing.mockup.dashboardEyebrow')}</span>
-                <h3>{t('landing.mockup.dashboardTitle')}</h3>
-                <p>{t('landing.mockup.dashboardSubtitle')}</p>
-              </div>
-
-              <div class="mk__flow">
-                <div class="mk__upload">
-                  <span class="mk__fileicon" aria-hidden="true"></span>
-                  <div>
-                    <p>{t('landing.mockup.uploadTitle')}</p>
-                    <span>{t('landing.mockup.uploadMeta')}</span>
-                  </div>
-                </div>
-
-                <div class="mk__chooser">
-                  <div class="mk__chooser-head">
-                    <p>{t('landing.mockup.chooseTitle')}</p>
-                    <span>{t('landing.mockup.chooseSubtitle')}</span>
-                  </div>
-                  <div class="mk__choice-grid">
-                    <div class="mk__choice mk__choice--selected">
-                      <span>{t('landing.mockup.summaryTitle')}</span>
-                      <p>{t('landing.mockup.summaryText')}</p>
-                      <strong>{t('landing.mockup.selected')}</strong>
-                    </div>
-                    <div class="mk__choice mk__choice--selected">
-                      <span>{t('landing.mockup.flashcardsTitle')}</span>
-                      <p>{t('landing.mockup.flashcardsText')}</p>
-                      <strong>{t('landing.mockup.selected')}</strong>
-                    </div>
-                    <div class="mk__choice mk__choice--selected">
-                      <span>{t('landing.mockup.examTitle')}</span>
-                      <p>{t('landing.mockup.examText')}</p>
-                      <strong>{t('landing.mockup.selected')}</strong>
-                    </div>
-                  </div>
-                  <div class="mk__action">
-                    <span>{t('landing.mockup.generateSelected')}</span>
-                  </div>
-                </div>
-
-                <div class="mk__progress">
-                  <div>
-                    <p>{t('landing.mockup.progressTitle')}</p>
-                    <span>{t('landing.mockup.progressMeta')}</span>
-                  </div>
-                  <strong>{t('landing.mockup.progressValue')}</strong>
-                  <div class="mk__bar" aria-hidden="true"><span></span></div>
-                </div>
-
-                <div class="mk__hub">
-                  <div class="mk__hub-head">
-                    <div>
-                      <p>{t('landing.mockup.hubTitle')}</p>
-                      <span>{t('landing.mockup.hubSubtitle')}</span>
-                    </div>
-                    <strong>{t('landing.mockup.ready')}</strong>
-                  </div>
-                  <div class="mk__hub-doc">
-                    <span>{t('landing.mockup.documentTitle')}</span>
-                    <div>
-                      <em>{t('landing.mockup.summaryReady')}</em>
-                      <em>{t('landing.mockup.flashcardsReady')}</em>
-                      <em>{t('landing.mockup.examReady')}</em>
-                    </div>
-                    <strong>{t('landing.mockup.open')}</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -193,48 +101,61 @@
         <h2 class="lp-h2">{t('landing.featuresHeadline')}</h2>
       </div>
 
-      <div class="lp-feature-rows">
+      <div class="lp-feature-grid">
         {#each features as feature, i}
-          <div class="lp-feature-row" class:lp-feature-row--reverse={i === 1}>
-            <div class="lp-feature-text">
+          <article class="lp-feature-card" class:lp-feature-card--wide={i === 0}>
+            <div class="lp-feature-card__copy">
               <p class="lp-eyebrow">{t(feature.eyebrow)}</p>
               <h3 class="lp-feature-title">{t(feature.title)}</h3>
               <p class="lp-feature-body">{t(feature.body)}</p>
             </div>
-            <div class="lp-feature-visual" aria-hidden="true">
+
+            <div class="lp-feature-card__visual" aria-hidden="true">
               {#if i === 0}
-                <div class="mk mk--panel">
-                  <div class="mk__content">
-                    <span class="mk__seclabel">{t('landing.mockup.featureSummaryEyebrow')}</span>
-                    <p class="mk__line">{t('landing.mockup.summaryLine1')}</p>
-                    <p class="mk__line">{t('landing.mockup.summaryLine2')}</p>
-                    <p class="mk__line">{t('landing.mockup.summaryLine3')}</p>
-                    <span class="mk__seclabel">{t('landing.mockup.mainArguments')}</span>
-                    <p class="mk__line">{t('landing.mockup.argumentLine1')}</p>
-                    <p class="mk__line">{t('landing.mockup.argumentLine2')}</p>
+                <div class="pv pv--summary">
+                  <div class="pv__header">
+                    <span>{t('landing.mockup.featureSummaryEyebrow')}</span>
+                    <strong>{t('landing.mockup.ready')}</strong>
+                  </div>
+                  <div class="pv__summary-lines">
+                    <p>{t('landing.mockup.summaryLine1')}</p>
+                    <p>{t('landing.mockup.summaryLine2')}</p>
+                    <p>{t('landing.mockup.summaryLine3')}</p>
+                  </div>
+                  <div class="pv__note-grid">
+                    <span>{t('landing.mockup.keyConcepts')}</span>
+                    <span>{t('landing.mockup.mainArguments')}</span>
                   </div>
                 </div>
               {:else if i === 1}
-                <div class="mk mk--panel mk--card">
-                  <span class="mk__seclabel">{t('landing.mockup.featureFlashcardEyebrow')}</span>
-                  <p class="mk__cardq">{t('landing.mockup.flashcardQuestion')}</p>
-                  <div class="mk__carddiv"></div>
-                  <p class="mk__carda">{t('landing.mockup.flashcardAnswer')}</p>
+                <div class="pv pv--flashcard">
+                  <div class="pv__header">
+                    <span>{t('landing.mockup.featureFlashcardEyebrow')}</span>
+                    <strong>{t('landing.mockup.flashcardCount')} {t('landing.mockup.flashcardLabel')}</strong>
+                  </div>
+                  <div class="pv__flashcard">
+                    <p>{t('landing.mockup.flashcardQuestion')}</p>
+                    <span></span>
+                    <p>{t('landing.mockup.flashcardAnswer')}</p>
+                  </div>
                 </div>
               {:else}
-                <div class="mk mk--panel mk--exam">
-                  <span class="mk__seclabel">{t('landing.mockup.featureExamEyebrow')}</span>
-                  <p class="mk__cardq">{t('landing.mockup.examQuestion')}</p>
-                  <ul class="mk__options">
-                    <li class="mk__opt"><span class="mk__optkey">A</span> {t('landing.mockup.optionA')}</li>
-                    <li class="mk__opt mk__opt--correct"><span class="mk__optkey">B</span> {t('landing.mockup.optionB')}</li>
-                    <li class="mk__opt"><span class="mk__optkey">C</span> {t('landing.mockup.optionC')}</li>
-                    <li class="mk__opt"><span class="mk__optkey">D</span> {t('landing.mockup.optionD')}</li>
+                <div class="pv pv--exam">
+                  <div class="pv__header">
+                    <span>{t('landing.mockup.featureExamEyebrow')}</span>
+                    <strong>{t('landing.mockup.questionCount')} {t('landing.mockup.questionLabel')}</strong>
+                  </div>
+                  <p class="pv__question">{t('landing.mockup.examQuestion')}</p>
+                  <ul class="pv__options">
+                    <li><span>{t('landing.mockup.optionKeyA')}</span>{t('landing.mockup.optionA')}</li>
+                    <li class="pv__option--correct"><span>{t('landing.mockup.optionKeyB')}</span>{t('landing.mockup.optionB')}</li>
+                    <li><span>{t('landing.mockup.optionKeyC')}</span>{t('landing.mockup.optionC')}</li>
+                    <li><span>{t('landing.mockup.optionKeyD')}</span>{t('landing.mockup.optionD')}</li>
                   </ul>
                 </div>
               {/if}
             </div>
-          </div>
+          </article>
         {/each}
       </div>
     </div>
@@ -380,10 +301,9 @@
   }
 
   .lp-hero__grid {
-    display: grid;
-    grid-template-columns: 1.05fr 1fr;
-    gap: clamp(2.5rem, 5vw, 4.5rem);
-    align-items: center;
+    display: block;
+    max-width: 48rem;
+    text-align: center;
   }
 
   .lp-badge {
@@ -414,7 +334,8 @@
 
   .lp-hero__sub {
     margin: 0 0 2rem;
-    max-width: 30rem;
+    max-width: 36rem;
+    margin-inline: auto;
     color: var(--ui-text-secondary);
     font-size: clamp(1rem, 1.5vw, 1.1rem);
     line-height: 1.7;
@@ -427,430 +348,150 @@
     line-height: 1.6;
   }
 
-  .lp-hero__visual {
-    min-width: 0;
+  /* Feature previews */
+  .pv {
+    display: grid;
+    gap: 1rem;
+    min-height: 18rem;
+    padding: 1.25rem;
+    border: 1px solid #1f1f1f;
+    border-radius: 10px;
+    background: #050505;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  /* ── Product mockup (always dark) ──────────────── */
-  .mk {
-    border: 1px solid #1e1e1e;
-    border-radius: 14px;
-    background: #0a0a0a;
-    overflow: hidden;
-    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.65);
-  }
-
-  .mk__chrome {
+  .pv__header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.7rem 0.9rem;
-    border-bottom: 1px solid #1e1e1e;
-    background: #0d0d0d;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid #1f1f1f;
   }
 
-  .mk__dot {
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 50%;
-    background: #2a2a2a;
-  }
-
-  .mk__url {
-    margin-inline-start: 0.6rem;
-    color: #444;
-    font-size: 0.65rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  }
-
-  .mk__app {
-    display: grid;
-    grid-template-columns: 9rem 1fr;
-    min-height: 19rem;
-  }
-
-  .mk__sidebar {
-    padding: 0.9rem 0.75rem;
-    border-inline-end: 1px solid #1e1e1e;
-    background: #0d0d0d;
-  }
-
-  .mk__brand {
-    margin-bottom: 1rem;
-    color: #fafafa;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-
-  .mk__nav {
-    display: grid;
-    gap: 0.25rem;
-  }
-
-  .mk__navitem {
-    padding: 0.4rem 0.55rem;
-    border-radius: 6px;
-    color: #888;
-    font-size: 0.72rem;
-    font-weight: 500;
-  }
-
-  .mk__navitem--active {
-    background: rgba(255, 255, 255, 0.07);
-    color: #fafafa;
-  }
-
-  .mk__main {
-    min-width: 0;
-  }
-
-  .mk__header {
-    padding: 1rem 1rem 0.85rem;
-    border-bottom: 1px solid #1e1e1e;
-  }
-
-  .mk__eyebrow {
-    display: block;
-    margin-bottom: 0.35rem;
-    color: #888;
-    font-size: 0.58rem;
+  .pv__header span {
+    color: #8a8a8a;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.12em;
+    line-height: 1.2;
     text-transform: uppercase;
   }
 
-  .mk__header h3,
-  .mk__header p,
-  .mk__upload p,
-  .mk__chooser-head p,
-  .mk__choice p,
-  .mk__progress p,
-  .mk__hub-head p {
-    margin: 0;
-  }
-
-  .mk__header h3 {
-    color: #fafafa;
-    font-size: 0.95rem;
+  .pv__header strong {
+    flex: 0 0 auto;
+    padding: 0.24rem 0.5rem;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.09);
+    color: #22c55e;
+    font-size: 0.62rem;
     font-weight: 700;
     line-height: 1.2;
   }
 
-  .mk__header p {
-    margin-top: 0.35rem;
-    max-width: 28rem;
-    color: #888;
-    font-size: 0.68rem;
-    line-height: 1.5;
-  }
-
-  .mk__flow {
+  .pv__summary-lines {
     display: grid;
-    gap: 0.65rem;
-    padding: 0.8rem 1rem 1rem;
+    gap: 0.7rem;
   }
 
-  .mk__upload,
-  .mk__chooser,
-  .mk__progress,
-  .mk__hub {
-    border: 1px solid #1e1e1e;
-    border-radius: 10px;
-    background: #0d0d0d;
+  .pv__summary-lines p,
+  .pv__flashcard p,
+  .pv__question {
+    margin: 0;
+    color: #fafafa;
+    font-size: 0.92rem;
+    line-height: 1.65;
   }
 
-  .mk__upload {
+  .pv__summary-lines p {
+    padding-inline-start: 0.9rem;
+    border-inline-start: 1px solid #2a2a2a;
+  }
+
+  .pv__note-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: auto;
+  }
+
+  .pv__note-grid span {
+    min-height: 4.5rem;
+    padding: 0.8rem;
+    border: 1px solid #1f1f1f;
+    border-radius: 8px;
+    color: #8a8a8a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .pv__flashcard {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    min-height: 12rem;
+    padding: 1rem;
+    border: 1px solid #1f1f1f;
+    border-radius: 9px;
+    background: #090909;
+  }
+
+  .pv__flashcard span {
+    display: block;
+    height: 1px;
+    background: #1f1f1f;
+  }
+
+  .pv__flashcard p:last-child {
+    color: #8a8a8a;
+    font-size: 0.86rem;
+  }
+
+  .pv__options {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pv__options li {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.7rem 0.8rem;
-  }
-
-  .mk__fileicon {
-    position: relative;
-    flex: 0 0 auto;
-    width: 1.75rem;
-    height: 2.1rem;
-    border: 1px solid #2a2a2a;
-    border-radius: 6px;
-    background: #111;
-  }
-
-  .mk__fileicon::after {
-    content: "";
-    position: absolute;
-    inset-block-start: 0.42rem;
-    inset-inline: 0.42rem;
-    height: 1px;
-    background: #444;
-    box-shadow: 0 0.42rem 0 #333, 0 0.84rem 0 #333;
-  }
-
-  .mk__upload p,
-  .mk__chooser-head p,
-  .mk__progress p,
-  .mk__hub-head p,
-  .mk__hub-doc > span {
-    color: #fafafa;
-    font-size: 0.76rem;
-    font-weight: 650;
+    gap: 0.7rem;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #1f1f1f;
+    border-radius: 8px;
+    color: #8a8a8a;
+    font-size: 0.84rem;
     line-height: 1.35;
   }
 
-  .mk__upload span:not(.mk__fileicon),
-  .mk__chooser-head span,
-  .mk__progress span,
-  .mk__hub-head span {
-    color: #888;
-    font-size: 0.62rem;
-    line-height: 1.45;
-  }
-
-  .mk__chooser {
-    display: grid;
-    gap: 0.65rem;
-    padding: 0.75rem;
-  }
-
-  .mk__chooser-head {
-    display: grid;
-    gap: 0.25rem;
-  }
-
-  .mk__choice-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.45rem;
-  }
-
-  .mk__choice {
-    display: grid;
-    gap: 0.35rem;
-    min-height: 6.7rem;
-    padding: 0.6rem;
-    border: 1px solid #242424;
-    border-radius: 8px;
-    background: #090909;
-  }
-
-  .mk__choice span {
-    color: #fafafa;
-    font-size: 0.68rem;
-    font-weight: 650;
-  }
-
-  .mk__choice p {
-    color: #888;
-    font-size: 0.58rem;
-    line-height: 1.45;
-  }
-
-  .mk__choice strong,
-  .mk__hub-head strong {
-    justify-self: start;
-    align-self: end;
-    padding: 0.18rem 0.45rem;
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    font-size: 0.54rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .mk__action {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .mk__action span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.8rem;
-    padding-inline: 0.75rem;
-    border-radius: 999px;
-    background: #fafafa;
-    color: #0a0a0a;
-    font-size: 0.62rem;
-    font-weight: 700;
-  }
-
-  .mk__progress {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.5rem 0.75rem;
-    padding: 0.7rem 0.8rem;
-  }
-
-  .mk__progress strong {
-    color: #fafafa;
-    font-size: 0.72rem;
-  }
-
-  .mk__bar {
-    grid-column: 1 / -1;
-    height: 0.38rem;
-    overflow: hidden;
-    border-radius: 999px;
-    background: #1e1e1e;
-  }
-
-  .mk__bar span {
-    display: block;
-    width: 72%;
-    height: 100%;
-    border-radius: inherit;
-    background: #fafafa;
-  }
-
-  .mk__hub {
-    display: grid;
-    gap: 0.6rem;
-    padding: 0.75rem;
-  }
-
-  .mk__hub-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  .mk__hub-doc {
-    display: grid;
-    gap: 0.5rem;
-    padding: 0.65rem;
-    border: 1px solid #242424;
-    border-radius: 8px;
-    background: #090909;
-  }
-
-  .mk__hub-doc div {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-  }
-
-  .mk__hub-doc em {
-    padding: 0.18rem 0.4rem;
-    border: 1px solid #242424;
-    border-radius: 999px;
-    color: #888;
-    font-size: 0.55rem;
-    font-style: normal;
-    line-height: 1.2;
-  }
-
-  .mk__hub-doc strong {
-    justify-self: start;
-    color: #fafafa;
-    font-size: 0.62rem;
-    font-weight: 700;
-  }
-
-  .mk__content {
-    padding: 1rem;
-  }
-
-  .mk__seclabel {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #888;
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .mk__line {
-    margin: 0 0 0.45rem;
-    color: #fafafa;
-    font-size: 0.74rem;
-    line-height: 1.5;
-  }
-
-  .mk__line + .mk__seclabel {
-    margin-top: 1rem;
-  }
-
-  /* Mockup as standalone feature panel */
-  .mk--panel {
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
-  }
-
-  .mk--card,
-  .mk--exam {
-    padding: 1.5rem;
-  }
-
-  .mk__cardq {
-    margin: 0;
-    color: #fafafa;
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.5;
-  }
-
-  .mk__carddiv {
-    height: 1px;
-    margin: 1.1rem 0;
-    background: #1e1e1e;
-  }
-
-  .mk__carda {
-    margin: 0;
-    color: #888;
-    font-size: 0.85rem;
-    line-height: 1.6;
-  }
-
-  .mk__options {
-    list-style: none;
-    margin: 1rem 0 0;
-    padding: 0;
-    display: grid;
-    gap: 0.5rem;
-  }
-
-  .mk__opt {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.6rem 0.75rem;
-    border: 1px solid #1e1e1e;
-    border-radius: 8px;
-    color: #888;
-    font-size: 0.8rem;
-  }
-
-  .mk__optkey {
+  .pv__options span {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 5px;
-    background: #1e1e1e;
+    width: 1.35rem;
+    height: 1.35rem;
+    flex: 0 0 auto;
+    border-radius: 6px;
+    background: #1f1f1f;
     color: #fafafa;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     font-weight: 700;
   }
 
-  .mk__opt--correct {
-    border-color: rgba(34, 197, 94, 0.25);
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
+  .pv__option--correct {
+    border-color: rgba(34, 197, 94, 0.25) !important;
+    background: rgba(34, 197, 94, 0.08);
+    color: #22c55e !important;
   }
 
-  .mk__opt--correct .mk__optkey {
-    background: rgba(34, 197, 94, 0.25);
-    color: #22c55e;
-  }
-
-  /* ── 2 · Credibility strip ─────────────────────── */
   .lp-strip {
     padding-block: 1.25rem;
     border-block: 1px solid color-mix(in srgb, var(--ui-border-default) 30%, transparent);
@@ -902,28 +543,45 @@
     background: var(--ui-bg-page);
   }
 
-  .lp-feature-rows {
+  .lp-feature-grid {
     display: grid;
-    gap: clamp(4rem, 8vw, 7rem);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #050505;
   }
 
-  .lp-feature-row {
-    display: flex;
+  .lp-feature-card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: clamp(2rem, 4vw, 3rem);
+    min-height: 36rem;
+    padding: clamp(1.5rem, 3vw, 2rem);
+    border-block-start: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 22%, transparent), transparent 42%),
+      #050505;
+  }
+
+  .lp-feature-card:nth-child(1),
+  .lp-feature-card:nth-child(2) {
+    border-block-start: 0;
+  }
+
+  .lp-feature-card:nth-child(odd) {
+    border-inline-end: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
+  }
+
+  .lp-feature-card--wide {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-rows: auto;
     align-items: center;
-    gap: 4rem;
   }
 
-  .lp-feature-row--reverse {
-    flex-direction: row-reverse;
-  }
-
-  .lp-feature-text {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .lp-feature-visual {
-    flex: 1 1 0;
+  .lp-feature-card__copy,
+  .lp-feature-card__visual {
     min-width: 0;
   }
 
@@ -938,6 +596,7 @@
 
   .lp-feature-body {
     margin: 0;
+    max-width: 34rem;
     color: var(--ui-text-secondary);
     font-size: 1rem;
     line-height: 1.75;
@@ -1095,12 +754,17 @@
 
   /* ── Responsive ────────────────────────────────── */
   @media (max-width: 900px) {
-    .lp-hero__grid {
+    .lp-feature-grid,
+    .lp-feature-card--wide {
       grid-template-columns: 1fr;
     }
 
-    .lp-hero__visual {
-      order: -1;
+    .lp-feature-card:nth-child(odd) {
+      border-inline-end: 0;
+    }
+
+    .lp-feature-card:nth-child(2) {
+      border-block-start: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
     }
 
     .lp-steps {
@@ -1114,36 +778,22 @@
   }
 
   @media (max-width: 640px) {
-    .mk__app {
-      grid-template-columns: 1fr;
-    }
-
-    .mk__sidebar {
-      display: none;
-    }
-
-    .mk__choice-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .mk__choice {
+    .lp-feature-card {
       min-height: 0;
     }
 
-    .lp-feature-row,
-    .lp-feature-row--reverse {
+    .pv,
+    .pv__flashcard {
+      min-height: 0;
+    }
+
+    .pv__header {
+      align-items: flex-start;
       flex-direction: column;
-      gap: 2rem;
     }
 
-    .lp-feature-text {
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 500px) {
-    .lp-hero__visual {
-      display: none;
+    .pv__note-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
