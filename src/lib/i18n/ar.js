@@ -1049,7 +1049,11 @@ ar.landing = {
     open: 'فتح',
     featureSummaryEyebrow: 'ملخص منشأ',
     featureFlashcardEyebrow: 'بطاقة · 7 من 24',
-    featureExamEyebrow: 'السؤال 4 من 10'
+    featureExamEyebrow: 'السؤال 4 من 10',
+    optionKeyA: 'أ',
+    optionKeyB: 'ب',
+    optionKeyC: 'ج',
+    optionKeyD: 'د'
   }
 };
 
