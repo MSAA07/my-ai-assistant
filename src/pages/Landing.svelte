@@ -4,16 +4,10 @@
   import { LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH } from '../routes.js';
   import { currentPath, routeParams, router } from '../stores/router.js';
 
-  const features = [
-    { eyebrow: 'landing.feature1Eyebrow', title: 'landing.feature1Title', body: 'landing.feature1Body' },
-    { eyebrow: 'landing.feature2Eyebrow', title: 'landing.feature2Title', body: 'landing.feature2Body' },
-    { eyebrow: 'landing.feature3Eyebrow', title: 'landing.feature3Title', body: 'landing.feature3Body' }
-  ];
-
-  const steps = [
-    { num: '01', title: 'landing.step1Title', body: 'landing.step1Body' },
-    { num: '02', title: 'landing.step2Title', body: 'landing.step2Body' },
-    { num: '03', title: 'landing.step3Title', body: 'landing.step3Body' }
+  const tourSteps = [
+    { num: '01', tone: 'blue', eyebrow: 'landing.tour.step1Eyebrow', title: 'landing.tour.step1Title', body: 'landing.tour.step1Body' },
+    { num: '02', tone: 'green', eyebrow: 'landing.tour.step2Eyebrow', title: 'landing.tour.step2Title', body: 'landing.tour.step2Body' },
+    { num: '03', tone: 'violet', eyebrow: 'landing.tour.step3Eyebrow', title: 'landing.tour.step3Title', body: 'landing.tour.step3Body' }
   ];
 
   const faqs = [
@@ -94,64 +88,92 @@
   </section>
 
   <!-- ── 4 · FEATURES ─────────────────────────────── -->
-  <section id="features" class="lp-features">
+  <section id="features" class="lp-tour">
     <div class="lp-container">
-      <div class="lp-section-head">
-        <p class="lp-eyebrow">{t('landing.featuresEyebrow')}</p>
-        <h2 class="lp-h2">{t('landing.featuresHeadline')}</h2>
+      <div class="lp-section-head lp-section-head--center">
+        <p class="lp-eyebrow">{t('landing.tour.eyebrow')}</p>
+        <h2 class="lp-h2">{t('landing.tour.headline')}</h2>
+        <p class="lp-section-sub">{t('landing.tour.sub')}</p>
       </div>
 
-      <div class="lp-feature-grid">
-        {#each features as feature, i}
-          <article class="lp-feature-card" class:lp-feature-card--wide={i === 0}>
-            <div class="lp-feature-card__copy">
-              <p class="lp-eyebrow">{t(feature.eyebrow)}</p>
-              <h3 class="lp-feature-title">{t(feature.title)}</h3>
-              <p class="lp-feature-body">{t(feature.body)}</p>
+      <div class="tour-shell">
+        <div class="tour-shell__rail" aria-hidden="true"></div>
+
+        {#each tourSteps as step, i}
+          <article class={`tour-step tour-step--${step.tone}`}>
+            <div class="tour-step__copy">
+              <span class="tour-step__num">{step.num}</span>
+              <p class="lp-eyebrow">{t(step.eyebrow)}</p>
+              <h3>{t(step.title)}</h3>
+              <p>{t(step.body)}</p>
             </div>
 
-            <div class="lp-feature-card__visual" aria-hidden="true">
+            <div class="tour-step__visual" aria-hidden="true">
               {#if i === 0}
-                <div class="pv pv--summary">
-                  <div class="pv__header">
-                    <span>{t('landing.mockup.featureSummaryEyebrow')}</span>
+                <div class="tour-upload">
+                  <div class="tour-upload__drop">
+                    <span class="tour-upload__icon"></span>
+                    <div>
+                      <p>{t('landing.tour.uploadDropTitle')}</p>
+                      <span>{t('landing.tour.uploadDropMeta')}</span>
+                    </div>
+                  </div>
+                  <div class="tour-file">
+                    <span></span>
+                    <div>
+                      <p>{t('landing.mockup.uploadTitle')}</p>
+                      <small>{t('landing.mockup.uploadMeta')}</small>
+                    </div>
                     <strong>{t('landing.mockup.ready')}</strong>
-                  </div>
-                  <div class="pv__summary-lines">
-                    <p>{t('landing.mockup.summaryLine1')}</p>
-                    <p>{t('landing.mockup.summaryLine2')}</p>
-                    <p>{t('landing.mockup.summaryLine3')}</p>
-                  </div>
-                  <div class="pv__note-grid">
-                    <span>{t('landing.mockup.keyConcepts')}</span>
-                    <span>{t('landing.mockup.mainArguments')}</span>
                   </div>
                 </div>
               {:else if i === 1}
-                <div class="pv pv--flashcard">
-                  <div class="pv__header">
-                    <span>{t('landing.mockup.featureFlashcardEyebrow')}</span>
-                    <strong>{t('landing.mockup.flashcardCount')} {t('landing.mockup.flashcardLabel')}</strong>
+                <div class="tour-picker">
+                  <div class="tour-picker__head">
+                    <p>{t('landing.mockup.chooseTitle')}</p>
+                    <span>{t('landing.tour.chooseHint')}</span>
                   </div>
-                  <div class="pv__flashcard">
-                    <p>{t('landing.mockup.flashcardQuestion')}</p>
-                    <span></span>
-                    <p>{t('landing.mockup.flashcardAnswer')}</p>
+                  <div class="tour-tool-grid">
+                    <div class="tour-tool tour-tool--summary">
+                      <strong>{t('landing.mockup.summaryTitle')}</strong>
+                      <p>{t('landing.mockup.summaryText')}</p>
+                      <span>{t('landing.mockup.selected')}</span>
+                    </div>
+                    <div class="tour-tool tour-tool--flashcards">
+                      <strong>{t('landing.mockup.flashcardsTitle')}</strong>
+                      <p>{t('landing.mockup.flashcardsText')}</p>
+                      <span>{t('landing.mockup.selected')}</span>
+                    </div>
+                    <div class="tour-tool tour-tool--exam">
+                      <strong>{t('landing.mockup.examTitle')}</strong>
+                      <p>{t('landing.mockup.examText')}</p>
+                      <span>{t('landing.mockup.selected')}</span>
+                    </div>
                   </div>
                 </div>
               {:else}
-                <div class="pv pv--exam">
-                  <div class="pv__header">
-                    <span>{t('landing.mockup.featureExamEyebrow')}</span>
-                    <strong>{t('landing.mockup.questionCount')} {t('landing.mockup.questionLabel')}</strong>
+                <div class="tour-hub">
+                  <div class="tour-hub__head">
+                    <div>
+                      <p>{t('landing.mockup.documentTitle')}</p>
+                      <span>{t('landing.tour.hubHint')}</span>
+                    </div>
+                    <strong>{t('landing.mockup.ready')}</strong>
                   </div>
-                  <p class="pv__question">{t('landing.mockup.examQuestion')}</p>
-                  <ul class="pv__options">
-                    <li><span>{t('landing.mockup.optionKeyA')}</span>{t('landing.mockup.optionA')}</li>
-                    <li class="pv__option--correct"><span>{t('landing.mockup.optionKeyB')}</span>{t('landing.mockup.optionB')}</li>
-                    <li><span>{t('landing.mockup.optionKeyC')}</span>{t('landing.mockup.optionC')}</li>
-                    <li><span>{t('landing.mockup.optionKeyD')}</span>{t('landing.mockup.optionD')}</li>
-                  </ul>
+                  <div class="tour-output-grid">
+                    <div class="tour-output tour-output--summary">
+                      <span>{t('landing.mockup.summaryReady')}</span>
+                      <p>{t('landing.tour.summaryOutcome')}</p>
+                    </div>
+                    <div class="tour-output tour-output--flashcards">
+                      <span>{t('landing.mockup.flashcardsReady')}</span>
+                      <p>{t('landing.tour.flashcardsOutcome')}</p>
+                    </div>
+                    <div class="tour-output tour-output--exam">
+                      <span>{t('landing.mockup.examReady')}</span>
+                      <p>{t('landing.tour.examOutcome')}</p>
+                    </div>
+                  </div>
                 </div>
               {/if}
             </div>
@@ -161,30 +183,6 @@
     </div>
   </section>
 
-  <!-- ── 5 · HOW IT WORKS ─────────────────────────── -->
-  <section id="how-it-works" class="lp-how">
-    <div class="lp-container">
-      <div class="lp-section-head">
-        <p class="lp-eyebrow">{t('landing.howEyebrow')}</p>
-        <h2 class="lp-h2">{t('landing.howHeadline')}</h2>
-      </div>
-
-      <div class="lp-steps">
-        {#each steps as step, i}
-          {#if i > 0}
-            <span class="lp-step-arrow" aria-hidden="true">→</span>
-          {/if}
-          <div class="lp-step">
-            <span class="lp-step__num">{step.num}</span>
-            <h3 class="lp-step__title">{t(step.title)}</h3>
-            <p class="lp-step__body">{t(step.body)}</p>
-          </div>
-        {/each}
-      </div>
-    </div>
-  </section>
-
-  <!-- ── 6 · FAQ ──────────────────────────────────── -->
   <section class="lp-faq">
     <div class="lp-faq__inner">
       <div class="lp-section-head">
@@ -348,150 +346,6 @@
     line-height: 1.6;
   }
 
-  /* Feature previews */
-  .pv {
-    display: grid;
-    gap: 1rem;
-    min-height: 18rem;
-    padding: 1.25rem;
-    border: 1px solid #1f1f1f;
-    border-radius: 10px;
-    background: #050505;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-
-  .pv__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-bottom: 0.9rem;
-    border-bottom: 1px solid #1f1f1f;
-  }
-
-  .pv__header span {
-    color: #8a8a8a;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-
-  .pv__header strong {
-    flex: 0 0 auto;
-    padding: 0.24rem 0.5rem;
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.09);
-    color: #22c55e;
-    font-size: 0.62rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .pv__summary-lines {
-    display: grid;
-    gap: 0.7rem;
-  }
-
-  .pv__summary-lines p,
-  .pv__flashcard p,
-  .pv__question {
-    margin: 0;
-    color: #fafafa;
-    font-size: 0.92rem;
-    line-height: 1.65;
-  }
-
-  .pv__summary-lines p {
-    padding-inline-start: 0.9rem;
-    border-inline-start: 1px solid #2a2a2a;
-  }
-
-  .pv__note-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-    margin-top: auto;
-  }
-
-  .pv__note-grid span {
-    min-height: 4.5rem;
-    padding: 0.8rem;
-    border: 1px solid #1f1f1f;
-    border-radius: 8px;
-    color: #8a8a8a;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    line-height: 1.4;
-    text-transform: uppercase;
-  }
-
-  .pv__flashcard {
-    display: grid;
-    align-content: center;
-    gap: 1rem;
-    min-height: 12rem;
-    padding: 1rem;
-    border: 1px solid #1f1f1f;
-    border-radius: 9px;
-    background: #090909;
-  }
-
-  .pv__flashcard span {
-    display: block;
-    height: 1px;
-    background: #1f1f1f;
-  }
-
-  .pv__flashcard p:last-child {
-    color: #8a8a8a;
-    font-size: 0.86rem;
-  }
-
-  .pv__options {
-    display: grid;
-    gap: 0.6rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .pv__options li {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    min-height: 2.75rem;
-    padding: 0.65rem 0.75rem;
-    border: 1px solid #1f1f1f;
-    border-radius: 8px;
-    color: #8a8a8a;
-    font-size: 0.84rem;
-    line-height: 1.35;
-  }
-
-  .pv__options span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.35rem;
-    height: 1.35rem;
-    flex: 0 0 auto;
-    border-radius: 6px;
-    background: #1f1f1f;
-    color: #fafafa;
-    font-size: 0.7rem;
-    font-weight: 700;
-  }
-
-  .pv__option--correct {
-    border-color: rgba(34, 197, 94, 0.25) !important;
-    background: rgba(34, 197, 94, 0.08);
-    color: #22c55e !important;
-  }
-
   .lp-strip {
     padding-block: 1.25rem;
     border-block: 1px solid color-mix(in srgb, var(--ui-border-default) 30%, transparent);
@@ -538,120 +392,264 @@
   }
 
   /* ── 4 · Features ──────────────────────────────── */
-  .lp-features {
-    padding-block: clamp(5rem, 9vw, 9rem);
-    background: var(--ui-bg-page);
-  }
-
-  .lp-feature-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    border: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
-    border-radius: 12px;
+  .lp-tour {
+    position: relative;
     overflow: hidden;
-    background: #050505;
-  }
-
-  .lp-feature-card {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    gap: clamp(2rem, 4vw, 3rem);
-    min-height: 36rem;
-    padding: clamp(1.5rem, 3vw, 2rem);
-    border-block-start: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
+    padding-block: clamp(5rem, 9vw, 9rem);
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 22%, transparent), transparent 42%),
-      #050505;
+      linear-gradient(color-mix(in srgb, var(--ui-border-default) 34%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--ui-border-default) 34%, transparent) 1px, transparent 1px),
+      radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.16), transparent 34rem),
+      var(--ui-bg-page);
+    background-size: auto, 7.5rem 7.5rem, auto, auto;
   }
 
-  .lp-feature-card:nth-child(1),
-  .lp-feature-card:nth-child(2) {
-    border-block-start: 0;
+  .lp-section-head--center {
+    max-width: 44rem;
+    margin-inline: auto;
+    text-align: center;
   }
 
-  .lp-feature-card:nth-child(odd) {
-    border-inline-end: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
+  .lp-section-sub {
+    margin: 1rem auto 0;
+    max-width: 38rem;
+    color: var(--ui-text-secondary);
+    font-size: 1rem;
+    line-height: 1.7;
   }
 
-  .lp-feature-card--wide {
-    grid-column: 1 / -1;
+  .tour-shell {
+    position: relative;
+    display: grid;
+    gap: 1.25rem;
+    max-width: 70rem;
+    margin-inline: auto;
+  }
+
+  .tour-shell__rail {
+    position: absolute;
+    inset-block: 2rem;
+    inset-inline-start: 2rem;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(56, 189, 248, 0.75), rgba(34, 197, 94, 0.75), rgba(168, 85, 247, 0.75), transparent);
+  }
+
+  .tour-step {
+    position: relative;
+    display: grid;
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    grid-template-rows: auto;
+    gap: clamp(1.5rem, 4vw, 4rem);
     align-items: center;
+    min-height: 24rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    padding-inline-start: clamp(4.25rem, 6vw, 5.25rem);
+    border: 1px solid color-mix(in srgb, var(--ui-border-default) 76%, transparent);
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 42%, transparent), transparent 70%),
+      rgba(5, 5, 5, 0.92);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 
-  .lp-feature-card__copy,
-  .lp-feature-card__visual {
+  .tour-step::before {
+    content: "";
+    position: absolute;
+    inset-block-start: 2rem;
+    inset-inline-start: calc(2rem - 0.42rem);
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 999px;
+    background: var(--tour-accent);
+    box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--tour-accent) 16%, transparent);
+  }
+
+  .tour-step--blue { --tour-accent: #38bdf8; --tour-surface: rgba(56, 189, 248, 0.12); }
+  .tour-step--green { --tour-accent: #22c55e; --tour-surface: rgba(34, 197, 94, 0.12); }
+  .tour-step--violet { --tour-accent: #a855f7; --tour-surface: rgba(168, 85, 247, 0.13); }
+
+  .tour-step__copy {
     min-width: 0;
   }
 
-  .lp-feature-title {
-    margin: 0 0 1rem;
-    color: var(--ui-text-primary);
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
+  .tour-step__num {
+    display: inline-flex;
+    margin-bottom: 1rem;
+    color: color-mix(in srgb, var(--tour-accent) 78%, #fff 22%);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
   }
 
-  .lp-feature-body {
+  .tour-step__copy h3 {
+    margin: 0 0 0.85rem;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.6rem, 3vw, 2.35rem);
+    font-weight: 850;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .tour-step__copy p:last-child {
     margin: 0;
-    max-width: 34rem;
+    max-width: 31rem;
     color: var(--ui-text-secondary);
     font-size: 1rem;
     line-height: 1.75;
   }
 
-  /* ── 5 · How it works ──────────────────────────── */
-  .lp-how {
-    padding-block: clamp(5rem, 8vw, 8rem);
-    border-block: 1px solid color-mix(in srgb, var(--ui-border-default) 40%, transparent);
-    background: color-mix(in srgb, var(--ui-surface-card) 20%, var(--ui-bg-page));
-  }
-
-  .lp-steps {
-    display: flex;
-    align-items: flex-start;
-    gap: 2rem;
-  }
-
-  .lp-step {
-    flex: 1 1 0;
+  .tour-step__visual {
     min-width: 0;
   }
 
-  .lp-step__num {
-    display: block;
-    margin-bottom: 0.75rem;
-    font-size: 3.5rem;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.03em;
-    color: color-mix(in srgb, var(--ui-text-muted) 40%, transparent);
+  .tour-upload,
+  .tour-picker,
+  .tour-hub {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--ui-border-default) 78%, transparent);
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 12% 0%, var(--tour-surface), transparent 16rem),
+      #080808;
   }
 
-  .lp-step__title {
-    margin: 0 0 0.5rem;
-    color: var(--ui-text-primary);
-    font-size: 1.05rem;
-    font-weight: 700;
+  .tour-upload__drop,
+  .tour-file,
+  .tour-picker__head,
+  .tour-hub__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #242424;
+    border-radius: 10px;
+    background: #0d0d0d;
   }
 
-  .lp-step__body {
-    margin: 0;
-    color: var(--ui-text-secondary);
-    font-size: 0.875rem;
-    line-height: 1.65;
+  .tour-upload__drop {
+    justify-content: flex-start;
+    min-height: 9rem;
+    border-style: dashed;
   }
 
-  .lp-step-arrow {
-    align-self: center;
+  .tour-upload__icon,
+  .tour-file > span {
+    position: relative;
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
     flex: 0 0 auto;
-    color: var(--ui-border-strong);
-    font-size: 1.25rem;
+    border-radius: 10px;
+    background: var(--tour-surface);
+    border: 1px solid color-mix(in srgb, var(--tour-accent) 35%, transparent);
   }
 
-  /* ── 6 · FAQ ───────────────────────────────────── */
+  .tour-upload__icon::before,
+  .tour-file > span::before {
+    content: "";
+    position: absolute;
+    inset: 0.72rem;
+    border-block-start: 2px solid var(--tour-accent);
+    border-inline-start: 2px solid var(--tour-accent);
+    transform: rotate(45deg) translate(0.1rem, 0.1rem);
+  }
+
+  .tour-upload p,
+  .tour-file p,
+  .tour-picker__head p,
+  .tour-hub__head p {
+    margin: 0;
+    color: #fafafa;
+    font-size: 0.98rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .tour-upload span,
+  .tour-file small,
+  .tour-picker__head span,
+  .tour-hub__head span {
+    color: #9a9a9a;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .tour-file strong,
+  .tour-hub__head strong,
+  .tour-tool span {
+    flex: 0 0 auto;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--tour-accent) 34%, transparent);
+    border-radius: 999px;
+    background: var(--tour-surface);
+    color: color-mix(in srgb, var(--tour-accent) 82%, #fff 18%);
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .tour-tool-grid,
+  .tour-output-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .tour-tool,
+  .tour-output {
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+    min-height: 11rem;
+    padding: 1rem;
+    border: 1px solid #242424;
+    border-radius: 10px;
+    background: #0d0d0d;
+  }
+
+  .tour-tool--summary,
+  .tour-output--summary { --tool-accent: #38bdf8; --tool-surface: rgba(56, 189, 248, 0.12); }
+  .tour-tool--flashcards,
+  .tour-output--flashcards { --tool-accent: #22c55e; --tool-surface: rgba(34, 197, 94, 0.12); }
+  .tour-tool--exam,
+  .tour-output--exam { --tool-accent: #f59e0b; --tool-surface: rgba(245, 158, 11, 0.13); }
+
+  .tour-tool {
+    border-color: color-mix(in srgb, var(--tool-accent) 28%, #242424 72%);
+    background: linear-gradient(180deg, var(--tool-surface), transparent 80%), #0d0d0d;
+  }
+
+  .tour-tool strong,
+  .tour-output span {
+    color: #fafafa;
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .tour-tool p,
+  .tour-output p {
+    margin: 0;
+    color: #a3a3a3;
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .tour-tool span {
+    justify-self: start;
+    margin-top: auto;
+    border-color: color-mix(in srgb, var(--tool-accent) 36%, transparent);
+    background: var(--tool-surface);
+    color: color-mix(in srgb, var(--tool-accent) 80%, #fff 20%);
+  }
+
+  .tour-output {
+    min-height: 8.5rem;
+    border-color: color-mix(in srgb, var(--tool-accent) 24%, #242424 76%);
+  }
+
   .lp-faq {
     padding-block: clamp(5rem, 8vw, 8rem);
     background: var(--ui-bg-page);
@@ -754,46 +752,48 @@
 
   /* ── Responsive ────────────────────────────────── */
   @media (max-width: 900px) {
-    .lp-feature-grid,
-    .lp-feature-card--wide {
+    .tour-shell__rail {
+      inset-inline-start: 1.25rem;
+    }
+
+    .tour-step {
       grid-template-columns: 1fr;
+      padding-inline-start: 3.25rem;
     }
 
-    .lp-feature-card:nth-child(odd) {
-      border-inline-end: 0;
+    .tour-step::before {
+      inset-inline-start: calc(1.25rem - 0.42rem);
     }
 
-    .lp-feature-card:nth-child(2) {
-      border-block-start: 1px solid color-mix(in srgb, var(--ui-border-default) 72%, transparent);
-    }
-
-    .lp-steps {
-      flex-direction: column;
-      gap: 2.5rem;
-    }
-
-    .lp-step-arrow {
-      display: none;
+    .tour-tool-grid,
+    .tour-output-grid {
+      grid-template-columns: 1fr;
     }
   }
 
   @media (max-width: 640px) {
-    .lp-feature-card {
-      min-height: 0;
+    .lp-hero__headline {
+      font-size: clamp(2.45rem, 14vw, 3.35rem);
     }
 
-    .pv,
-    .pv__flashcard {
-      min-height: 0;
+    .tour-shell__rail {
+      display: none;
     }
 
-    .pv__header {
+    .tour-step {
+      padding: 1rem;
+    }
+
+    .tour-step::before {
+      display: none;
+    }
+
+    .tour-upload__drop,
+    .tour-file,
+    .tour-picker__head,
+    .tour-hub__head {
       align-items: flex-start;
       flex-direction: column;
-    }
-
-    .pv__note-grid {
-      grid-template-columns: 1fr;
     }
   }
 </style>
