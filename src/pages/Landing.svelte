@@ -85,35 +85,80 @@
             <aside class="mk__sidebar">
               <div class="mk__brand">{t('publicHeader.brandName')}</div>
               <div class="mk__nav">
-                <div class="mk__navitem mk__navitem--active">{t('landing.mockup.navStudyHub')}</div>
+                <div class="mk__navitem mk__navitem--active">{t('landing.mockup.navHome')}</div>
+                <div class="mk__navitem">{t('landing.mockup.navStudyHub')}</div>
                 <div class="mk__navitem">{t('landing.mockup.navSettings')}</div>
               </div>
             </aside>
             <div class="mk__main">
-              <div class="mk__docrow">
-                <span class="mk__doctitle">{t('landing.mockup.documentTitle')}</span>
-                <span class="mk__complete">
-                  <span aria-hidden="true">✓</span>
-                  {t('landing.mockup.complete')}
-                </span>
+              <div class="mk__header">
+                <span class="mk__eyebrow">{t('landing.mockup.dashboardEyebrow')}</span>
+                <h3>{t('landing.mockup.dashboardTitle')}</h3>
+                <p>{t('landing.mockup.dashboardSubtitle')}</p>
               </div>
-              <div class="mk__tabs">
-                <span class="mk__tab mk__tab--active">{t('landing.mockup.tabSummary')}</span>
-                <span class="mk__tab">{t('landing.mockup.tabFlashcards')}</span>
-                <span class="mk__tab">{t('landing.mockup.tabExam')}</span>
-              </div>
-              <div class="mk__content">
-                <span class="mk__seclabel">{t('landing.mockup.keyConcepts')}</span>
-                <p class="mk__line">{t('landing.mockup.summaryLine1')}</p>
-                <p class="mk__line">{t('landing.mockup.summaryLine2')}</p>
-                <p class="mk__line">{t('landing.mockup.summaryLine3')}</p>
-                <span class="mk__seclabel">{t('landing.mockup.mainArguments')}</span>
-                <p class="mk__line">{t('landing.mockup.argumentLine1')}</p>
-                <p class="mk__line">{t('landing.mockup.argumentLine2')}</p>
-                <div class="mk__stats">
-                  <div class="mk__stat"><span>{t('landing.mockup.flashcardCount')}</span>{t('landing.mockup.flashcardLabel')}</div>
-                  <div class="mk__stat"><span>{t('landing.mockup.questionCount')}</span>{t('landing.mockup.questionLabel')}</div>
-                  <div class="mk__stat"><span>{t('landing.mockup.buildTime')}</span>{t('landing.mockup.buildLabel')}</div>
+
+              <div class="mk__flow">
+                <div class="mk__upload">
+                  <span class="mk__fileicon" aria-hidden="true"></span>
+                  <div>
+                    <p>{t('landing.mockup.uploadTitle')}</p>
+                    <span>{t('landing.mockup.uploadMeta')}</span>
+                  </div>
+                </div>
+
+                <div class="mk__chooser">
+                  <div class="mk__chooser-head">
+                    <p>{t('landing.mockup.chooseTitle')}</p>
+                    <span>{t('landing.mockup.chooseSubtitle')}</span>
+                  </div>
+                  <div class="mk__choice-grid">
+                    <div class="mk__choice mk__choice--selected">
+                      <span>{t('landing.mockup.summaryTitle')}</span>
+                      <p>{t('landing.mockup.summaryText')}</p>
+                      <strong>{t('landing.mockup.selected')}</strong>
+                    </div>
+                    <div class="mk__choice mk__choice--selected">
+                      <span>{t('landing.mockup.flashcardsTitle')}</span>
+                      <p>{t('landing.mockup.flashcardsText')}</p>
+                      <strong>{t('landing.mockup.selected')}</strong>
+                    </div>
+                    <div class="mk__choice mk__choice--selected">
+                      <span>{t('landing.mockup.examTitle')}</span>
+                      <p>{t('landing.mockup.examText')}</p>
+                      <strong>{t('landing.mockup.selected')}</strong>
+                    </div>
+                  </div>
+                  <div class="mk__action">
+                    <span>{t('landing.mockup.generateSelected')}</span>
+                  </div>
+                </div>
+
+                <div class="mk__progress">
+                  <div>
+                    <p>{t('landing.mockup.progressTitle')}</p>
+                    <span>{t('landing.mockup.progressMeta')}</span>
+                  </div>
+                  <strong>{t('landing.mockup.progressValue')}</strong>
+                  <div class="mk__bar" aria-hidden="true"><span></span></div>
+                </div>
+
+                <div class="mk__hub">
+                  <div class="mk__hub-head">
+                    <div>
+                      <p>{t('landing.mockup.hubTitle')}</p>
+                      <span>{t('landing.mockup.hubSubtitle')}</span>
+                    </div>
+                    <strong>{t('landing.mockup.ready')}</strong>
+                  </div>
+                  <div class="mk__hub-doc">
+                    <span>{t('landing.mockup.documentTitle')}</span>
+                    <div>
+                      <em>{t('landing.mockup.summaryReady')}</em>
+                      <em>{t('landing.mockup.flashcardsReady')}</em>
+                      <em>{t('landing.mockup.examReady')}</em>
+                    </div>
+                    <strong>{t('landing.mockup.open')}</strong>
+                  </div>
                 </div>
               </div>
             </div>
@@ -160,7 +205,7 @@
               {#if i === 0}
                 <div class="mk mk--panel">
                   <div class="mk__content">
-                    <span class="mk__seclabel">{t('landing.mockup.keyConcepts')}</span>
+                    <span class="mk__seclabel">{t('landing.mockup.featureSummaryEyebrow')}</span>
                     <p class="mk__line">{t('landing.mockup.summaryLine1')}</p>
                     <p class="mk__line">{t('landing.mockup.summaryLine2')}</p>
                     <p class="mk__line">{t('landing.mockup.summaryLine3')}</p>
@@ -171,14 +216,14 @@
                 </div>
               {:else if i === 1}
                 <div class="mk mk--panel mk--card">
-                  <span class="mk__seclabel">{t('landing.mockup.flashcardProgress')}</span>
+                  <span class="mk__seclabel">{t('landing.mockup.featureFlashcardEyebrow')}</span>
                   <p class="mk__cardq">{t('landing.mockup.flashcardQuestion')}</p>
                   <div class="mk__carddiv"></div>
                   <p class="mk__carda">{t('landing.mockup.flashcardAnswer')}</p>
                 </div>
               {:else}
                 <div class="mk mk--panel mk--exam">
-                  <span class="mk__seclabel">{t('landing.mockup.examProgress')}</span>
+                  <span class="mk__seclabel">{t('landing.mockup.featureExamEyebrow')}</span>
                   <p class="mk__cardq">{t('landing.mockup.examQuestion')}</p>
                   <ul class="mk__options">
                     <li class="mk__opt"><span class="mk__optkey">A</span> {t('landing.mockup.optionA')}</li>
@@ -460,51 +505,250 @@
     min-width: 0;
   }
 
-  .mk__docrow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.8rem 1rem;
+  .mk__header {
+    padding: 1rem 1rem 0.85rem;
     border-bottom: 1px solid #1e1e1e;
   }
 
-  .mk__doctitle {
-    color: #fafafa;
-    font-size: 0.8rem;
-    font-weight: 600;
+  .mk__eyebrow {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #888;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
-  .mk__complete {
-    flex-shrink: 0;
-    padding: 0.2rem 0.55rem;
+  .mk__header h3,
+  .mk__header p,
+  .mk__upload p,
+  .mk__chooser-head p,
+  .mk__choice p,
+  .mk__progress p,
+  .mk__hub-head p {
+    margin: 0;
+  }
+
+  .mk__header h3 {
+    color: #fafafa;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .mk__header p {
+    margin-top: 0.35rem;
+    max-width: 28rem;
+    color: #888;
+    font-size: 0.68rem;
+    line-height: 1.5;
+  }
+
+  .mk__flow {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.8rem 1rem 1rem;
+  }
+
+  .mk__upload,
+  .mk__chooser,
+  .mk__progress,
+  .mk__hub {
+    border: 1px solid #1e1e1e;
+    border-radius: 10px;
+    background: #0d0d0d;
+  }
+
+  .mk__upload {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .mk__fileicon {
+    position: relative;
+    flex: 0 0 auto;
+    width: 1.75rem;
+    height: 2.1rem;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    background: #111;
+  }
+
+  .mk__fileicon::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 0.42rem;
+    inset-inline: 0.42rem;
+    height: 1px;
+    background: #444;
+    box-shadow: 0 0.42rem 0 #333, 0 0.84rem 0 #333;
+  }
+
+  .mk__upload p,
+  .mk__chooser-head p,
+  .mk__progress p,
+  .mk__hub-head p,
+  .mk__hub-doc > span {
+    color: #fafafa;
+    font-size: 0.76rem;
+    font-weight: 650;
+    line-height: 1.35;
+  }
+
+  .mk__upload span:not(.mk__fileicon),
+  .mk__chooser-head span,
+  .mk__progress span,
+  .mk__hub-head span {
+    color: #888;
+    font-size: 0.62rem;
+    line-height: 1.45;
+  }
+
+  .mk__chooser {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.75rem;
+  }
+
+  .mk__chooser-head {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .mk__choice-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .mk__choice {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 6.7rem;
+    padding: 0.6rem;
+    border: 1px solid #242424;
+    border-radius: 8px;
+    background: #090909;
+  }
+
+  .mk__choice span {
+    color: #fafafa;
+    font-size: 0.68rem;
+    font-weight: 650;
+  }
+
+  .mk__choice p {
+    color: #888;
+    font-size: 0.58rem;
+    line-height: 1.45;
+  }
+
+  .mk__choice strong,
+  .mk__hub-head strong {
+    justify-self: start;
+    align-self: end;
+    padding: 0.18rem 0.45rem;
     border: 1px solid rgba(34, 197, 94, 0.25);
     border-radius: 999px;
     background: rgba(34, 197, 94, 0.1);
     color: #22c55e;
-    font-size: 0.62rem;
-    font-weight: 600;
-    white-space: nowrap;
+    font-size: 0.54rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
-  .mk__tabs {
+  .mk__action {
     display: flex;
-    gap: 1rem;
-    padding-inline: 1rem;
-    border-bottom: 1px solid #1e1e1e;
+    justify-content: flex-end;
   }
 
-  .mk__tab {
-    padding: 0.6rem 0;
-    border-bottom: 1.5px solid transparent;
-    color: #888;
-    font-size: 0.72rem;
-    font-weight: 500;
+  .mk__action span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.8rem;
+    padding-inline: 0.75rem;
+    border-radius: 999px;
+    background: #fafafa;
+    color: #0a0a0a;
+    font-size: 0.62rem;
+    font-weight: 700;
   }
 
-  .mk__tab--active {
-    border-bottom-color: #fafafa;
+  .mk__progress {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem 0.75rem;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .mk__progress strong {
     color: #fafafa;
+    font-size: 0.72rem;
+  }
+
+  .mk__bar {
+    grid-column: 1 / -1;
+    height: 0.38rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #1e1e1e;
+  }
+
+  .mk__bar span {
+    display: block;
+    width: 72%;
+    height: 100%;
+    border-radius: inherit;
+    background: #fafafa;
+  }
+
+  .mk__hub {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+
+  .mk__hub-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .mk__hub-doc {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.65rem;
+    border: 1px solid #242424;
+    border-radius: 8px;
+    background: #090909;
+  }
+
+  .mk__hub-doc div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .mk__hub-doc em {
+    padding: 0.18rem 0.4rem;
+    border: 1px solid #242424;
+    border-radius: 999px;
+    color: #888;
+    font-size: 0.55rem;
+    font-style: normal;
+    line-height: 1.2;
+  }
+
+  .mk__hub-doc strong {
+    justify-self: start;
+    color: #fafafa;
+    font-size: 0.62rem;
+    font-weight: 700;
   }
 
   .mk__content {
@@ -530,35 +774,6 @@
 
   .mk__line + .mk__seclabel {
     margin-top: 1rem;
-  }
-
-  .mk__stats {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1.1rem;
-  }
-
-  .mk__stat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding: 0.55rem 0.65rem;
-    border: 1px solid #1e1e1e;
-    border-radius: 8px;
-    background: #0d0d0d;
-    color: #888;
-    font-size: 0.6rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .mk__stat span {
-    color: #fafafa;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    text-transform: none;
   }
 
   /* Mockup as standalone feature panel */
@@ -899,6 +1114,22 @@
   }
 
   @media (max-width: 640px) {
+    .mk__app {
+      grid-template-columns: 1fr;
+    }
+
+    .mk__sidebar {
+      display: none;
+    }
+
+    .mk__choice-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mk__choice {
+      min-height: 0;
+    }
+
     .lp-feature-row,
     .lp-feature-row--reverse {
       flex-direction: column;
