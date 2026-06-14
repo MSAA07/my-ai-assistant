@@ -1,5 +1,24 @@
 import { API_BASE } from '../../config.js';
 
+export class ApiRequestError extends Error {
+  constructor(message, { status = 0, code = '', data = null } = {}) {
+    super(message || 'Request failed');
+    this.name = 'ApiRequestError';
+    this.status = status;
+    this.code = code;
+    this.data = data;
+  }
+}
+
+function createApiError(response, data, fallback) {
+  const message = data?.error || (response?.status ? `${fallback} (${response.status})` : fallback);
+  return new ApiRequestError(message, {
+    status: response.status,
+    code: data?.code || '',
+    data,
+  });
+}
+
 async function requestJson(path, { method = 'GET', body } = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     method,
@@ -11,7 +30,7 @@ async function requestJson(path, { method = 'GET', body } = {}) {
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(data?.error || 'Request failed');
+    throw createApiError(response, data, 'Request failed');
   }
 
   return data;
@@ -51,7 +70,7 @@ export async function exportStudyMaterialPdf(documentId, feature) {
 
   if (!response.ok) {
     const data = await response.json().catch(() => null);
-    throw new Error(data?.error || 'Failed to export PDF');
+    throw createApiError(response, data, 'Failed to export PDF');
   }
 
   const blob = await response.blob();

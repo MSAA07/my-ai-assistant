@@ -12,6 +12,7 @@
   import StudyActivityShell from './StudyActivityShell.svelte';
   import { getDocumentDisplayName } from '../../utils/documentName.js';
   import { getDocumentFileTypeLabel } from '../../utils/fileType.js';
+  import { formatStudyText } from '../../utils/studyTextFormat.js';
   import { readPageCache, writePageCache } from '../../../stores/pageCache.js';
   import { router } from '../../../stores/router.js';
   import {
@@ -228,7 +229,7 @@
     && telegramStatusRequestedFor !== currentDocumentId
   ) {
     telegramStatusRequestedFor = currentDocumentId;
-    void loadTelegramStatus({ background: Boolean(telegramStatus) });
+    void loadTelegramStatus({ background: true });
   }
 
   onDestroy(() => {
@@ -242,6 +243,10 @@
 
   function text(value) {
     return typeof value === 'string' ? value.trim() : '';
+  }
+
+  function displayText(value) {
+    return formatStudyText(text(value));
   }
 
   function containsArabicText(value) {
@@ -419,18 +424,18 @@
 
     while ((match = pattern.exec(source)) !== null) {
       if (match.index > cursor) {
-        segments.push({ text: source.slice(cursor, match.index), strong: false });
+        segments.push({ text: displayText(source.slice(cursor, match.index)), strong: false });
       }
 
       if (match[1]) {
-        segments.push({ text: match[1], strong: true });
+        segments.push({ text: displayText(match[1]), strong: true });
       }
 
       cursor = match.index + match[0].length;
     }
 
     if (cursor < source.length) {
-      segments.push({ text: source.slice(cursor), strong: false });
+      segments.push({ text: displayText(source.slice(cursor)), strong: false });
     }
 
     return segments.filter((segment) => segment.text);
@@ -586,6 +591,22 @@
     telegramFeedbackTone = { ...telegramFeedbackTone, [featureKey]: tone };
   }
 
+  function getTelegramErrorMessage(error) {
+    const code = text(error?.code);
+    if (code === 'telegram_not_connected') return t('document.activity.telegram.notConnected');
+    if (code === 'telegram_not_configured') return 'Telegram is not configured on the server yet.';
+    if (code === 'document_not_ready') return 'This document is still processing. Try again when generation finishes.';
+    if (code === 'flashcards_not_ready') return t('document.flashcards.generatePrompt');
+    if (code === 'exam_not_ready') return t('document.exam.generatePrompt');
+    if (code === 'telegram_send_cooldown') return 'Telegram send was just requested. Wait a few seconds and try again.';
+    if (error?.status === 404) return 'Telegram is not available on this server yet. Restart or redeploy the backend, then try again.';
+    if (error?.status === 401 || error?.status === 403) return 'Sign in again, then retry Telegram sending.';
+    if (error?.status >= 500) return 'Telegram could not be reached from the server. Try again after the backend is restarted.';
+    const message = text(error?.message);
+    if (!message || message === 'Request failed') return t('document.activity.telegram.sendError');
+    return message;
+  }
+
   function clearTelegramSentTimer(featureKey) {
     if (!telegramSentTimers[featureKey]) return;
     clearTimeout(telegramSentTimers[featureKey]);
@@ -624,7 +645,9 @@
         telegramDeepLink = '';
       }
     } catch (error) {
-      setTelegramMessage(activeFeatureKey, text(error?.message) || t('document.activity.telegram.statusError'), 'error');
+      if (!background) {
+        setTelegramMessage(activeFeatureKey, getTelegramErrorMessage(error) || t('document.activity.telegram.statusError'), 'error');
+      }
     } finally {
       telegramStatusLoading = false;
     }
@@ -650,7 +673,7 @@
         window.open(telegramDeepLink, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
-      setTelegramMessage(featureKey, text(error?.message) || t('document.activity.telegram.linkError'), 'error');
+      setTelegramMessage(featureKey, getTelegramErrorMessage(error) || t('document.activity.telegram.linkError'), 'error');
     } finally {
       telegramConnecting = false;
     }
@@ -680,7 +703,7 @@
       }
       await loadTelegramStatus({ background: true });
     } catch (error) {
-      setTelegramMessage(featureKey, text(error?.message) || t('document.activity.telegram.sendError'), 'error');
+      setTelegramMessage(featureKey, getTelegramErrorMessage(error), 'error');
     } finally {
       setTelegramBusy(featureKey, false);
     }
@@ -1054,7 +1077,7 @@
   }
 
   function normalizeComparableAnswer(answer, type) {
-    const normalized = text(answer).toLowerCase();
+    const normalized = displayText(answer).toLowerCase();
     if (type === 'true_false') {
       if (normalized === 'true' || normalized === 't') return 'true';
       if (normalized === 'false' || normalized === 'f') return 'false';
@@ -1465,7 +1488,7 @@
                 {#each flashcards as flashcard, index}
                   <article class="review" class:review-correct={flashcardResults[index] === 'correct'}>
                     <div class="review-head">
-                      <p class="review-question">{index + 1}. {flashcard.question}</p>
+                      <p class="review-question">{index + 1}. {displayText(flashcard.question)}</p>
                       <span class={`review-icon ${flashcardResults[index] === 'correct' ? 'review-icon--correct' : 'review-icon--incorrect'}`} aria-hidden="true">
                         {#if flashcardResults[index] === 'correct'}
                           <Check />
@@ -1486,9 +1509,9 @@
                             ? t('document.exam.reviewIncorrect')
                             : t('document.activity.exam.notAnswered')}
                       </p>
-                      <p><strong>{t('document.activity.flashcards.answerLabel')}</strong> {flashcard.answer}</p>
+                      <p><strong>{t('document.activity.flashcards.answerLabel')}</strong> {displayText(flashcard.answer)}</p>
                       {#if text(flashcard.explanation)}
-                        <p>{flashcard.explanation}</p>
+                        <p>{displayText(flashcard.explanation)}</p>
                       {/if}
                     </div>
                   </article>
@@ -1516,7 +1539,7 @@
                     dir={currentFlashcardDirection}
                     lang={currentFlashcardLanguage}
                   >
-                    {currentFlashcard?.question}
+                    {displayText(currentFlashcard?.question)}
                   </h2>
                 </div>
 
@@ -1528,7 +1551,7 @@
                       dir={currentFlashcardDirection}
                       lang={currentFlashcardLanguage}
                     >
-                      {currentFlashcard?.answer}
+                      {displayText(currentFlashcard?.answer)}
                     </p>
                     {#if revealAnswer && text(currentFlashcard?.explanation)}
                       <p
@@ -1536,7 +1559,7 @@
                         dir={currentFlashcardDirection}
                         lang={currentFlashcardLanguage}
                       >
-                        {currentFlashcard.explanation}
+                        {displayText(currentFlashcard.explanation)}
                       </p>
                     {/if}
                   </div>
@@ -1675,7 +1698,7 @@
                 {#each examQuestions as question, index}
                   <article class="review" class:review-correct={isAnswerCorrect(question, examAnswers[index])}>
                     <div class="review-head">
-                      <p class="review-question">{index + 1}. {question.question}</p>
+                      <p class="review-question">{index + 1}. {displayText(question.question)}</p>
                       <span class={`review-icon ${isAnswerCorrect(question, examAnswers[index]) ? 'review-icon--correct' : 'review-icon--incorrect'}`} aria-hidden="true">
                         {#if isAnswerCorrect(question, examAnswers[index])}
                           <Check />
@@ -1686,10 +1709,10 @@
                     </div>
                     <div class="review-copy">
                       <p>
-                        {t('document.activity.exam.yourAnswer', { answer: text(examAnswers[index]) || t('document.activity.exam.notAnswered') })}
+                        {t('document.activity.exam.yourAnswer', { answer: displayText(examAnswers[index]) || t('document.activity.exam.notAnswered') })}
                       </p>
                       {#if !isAnswerCorrect(question, examAnswers[index])}
-                        <p>{t('document.activity.exam.correctAnswer', { answer: text(question?.correctAnswer) })}</p>
+                        <p>{t('document.activity.exam.correctAnswer', { answer: displayText(question?.correctAnswer) })}</p>
                       {/if}
                     </div>
                   </article>
@@ -1742,14 +1765,14 @@
 
               <Card as="article" class="activity-stage question-surface study-session-card study-session-card--exam exam-question-card" variant="base" padding="lg" border="strong">
                 <div class="study-session-card__copy study-session-card__copy--exam">
-                  <p class="exam-question-card__prompt">{currentExamQuestion?.question}</p>
+                  <p class="exam-question-card__prompt">{displayText(currentExamQuestion?.question)}</p>
                 </div>
 
                 <div class="stack stack-spacious study-session-card__body exam-option-stack">
                   {#each questionOptions(currentExamQuestion) as option, optionIndex}
                     <button type="button" class="option" class:option-selected={text(examAnswers[currentQuestionIndex]) === option} on:click={() => setExamAnswer(option)}>
                       <span class="option-letter">{optionLetter(optionIndex)}</span>
-                      <span>{option}</span>
+                      <span>{displayText(option)}</span>
                     </button>
                   {/each}
                 </div>
@@ -1875,6 +1898,8 @@
   .activity-content-head__actions {
     display: flex;
     align-items: flex-start;
+    gap: var(--study-flow-action-gap);
+    flex-wrap: wrap;
     flex-shrink: 0;
   }
 
