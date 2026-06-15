@@ -363,7 +363,7 @@
   /* ── 3 · Problem ───────────────────────────────── */
   .lp-problem {
     padding-block: clamp(5rem, 9vw, 9rem);
-    background: color-mix(in srgb, var(--ui-surface-card) 18%, var(--ui-bg-page));
+    background: color-mix(in srgb, var(--ui-surface-card) 28%, var(--ui-bg-page));
   }
 
   .lp-problem__inner {
@@ -397,8 +397,8 @@
     overflow: hidden;
     padding-block: clamp(5rem, 9vw, 9rem);
     background:
-      linear-gradient(color-mix(in srgb, var(--ui-border-default) 34%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--ui-border-default) 34%, transparent) 1px, transparent 1px),
+      linear-gradient(color-mix(in srgb, var(--ui-border-default) 48%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--ui-border-default) 48%, transparent) 1px, transparent 1px),
       radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ui-accent-info) 16%, transparent), transparent 34rem),
       var(--ui-bg-page);
     background-size: auto, 7.5rem 7.5rem, auto, auto;
@@ -609,17 +609,10 @@
     background: var(--ui-surface-card);
   }
 
-  .tour-tool--summary,
-  .tour-output--summary { --tool-accent: var(--ui-accent-info); --tool-surface: color-mix(in srgb, var(--ui-accent-info) 12%, transparent); }
-  .tour-tool--flashcards,
-  .tour-output--flashcards { --tool-accent: var(--ui-accent-success); --tool-surface: color-mix(in srgb, var(--ui-accent-success) 12%, transparent); }
-  .tour-tool--exam,
-  .tour-output--exam { --tool-accent: var(--ui-accent-warning); --tool-surface: color-mix(in srgb, var(--ui-accent-warning) 13%, transparent); }
-
-  .tour-tool {
-    border-color: color-mix(in srgb, var(--tool-accent) 28%, #242424 72%);
-    background: linear-gradient(180deg, var(--tool-surface), transparent 80%), #0d0d0d;
-  }
+  /* Output cards: all green = "ready" state, matching the real app */
+  .tour-output--summary,
+  .tour-output--flashcards,
+  .tour-output--exam { --tool-accent: var(--ui-accent-success); --tool-surface: color-mix(in srgb, var(--ui-accent-success) 12%, transparent); }
 
   .tour-tool strong,
   .tour-output span {
@@ -640,20 +633,22 @@
   .tour-tool span {
     justify-self: start;
     margin-top: auto;
-    border-color: color-mix(in srgb, var(--tool-accent) 36%, transparent);
-    background: var(--tool-surface);
-    color: color-mix(in srgb, var(--tool-accent) 80%, #fff 20%);
+    border-color: color-mix(in srgb, var(--ui-accent-success) 36%, transparent);
+    background: color-mix(in srgb, var(--ui-accent-success) 12%, transparent);
+    color: color-mix(in srgb, var(--ui-accent-success) 80%, #fff 20%);
   }
 
   .tour-output {
     min-height: 8.5rem;
-    border-color: color-mix(in srgb, var(--tool-accent) 24%, #242424 76%);
+    border-color: color-mix(in srgb, var(--tool-accent) 24%, var(--ui-border-default) 76%);
+    background: linear-gradient(180deg, var(--tool-surface), transparent 80%), var(--ui-surface-card);
   }
 
   .lp-faq {
     padding-block: clamp(5rem, 8vw, 8rem);
+    border-top: 1px solid var(--ui-border-default);
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 10%, transparent) 0%, transparent 30%),
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 18%, transparent) 0%, transparent 40%),
       var(--ui-bg-page);
   }
 
@@ -717,6 +712,7 @@
   /* ── 7 · Final CTA ─────────────────────────────── */
   .lp-cta {
     padding-block: clamp(6rem, 10vw, 10rem);
+    border-top: 1px solid var(--ui-border-default);
     background:
       radial-gradient(60% 90% at 50% 100%, color-mix(in srgb, var(--ui-text-primary) 5%, transparent), transparent),
       var(--ui-bg-page);
