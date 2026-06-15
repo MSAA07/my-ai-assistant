@@ -7,7 +7,7 @@
   const tourSteps = [
     { num: '01', tone: 'blue', eyebrow: 'landing.tour.step1Eyebrow', title: 'landing.tour.step1Title', body: 'landing.tour.step1Body' },
     { num: '02', tone: 'green', eyebrow: 'landing.tour.step2Eyebrow', title: 'landing.tour.step2Title', body: 'landing.tour.step2Body' },
-    { num: '03', tone: 'violet', eyebrow: 'landing.tour.step3Eyebrow', title: 'landing.tour.step3Title', body: 'landing.tour.step3Body' }
+    { num: '03', tone: 'amber', eyebrow: 'landing.tour.step3Eyebrow', title: 'landing.tour.step3Title', body: 'landing.tour.step3Body' }
   ];
 
   const faqs = [
@@ -280,8 +280,8 @@
 
   .lp-btn--primary {
     padding: 0.85rem 2.25rem;
-    background: #fafafa;
-    color: #0a0a0a;
+    background: var(--ui-text-primary);
+    color: var(--ui-bg-page);
   }
 
   .lp-btn--primary:hover {
@@ -363,7 +363,7 @@
   /* ── 3 · Problem ───────────────────────────────── */
   .lp-problem {
     padding-block: clamp(5rem, 9vw, 9rem);
-    background: color-mix(in srgb, var(--ui-surface-card) 35%, var(--ui-bg-page));
+    background: color-mix(in srgb, var(--ui-surface-card) 18%, var(--ui-bg-page));
   }
 
   .lp-problem__inner {
@@ -399,7 +399,7 @@
     background:
       linear-gradient(color-mix(in srgb, var(--ui-border-default) 34%, transparent) 1px, transparent 1px),
       linear-gradient(90deg, color-mix(in srgb, var(--ui-border-default) 34%, transparent) 1px, transparent 1px),
-      radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.16), transparent 34rem),
+      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ui-accent-info) 16%, transparent), transparent 34rem),
       var(--ui-bg-page);
     background-size: auto, 7.5rem 7.5rem, auto, auto;
   }
@@ -431,7 +431,7 @@
     inset-block: 2rem;
     inset-inline-start: 2rem;
     width: 1px;
-    background: linear-gradient(180deg, transparent, rgba(56, 189, 248, 0.75), rgba(34, 197, 94, 0.75), rgba(168, 85, 247, 0.75), transparent);
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ui-accent-info) 75%, transparent), color-mix(in srgb, var(--ui-accent-success) 75%, transparent), color-mix(in srgb, var(--ui-accent-warning) 75%, transparent), transparent);
   }
 
   .tour-step {
@@ -463,9 +463,9 @@
     box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--tour-accent) 16%, transparent);
   }
 
-  .tour-step--blue { --tour-accent: #38bdf8; --tour-surface: rgba(56, 189, 248, 0.12); }
-  .tour-step--green { --tour-accent: #22c55e; --tour-surface: rgba(34, 197, 94, 0.12); }
-  .tour-step--violet { --tour-accent: #a855f7; --tour-surface: rgba(168, 85, 247, 0.13); }
+  .tour-step--blue { --tour-accent: var(--ui-accent-info); --tour-surface: color-mix(in srgb, var(--ui-accent-info) 12%, transparent); }
+  .tour-step--green { --tour-accent: var(--ui-accent-success); --tour-surface: color-mix(in srgb, var(--ui-accent-success) 12%, transparent); }
+  .tour-step--amber { --tour-accent: var(--ui-accent-warning); --tour-surface: color-mix(in srgb, var(--ui-accent-warning) 13%, transparent); }
 
   .tour-step__copy {
     min-width: 0;
@@ -511,7 +511,7 @@
     border-radius: 12px;
     background:
       radial-gradient(circle at 12% 0%, var(--tour-surface), transparent 16rem),
-      #080808;
+      var(--ui-surface-secondary);
   }
 
   .tour-upload__drop,
@@ -523,9 +523,9 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem;
-    border: 1px solid #242424;
+    border: 1px solid var(--ui-border-default);
     border-radius: 10px;
-    background: #0d0d0d;
+    background: var(--ui-surface-card);
   }
 
   .tour-upload__drop {
@@ -561,7 +561,7 @@
   .tour-picker__head p,
   .tour-hub__head p {
     margin: 0;
-    color: #fafafa;
+    color: var(--ui-text-primary);
     font-size: 0.98rem;
     font-weight: 700;
     line-height: 1.35;
@@ -571,7 +571,7 @@
   .tour-file small,
   .tour-picker__head span,
   .tour-hub__head span {
-    color: #9a9a9a;
+    color: var(--ui-text-secondary);
     font-size: 0.82rem;
     line-height: 1.45;
   }
@@ -604,17 +604,17 @@
     gap: 0.7rem;
     min-height: 11rem;
     padding: 1rem;
-    border: 1px solid #242424;
+    border: 1px solid var(--ui-border-default);
     border-radius: 10px;
-    background: #0d0d0d;
+    background: var(--ui-surface-card);
   }
 
   .tour-tool--summary,
-  .tour-output--summary { --tool-accent: #38bdf8; --tool-surface: rgba(56, 189, 248, 0.12); }
+  .tour-output--summary { --tool-accent: var(--ui-accent-info); --tool-surface: color-mix(in srgb, var(--ui-accent-info) 12%, transparent); }
   .tour-tool--flashcards,
-  .tour-output--flashcards { --tool-accent: #22c55e; --tool-surface: rgba(34, 197, 94, 0.12); }
+  .tour-output--flashcards { --tool-accent: var(--ui-accent-success); --tool-surface: color-mix(in srgb, var(--ui-accent-success) 12%, transparent); }
   .tour-tool--exam,
-  .tour-output--exam { --tool-accent: #f59e0b; --tool-surface: rgba(245, 158, 11, 0.13); }
+  .tour-output--exam { --tool-accent: var(--ui-accent-warning); --tool-surface: color-mix(in srgb, var(--ui-accent-warning) 13%, transparent); }
 
   .tour-tool {
     border-color: color-mix(in srgb, var(--tool-accent) 28%, #242424 72%);
@@ -623,7 +623,7 @@
 
   .tour-tool strong,
   .tour-output span {
-    color: #fafafa;
+    color: var(--ui-text-primary);
     font-size: 0.92rem;
     font-weight: 800;
     line-height: 1.35;
@@ -632,7 +632,7 @@
   .tour-tool p,
   .tour-output p {
     margin: 0;
-    color: #a3a3a3;
+    color: var(--ui-text-secondary);
     font-size: 0.82rem;
     line-height: 1.55;
   }
@@ -652,7 +652,9 @@
 
   .lp-faq {
     padding-block: clamp(5rem, 8vw, 8rem);
-    background: var(--ui-bg-page);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 10%, transparent) 0%, transparent 30%),
+      var(--ui-bg-page);
   }
 
   .lp-faq__inner {
