@@ -5,9 +5,9 @@
   import { currentPath, routeParams, router } from '../stores/router.js';
 
   const tourSteps = [
-    { num: '01', tone: 'blue', eyebrow: 'landing.tour.step1Eyebrow', title: 'landing.tour.step1Title', body: 'landing.tour.step1Body' },
-    { num: '02', tone: 'green', eyebrow: 'landing.tour.step2Eyebrow', title: 'landing.tour.step2Title', body: 'landing.tour.step2Body' },
-    { num: '03', tone: 'amber', eyebrow: 'landing.tour.step3Eyebrow', title: 'landing.tour.step3Title', body: 'landing.tour.step3Body' }
+    { num: '01', eyebrow: 'landing.tour.step1Eyebrow', title: 'landing.tour.step1Title', body: 'landing.tour.step1Body' },
+    { num: '02', eyebrow: 'landing.tour.step2Eyebrow', title: 'landing.tour.step2Title', body: 'landing.tour.step2Body' },
+    { num: '03', eyebrow: 'landing.tour.step3Eyebrow', title: 'landing.tour.step3Title', body: 'landing.tour.step3Body' }
   ];
 
   const faqs = [
@@ -100,7 +100,7 @@
         <div class="tour-shell__rail" aria-hidden="true"></div>
 
         {#each tourSteps as step, i}
-          <article class={`tour-step tour-step--${step.tone}`}>
+          <article class="tour-step">
             <div class="tour-step__copy">
               <span class="tour-step__num">{step.num}</span>
               <p class="lp-eyebrow">{t(step.eyebrow)}</p>
@@ -294,7 +294,7 @@
     overflow: hidden;
     padding-block: clamp(4rem, 9vw, 8rem);
     background:
-      radial-gradient(60% 80% at 100% 0%, color-mix(in srgb, var(--ui-text-primary) 5%, transparent), transparent),
+      radial-gradient(60% 80% at 100% 0%, color-mix(in srgb, var(--ui-text-primary) 4%, transparent), transparent),
       var(--ui-bg-page);
   }
 
@@ -363,7 +363,8 @@
   /* ── 3 · Problem ───────────────────────────────── */
   .lp-problem {
     padding-block: clamp(5rem, 9vw, 9rem);
-    background: color-mix(in srgb, var(--ui-surface-card) 28%, var(--ui-bg-page));
+    border-top: 1px solid var(--ui-border-default);
+    background: var(--ui-bg-page);
   }
 
   .lp-problem__inner {
@@ -393,15 +394,9 @@
 
   /* ── 4 · Features ──────────────────────────────── */
   .lp-tour {
-    position: relative;
-    overflow: hidden;
     padding-block: clamp(5rem, 9vw, 9rem);
-    background:
-      linear-gradient(color-mix(in srgb, var(--ui-border-default) 48%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--ui-border-default) 48%, transparent) 1px, transparent 1px),
-      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ui-accent-info) 16%, transparent), transparent 34rem),
-      var(--ui-bg-page);
-    background-size: auto, 7.5rem 7.5rem, auto, auto;
+    border-top: 1px solid var(--ui-border-default);
+    background: var(--ui-bg-page);
   }
 
   .lp-section-head--center {
@@ -431,10 +426,12 @@
     inset-block: 2rem;
     inset-inline-start: 2rem;
     width: 1px;
-    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ui-accent-info) 75%, transparent), color-mix(in srgb, var(--ui-accent-success) 75%, transparent), color-mix(in srgb, var(--ui-accent-warning) 75%, transparent), transparent);
+    background: linear-gradient(180deg, transparent, var(--ui-border-strong) 20%, var(--ui-border-strong) 80%, transparent);
   }
 
   .tour-step {
+    --tour-accent: var(--ui-border-strong);
+    --tour-surface: color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
@@ -445,10 +442,13 @@
     padding-inline-start: clamp(4.25rem, 6vw, 5.25rem);
     border: 1px solid color-mix(in srgb, var(--ui-border-default) 76%, transparent);
     border-radius: 14px;
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 42%, transparent), transparent 70%),
-      rgba(5, 5, 5, 0.92);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: var(--ui-surface-card);
+    box-shadow: none;
+  }
+
+  .tour-step:hover {
+    border-color: var(--ui-border-strong);
+    transition: border-color 200ms ease;
   }
 
   .tour-step::before {
@@ -459,13 +459,9 @@
     width: 0.85rem;
     height: 0.85rem;
     border-radius: 999px;
-    background: var(--tour-accent);
-    box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--tour-accent) 16%, transparent);
+    background: var(--ui-border-strong);
+    box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
   }
-
-  .tour-step--blue { --tour-accent: var(--ui-accent-info); --tour-surface: color-mix(in srgb, var(--ui-accent-info) 12%, transparent); }
-  .tour-step--green { --tour-accent: var(--ui-accent-success); --tour-surface: color-mix(in srgb, var(--ui-accent-success) 12%, transparent); }
-  .tour-step--amber { --tour-accent: var(--ui-accent-warning); --tour-surface: color-mix(in srgb, var(--ui-accent-warning) 13%, transparent); }
 
   .tour-step__copy {
     min-width: 0;
@@ -474,7 +470,7 @@
   .tour-step__num {
     display: inline-flex;
     margin-bottom: 1rem;
-    color: color-mix(in srgb, var(--tour-accent) 78%, #fff 22%);
+    color: var(--ui-text-muted);
     font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.16em;
@@ -507,11 +503,9 @@
     display: grid;
     gap: 1rem;
     padding: 1rem;
-    border: 1px solid color-mix(in srgb, var(--ui-border-default) 78%, transparent);
+    border: 1px solid var(--ui-border-default);
     border-radius: 12px;
-    background:
-      radial-gradient(circle at 12% 0%, var(--tour-surface), transparent 16rem),
-      var(--ui-surface-secondary);
+    background: var(--ui-surface-secondary);
   }
 
   .tour-upload__drop,
@@ -542,8 +536,8 @@
     height: 2.5rem;
     flex: 0 0 auto;
     border-radius: 10px;
-    background: var(--tour-surface);
-    border: 1px solid color-mix(in srgb, var(--tour-accent) 35%, transparent);
+    background: color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
+    border: 1px solid var(--ui-border-default);
   }
 
   .tour-upload__icon::before,
@@ -551,8 +545,8 @@
     content: "";
     position: absolute;
     inset: 0.72rem;
-    border-block-start: 2px solid var(--tour-accent);
-    border-inline-start: 2px solid var(--tour-accent);
+    border-block-start: 2px solid var(--ui-text-muted);
+    border-inline-start: 2px solid var(--ui-text-muted);
     transform: rotate(45deg) translate(0.1rem, 0.1rem);
   }
 
@@ -581,10 +575,10 @@
   .tour-tool span {
     flex: 0 0 auto;
     padding: 0.25rem 0.55rem;
-    border: 1px solid color-mix(in srgb, var(--tour-accent) 34%, transparent);
+    border: 1px solid rgba(34, 197, 94, 0.3);
     border-radius: 999px;
-    background: var(--tour-surface);
-    color: color-mix(in srgb, var(--tour-accent) 82%, #fff 18%);
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
     font-size: 0.68rem;
     font-weight: 800;
     line-height: 1.2;
@@ -612,7 +606,10 @@
   /* Output cards: all green = "ready" state, matching the real app */
   .tour-output--summary,
   .tour-output--flashcards,
-  .tour-output--exam { --tool-accent: var(--ui-accent-success); --tool-surface: color-mix(in srgb, var(--ui-accent-success) 12%, transparent); }
+  .tour-output--exam {
+    --tool-accent: #22c55e;
+    --tool-surface: rgba(34, 197, 94, 0.1);
+  }
 
   .tour-tool strong,
   .tour-output span {
@@ -633,9 +630,6 @@
   .tour-tool span {
     justify-self: start;
     margin-top: auto;
-    border-color: color-mix(in srgb, var(--ui-accent-success) 36%, transparent);
-    background: color-mix(in srgb, var(--ui-accent-success) 12%, transparent);
-    color: color-mix(in srgb, var(--ui-accent-success) 80%, #fff 20%);
   }
 
   .tour-output {
@@ -757,6 +751,10 @@
     .tour-step {
       grid-template-columns: 1fr;
       padding-inline-start: 3.25rem;
+    }
+
+    .tour-step__copy h3 {
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
     }
 
     .tour-step::before {
