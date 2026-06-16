@@ -37,6 +37,7 @@
   const challengeEnabled = isAuthChallengeEnabled();
 
   $: signInHref = buildAuthHref('/sign-in');
+  $: passwordStrength = getPasswordStrength(password);
   $: fieldErrors = {
     name: touched.name ? validateName(name, t) : '',
     email: touched.email ? validateEmail(email, t) : '',
@@ -103,6 +104,23 @@
     router.replace(`${VERIFY_EMAIL_PATH}?${params.toString()}`);
   }
 
+  function getPasswordStrength(pw) {
+    if (!pw) return null;
+
+    const hasLetter = /[a-zA-Z]/.test(pw);
+    const hasNumber = /[0-9]/.test(pw);
+    const hasSymbol = /[^a-zA-Z0-9]/.test(pw);
+    const typeCount = [hasLetter, hasNumber, hasSymbol].filter(Boolean).length;
+
+    if (pw.length < 8) {
+      return { level: 1, label: 'Weak', color: 'var(--ui-accent-danger)' };
+    }
+    if (typeCount < 2) {
+      return { level: 2, label: 'Fair', color: 'var(--ui-accent-warning)' };
+    }
+    return { level: 3, label: 'Strong', color: 'var(--ui-accent-success)' };
+  }
+
   function buildAuthHref(path) {
     const params = new URLSearchParams();
     if (redirectTarget && redirectTarget !== '/home') {
@@ -116,7 +134,6 @@
 
 <Card class="auth-card" variant="raised" padding="lg" border="subtle">
   <header class="auth-header">
-    <p class="auth-eyebrow">{t('auth.signUp.eyebrow')}</p>
     <h2>{t('auth.signUp.title')}</h2>
     <p>{t('auth.signUp.subtitle')}</p>
   </header>
@@ -166,7 +183,6 @@
       forId="password"
       required
       error={fieldErrors.password}
-      hint={t('auth.validation.passwordHint')}
     >
       <div class="password-field">
         <input
@@ -188,6 +204,28 @@
         </button>
       </div>
     </FieldShell>
+
+    {#if passwordStrength}
+      <div class="password-strength">
+        <div class="password-strength__bars">
+          <span
+            class="password-strength__bar"
+            style="background: {passwordStrength.level >= 1 ? passwordStrength.color : 'var(--ui-border-default)'}"
+          ></span>
+          <span
+            class="password-strength__bar"
+            style="background: {passwordStrength.level >= 2 ? passwordStrength.color : 'var(--ui-border-default)'}"
+          ></span>
+          <span
+            class="password-strength__bar"
+            style="background: {passwordStrength.level >= 3 ? passwordStrength.color : 'var(--ui-border-default)'}"
+          ></span>
+        </div>
+        <span class="password-strength__label" style="color: {passwordStrength.color}">
+          {passwordStrength.label}
+        </span>
+      </div>
+    {/if}
 
     <FieldShell
       label={t('auth.fields.confirmPassword')}
@@ -231,6 +269,8 @@
     <Button type="submit" variant="primary" loading={loading} disabled={loading || hasFieldErrors} block>
       {loading ? t('auth.signUp.actions.loading') : t('auth.signUp.actions.submit')}
     </Button>
+
+    <p class="trust-line">Free to use • No credit card required</p>
   </form>
 
   <p class="toggle-text">
@@ -256,15 +296,6 @@
     text-align: start;
   }
 
-  .auth-eyebrow {
-    margin: 0;
-    color: var(--ui-text-muted);
-    font-size: var(--ui-type-label);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
   .auth-header h2 {
     margin: 0;
     color: var(--ui-text-primary);
@@ -283,7 +314,7 @@
 
   .auth-form {
     display: grid;
-    gap: var(--ui-space-4);
+    gap: var(--ui-space-3);
   }
 
   .auth-notice,
@@ -342,6 +373,38 @@
   .password-toggle:focus-visible {
     outline: none;
     box-shadow: var(--ui-focus-ring-strong);
+  }
+
+  .password-strength {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    margin-top: -0.15rem;
+  }
+
+  .password-strength__bars {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .password-strength__bar {
+    width: 1.75rem;
+    height: 0.25rem;
+    border-radius: var(--ui-radius-pill, 999px);
+    background: var(--ui-border-default);
+    transition: background var(--motion-fast) var(--ease-standard);
+  }
+
+  .password-strength__label {
+    font-size: var(--ui-type-label);
+    font-weight: 600;
+  }
+
+  .trust-line {
+    margin: 0;
+    color: var(--ui-text-muted);
+    text-align: center;
+    font-size: var(--ui-type-label);
   }
 
   .toggle-text {

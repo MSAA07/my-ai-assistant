@@ -919,7 +919,7 @@ export default {
     signUp: {
       eyebrow: 'Create account',
       title: 'Create account',
-      subtitle: 'Set up your profile to start generating study materials.',
+      subtitle: 'Turn any document into flashcards, summaries, and practice exams — instantly.',
       placeholders: {
         name: 'Enter your name',
         email: 'Enter your email',
