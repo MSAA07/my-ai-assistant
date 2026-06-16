@@ -152,6 +152,13 @@
   $: planLabel = locale && (isPaidPlan ? t('nav.proBadge') : t('nav.freeBadge'));
   $: isPublicRoute = isPublicRoutePath(normalizedPath);
   $: isAuthRoute = isAuthRoutePath(normalizedPath);
+  $: isAuthPage = [
+    SIGN_IN_PATH,
+    SIGN_UP_PATH,
+    FORGOT_PASSWORD_PATH,
+    RESET_PASSWORD_PATH,
+    VERIFY_EMAIL_PATH
+  ].includes(normalizedPath);
   $: redirectTarget = sanitizeRedirectPath(params.redirect) ?? DEFAULT_AUTH_PATH;
   $: authScreenRedirectTarget = isAuthRoute ? redirectTarget : normalizedPath;
   $: authNoticeKey = AUTH_NOTICE_KEYS[params.reason] ?? '';
@@ -239,7 +246,7 @@
         <PublicFooter />
       </div>
     {:else if normalizedPath === VERIFY_EMAIL_PATH}
-      <div class="public-shell">
+      <div class="public-shell" class:auth-page={isAuthPage}>
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
@@ -266,10 +273,12 @@
             </div>
           </section>
         </main>
-        <PublicFooter compact />
+        {#if !isAuthPage}
+          <PublicFooter compact />
+        {/if}
       </div>
     {:else if normalizedPath === FORGOT_PASSWORD_PATH}
-      <div class="public-shell">
+      <div class="public-shell" class:auth-page={isAuthPage}>
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
@@ -291,10 +300,12 @@
             </div>
           </section>
         </main>
-        <PublicFooter compact />
+        {#if !isAuthPage}
+          <PublicFooter compact />
+        {/if}
       </div>
     {:else if normalizedPath === RESET_PASSWORD_PATH}
-      <div class="public-shell">
+      <div class="public-shell" class:auth-page={isAuthPage}>
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
@@ -320,10 +331,12 @@
             </div>
           </section>
         </main>
-        <PublicFooter compact />
+        {#if !isAuthPage}
+          <PublicFooter compact />
+        {/if}
       </div>
     {:else if !isAuthenticated && (isAuthRoute || shouldRedirectUnauthenticated)}
-      <div class="public-shell">
+      <div class="public-shell" class:auth-page={isAuthPage}>
         <PublicHeader />
         <main class="auth-wrapper">
           <section class="auth-stage">
@@ -349,7 +362,9 @@
             </div>
           </section>
         </main>
-        <PublicFooter compact />
+        {#if !isAuthPage}
+          <PublicFooter compact />
+        {/if}
       </div>
     {:else if useAppShell}
       <AppShell
@@ -439,6 +454,11 @@
     background: var(--color-bg);
     display: flex;
     flex-direction: column;
+  }
+
+  .public-shell.auth-page {
+    height: 100vh;
+    overflow: hidden;
   }
 
   .auth-wrapper {
