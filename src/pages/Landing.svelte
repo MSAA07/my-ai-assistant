@@ -67,6 +67,40 @@
         <p class="lp-hero__trust">{t('landing.heroTrust')}</p>
       </div>
 
+      <div class="lp-hero__visual" aria-hidden="true">
+        <div class="hero-mockup">
+          <div class="hero-mockup__bar">
+            <span class="hero-mockup__dot"></span>
+            <span class="hero-mockup__dot"></span>
+            <span class="hero-mockup__dot"></span>
+            <span class="hero-mockup__title">Biology Midterm Pack</span>
+            <span class="hero-mockup__badge">Ready</span>
+          </div>
+          <div class="hero-mockup__body">
+            <div class="hero-mockup__card hero-mockup__card--summary">
+              <p class="hero-mockup__card-label">Summary ready</p>
+              <p class="hero-mockup__card-sub">Read the key ideas first</p>
+              <span class="hero-mockup__card-action">Read summary &rarr;</span>
+            </div>
+            <div class="hero-mockup__card hero-mockup__card--flashcards">
+              <p class="hero-mockup__card-label">24 Flashcards</p>
+              <p class="hero-mockup__card-sub">Practice active recall</p>
+              <span class="hero-mockup__card-action">Study cards &rarr;</span>
+            </div>
+            <div class="hero-mockup__card hero-mockup__card--exam">
+              <p class="hero-mockup__card-label">10 questions</p>
+              <p class="hero-mockup__card-sub">Check exam readiness</p>
+              <span class="hero-mockup__card-action">Take exam &rarr;</span>
+            </div>
+          </div>
+          <div class="hero-mockup__footer">
+            <span>Generated in 47 seconds</span>
+            <span>&middot;</span>
+            <span>PDF &middot; 18 pages</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -185,7 +219,7 @@
 
   <section class="lp-faq">
     <div class="lp-faq__inner">
-      <div class="lp-section-head">
+      <div class="lp-section-head lp-section-head--center">
         <p class="lp-eyebrow">{t('landing.faqEyebrow')}</p>
         <h2 class="lp-h2">{t('landing.faqHeadline')}</h2>
       </div>
@@ -299,9 +333,12 @@
   }
 
   .lp-hero__grid {
-    display: block;
-    max-width: 48rem;
-    text-align: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(3rem, 6vw, 6rem);
+    align-items: center;
+    max-width: 72rem;
+    text-align: start;
   }
 
   .lp-badge {
@@ -333,7 +370,6 @@
   .lp-hero__sub {
     margin: 0 0 2rem;
     max-width: 36rem;
-    margin-inline: auto;
     color: var(--ui-text-secondary);
     font-size: clamp(1rem, 1.5vw, 1.1rem);
     line-height: 1.7;
@@ -344,6 +380,107 @@
     color: var(--ui-text-muted);
     font-size: 0.75rem;
     line-height: 1.6;
+  }
+
+  .lp-hero__visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-mockup {
+    width: 100%;
+    max-width: 28rem;
+    border: 1px solid var(--ui-border-default);
+    border-radius: 16px;
+    background: var(--ui-surface-card);
+    overflow: hidden;
+  }
+
+  .hero-mockup__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-text-primary) 3%, var(--ui-surface-card));
+  }
+
+  .hero-mockup__dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: var(--ui-border-strong);
+    flex-shrink: 0;
+  }
+
+  .hero-mockup__title {
+    flex: 1;
+    margin-inline-start: 0.35rem;
+    color: var(--ui-text-primary);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .hero-mockup__badge {
+    padding: 0.2rem 0.55rem;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .hero-mockup__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .hero-mockup__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 0.85rem;
+    border-inline-end: 1px solid var(--ui-border-default);
+  }
+
+  .hero-mockup__card:last-child {
+    border-inline-end: none;
+  }
+
+  .hero-mockup__card-label {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .hero-mockup__card-sub {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .hero-mockup__card-action {
+    color: #22c55e;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  .hero-mockup__footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-top: 1px solid var(--ui-border-default);
+    color: var(--ui-text-muted);
+    font-size: 0.72rem;
   }
 
   .lp-strip {
@@ -368,7 +505,7 @@
   }
 
   .lp-problem__inner {
-    max-width: 52rem;
+    max-width: 72rem;
     margin-inline: auto;
   }
 
@@ -386,7 +523,7 @@
 
   .lp-problem__body {
     margin: 0;
-    max-width: 42rem;
+    max-width: 52rem;
     color: var(--ui-text-secondary);
     font-size: 1rem;
     line-height: 1.8;
@@ -744,6 +881,19 @@
 
   /* ── Responsive ────────────────────────────────── */
   @media (max-width: 900px) {
+    .lp-hero__grid {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .lp-hero__sub {
+      margin-inline: auto;
+    }
+
+    .lp-hero__visual {
+      display: none;
+    }
+
     .tour-shell__rail {
       inset-inline-start: 1.25rem;
     }
