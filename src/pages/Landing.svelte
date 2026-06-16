@@ -15,7 +15,6 @@
     { q: 'landing.faq2Q', a: 'landing.faq2A' },
     { q: 'landing.faq3Q', a: 'landing.faq3A' },
     { q: 'landing.faq4Q', a: 'landing.faq4A' },
-    { q: 'landing.faq5Q', a: 'landing.faq5A' },
     { q: 'landing.faq6Q', a: 'landing.faq6A' }
   ];
 
@@ -54,7 +53,6 @@
   <section class="lp-hero">
     <div class="lp-container lp-hero__grid">
       <div class="lp-hero__copy">
-        <span class="lp-badge">{t('landing.heroBadge')}</span>
         <h1 class="lp-hero__headline">
           <span>{t('landing.heroHeadline1')}</span>
           <span>{t('landing.heroHeadline2')}</span>
@@ -64,17 +62,12 @@
         <button class="lp-btn lp-btn--primary" type="button" on:click={() => goTo(SIGN_UP_PATH)}>
           {t('landing.heroCta')}
         </button>
-        <p class="lp-hero__trust">{t('landing.heroTrust')}</p>
       </div>
 
     </div>
   </section>
 
   <!-- ── 2 · CREDIBILITY STRIP ────────────────────── -->
-  <section class="lp-strip">
-    <p class="lp-strip__text">{t('landing.credibilityStrip')}</p>
-  </section>
-
   <!-- ── 3 · PROBLEM STATEMENT ────────────────────── -->
   <section class="lp-problem">
     <div class="lp-container lp-problem__inner">
@@ -112,14 +105,12 @@
               {#if i === 0}
                 <div class="tour-upload">
                   <div class="tour-upload__drop">
-                    <span class="tour-upload__icon"></span>
                     <div>
                       <p>{t('landing.tour.uploadDropTitle')}</p>
                       <span>{t('landing.tour.uploadDropMeta')}</span>
                     </div>
                   </div>
                   <div class="tour-file">
-                    <span></span>
                     <div>
                       <p>{t('landing.mockup.uploadTitle')}</p>
                       <small>{t('landing.mockup.uploadMeta')}</small>
@@ -304,20 +295,6 @@
     text-align: center;
   }
 
-  .lp-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.35rem 0.85rem;
-    margin-bottom: 1.75rem;
-    border: 1px solid var(--ui-border-default);
-    border-radius: 999px;
-    background: var(--ui-surface-card);
-    color: var(--ui-text-secondary);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
-
   .lp-hero__headline {
     margin: 0 0 1.5rem;
     font-size: clamp(3rem, 6vw, 5rem);
@@ -339,26 +316,6 @@
     line-height: 1.7;
   }
 
-  .lp-hero__trust {
-    margin: 1rem 0 0;
-    color: var(--ui-text-muted);
-    font-size: 0.75rem;
-    line-height: 1.6;
-  }
-
-  .lp-strip {
-    padding-block: 1.25rem;
-    border-block: 1px solid color-mix(in srgb, var(--ui-border-default) 30%, transparent);
-    background: var(--ui-bg-page);
-  }
-
-  .lp-strip__text {
-    margin: 0;
-    text-align: center;
-    color: var(--ui-text-muted);
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
 
   /* ── 3 · Problem ───────────────────────────────── */
   .lp-problem {
@@ -370,6 +327,7 @@
   .lp-problem__inner {
     max-width: 52rem;
     margin-inline: auto;
+    text-align: center;
   }
 
   .lp-problem__headline {
@@ -387,6 +345,7 @@
   .lp-problem__body {
     margin: 0;
     max-width: 42rem;
+    margin-inline: auto;
     color: var(--ui-text-secondary);
     font-size: 1rem;
     line-height: 1.8;
@@ -523,31 +482,30 @@
   }
 
   .tour-upload__drop {
-    justify-content: flex-start;
-    min-height: 9rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+    min-height: 8rem;
+    padding: 1.2rem;
     border-style: dashed;
+    background: color-mix(in srgb, var(--ui-text-primary) 3%, var(--ui-surface-card));
   }
 
-  .tour-upload__icon,
-  .tour-file > span {
-    position: relative;
-    display: inline-flex;
-    width: 2.5rem;
-    height: 2.5rem;
-    flex: 0 0 auto;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
-    border: 1px solid var(--ui-border-default);
+  .tour-file {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 4.5rem;
   }
 
-  .tour-upload__icon::before,
-  .tour-file > span::before {
-    content: "";
-    position: absolute;
-    inset: 0.72rem;
-    border-block-start: 2px solid var(--ui-text-muted);
-    border-inline-start: 2px solid var(--ui-text-muted);
-    transform: rotate(45deg) translate(0.1rem, 0.1rem);
+  .tour-upload__drop > div,
+  .tour-file > div {
+    min-width: 0;
+  }
+
+  .tour-upload__drop p,
+  .tour-file p {
+    overflow-wrap: anywhere;
   }
 
   .tour-upload p,
@@ -568,6 +526,12 @@
     color: var(--ui-text-secondary);
     font-size: 0.82rem;
     line-height: 1.45;
+  }
+
+  .tour-upload__drop span,
+  .tour-file small {
+    display: block;
+    margin-top: 0.2rem;
   }
 
   .tour-file strong,
@@ -603,14 +567,6 @@
     background: var(--ui-surface-card);
   }
 
-  /* Output cards: all green = "ready" state, matching the real app */
-  .tour-output--summary,
-  .tour-output--flashcards,
-  .tour-output--exam {
-    --tool-accent: #22c55e;
-    --tool-surface: rgba(34, 197, 94, 0.1);
-  }
-
   .tour-tool strong,
   .tour-output span {
     color: var(--ui-text-primary);
@@ -634,8 +590,8 @@
 
   .tour-output {
     min-height: 8.5rem;
-    border-color: color-mix(in srgb, var(--tool-accent) 24%, var(--ui-border-default) 76%);
-    background: linear-gradient(180deg, var(--tool-surface), transparent 80%), var(--ui-surface-card);
+    border-color: var(--ui-border-default);
+    background: var(--ui-surface-card);
   }
 
   .lp-faq {
@@ -790,6 +746,11 @@
     .tour-hub__head {
       align-items: flex-start;
       flex-direction: column;
+    }
+
+    .tour-upload__drop,
+    .tour-file {
+      grid-template-columns: 1fr;
     }
   }
 </style>
