@@ -99,7 +99,6 @@ export default {
     heroHeadline3: 'revision.',
     heroSub: 'Stop rereading pages. Upload your notes and get a focused summary, active-recall flashcards, and a mock exam that shows what to study next.',
     heroCta: 'Start studying',
-    heroTrust: 'PDF, DOCX, PPTX · English + Arabic · Built for exam revision',
     problemEyebrow: 'The problem',
     problemHeadline1: 'Too much to revise?',
     problemHeadline2: 'Start with what matters.',

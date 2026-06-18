@@ -212,7 +212,6 @@
       <button class="lp-btn lp-btn--primary" type="button" on:click={() => goTo(SIGN_UP_PATH)}>
         {t('landing.ctaButton')}
       </button>
-      <p class="lp-cta__foot">{t('landing.heroTrust')}</p>
     </div>
   </section>
 
@@ -690,12 +689,6 @@
     color: var(--ui-text-secondary);
     font-size: 1.05rem;
     line-height: 1.6;
-  }
-
-  .lp-cta__foot {
-    margin: 1rem 0 0;
-    color: var(--ui-text-muted);
-    font-size: 0.75rem;
   }
 
   /* ── Responsive ────────────────────────────────── */
