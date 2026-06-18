@@ -55,7 +55,6 @@
           <p class="public-footer__title">{t('publicHeader.brandName')}</p>
         </div>
       </div>
-      <p class="public-footer__meta">{t('publicFooter.copyright')}</p>
     </div>
 
     <div class="public-footer__grid">
@@ -121,7 +120,6 @@
   }
 
   .public-footer__title,
-  .public-footer__meta,
   .public-footer h2 {
     margin: 0;
   }
@@ -131,11 +129,6 @@
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-  }
-
-  .public-footer__meta {
-    color: var(--ui-text-muted);
-    font-size: var(--ui-type-label);
   }
 
   .public-footer__grid {
