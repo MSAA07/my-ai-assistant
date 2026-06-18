@@ -49,14 +49,6 @@
 
 <footer class:compact class="public-footer" dir={currentLanguage === 'ar' ? 'rtl' : 'ltr'}>
   <div class="public-footer__inner">
-    <div class="public-footer__lead">
-      <div class="public-footer__brand">
-        <div>
-          <p class="public-footer__title">{t('publicHeader.brandName')}</p>
-        </div>
-      </div>
-    </div>
-
     <div class="public-footer__grid">
       <section>
         <h2>{t('publicFooter.sections.product')}</h2>
@@ -106,29 +98,8 @@
     gap: 2rem;
   }
 
-  .public-footer__lead {
-    display: grid;
-    gap: 1rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--ui-border-default) 90%, transparent);
-  }
-
-  .public-footer__brand {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.9rem;
-  }
-
-  .public-footer__title,
   .public-footer h2 {
     margin: 0;
-  }
-
-  .public-footer__title {
-    color: var(--ui-text-primary);
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
   }
 
   .public-footer__grid {
