@@ -11,24 +11,23 @@
   $: Icon = icon;
   $: resolvedCard = {
     title: '',
-    stateTone: 'info',
+    status: 'not_generated',
     stateLabel: '',
     description: '',
     statusCopy: '',
-    errorMessage: '',
-    progressVisible: false,
-    phase: 'not_requested',
-    loadingLabel: '',
-    progressText: '',
-    progressValue: 0,
-    progressIndeterminate: false,
+    primaryMetric: '',
+    secondaryMetric: '',
+    tertiaryMetric: '',
+    completedCount: 0,
+    totalCount: 0,
+    progressLabel: '',
     canPrimaryAction: false,
     primaryLabel: '',
     ...card,
   };
 </script>
 
-<StudyActionCard class="study-hub-feature-card" title={resolvedCard.title} status={resolvedCard.stateTone} statusLabel={resolvedCard.stateLabel}>
+<StudyActionCard class="study-hub-feature-card" title={resolvedCard.title} status={resolvedCard.status} statusLabel={resolvedCard.stateLabel}>
   <svelte:fragment slot="icon">
     {#if Icon}
       <svelte:component this={Icon} />
@@ -36,45 +35,40 @@
   </svelte:fragment>
 
   <svelte:fragment slot="description">
-    <p>{resolvedCard.description}</p>
-    <p class="study-hub-feature-card__support-copy">{resolvedCard.statusCopy}</p>
-    {#if resolvedCard.errorMessage}<p class="study-hub-feature-card__error">{resolvedCard.errorMessage}</p>{/if}
+    {#if resolvedCard.status === 'not_generated'}
+      <p>{resolvedCard.description}</p>
+    {:else if resolvedCard.status !== 'complete'}
+      <p>{resolvedCard.statusCopy}</p>
+    {/if}
   </svelte:fragment>
 
-  <div slot="actions" class="study-hub-feature-card__actions">
-    {#if resolvedCard.progressVisible}
-      <div
-        class={`study-hub-feature-card__loading study-hub-feature-card__loading--${resolvedCard.phase}`.trim()}
-        role="status"
-        aria-live="polite"
-        aria-label={`${resolvedCard.title} ${resolvedCard.loadingLabel}`}
-      >
-        <div class="study-hub-feature-card__loading-meta">
-          <span class="study-hub-feature-card__loading-label">{resolvedCard.loadingLabel}</span>
-          {#if resolvedCard.progressText}
-            <span class="study-hub-feature-card__loading-value">{resolvedCard.progressText}</span>
-          {/if}
-        </div>
+  {#if resolvedCard.status === 'complete'}
+    <div class="study-hub-feature-card__metrics">
+      {#if resolvedCard.primaryMetric}<p class="study-hub-feature-card__primary-metric">{resolvedCard.primaryMetric}</p>{/if}
+      {#if resolvedCard.totalCount > 0 && resolvedCard.progressLabel}
         <ProgressBar
-          value={resolvedCard.progressValue}
-          max={100}
-          indeterminate={resolvedCard.progressIndeterminate}
-          ariaLabel={`${resolvedCard.title} ${resolvedCard.loadingLabel}`}
-          className="study-hub-feature-card__loading-bar"
+          value={resolvedCard.completedCount}
+          max={resolvedCard.totalCount}
+          ariaLabel={resolvedCard.progressLabel}
+          className="study-hub-feature-card__progress"
         />
-      </div>
-    {:else}
-      <Button
-        type="button"
-        variant={resolvedCard.phase === 'ready' ? 'primary' : 'secondary'}
-        className="study-hub-feature-card__button"
-        on:click={() => onPrimaryAction(resolvedCard)}
-        disabled={!resolvedCard.canPrimaryAction}
-      >
-        <span slot="icon" aria-hidden="true"><Sparkles /></span>
-        {resolvedCard.primaryLabel}
-      </Button>
-    {/if}
+      {/if}
+      {#if resolvedCard.secondaryMetric}<p>{resolvedCard.secondaryMetric}</p>{/if}
+      {#if resolvedCard.tertiaryMetric}<p>{resolvedCard.tertiaryMetric}</p>{/if}
+    </div>
+  {/if}
+
+  <div slot="actions" class="study-hub-feature-card__actions">
+    <Button
+      type="button"
+      variant={resolvedCard.status === 'complete' ? 'primary' : 'secondary'}
+      className="study-hub-feature-card__button"
+      on:click={() => onPrimaryAction(resolvedCard)}
+      disabled={!resolvedCard.canPrimaryAction}
+    >
+      <span slot="icon" aria-hidden="true"><Sparkles /></span>
+      {resolvedCard.primaryLabel}
+    </Button>
   </div>
 </StudyActionCard>
 
@@ -83,78 +77,27 @@
     min-height: 0;
   }
 
-  .study-hub-feature-card__support-copy {
-    margin: 0;
-    margin-top: 0.35rem;
-    color: var(--ui-text-secondary);
-    line-height: 1.5;
-    font-size: var(--font-size-sm);
-  }
-
-  .study-hub-feature-card__error {
-    margin: 0;
-    margin-top: 0.35rem;
-    color: var(--destructive);
-    font-size: var(--font-size-sm);
-    line-height: 1.5;
-  }
-
-  .study-hub-feature-card__actions {
-    position: relative;
-    z-index: 1;
-  }
-
-  .study-hub-feature-card__loading {
+  .study-hub-feature-card__metrics {
     display: grid;
-    gap: 0.5rem;
-    min-height: var(--ui-control-height-md);
-    padding: 0.8rem 0.9rem;
-    border-radius: var(--ui-radius-sm);
-    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 12%, var(--ui-border-default) 88%);
-    background: color-mix(in srgb, var(--ui-surface-secondary) 82%, black 18%);
-    color: var(--ui-text-primary);
-    box-shadow: none;
-    --ui-progress-track: color-mix(in srgb, var(--ui-surface-secondary) 74%, black 26%);
-    --ui-progress-fill: linear-gradient(90deg, rgba(255,255,255,.96), rgba(209,213,219,.82), rgba(255,255,255,.96));
-    animation: study-hub-feature-card-pulse 1.4s ease-in-out infinite;
-  }
-
-  .study-hub-feature-card__loading-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .study-hub-feature-card__loading-label {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: inherit;
+    gap: var(--ui-space-2);
+    color: var(--ui-text-secondary);
     font-size: var(--font-size-sm);
-    font-weight: 650;
     line-height: 1.4;
   }
 
-  @media (max-width: 640px) {
-    .study-hub-feature-card__loading-label {
-      white-space: normal;
-    }
+  .study-hub-feature-card__metrics p {
+    margin: 0;
   }
 
-  .study-hub-feature-card__loading-value {
+  .study-hub-feature-card__primary-metric {
     color: var(--ui-text-primary);
-    font-size: 0.82rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 650;
     font-variant-numeric: tabular-nums;
-    direction: ltr;
-    unicode-bidi: plaintext;
   }
 
-  :global(.study-hub-feature-card__loading-bar.ui-progress) {
-    --progress-height: 0.36rem;
+  :global(.study-hub-feature-card__progress.ui-progress) {
+    --progress-height: 0.25rem;
   }
 
   :global(.study-hub-feature-card__button) {
@@ -168,26 +111,4 @@
     stroke-width: 2;
   }
 
-  @keyframes study-hub-feature-card-pulse {
-    0%, 100% {
-      border-color: color-mix(in srgb, var(--ui-text-primary) 10%, var(--ui-border-default) 90%);
-      background: color-mix(in srgb, var(--ui-surface-secondary) 82%, black 18%);
-    }
-
-    50% {
-      border-color: color-mix(in srgb, var(--ui-text-primary) 16%, var(--ui-border-default) 84%);
-      background: color-mix(in srgb, var(--ui-surface-secondary) 88%, black 12%);
-    }
-  }
-
-  :global(html[dir='rtl']) .study-hub-feature-card__loading-meta {
-    align-items: flex-start;
-  }
-
-  @media (max-width: 640px) {
-    .study-hub-feature-card__loading-meta {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  }
 </style>
