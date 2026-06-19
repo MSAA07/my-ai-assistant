@@ -131,7 +131,7 @@ export default {
     faq3Q: 'How long does generation take?',
     faq3A: 'Most documents are fully processed — all three tools — in under 60 seconds. Larger files may take slightly longer.',
     faq4Q: 'Is my document private?',
-    faq4A: 'Your files are stored securely and are only visible to you. We do not share your content.',
+    faq4A: 'Your documents are private to your account. We use trusted service providers for storage, OCR, AI generation, security, and optional Telegram delivery, but we do not sell your content or make it visible to other users.',
     faq6Q: 'Can I export my study materials?',
     faq6A: 'Yes. Export as PDF, or receive your flashcards and practice exams directly via Telegram.',
     ctaHeadline: 'Start studying smarter.',
@@ -792,7 +792,7 @@ export default {
     },
     dataExport: {
       title: 'Your Data',
-      description: 'Download a copy of your account data including documents, study progress, and usage history.',
+      description: 'Download a copy of your profile, document list, flashcards, exam attempts, and Telegram status. Uploaded files and complete system logs are not included.',
       download: 'Download my data',
       downloading: 'Preparing export...',
       successNote: 'Your export is downloading.',
@@ -1189,6 +1189,9 @@ export default {
     brandSubtitle: 'Fast document-to-study workflow',
     navLabel: 'Public',
     languageLabel: 'Language',
+    preferences: 'Preferences',
+    preferencesLabel: 'Open display preferences',
+    preferencesMenuLabel: 'Display preferences',
     links: {
       features: 'Features',
       howItWorks: 'How it works'
@@ -1201,6 +1204,7 @@ export default {
   },
   publicFooter: {
     copyright: '© 2025 Studymaxing. All rights reserved.',
+    freelanceLogoAlt: 'Saudi freelance work registration',
     sections: {
       product: 'Product',
       company: 'Company',
@@ -1228,7 +1232,7 @@ export default {
       acceptableUse: 'Acceptable use'
     },
     supportItems: {
-      email: 'support@studymaxing.com',
+      email: 'contact@studymaxing.com',
       detail: 'Use this email for support, feedback, and account questions'
     },
     socialItems: {

@@ -16,12 +16,12 @@
 
       <div class="footer-col">
         <p class="footer-col-heading">LEGAL</p>
-        <a href="/legal/privacy-policy">Privacy policy</a>
-        <a href="/legal/terms-of-service">Terms of service</a>
-        <a href="/legal/cookie-policy">Cookie policy</a>
-        <a href="/legal/refund-policy">Refund policy</a>
-        <a href="/legal/disclaimer">Disclaimer</a>
-        <a href="/legal/acceptable-use">Acceptable use</a>
+        <a href="#/legal/privacy-policy">Privacy policy</a>
+        <a href="#/legal/terms-of-service">Terms of service</a>
+        <a href="#/legal/cookie-policy">Cookie policy</a>
+        <a href="#/legal/refund-policy">Refund policy</a>
+        <a href="#/legal/disclaimer">Disclaimer</a>
+        <a href="#/legal/acceptable-use">Acceptable use</a>
       </div>
 
       <div class="footer-col">
@@ -29,13 +29,6 @@
         <a href="mailto:contact@studymaxing.com">contact@studymaxing.com</a>
       </div>
 
-      <div class="footer-col">
-        <p class="footer-col-heading">SOCIAL</p>
-        <a href="#">X (Twitter)</a>
-        <a href="#">Whatsapp</a>
-        <a href="#">LinkedIn</a>
-        <a href="#">Telegram</a>
-      </div>
     </div>
   </div>
 

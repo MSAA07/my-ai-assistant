@@ -149,7 +149,7 @@ const ar = {
     faq3Q: 'كم يستغرق التوليد؟',
     faq3A: 'معظم المستندات تُعالج بالكامل — الأدوات الثلاث — في أقل من 60 ثانية. الملفات الأكبر قد تستغرق وقتاً أطول قليلاً.',
     faq4Q: 'هل مستندي خاص؟',
-    faq4A: 'ملفاتك مخزنة بأمان ولا يمكن لأحد غيرك الاطلاع عليها. لا نشارك محتواك مع أي جهة.',
+    faq4A: 'مستنداتك خاصة بحسابك. نستخدم مزودي خدمة موثوقين للتخزين وOCR وتوليد الذكاء الاصطناعي والأمان وإرسال Telegram الاختياري، لكننا لا نبيع محتواك ولا نجعله مرئيًا لمستخدمين آخرين.',
     faq6Q: 'هل يمكنني تصدير موادي الدراسية؟',
     faq6A: 'نعم. صدّر كـ PDF، أو استقبل بطاقاتك التعليمية واختباراتك التدريبية مباشرة عبر تيليغرام.',
     ctaHeadline: 'ابدأ الدراسة بذكاء.',
@@ -708,7 +708,7 @@ const ar = {
     },
     dataExport: {
       title: 'بياناتك',
-      description: 'نزّل نسخة من بيانات حسابك تشمل المستندات وتقدم الدراسة وسجل الاستخدام.',
+      description: 'نزّل نسخة من ملفك الشخصي وقائمة المستندات والبطاقات التعليمية ومحاولات الاختبار وحالة Telegram. لا يشمل ذلك الملفات المرفوعة أو سجلات النظام الكاملة.',
       download: 'تنزيل بياناتي',
       downloading: 'جارٍ تجهيز الملف...',
       successNote: 'بدأ تنزيل ملف البيانات.',
@@ -961,6 +961,9 @@ ar.publicHeader = {
   brandSubtitle: 'مسار سريع من المستند إلى الدراسة',
   navLabel: 'عام',
   languageLabel: 'اللغة',
+  preferences: 'التفضيلات',
+  preferencesLabel: 'فتح تفضيلات العرض',
+  preferencesMenuLabel: 'تفضيلات العرض',
   links: {
     features: 'المزايا',
     howItWorks: 'طريقة العمل'
@@ -1075,6 +1078,7 @@ ar.landing = {
 
 ar.publicFooter = {
   copyright: '© 2025 Studymaxing. All rights reserved.',
+  freelanceLogoAlt: 'شعار وثيقة العمل الحر السعودية',
   sections: {
     product: 'المنتج',
     company: 'الشركة',
@@ -1094,15 +1098,15 @@ ar.publicFooter = {
     getStarted: 'ابدأ الآن'
   },
   legalLinks: {
-    privacyPolicy: 'Privacy Policy',
-    termsOfService: 'Terms of Service',
-    cookiePolicy: 'Cookie Policy',
-    refundPolicy: 'Refund Policy',
+    privacyPolicy: 'سياسة الخصوصية',
+    termsOfService: 'شروط الخدمة',
+    cookiePolicy: 'سياسة ملفات تعريف الارتباط',
+    refundPolicy: 'سياسة الاسترداد',
     disclaimer: 'إخلاء المسؤولية',
     acceptableUse: 'الاستخدام المقبول'
   },
   supportItems: {
-    email: 'support@studymaxing.com',
+    email: 'contact@studymaxing.com',
     detail: 'استخدم هذا البريد للدعم والملاحظات وأسئلة الحساب'
   },
   socialItems: {

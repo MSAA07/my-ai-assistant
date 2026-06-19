@@ -30,7 +30,7 @@ export const getApiBaseUrl = () => {
 };
 
 export const API_BASE = getApiBaseUrl();
-export const AUTH_SUPPORT_EMAIL = normalizeEnvValue(import.meta.env?.VITE_AUTH_SUPPORT_EMAIL || "support@studymaxing.com");
+export const AUTH_SUPPORT_EMAIL = normalizeEnvValue(import.meta.env?.VITE_AUTH_SUPPORT_EMAIL || "contact@studymaxing.com");
 export const AUTH_TURNSTILE_SITE_KEY = normalizeEnvValue(import.meta.env?.VITE_AUTH_TURNSTILE_SITE_KEY || "");
 
 export function isAuthChallengeEnabled() {

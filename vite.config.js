@@ -1,8 +1,6 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
-// Dev proxy should use an explicit env target, falling back to the local backend so local work never hits staging by accident.
-const DEV_API_TARGET = process.env.VITE_API_BASE_URL || process.env.LOCAL_API_BASE_URL || 'http://localhost:3001';
 const STAGING_SESSION_COOKIE = '__Secure-better-auth.session_token';
 const LOCAL_SESSION_COOKIE = 'better-auth.session_token';
 
@@ -15,47 +13,53 @@ function rewriteDevSetCookieHeader(cookie) {
     .replace(/;\s*Domain=[^;]+/gi, '');
 }
 
-export default defineConfig({
-  plugins: [svelte()],
-  server: {
-    port: 5173,
-    strictPort: false,
-    proxy: {
-      '/api': {
-        target: DEV_API_TARGET,
-        changeOrigin: true,
-        secure: true,
-        configure(proxy) {
-          proxy.on('proxyReq', (proxyReq, req) => {
-            const cookieHeader = req.headers.cookie;
-            if (!cookieHeader || !cookieHeader.includes(LOCAL_SESSION_COOKIE)) {
-              return;
-            }
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  // Keep browser requests same-origin while explicitly selecting the backend used by the dev proxy.
+  const devApiTarget = env.LOCAL_API_BASE_URL || env.VITE_API_BASE_URL || 'http://localhost:3001';
 
-            proxyReq.setHeader(
-              'cookie',
-              cookieHeader.replace(
-                new RegExp(`(^|;\\s*)${LOCAL_SESSION_COOKIE}=`, 'g'),
-                `$1${STAGING_SESSION_COOKIE}=`,
-              ),
-            );
-          });
+  return {
+    plugins: [svelte()],
+    server: {
+      port: 5173,
+      strictPort: false,
+      proxy: {
+        '/api': {
+          target: devApiTarget,
+          changeOrigin: true,
+          secure: true,
+          configure(proxy) {
+            proxy.on('proxyReq', (proxyReq, req) => {
+              const cookieHeader = req.headers.cookie;
+              if (!cookieHeader || !cookieHeader.includes(LOCAL_SESSION_COOKIE)) {
+                return;
+              }
 
-          proxy.on('proxyRes', (proxyRes) => {
-            const setCookie = proxyRes.headers['set-cookie'];
-            if (!Array.isArray(setCookie) || setCookie.length === 0) {
-              return;
-            }
+              proxyReq.setHeader(
+                'cookie',
+                cookieHeader.replace(
+                  new RegExp(`(^|;\\s*)${LOCAL_SESSION_COOKIE}=`, 'g'),
+                  `$1${STAGING_SESSION_COOKIE}=`,
+                ),
+              );
+            });
 
-            proxyRes.headers['set-cookie'] = setCookie.map(rewriteDevSetCookieHeader);
-          });
+            proxy.on('proxyRes', (proxyRes) => {
+              const setCookie = proxyRes.headers['set-cookie'];
+              if (!Array.isArray(setCookie) || setCookie.length === 0) {
+                return;
+              }
+
+              proxyRes.headers['set-cookie'] = setCookie.map(rewriteDevSetCookieHeader);
+            });
+          },
+        },
+        '/auth': {
+          target: devApiTarget,
+          changeOrigin: true,
+          secure: true,
         },
       },
-      '/auth': {
-        target: DEV_API_TARGET,
-        changeOrigin: true,
-        secure: true,
-      },
     },
-  },
+  };
 });
