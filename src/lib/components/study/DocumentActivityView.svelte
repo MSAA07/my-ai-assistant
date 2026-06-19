@@ -116,7 +116,6 @@
     : mode === 'flashcards'
       ? t('document.activity.subtitle.flashcards')
       : t('document.activity.subtitle.exam');
-  $: documentLanguage = text(docData?.language).toLowerCase();
   $: summaryDirection = resolveContentDirection(docData?.summary);
   $: summaryLanguage = summaryDirection === 'rtl' ? 'ar' : 'en';
   $: currentFlashcardDirection = resolveContentDirection(
@@ -249,16 +248,12 @@
     return formatStudyText(text(value));
   }
 
-  function containsArabicText(value) {
-    return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(text(value));
-  }
-
   function resolveContentDirection(...values) {
-    if (documentLanguage === 'arabic') {
-      return 'rtl';
-    }
+    const content = values.map((value) => text(value)).join(' ');
+    const arabicLetterCount = (content.match(/[\u0621-\u063A\u0641-\u064A\u066E-\u066F\u0671-\u06D3\u06FA-\u06FC\u0750-\u077F\u08A0-\u08C9]/g) || []).length;
+    const latinLetterCount = (content.match(/[A-Za-z]/g) || []).length;
 
-    return values.some((value) => containsArabicText(value)) ? 'rtl' : 'ltr';
+    return arabicLetterCount > latinLetterCount ? 'rtl' : 'ltr';
   }
 
   function parseSummaryBlocks(value) {
