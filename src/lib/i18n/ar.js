@@ -356,6 +356,8 @@ const ar = {
       featuresTitle: 'مواد الدراسة',
       readyHint: 'تم الإنشاء وأصبح جاهزًا للفتح.',
       readyToGenerateHint: 'لم يتم طلب أي مواد دراسية بعد. اختر ما تريد إنشاءه عندما تكون جاهزًا.',
+      generatingEstimate: 'يكون جاهزًا عادةً خلال أقل من دقيقة.',
+      failedCopy: 'حدث خطأ أثناء إنشاء هذا المحتوى.',
       featureDescriptions: {
         summary: 'احصل على ملخص شامل يولده الذكاء الاصطناعي لأهم المفاهيم والنقاط الرئيسية في مستندك.',
         flashcards: 'راجع باستخدام بطاقات تعليمية مولدة بالذكاء الاصطناعي تساعدك على حفظ المصطلحات والمفاهيم المهمة.',
@@ -392,7 +394,26 @@ const ar = {
         open: 'فتح',
         startSummary: 'بدء الملخص',
         startFlashcards: 'بدء البطاقات التعليمية',
-        startMockExam: 'بدء الاختبار التجريبي'
+        startMockExam: 'بدء الاختبار التجريبي',
+        openSummary: 'فتح الملخص',
+        studyFlashcards: 'دراسة البطاقات التعليمية',
+        retakeExam: 'إعادة الاختبار',
+        generateSummary: 'إنشاء الملخص',
+        generateFlashcards: 'إنشاء البطاقات التعليمية',
+        generateMockExam: 'إنشاء اختبار تجريبي',
+        generating: 'جارٍ الإنشاء…',
+        tryAgain: 'حاول مرة أخرى'
+      },
+      metrics: {
+        words: '{count} كلمة',
+        cards: '{count} بطاقة',
+        completed: 'اكتمل {completed} من {total}',
+        questions: '{count} أسئلة',
+        examBreakdown: '{multipleChoice} اختيار من متعدد، {trueFalse} صح أو خطأ',
+        notAttempted: 'لم تتم المحاولة بعد',
+        lastScore: 'آخر نتيجة: {score}% · {count} {attempts}',
+        attempt: 'محاولة',
+        attempts: 'محاولات'
       },
       meta: {
         fileType: 'نوع الملف'
