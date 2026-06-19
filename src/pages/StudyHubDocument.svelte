@@ -506,7 +506,7 @@
       stateLabel,
       primaryLabel,
       canPrimaryAction: status !== 'generating',
-      shouldRegenerate: hasFeatureContent(featureKey) || generationStatus === 'complete',
+      shouldRegenerate: status === 'failed' || hasFeatureContent(featureKey) || generationStatus === 'complete',
       errorMessage: status === 'failed' ? errorMessage : '',
       statusCopy: status === 'generating'
         ? t('document.hub.generatingEstimate')
