@@ -3,7 +3,6 @@
   import { ArrowLeft, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
   import { formatDate, formatNumber, t } from '../lib/i18n/t.js';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
-  import Badge from '../lib/components/ui/Badge.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import Card from '../lib/components/ui/Card.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
@@ -431,32 +430,93 @@
   function buildFeatureCard(featureKey) {
     const phase = getFeaturePhase(featureKey);
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
-    const errorMessage = text(generationErrors?.[featureKey]) || text(documentData?.generationState?.[featureKey]?.errorMessage);
-    const progress = getFeatureProgressState(featureKey);
-    const visualProgressValue = clampProgress(displayedProgress[featureKey]);
-    const progressVisible = progress.visible;
-    const progressIndeterminate = progress.indeterminate;
-    const progressText = progressIndeterminate ? '' : formatProgressText(visualProgressValue, { precise: true });
+    const status = phase === 'ready'
+      ? 'complete'
+      : phase === 'failed'
+        ? 'failed'
+        : phase === 'queued' || phase === 'generating'
+          ? 'generating'
+          : 'not_generated';
+    const stats = documentData?.studyMaterialStats ?? {};
+    const flashcardStats = stats.flashcards ?? {};
+    const examStats = stats.exam ?? {};
+    const totalCount = Number(flashcardStats.totalCount || 0);
+    const completedCount = Math.min(Number(flashcardStats.completedCount || 0), totalCount);
+    const attemptCount = Number(examStats.attemptCount || 0);
+    const latestScore = Number(examStats.latestScorePercent || 0);
+    const stateLabel = status === 'complete'
+      ? t('status.complete')
+      : status === 'failed'
+        ? t('status.failed')
+        : status === 'generating'
+          ? t('document.hub.states.generating')
+          : t('document.hub.states.notGenerated');
+    const primaryLabel = status === 'complete'
+      ? t(featureKey === 'summary'
+        ? 'document.hub.actions.openSummary'
+        : featureKey === 'flashcards'
+          ? 'document.hub.actions.studyFlashcards'
+          : attemptCount > 0
+            ? 'document.hub.actions.retakeExam'
+            : 'document.hub.actions.startMockExam')
+      : status === 'generating'
+        ? t('document.hub.actions.generating')
+        : status === 'failed'
+          ? t('document.hub.actions.tryAgain')
+          : t(featureKey === 'summary'
+            ? 'document.hub.actions.generateSummary'
+            : featureKey === 'flashcards'
+              ? 'document.hub.actions.generateFlashcards'
+              : 'document.hub.actions.generateMockExam');
+
+    let primaryMetric = '';
+    let secondaryMetric = '';
+    let tertiaryMetric = '';
+    if (status === 'complete' && featureKey === 'summary') {
+      primaryMetric = t('document.hub.metrics.words', { count: formatNumber(Number(stats.summary?.wordCount || 0)) });
+    } else if (status === 'complete' && featureKey === 'flashcards') {
+      primaryMetric = t('document.hub.metrics.cards', { count: formatNumber(totalCount) });
+      secondaryMetric = t('document.hub.metrics.completed', {
+        completed: formatNumber(completedCount),
+        total: formatNumber(totalCount),
+      });
+    } else if (status === 'complete' && featureKey === 'exam') {
+      const questionCount = Number(examStats.questionCount || 0);
+      primaryMetric = t('document.hub.metrics.questions', { count: formatNumber(questionCount) });
+      secondaryMetric = t('document.hub.metrics.examBreakdown', {
+        multipleChoice: formatNumber(Number(examStats.multipleChoiceCount || 0)),
+        trueFalse: formatNumber(Number(examStats.trueFalseCount || 0)),
+      });
+      tertiaryMetric = attemptCount > 0
+        ? t('document.hub.metrics.lastScore', {
+          score: formatNumber(latestScore),
+          count: formatNumber(attemptCount),
+          attempts: t(attemptCount === 1 ? 'document.hub.metrics.attempt' : 'document.hub.metrics.attempts'),
+        })
+        : t('document.hub.metrics.notAttempted');
+    }
+
     return {
       key: featureKey,
       title: t(FEATURE_CONFIG[featureKey].titleKey),
       description: t(FEATURE_CONFIG[featureKey].descriptionKey),
       phase,
-      stateLabel: getFeatureStatusLabel(featureKey, phase),
-      stateTone: getFeatureTone(phase),
-      primaryLabel: getFeaturePrimaryLabel(featureKey, phase),
-      canPrimaryAction: !progress.visible && phase !== 'queued' && phase !== 'generating',
+      status,
+      stateLabel,
+      primaryLabel,
+      canPrimaryAction: status !== 'generating',
       shouldRegenerate: hasFeatureContent(featureKey) || generationStatus === 'complete',
-      statusCopy: getFeatureStatusCopy(phase, errorMessage),
-      errorMessage: phase === 'failed' ? errorMessage : '',
-      actualProgressPct: progress.actualProgressPct,
-      displayedProgressPct: visualProgressValue,
-      safeVisualCapByPhase: progress.safeVisualCapByPhase,
-      progressVisible,
-      progressValue: progressIndeterminate ? 0 : visualProgressValue,
-      progressIndeterminate,
-      progressText,
-      loadingLabel: getFeatureLoadingLabel(featureKey, phase, { extractionBlocked: progress.extractionBlocked, job: progress.job }),
+      statusCopy: status === 'generating'
+        ? t('document.hub.generatingEstimate')
+        : status === 'failed'
+          ? t('document.hub.failedCopy')
+          : '',
+      primaryMetric,
+      secondaryMetric,
+      tertiaryMetric,
+      totalCount,
+      completedCount,
+      progressLabel: secondaryMetric,
     };
   }
 
@@ -854,7 +914,7 @@
 
     <PageHeader className="document-header" eyebrow={t('nav.study')} title={documentTitle} subtitle={documentSubtitle}>
       <div slot="meta" class="document-meta">
-        {#if fileTypeBadge}<Badge tone="destructive" variant="outline" size="sm" className="document-meta-badge">{fileTypeBadge}</Badge>{/if}
+        {#if fileTypeBadge}<span class="document-meta-pill">{fileTypeBadge}</span>{/if}
         {#if languageMeta}<span class="document-meta-pill">{languageMeta.value}</span>{/if}
         {#if uploadedMeta}<span class="document-meta-pill">{uploadedMeta.label} {uploadedMeta.value}</span>{/if}
       </div>
@@ -898,7 +958,6 @@
   :global(.document-hub .back-link svg){width:1.15rem;height:1.15rem;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
   :global(.document-hub .back-link:hover){color:var(--ui-text-primary);transform:none}
   .document-meta{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
-  :global(.document-meta-badge){min-height:var(--study-flow-chip-min-height);padding-inline:var(--study-flow-chip-padding-inline);border-radius:var(--study-flow-chip-radius);font-size:var(--font-size-sm);letter-spacing:0}
   .document-meta-pill{display:inline-flex;align-items:center;min-height:var(--study-flow-chip-min-height);padding:0 var(--study-flow-chip-padding-inline);border-radius:var(--study-flow-chip-radius);border:1px solid var(--ui-border-default);background:color-mix(in srgb,var(--ui-surface-secondary) 50%,transparent);color:var(--ui-text-secondary);font-size:.75rem;font-weight:500}
   h2{margin:0;color:var(--ui-text-primary);font-size:1rem;font-weight:600;line-height:1.2;letter-spacing:-.02em}
   :global(.document-hub .state-panel){display:grid;gap:var(--space-2)}
