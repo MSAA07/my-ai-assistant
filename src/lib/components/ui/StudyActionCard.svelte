@@ -1,6 +1,7 @@
 <script>
   import Card from './Card.svelte';
   import Badge from './Badge.svelte';
+  import { LoaderCircle } from '@lucide/svelte';
 
   export let title = '';
   export let status = '';
@@ -12,8 +13,10 @@
 
   const statusToneMap = {
     ready: 'success',
+    complete: 'success',
     processing: 'warning',
-    generating: 'warning',
+    generating: 'neutral',
+    not_generated: 'neutral',
     failed: 'destructive',
     info: 'neutral',
   };
@@ -28,7 +31,7 @@
   variant="standard"
   padding="sm"
   border="none"
-  className={['ui-study-action-card', className, $$props.class ?? ''].filter(Boolean).join(' ')}
+  className={['ui-study-action-card', status ? `ui-study-action-card--${status}` : '', className, $$props.class ?? ''].filter(Boolean).join(' ')}
   on:click
   on:keydown
 >
@@ -52,6 +55,9 @@
         size="sm"
         className={`ui-study-action-card__status ui-study-action-card__status--${status || 'neutral'}`}
       >
+        {#if status === 'generating'}
+          <LoaderCircle class="ui-study-action-card__status-spinner" aria-hidden="true" />
+        {/if}
         {statusLabel}
       </Badge>
     {/if}
@@ -124,6 +130,10 @@
     height: 1.25rem;
   }
 
+  :global(.ui-study-action-card--not_generated .ui-study-action-card__icon) {
+    color: var(--ui-text-secondary);
+  }
+
   .ui-study-action-card__copy {
     display: grid;
     gap: 0;
@@ -153,11 +163,35 @@
     color: var(--ui-accent-success);
   }
 
-  :global(.ui-study-action-card__status--processing),
-  :global(.ui-study-action-card__status--generating) {
+  :global(.ui-study-action-card__status--complete) {
+    border-color: color-mix(in srgb, var(--ui-accent-success) 30%, var(--ui-border-default) 70%);
+    background: color-mix(in srgb, var(--ui-accent-success) 10%, transparent);
+    color: var(--ui-accent-success);
+  }
+
+  :global(.ui-study-action-card__status--processing) {
     border-color: color-mix(in srgb, var(--ui-accent-warning) 28%, var(--ui-border-default) 72%);
     background: color-mix(in srgb, var(--ui-accent-warning) 12%, transparent);
     color: color-mix(in srgb, var(--ui-accent-warning) 82%, var(--ui-text-primary) 18%);
+  }
+
+  :global(.ui-study-action-card__status--not_generated),
+  :global(.ui-study-action-card__status--generating) {
+    border-color: var(--ui-border-default);
+    background: var(--ui-surface-secondary);
+    color: var(--ui-text-secondary);
+  }
+
+  :global(.ui-study-action-card__status--generating) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+  }
+
+  :global(.ui-study-action-card__status-spinner) {
+    width: 0.8rem;
+    height: 0.8rem;
+    animation: ui-study-action-card-spin 0.8s linear infinite;
   }
 
   :global(.ui-study-action-card__status--failed) {
@@ -199,5 +233,13 @@
     font-size: 0.875rem;
     border-radius: var(--ui-radius-sm);
     box-shadow: none;
+  }
+
+  @keyframes ui-study-action-card-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.ui-study-action-card__status-spinner) { animation: none; }
   }
 </style>
