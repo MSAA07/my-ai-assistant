@@ -430,6 +430,7 @@
   function buildFeatureCard(featureKey) {
     const phase = getFeaturePhase(featureKey);
     const generationStatus = normalizeGenerationStatus(documentData?.generationState?.[featureKey]?.status);
+    const errorMessage = text(generationErrors?.[featureKey]) || text(documentData?.generationState?.[featureKey]?.errorMessage);
     const status = phase === 'ready'
       ? 'complete'
       : phase === 'failed'
@@ -506,6 +507,7 @@
       primaryLabel,
       canPrimaryAction: status !== 'generating',
       shouldRegenerate: hasFeatureContent(featureKey) || generationStatus === 'complete',
+      errorMessage: status === 'failed' ? errorMessage : '',
       statusCopy: status === 'generating'
         ? t('document.hub.generatingEstimate')
         : status === 'failed'
@@ -514,9 +516,9 @@
       primaryMetric,
       secondaryMetric,
       tertiaryMetric,
-      totalCount,
-      completedCount,
-      progressLabel: secondaryMetric,
+      totalCount: featureKey === 'flashcards' ? totalCount : 0,
+      completedCount: featureKey === 'flashcards' ? completedCount : 0,
+      progressLabel: featureKey === 'flashcards' ? secondaryMetric : '',
     };
   }
 
