@@ -426,6 +426,8 @@ export default {
       featuresTitle: 'Study features',
       readyHint: 'Generated and ready to open.',
       readyToGenerateHint: 'No study materials requested yet. Choose what you want to generate when you are ready.',
+      generatingEstimate: 'Usually ready in under a minute.',
+      failedCopy: 'Something went wrong generating this.',
       featureDescriptions: {
         summary: 'Get a comprehensive AI-generated summary of the key concepts and main points from your document.',
         flashcards: 'Study with AI-generated flashcards that help you memorize important terms and concepts.',
@@ -462,7 +464,26 @@ export default {
         open: 'Open',
         startSummary: 'Start Summary',
         startFlashcards: 'Start Flashcards',
-        startMockExam: 'Start Mock Exam'
+        startMockExam: 'Start mock exam',
+        openSummary: 'Open summary',
+        studyFlashcards: 'Study flashcards',
+        retakeExam: 'Retake exam',
+        generateSummary: 'Generate summary',
+        generateFlashcards: 'Generate flashcards',
+        generateMockExam: 'Generate mock exam',
+        generating: 'Generating…',
+        tryAgain: 'Try again'
+      },
+      metrics: {
+        words: '{count} words',
+        cards: '{count} cards',
+        completed: '{completed} of {total} completed',
+        questions: '{count} questions',
+        examBreakdown: '{multipleChoice} multiple-choice, {trueFalse} true/false',
+        notAttempted: 'Not attempted yet',
+        lastScore: 'Last score: {score}% · {count} {attempts}',
+        attempt: 'attempt',
+        attempts: 'attempts'
       },
       meta: {
         fileType: 'File type'
