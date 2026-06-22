@@ -2801,29 +2801,30 @@
 
   .flashcard-stage__answer {
     display: grid;
-    max-height: 0;
+    grid-template-rows: 0fr;
     opacity: 0;
     overflow: hidden;
     border-top: 0 solid transparent;
     padding-top: 0;
     transition:
-      max-height var(--motion-slow) var(--ease-standard),
+      grid-template-rows var(--motion-slow) var(--ease-standard),
       opacity var(--motion-default) var(--ease-standard),
       padding-top var(--motion-default) var(--ease-standard),
       border-color var(--motion-default) var(--ease-standard);
   }
 
   .flashcard-stage__answer--visible {
-    max-height: 60vh;
+    grid-template-rows: 1fr;
     opacity: 1;
     border-top: 1px solid var(--ui-border-default);
     padding-top: 0.95rem;
-    overflow-y: auto;
   }
 
   .flashcard-stage__answer-copy {
     display: grid;
     gap: 0.65rem;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .flashcard-stage__answer-label {

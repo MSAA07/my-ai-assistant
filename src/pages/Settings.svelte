@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import { ExternalLink, RefreshCw, Send, Unlink } from '@lucide/svelte';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
-  import LanguageToggle from '../lib/components/ui/LanguageToggle.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import FieldShell from '../lib/components/ui/FieldShell.svelte';
@@ -17,7 +16,6 @@
     session,
     signOut,
   } from '../stores/auth.js';
-  import { API_BASE } from '../config.js';
   import {
     createTelegramLinkToken,
     disconnectTelegram,
@@ -94,51 +92,6 @@
     newPassword = '';
     confirmPassword = '';
     passwordTouched = { currentPassword: false, newPassword: false, confirmPassword: false };
-  }
-
-  // ── Data Export ──────────────────────────────────────────────────────
-  let exportDownloading = false;
-  let exportError = '';
-  let exportSuccess = false;
-
-  async function handleDataExport() {
-    if (exportDownloading) return;
-    exportDownloading = true;
-    exportError = '';
-    exportSuccess = false;
-
-    try {
-      const response = await fetch(`${API_BASE}/api/user/export`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        exportError = t('settings.dataExport.errors.failed');
-        return;
-      }
-
-      const blob = await response.blob();
-      const contentDisposition = response.headers.get('Content-Disposition') ?? '';
-      const filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
-      const filename = filenameMatch?.[1] ?? `studymaxing-data-export-${new Date().toISOString().slice(0, 10)}.json`;
-
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = filename;
-      anchor.style.display = 'none';
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      URL.revokeObjectURL(url);
-
-      exportSuccess = true;
-    } catch {
-      exportError = t('settings.dataExport.errors.failed');
-    } finally {
-      exportDownloading = false;
-    }
   }
 
   // ── Telegram ─────────────────────────────────────────────────────────
@@ -311,9 +264,8 @@
 {#if !$session}
   <SettingsPanelSkeleton />
 {:else}
-  <PageLayout class="settings-page" width="wide" gap="compact">
+  <PageLayout class="settings-page" width="wide">
     <PageHeader
-      eyebrow={t('settings.eyebrow')}
       title={t('settings.title')}
       subtitle={t('settings.subtitle')}
     />
@@ -323,6 +275,7 @@
       <!-- Account -->
       <Section
         id="account"
+        className="settings-card settings-card--account"
         title={t('settings.account.title')}
         description={t('settings.account.description')}
       >
@@ -350,21 +303,10 @@
         </div>
       </Section>
 
-      <!-- Language -->
-      <Section
-        id="language"
-        title={t('settings.language.title')}
-        description={t('settings.language.description')}
-      >
-        <div class="lang-block">
-          <LanguageToggle />
-          <p class="helper">{t('settings.language.helper')}</p>
-        </div>
-      </Section>
-
       <!-- Telegram -->
       <Section
         id="telegram"
+        className="settings-card settings-card--telegram"
         title={t('settings.telegram.title')}
         description={t('settings.telegram.description')}
       >
@@ -456,6 +398,7 @@
       <!-- Security -->
       <Section
         id="security"
+        className="settings-card settings-card--wide"
         title={t('settings.security.title')}
         description={t('settings.security.description')}
       >
@@ -533,38 +476,10 @@
         </div>
       </Section>
 
-      <!-- Data Export -->
-      <Section
-        id="data-export"
-        title={t('settings.dataExport.title')}
-        description={t('settings.dataExport.description')}
-      >
-        <div class="export-block">
-          <div class="export-actions">
-            <Button
-              type="button"
-              variant="secondary"
-              loading={exportDownloading}
-              disabled={exportDownloading}
-              on:click={handleDataExport}
-            >
-              {exportDownloading ? t('settings.dataExport.downloading') : t('settings.dataExport.download')}
-            </Button>
-          </div>
-
-          {#if exportError}
-            <p class="export-feedback export-feedback--error" role="alert">{exportError}</p>
-          {:else if exportSuccess}
-            <p class="export-feedback export-feedback--success" role="status">{t('settings.dataExport.successNote')}</p>
-          {/if}
-
-          <p class="helper">{t('settings.dataExport.clarification')}</p>
-        </div>
-      </Section>
-
       <!-- Sessions -->
       <Section
         id="sessions"
+        className="settings-card settings-card--wide"
         title={t('settings.sessions.title')}
         description={t('settings.sessions.description')}
       >
@@ -649,8 +564,24 @@
 
   .settings-grid {
     display: grid;
-    gap: var(--ui-space-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-4);
+    align-items: start;
     min-width: 0;
+  }
+
+  :global(.settings-card.ui-section) {
+    background:
+      radial-gradient(circle at top right, color-mix(in srgb, var(--ui-text-primary) 4%, transparent) 0%, transparent 38%),
+      linear-gradient(145deg, color-mix(in srgb, var(--ui-surface-card) 92%, var(--ui-surface-secondary) 8%) 0%, var(--ui-surface-card) 100%);
+    border-color: color-mix(in srgb, var(--ui-text-primary) 8%, var(--ui-border-default) 92%);
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--ui-text-primary) 4%, transparent) inset,
+      var(--ui-shadow-1);
+  }
+
+  :global(.settings-card--wide.ui-section) {
+    grid-column: 1 / -1;
   }
 
   /* Account row */
@@ -708,12 +639,6 @@
   .account-actions {
     flex: 0 0 auto;
     margin-inline-start: auto;
-  }
-
-  /* Language */
-  .lang-block {
-    display: grid;
-    gap: var(--ui-space-2);
   }
 
   .telegram-block,
@@ -822,37 +747,6 @@
   }
 
   .password-feedback--error {
-    background: var(--color-danger-surface);
-    border: 1px solid var(--color-danger-border);
-    color: var(--color-danger-soft);
-  }
-
-  /* Data Export */
-  .export-block {
-    display: grid;
-    gap: var(--ui-space-2);
-    max-width: 34rem;
-  }
-
-  .export-actions {
-    display: flex;
-    align-items: center;
-  }
-
-  .export-feedback {
-    margin: 0;
-    border-radius: var(--ui-radius-md);
-    padding: 0.65rem 0.85rem;
-    font-size: var(--ui-type-body-sm);
-  }
-
-  .export-feedback--success {
-    background: color-mix(in srgb, var(--ui-surface-card) 82%, #dff4e8 18%);
-    border: 1px solid color-mix(in srgb, #1f8f58 40%, var(--ui-border-subtle) 60%);
-    color: #176640;
-  }
-
-  .export-feedback--error {
     background: var(--color-danger-surface);
     border: 1px solid var(--color-danger-border);
     color: var(--color-danger-soft);
@@ -985,6 +879,14 @@
   }
 
   @media (max-width: 640px) {
+    .settings-grid {
+      grid-template-columns: 1fr;
+    }
+
+    :global(.settings-card--wide.ui-section) {
+      grid-column: auto;
+    }
+
     .account-name {
       max-width: 100%;
     }

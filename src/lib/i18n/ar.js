@@ -20,7 +20,7 @@ function mergeDictionaries(base, overrides) {
 const ar = {
   app: {
     name: 'مساعد الدراسة بالذكاء الاصطناعي',
-    wordmark: 'Study AI',
+    wordmark: 'StudyMaxing',
     loadingSession: 'جارٍ تحميل الجلسة...'
   },
   access: {

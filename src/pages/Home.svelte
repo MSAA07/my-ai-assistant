@@ -1173,6 +1173,19 @@
     gap: var(--study-flow-card-gap);
   }
 
+  :global(.guided-shell.ui-card) {
+    --card-bg: color-mix(in srgb, var(--ui-surface-secondary) 74%, var(--ui-bg-page) 26%);
+    --card-border-color: color-mix(in srgb, var(--ui-accent-info) 18%, var(--ui-border-default) 82%);
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--ui-accent-info) 10%, transparent) 0%, transparent 42%),
+      linear-gradient(145deg, color-mix(in srgb, var(--ui-accent-info) 5%, var(--ui-surface-secondary) 95%) 0%, color-mix(in srgb, var(--ui-accent-info) 2%, var(--ui-surface-card) 98%) 100%);
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--ui-text-primary) 5%, transparent) inset,
+      0 18px 48px color-mix(in srgb, var(--color-shadow) 70%, transparent);
+  }
+
   .guided-step-header__title-row,
   .progress-hero__meta,
   .guided-action-bar {

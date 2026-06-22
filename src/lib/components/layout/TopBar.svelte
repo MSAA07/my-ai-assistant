@@ -62,11 +62,6 @@
     theme.setTheme(event.detail.theme);
   }
 
-  function handleProfile() {
-    dispatch('openProfile');
-    closeMenu();
-  }
-
   function handleSignOut() {
     dispatch('signOut');
     closeMenu();
@@ -189,9 +184,6 @@
             <span class="menu-email">{userEmail || t('settings.account.noEmail')}</span>
           </div>
 
-          <MenuItem on:click={handleProfile}>
-            {t('topbar.profile')}
-          </MenuItem>
           <MenuItem on:click={handleSignOut}>
             {t('topbar.logout')}
           </MenuItem>

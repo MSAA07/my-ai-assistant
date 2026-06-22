@@ -21,10 +21,6 @@
     dispatch('signOut');
   }
 
-  function onProfile() {
-    dispatch('openProfile');
-  }
-
   function onToggleSidebar() {
     toggleSidebarCollapsed();
   }
@@ -49,7 +45,6 @@
       planLabel={planLabel}
       sidebarCollapsed={$sidebarCollapsed}
       on:signOut={onSignOut}
-      on:openProfile={onProfile}
       on:toggleSidebar={onToggleSidebar}
     />
 

@@ -2,7 +2,7 @@ export default {
   app: {
     name: 'AI Study Assistant',
     shortName: 'AI',
-    wordmark: 'Study AI',
+    wordmark: 'StudyMaxing',
     loadingSession: 'Loading session...'
   },
   access: {
