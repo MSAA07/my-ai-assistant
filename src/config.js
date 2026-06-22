@@ -18,6 +18,14 @@ export const getApiBaseUrl = () => {
     throw new Error(MISSING_API_BASE_URL_ERROR);
   }
 
+  if (apiBaseUrl === "same-origin") {
+    if (typeof window === "undefined") {
+      throw new Error("VITE_API_BASE_URL=same-origin requires a browser environment");
+    }
+
+    return window.location.origin;
+  }
+
   if (!apiBaseUrl.startsWith("http://") && !apiBaseUrl.startsWith("https://")) {
     apiBaseUrl = `https://${apiBaseUrl}`;
   }

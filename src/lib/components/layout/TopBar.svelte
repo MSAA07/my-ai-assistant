@@ -1,12 +1,15 @@
 <script>
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-  import { PanelLeftClose, PanelLeftOpen } from '@lucide/svelte';
+  import { PanelLeftClose, PanelLeftOpen, SlidersHorizontal } from '@lucide/svelte';
+  import Button from '../ui/Button.svelte';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
   import Badge from '../ui/Badge.svelte';
   import MenuItem from '../ui/MenuItem.svelte';
   import MenuSurface from '../ui/MenuSurface.svelte';
+  import ThemeToggle from '../ui/ThemeToggle.svelte';
   import { ENABLE_ARABIC_UI } from '../../config/features.js';
   import { t } from '../../i18n/t.js';
+  import { theme } from '../../../stores/theme.js';
 
   export let pageTitle = '';
   export let userName = '';
@@ -16,21 +19,47 @@
 
   const dispatch = createEventDispatcher();
   let menuOpen = false;
+  let preferencesOpen = false;
   let accountWrapper;
+  let preferencesWrapper;
 
   function toggleMenu() {
     menuOpen = !menuOpen;
+    preferencesOpen = false;
   }
 
   function closeMenu() {
     menuOpen = false;
   }
 
+  function togglePreferences(event) {
+    event?.stopPropagation();
+    preferencesOpen = !preferencesOpen;
+    menuOpen = false;
+  }
+
+  function closePreferences() {
+    preferencesOpen = false;
+  }
+
   function handleOutsideClick(event) {
-    if (!menuOpen) return;
-    if (accountWrapper && !accountWrapper.contains(event.target)) {
+    if (menuOpen && accountWrapper && !accountWrapper.contains(event.target)) {
       closeMenu();
     }
+    if (preferencesOpen && preferencesWrapper && !preferencesWrapper.contains(event.target)) {
+      closePreferences();
+    }
+  }
+
+  function handleWindowKeydown(event) {
+    if (event.key === 'Escape') {
+      closeMenu();
+      closePreferences();
+    }
+  }
+
+  function handleThemeChange(event) {
+    theme.setTheme(event.detail.theme);
   }
 
   function handleProfile() {
@@ -50,12 +79,14 @@
   onMount(() => {
     if (typeof window !== 'undefined') {
       window.addEventListener('click', handleOutsideClick);
+      window.addEventListener('keydown', handleWindowKeydown);
     }
   });
 
   onDestroy(() => {
     if (typeof window !== 'undefined') {
       window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener('keydown', handleWindowKeydown);
     }
   });
 
@@ -96,9 +127,48 @@
       <Badge className="plan-pill" tone="neutral" size="sm">{planLabel}</Badge>
     {/if}
 
-    {#if ENABLE_ARABIC_UI}
-      <LanguageToggle />
-    {/if}
+    <div class="preferences" bind:this={preferencesWrapper}>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        type="button"
+        className="preferences-trigger"
+        on:click={togglePreferences}
+        aria-haspopup="dialog"
+        aria-expanded={preferencesOpen}
+        aria-controls="app-preferences-menu"
+        aria-label={t('publicHeader.preferencesLabel')}
+        title={t('publicHeader.preferencesLabel')}
+      >
+        <SlidersHorizontal slot="icon" aria-hidden="true" />
+      </Button>
+
+      {#if preferencesOpen}
+        <MenuSurface
+          id="app-preferences-menu"
+          className="preferences-menu"
+          role="dialog"
+          minWidth="260px"
+          aria-label={t('publicHeader.preferencesMenuLabel')}
+        >
+          <div class="preferences-menu__header">
+            {t('publicHeader.preferences')}
+          </div>
+
+          <div class="preferences-menu__row">
+            <span class="preferences-menu__label">{t('settings.theme.title')}</span>
+            <ThemeToggle value={$theme} on:change={handleThemeChange} />
+          </div>
+
+          {#if ENABLE_ARABIC_UI}
+            <div class="preferences-menu__row">
+              <span class="preferences-menu__label">{t('settings.language.title')}</span>
+              <LanguageToggle />
+            </div>
+          {/if}
+        </MenuSurface>
+      {/if}
+    </div>
 
     <div class="account-wrapper" bind:this={accountWrapper}>
       <button
@@ -225,6 +295,60 @@
     color: var(--ui-text-primary);
     letter-spacing: 0;
     font-weight: 500;
+  }
+
+  .preferences {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+
+  :global(.preferences-trigger.ui-button) {
+    color: var(--ui-text-secondary);
+  }
+
+  :global(.preferences-trigger.ui-button:hover),
+  :global(.preferences-trigger.ui-button[aria-expanded='true']) {
+    color: var(--ui-text-primary);
+    background: color-mix(in srgb, var(--ui-text-primary) 7%, transparent);
+  }
+
+  :global(.preferences-menu) {
+    position: absolute;
+    inset-inline-end: 0;
+    top: calc(100% + 0.55rem);
+    z-index: 40;
+    gap: 0.45rem;
+    padding: 0.5rem;
+  }
+
+  .preferences-menu__header {
+    padding: 0.35rem 0.45rem 0.15rem;
+    color: var(--ui-text-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .preferences-menu__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    min-height: 3rem;
+    padding: 0.45rem;
+    border: 1px solid color-mix(in srgb, var(--ui-border-subtle) 72%, transparent);
+    border-radius: var(--ui-radius-sm);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 46%, transparent);
+  }
+
+  .preferences-menu__label {
+    min-width: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    line-height: 1.2;
   }
 
   .account-trigger {
