@@ -8,7 +8,6 @@
   import FieldShell from '../lib/components/ui/FieldShell.svelte';
   import Section from '../lib/components/ui/Section.svelte';
   import SettingsPanelSkeleton from '../lib/components/ui/SettingsPanelSkeleton.svelte';
-  import ThemeToggle from '../lib/components/ui/ThemeToggle.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
   import {
     changePassword,
@@ -24,7 +23,6 @@
     disconnectTelegram,
     getTelegramStatus
   } from '../lib/api/studyHub.js';
-  import { theme } from '../stores/theme.js';
   import { t } from '../lib/i18n/t.js';
   import { validateConfirmPassword, validatePassword } from '../components/auth/validation.js';
 
@@ -44,11 +42,6 @@
     } finally {
       loggingOut = false;
     }
-  }
-
-  // ── Appearance ────────────────────────────────────────────────────────
-  function handleThemeChange(event) {
-    theme.setTheme(event.detail.theme);
   }
 
   // ── Security — change password ────────────────────────────────────────
@@ -355,14 +348,6 @@
             </Button>
           </div>
         </div>
-      </Section>
-
-      <!-- Appearance -->
-      <Section
-        title={t('settings.theme.title')}
-        description={t('settings.theme.description')}
-      >
-        <ThemeToggle value={$theme} on:change={handleThemeChange} />
       </Section>
 
       <!-- Language -->
