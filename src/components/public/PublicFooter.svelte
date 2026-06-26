@@ -1,5 +1,4 @@
 <script>
-  import freelanceLogo from '../../assets/freelance-logo-white.svg';
   import { t } from '../../lib/i18n/t.js';
   import { language } from '../../lib/stores/language.js';
   import { router } from '../../stores/router.js';
@@ -76,12 +75,6 @@
         </nav>
       </section>
 
-      <section class="public-footer__credential">
-        <div class="freelance-mark">
-          <img src={freelanceLogo} alt={t('publicFooter.freelanceLogoAlt')} />
-        </div>
-      </section>
-
     </div>
   </div>
 </footer>
@@ -111,7 +104,7 @@
 
   .public-footer__grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(150px, 0.7fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: start;
     column-gap: clamp(1.5rem, 4vw, 4rem);
     row-gap: 2rem;
@@ -155,26 +148,6 @@
     overflow-wrap: anywhere;
   }
 
-  .public-footer__credential {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-  }
-
-  .freelance-mark {
-    width: min(100%, 176px);
-    padding: 0.7rem 0.85rem;
-    border: 1px solid color-mix(in srgb, white 16%, transparent);
-    border-radius: var(--ui-radius-sm);
-    background: #111318;
-  }
-
-  .freelance-mark img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
   @media (max-width: 960px) {
     .public-footer__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -191,8 +164,5 @@
       grid-template-columns: 1fr;
     }
 
-    .public-footer__credential {
-      justify-content: flex-start;
-    }
   }
 </style>

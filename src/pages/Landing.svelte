@@ -1,4 +1,5 @@
 <script>
+  import { Check, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
   import { tick } from 'svelte';
   import { t } from '../lib/i18n/t.js';
   import { LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH } from '../routes.js';
@@ -94,8 +95,8 @@
 
         {#each tourSteps as step, i}
           <article class="tour-step">
+            <span class="tour-step__marker" aria-hidden="true">{step.num}</span>
             <div class="tour-step__copy">
-              <span class="tour-step__num">{step.num}</span>
               <p class="lp-eyebrow">{t(step.eyebrow)}</p>
               <h3>{t(step.title)}</h3>
               <p>{t(step.body)}</p>
@@ -103,67 +104,66 @@
 
             <div class="tour-step__visual" aria-hidden="true">
               {#if i === 0}
-                <div class="tour-upload">
-                  <div class="tour-upload__drop">
-                    <div>
-                      <p>{t('landing.tour.uploadDropTitle')}</p>
-                      <span>{t('landing.tour.uploadDropMeta')}</span>
+                <div class="tour-mockup tour-upload-mockup">
+                  <div class="tour-upload-zone">
+                    <div class="tour-mockup-icon tour-mockup-icon--large">
+                      <FileText size={26} strokeWidth={1.8} />
                     </div>
+                    <p>Drop your PDF, DOCX, or PPTX here</p>
                   </div>
-                  <div class="tour-file">
-                    <div>
-                      <p>{t('landing.mockup.uploadTitle')}</p>
-                      <small>{t('landing.mockup.uploadMeta')}</small>
+                  <div class="tour-file-row">
+                    <div class="tour-file-row__icon">
+                      <FileText size={18} strokeWidth={1.8} />
                     </div>
-                    <strong>{t('landing.mockup.ready')}</strong>
+                    <p>Biology Midterm.pdf &middot; 4.2 MB &middot; Ready</p>
+                    <Check class="tour-file-row__check" size={18} strokeWidth={2.4} />
                   </div>
                 </div>
               {:else if i === 1}
-                <div class="tour-picker">
-                  <div class="tour-picker__head">
-                    <p>{t('landing.mockup.chooseTitle')}</p>
-                    <span>{t('landing.tour.chooseHint')}</span>
+                <div class="tour-mockup tour-choice-mockup">
+                  <div class="tour-choice-grid">
+                    <div class="tour-choice-card">
+                      <div class="tour-mockup-icon">
+                        <FileText size={18} strokeWidth={1.8} />
+                      </div>
+                      <strong>Summary</strong>
+                      <p>Condensed notes from the source file.</p>
+                    </div>
+                    <div class="tour-choice-card tour-choice-card--selected">
+                      <div class="tour-mockup-icon">
+                        <Layers3 size={18} strokeWidth={1.8} />
+                      </div>
+                      <strong>Flashcards</strong>
+                      <p>Active recall cards for key terms.</p>
+                    </div>
+                    <div class="tour-choice-card">
+                      <div class="tour-mockup-icon">
+                        <ClipboardCheck size={18} strokeWidth={1.8} />
+                      </div>
+                      <strong>Mock Exam</strong>
+                      <p>Practice questions with answer checks.</p>
+                    </div>
                   </div>
-                  <div class="tour-tool-grid">
-                    <div class="tour-tool tour-tool--summary">
-                      <strong>{t('landing.mockup.summaryTitle')}</strong>
-                      <p>{t('landing.mockup.summaryText')}</p>
-                      <span>{t('landing.mockup.selected')}</span>
-                    </div>
-                    <div class="tour-tool tour-tool--flashcards">
-                      <strong>{t('landing.mockup.flashcardsTitle')}</strong>
-                      <p>{t('landing.mockup.flashcardsText')}</p>
-                      <span>{t('landing.mockup.selected')}</span>
-                    </div>
-                    <div class="tour-tool tour-tool--exam">
-                      <strong>{t('landing.mockup.examTitle')}</strong>
-                      <p>{t('landing.mockup.examText')}</p>
-                      <span>{t('landing.mockup.selected')}</span>
-                    </div>
-                  </div>
+                  <button class="tour-generate-button" type="button" tabindex="-1">Generate</button>
                 </div>
               {:else}
-                <div class="tour-hub">
-                  <div class="tour-hub__head">
-                    <div>
-                      <p>{t('landing.mockup.documentTitle')}</p>
-                      <span>{t('landing.tour.hubHint')}</span>
-                    </div>
-                    <strong>{t('landing.mockup.ready')}</strong>
+                <div class="tour-mockup tour-study-mockup">
+                  <div class="tour-tabs">
+                    <span class="tour-tab tour-tab--active">Summary</span>
+                    <span class="tour-tab">Flashcards</span>
+                    <span class="tour-tab">Exam</span>
                   </div>
-                  <div class="tour-output-grid">
-                    <div class="tour-output tour-output--summary">
-                      <span>{t('landing.mockup.summaryReady')}</span>
-                      <p>{t('landing.tour.summaryOutcome')}</p>
-                    </div>
-                    <div class="tour-output tour-output--flashcards">
-                      <span>{t('landing.mockup.flashcardsReady')}</span>
-                      <p>{t('landing.tour.flashcardsOutcome')}</p>
-                    </div>
-                    <div class="tour-output tour-output--exam">
-                      <span>{t('landing.mockup.examReady')}</span>
-                      <p>{t('landing.tour.examOutcome')}</p>
-                    </div>
+                  <div class="tour-summary-panel">
+                    <h4>Biology Midterm</h4>
+                    <ul>
+                      <li>Cell membranes use phospholipid bilayers to control what enters and leaves the cell.</li>
+                      <li>Mitochondria convert glucose into ATP through cellular respiration.</li>
+                      <li>DNA in the nucleus stores instructions for protein synthesis and cell division.</li>
+                    </ul>
+                  </div>
+                  <div class="tour-stat-row">
+                    <span>24 flashcards ready</span>
+                    <span>10 exam questions ready</span>
                   </div>
                 </div>
               {/if}
@@ -357,6 +357,10 @@
     background: var(--ui-bg-page);
   }
 
+  .lp-tour > .lp-container {
+    max-width: min(92rem, 100%);
+  }
+
   .lp-section-head--center {
     max-width: 44rem;
     margin-inline: auto;
@@ -374,64 +378,55 @@
   .tour-shell {
     position: relative;
     display: grid;
-    gap: 1.25rem;
-    max-width: 70rem;
+    gap: 0;
+    max-width: 88rem;
     margin-inline: auto;
   }
 
   .tour-shell__rail {
     position: absolute;
-    inset-block: 2rem;
-    inset-inline-start: 2rem;
+    inset-block: clamp(3rem, 7vw, 5rem);
+    inset-inline-start: 1.35rem;
     width: 1px;
-    background: linear-gradient(180deg, transparent, var(--ui-border-strong) 20%, var(--ui-border-strong) 80%, transparent);
+    background: var(--ui-border-default);
   }
 
   .tour-step {
-    --tour-accent: var(--ui-border-strong);
-    --tour-surface: color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    gap: clamp(1.5rem, 4vw, 4rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 5rem);
     align-items: center;
-    min-height: 24rem;
-    padding: clamp(1.25rem, 3vw, 2rem);
-    padding-inline-start: clamp(4.25rem, 6vw, 5.25rem);
-    border: 1px solid color-mix(in srgb, var(--ui-border-default) 76%, transparent);
-    border-radius: 14px;
-    background: var(--ui-surface-card);
-    box-shadow: none;
+    min-height: 25rem;
+    padding: clamp(3rem, 7vw, 5rem) 0 clamp(3rem, 7vw, 5rem) clamp(5rem, 7vw, 6rem);
   }
 
-  .tour-step:hover {
-    border-color: var(--ui-border-strong);
-    transition: border-color 200ms ease;
+  .tour-step + .tour-step {
+    border-top: 1px solid var(--ui-border-default);
   }
 
-  .tour-step::before {
-    content: "";
+  .tour-step__marker {
     position: absolute;
-    inset-block-start: 2rem;
-    inset-inline-start: calc(2rem - 0.42rem);
-    width: 0.85rem;
-    height: 0.85rem;
-    border-radius: 999px;
-    background: var(--ui-border-strong);
-    box-shadow: 0 0 0 0.35rem color-mix(in srgb, var(--ui-text-primary) 6%, transparent);
+    inset-block-start: clamp(3rem, 7vw, 5rem);
+    inset-inline-start: 0;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--ui-border-strong);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-card);
+    color: var(--ui-text-primary);
+    box-shadow: var(--ui-shadow-1);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
   }
 
   .tour-step__copy {
     min-width: 0;
-  }
-
-  .tour-step__num {
-    display: inline-flex;
-    margin-bottom: 1rem;
-    color: var(--ui-text-muted);
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
   }
 
   .tour-step__copy h3 {
@@ -455,142 +450,235 @@
     min-width: 0;
   }
 
-  .tour-upload,
-  .tour-picker,
-  .tour-hub {
+  .tour-mockup {
     display: grid;
-    gap: 1rem;
-    padding: 1rem;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-4);
     border: 1px solid var(--ui-border-default);
-    border-radius: 12px;
+    border-radius: var(--ui-radius-lg);
+    background: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
+    box-shadow: var(--ui-shadow-2);
+  }
+
+  .tour-mockup-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-sm);
     background: var(--ui-surface-secondary);
+    color: var(--ui-text-primary);
   }
 
-  .tour-upload__drop,
-  .tour-file,
-  .tour-picker__head,
-  .tour-hub__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem;
-    border: 1px solid var(--ui-border-default);
-    border-radius: 10px;
-    background: var(--ui-surface-card);
+  .tour-mockup-icon--large {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: var(--ui-radius-md);
   }
 
-  .tour-upload__drop {
+  .tour-mockup-icon :global(svg) {
+    display: block;
+  }
+
+  .tour-upload-zone {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    justify-content: stretch;
-    min-height: 8rem;
-    padding: 1.2rem;
-    border-style: dashed;
-    background: color-mix(in srgb, var(--ui-text-primary) 3%, var(--ui-surface-card));
+    min-height: 14rem;
+    place-items: center;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-6);
+    border: 1px dashed var(--ui-border-default);
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 44%, transparent);
+    text-align: center;
   }
 
-  .tour-file {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    min-height: 4.5rem;
-  }
-
-  .tour-upload__drop > div,
-  .tour-file > div {
-    min-width: 0;
-  }
-
-  .tour-upload__drop p,
-  .tour-file p {
-    overflow-wrap: anywhere;
-  }
-
-  .tour-upload p,
-  .tour-file p,
-  .tour-picker__head p,
-  .tour-hub__head p {
+  .tour-upload-zone p {
     margin: 0;
     color: var(--ui-text-primary);
-    font-size: 0.98rem;
-    font-weight: 700;
-    line-height: 1.35;
-  }
-
-  .tour-upload span,
-  .tour-file small,
-  .tour-picker__head span,
-  .tour-hub__head span {
-    color: var(--ui-text-secondary);
-    font-size: 0.82rem;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
     line-height: 1.45;
   }
 
-  .tour-upload__drop span,
-  .tour-file small {
-    display: block;
-    margin-top: 0.2rem;
+  .tour-file-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--ui-space-3);
+    min-height: 4rem;
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-md);
+    background: var(--upload-file-row-bg);
   }
 
-  .tour-file strong,
-  .tour-hub__head strong,
-  .tour-tool span {
-    flex: 0 0 auto;
-    padding: 0.25rem 0.55rem;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    font-size: 0.68rem;
+  .tour-file-row__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-surface-secondary);
+    color: var(--ui-text-muted);
+  }
+
+  .tour-file-row__icon :global(svg) {
+    display: block;
+  }
+
+  .tour-file-row p {
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ui-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+  }
+
+  :global(.tour-file-row__check) {
+    color: var(--ui-accent-success);
+  }
+
+  .tour-choice-mockup {
+    align-content: start;
+  }
+
+  .tour-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ui-space-3);
+  }
+
+  .tour-choice-card {
+    display: grid;
+    align-content: start;
+    gap: var(--ui-space-2);
+    min-height: 10rem;
+    padding: var(--ui-space-4);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-secondary);
+    box-shadow: var(--ui-shadow-1);
+  }
+
+  .tour-choice-card--selected {
+    border-color: var(--ui-border-strong);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 72%, var(--ui-text-primary) 8%);
+    box-shadow: var(--ui-focus-ring);
+  }
+
+  .tour-choice-card strong {
+    color: var(--ui-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .tour-choice-card p {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
+  .tour-generate-button {
+    justify-self: start;
+    min-height: 2.75rem;
+    padding-inline: var(--ui-space-5);
+    border: 1px solid transparent;
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-text-primary);
+    color: var(--ui-bg-page);
+    box-shadow: var(--ui-shadow-1);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+  }
+
+  .tour-study-mockup {
+    gap: 0;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .tour-tabs {
+    display: flex;
+    gap: var(--ui-space-1);
+    padding: var(--ui-space-3);
+    border-bottom: 1px solid var(--ui-border-default);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 58%, transparent);
+  }
+
+  .tour-tab {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding-inline: var(--ui-space-3);
+    border: 1px solid transparent;
+    border-radius: var(--ui-radius-sm);
+    color: var(--ui-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+  }
+
+  .tour-tab--active {
+    border-color: var(--ui-border-strong);
+    background: var(--ui-surface-card);
+    color: var(--ui-text-primary);
+    box-shadow: var(--ui-shadow-1);
+  }
+
+  .tour-summary-panel {
+    display: grid;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-5);
+  }
+
+  .tour-summary-panel h4 {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.15rem, 1vw, 1.35rem);
     font-weight: 800;
     line-height: 1.2;
   }
 
-  .tour-tool-grid,
-  .tour-output-grid {
+  .tour-summary-panel ul {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.8rem;
-  }
-
-  .tour-tool,
-  .tour-output {
-    display: grid;
-    align-content: start;
-    gap: 0.7rem;
-    min-height: 11rem;
-    padding: 1rem;
-    border: 1px solid var(--ui-border-default);
-    border-radius: 10px;
-    background: var(--ui-surface-card);
-  }
-
-  .tour-tool strong,
-  .tour-output span {
-    color: var(--ui-text-primary);
-    font-size: 0.92rem;
-    font-weight: 800;
-    line-height: 1.35;
-  }
-
-  .tour-tool p,
-  .tour-output p {
+    gap: var(--ui-space-2);
     margin: 0;
+    padding-inline-start: 1.1rem;
     color: var(--ui-text-secondary);
-    font-size: 0.82rem;
-    line-height: 1.55;
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
   }
 
-  .tour-tool span {
-    justify-self: start;
-    margin-top: auto;
+  .tour-summary-panel li::marker {
+    color: var(--ui-text-primary);
   }
 
-  .tour-output {
-    min-height: 8.5rem;
-    border-color: var(--ui-border-default);
-    background: var(--ui-surface-card);
+  .tour-stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2);
+    padding: 0 var(--ui-space-5) var(--ui-space-5);
+  }
+
+  .tour-stat-row span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding-inline: var(--ui-space-3);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-secondary);
+    color: var(--ui-text-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
   }
 
   .lp-faq {
@@ -699,20 +787,12 @@
 
     .tour-step {
       grid-template-columns: 1fr;
-      padding-inline-start: 3.25rem;
+      min-height: auto;
+      padding-inline-start: 4rem;
     }
 
     .tour-step__copy h3 {
       font-size: clamp(1.4rem, 3vw, 1.9rem);
-    }
-
-    .tour-step::before {
-      inset-inline-start: calc(1.25rem - 0.42rem);
-    }
-
-    .tour-tool-grid,
-    .tour-output-grid {
-      grid-template-columns: 1fr;
     }
   }
 
@@ -722,28 +802,40 @@
     }
 
     .tour-shell__rail {
-      display: none;
+      inset-inline-start: 1.1rem;
     }
 
     .tour-step {
-      padding: 1rem;
+      padding-block: var(--ui-space-7);
+      padding-inline-start: 3.25rem;
     }
 
-    .tour-step::before {
-      display: none;
+    .tour-step__marker {
+      width: 2.25rem;
+      height: 2.25rem;
+      font-size: 0.68rem;
     }
 
-    .tour-upload__drop,
-    .tour-file,
-    .tour-picker__head,
-    .tour-hub__head {
-      align-items: flex-start;
-      flex-direction: column;
+    .tour-mockup {
+      padding: var(--ui-space-3);
     }
 
-    .tour-upload__drop,
-    .tour-file {
+    .tour-upload-zone {
+      min-height: 12rem;
+      padding: var(--ui-space-5);
+    }
+
+    .tour-choice-grid {
       grid-template-columns: 1fr;
+    }
+
+    .tour-tabs {
+      overflow-x: auto;
+    }
+
+    .tour-summary-panel,
+    .tour-stat-row {
+      padding-inline: var(--ui-space-4);
     }
   }
 </style>
