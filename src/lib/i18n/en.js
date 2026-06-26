@@ -798,7 +798,10 @@ export default {
     },
     security: {
       title: 'Security',
-      description: 'Update your password while keeping your current session active.'
+      description: 'Change your password only when you need to protect the account or replace a weak password.',
+      formDescription: 'Enter your current password first, then choose a new password that is unique to StudyMaxing.',
+      guidanceTitle: 'Password guidance',
+      guidanceBody: 'Use a password manager and a long, unique password. Your current session stays active after this update; use Active Sessions below to sign out other devices.'
     },
     account: {
       title: 'Account',

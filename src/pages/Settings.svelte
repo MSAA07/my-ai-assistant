@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { ExternalLink, RefreshCw, Send, Unlink } from '@lucide/svelte';
+  import { ExternalLink, Eye, EyeOff, RefreshCw, Send, ShieldCheck, Unlink } from '@lucide/svelte';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Button from '../lib/components/ui/Button.svelte';
@@ -47,6 +47,9 @@
   let currentPassword = '';
   let newPassword = '';
   let confirmPassword = '';
+  let showCurrentPassword = false;
+  let showNewPassword = false;
+  let showConfirmPassword = false;
   let passwordFeedback = '';
   let passwordFeedbackTone = 'info';
   let passwordTouched = {
@@ -61,6 +64,9 @@
     confirmPassword: passwordTouched.confirmPassword ? validateConfirmPassword(newPassword, confirmPassword, t) : '',
   };
   $: passwordHasErrors = Boolean(passwordErrors.currentPassword || passwordErrors.newPassword || passwordErrors.confirmPassword);
+  $: currentPasswordInputType = showCurrentPassword ? 'text' : 'password';
+  $: newPasswordInputType = showNewPassword ? 'text' : 'password';
+  $: confirmPasswordInputType = showConfirmPassword ? 'text' : 'password';
 
   async function handleChangePassword() {
     if (changingPassword) return;
@@ -275,7 +281,7 @@
       <!-- Account -->
       <Section
         id="account"
-        className="settings-card settings-card--account"
+        className="settings-card settings-card--account settings-card--summary"
         title={t('settings.account.title')}
         description={t('settings.account.description')}
       >
@@ -306,7 +312,7 @@
       <!-- Telegram -->
       <Section
         id="telegram"
-        className="settings-card settings-card--telegram"
+        className="settings-card settings-card--telegram settings-card--summary"
         title={t('settings.telegram.title')}
         description={t('settings.telegram.description')}
       >
@@ -402,77 +408,124 @@
         title={t('settings.security.title')}
         description={t('settings.security.description')}
       >
-        <div class="password-form">
-          <FieldShell
-            label={t('auth.changePassword.fields.currentPassword')}
-            forId="current-password"
-            required
-            error={passwordErrors.currentPassword}
-          >
-            <input
-              id="current-password"
-              type="password"
-              bind:value={currentPassword}
-              autocomplete="current-password"
-              placeholder={t('auth.changePassword.placeholders.currentPassword')}
-              aria-invalid={passwordErrors.currentPassword ? 'true' : 'false'}
-              on:blur={() => (passwordTouched = { ...passwordTouched, currentPassword: true })}
-            />
-          </FieldShell>
+        <div class="security-layout">
+          <div class="password-form">
+            <div class="security-form-copy">
+              <p>{t('settings.security.formDescription')}</p>
+            </div>
 
-          <FieldShell
-            label={t('auth.changePassword.fields.newPassword')}
-            forId="new-password"
-            required
-            error={passwordErrors.newPassword}
-            hint={t('auth.validation.passwordHint')}
-          >
-            <input
-              id="new-password"
-              type="password"
-              bind:value={newPassword}
-              autocomplete="new-password"
-              placeholder={t('auth.changePassword.placeholders.newPassword')}
-              aria-invalid={passwordErrors.newPassword ? 'true' : 'false'}
-              on:blur={() => (passwordTouched = { ...passwordTouched, newPassword: true })}
-            />
-          </FieldShell>
-
-          <FieldShell
-            label={t('auth.fields.confirmPassword')}
-            forId="confirm-new-password"
-            required
-            error={passwordErrors.confirmPassword}
-          >
-            <input
-              id="confirm-new-password"
-              type="password"
-              bind:value={confirmPassword}
-              autocomplete="new-password"
-              placeholder={t('auth.changePassword.placeholders.confirmPassword')}
-              aria-invalid={passwordErrors.confirmPassword ? 'true' : 'false'}
-              on:blur={() => (passwordTouched = { ...passwordTouched, confirmPassword: true })}
-            />
-          </FieldShell>
-
-          {#if passwordFeedback}
-            <p class="password-feedback password-feedback--{passwordFeedbackTone}" role="status">
-              {passwordFeedback}
-            </p>
-          {/if}
-
-          <div class="password-actions">
-            <Button
-              type="button"
-              variant="primary"
-              loading={changingPassword}
-              disabled={changingPassword || passwordHasErrors}
-              on:click={handleChangePassword}
+            <FieldShell
+              label={t('auth.changePassword.fields.currentPassword')}
+              forId="current-password"
+              required
+              error={passwordErrors.currentPassword}
             >
-              {changingPassword ? t('auth.changePassword.actions.loading') : t('auth.changePassword.actions.submit')}
-            </Button>
-            <p class="helper">{t('auth.changePassword.sessionNote')}</p>
+              <div class="password-input-wrap">
+                <input
+                  id="current-password"
+                  type={currentPasswordInputType}
+                  bind:value={currentPassword}
+                  autocomplete="current-password"
+                  placeholder={t('auth.changePassword.placeholders.currentPassword')}
+                  aria-invalid={passwordErrors.currentPassword ? 'true' : 'false'}
+                  on:blur={() => (passwordTouched = { ...passwordTouched, currentPassword: true })}
+                />
+                <button
+                  type="button"
+                  class="password-visibility"
+                  aria-label={showCurrentPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+                  aria-pressed={showCurrentPassword}
+                  on:click={() => (showCurrentPassword = !showCurrentPassword)}
+                >
+                  {#if showCurrentPassword}<EyeOff />{:else}<Eye />{/if}
+                </button>
+              </div>
+            </FieldShell>
+
+            <FieldShell
+              label={t('auth.changePassword.fields.newPassword')}
+              forId="new-password"
+              required
+              error={passwordErrors.newPassword}
+              hint={t('auth.validation.passwordHint')}
+            >
+              <div class="password-input-wrap">
+                <input
+                  id="new-password"
+                  type={newPasswordInputType}
+                  bind:value={newPassword}
+                  autocomplete="new-password"
+                  placeholder={t('auth.changePassword.placeholders.newPassword')}
+                  aria-invalid={passwordErrors.newPassword ? 'true' : 'false'}
+                  on:blur={() => (passwordTouched = { ...passwordTouched, newPassword: true })}
+                />
+                <button
+                  type="button"
+                  class="password-visibility"
+                  aria-label={showNewPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+                  aria-pressed={showNewPassword}
+                  on:click={() => (showNewPassword = !showNewPassword)}
+                >
+                  {#if showNewPassword}<EyeOff />{:else}<Eye />{/if}
+                </button>
+              </div>
+            </FieldShell>
+
+            <FieldShell
+              label={t('auth.fields.confirmPassword')}
+              forId="confirm-new-password"
+              required
+              error={passwordErrors.confirmPassword}
+            >
+              <div class="password-input-wrap">
+                <input
+                  id="confirm-new-password"
+                  type={confirmPasswordInputType}
+                  bind:value={confirmPassword}
+                  autocomplete="new-password"
+                  placeholder={t('auth.changePassword.placeholders.confirmPassword')}
+                  aria-invalid={passwordErrors.confirmPassword ? 'true' : 'false'}
+                  on:blur={() => (passwordTouched = { ...passwordTouched, confirmPassword: true })}
+                />
+                <button
+                  type="button"
+                  class="password-visibility"
+                  aria-label={showConfirmPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+                  aria-pressed={showConfirmPassword}
+                  on:click={() => (showConfirmPassword = !showConfirmPassword)}
+                >
+                  {#if showConfirmPassword}<EyeOff />{:else}<Eye />{/if}
+                </button>
+              </div>
+            </FieldShell>
+
+            {#if passwordFeedback}
+              <p class="password-feedback password-feedback--{passwordFeedbackTone}" role="status">
+                {passwordFeedback}
+              </p>
+            {/if}
+
+            <div class="password-actions">
+              <Button
+                type="button"
+                variant="primary"
+                loading={changingPassword}
+                disabled={changingPassword || passwordHasErrors}
+                on:click={handleChangePassword}
+              >
+                {changingPassword ? t('auth.changePassword.actions.loading') : t('auth.changePassword.actions.submit')}
+              </Button>
+              <p class="helper">{t('auth.changePassword.sessionNote')}</p>
+            </div>
           </div>
+
+          <aside class="security-guidance" aria-label={t('settings.security.guidanceTitle')}>
+            <span class="security-guidance__icon" aria-hidden="true"><ShieldCheck /></span>
+            <div>
+              <h3>{t('settings.security.guidanceTitle')}</h3>
+              <p>{t('settings.security.guidanceBody')}</p>
+            </div>
+          </aside>
         </div>
       </Section>
 
@@ -566,7 +619,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--ui-space-4);
-    align-items: start;
+    align-items: stretch;
     min-width: 0;
   }
 
@@ -584,12 +637,22 @@
     grid-column: 1 / -1;
   }
 
+  :global(.settings-card--summary.ui-section) {
+    height: 100%;
+  }
+
+  :global(.settings-card--summary .ui-section__body) {
+    display: flex;
+    flex-direction: column;
+  }
+
   /* Account row */
   .account-row {
     display: flex;
     align-items: center;
     gap: 1rem;
     flex-wrap: wrap;
+    flex: 1;
   }
 
   .account-avatar {
@@ -721,10 +784,62 @@
   }
 
   /* Password form */
+  .security-layout {
+    display: grid;
+    grid-template-columns: minmax(18rem, 34rem) minmax(16rem, 1fr);
+    gap: var(--ui-space-5);
+    align-items: start;
+  }
+
   .password-form {
     display: grid;
     gap: var(--ui-space-3);
-    max-width: 34rem;
+    min-width: 0;
+  }
+
+  .security-form-copy p {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    line-height: 1.55;
+  }
+
+  .password-input-wrap {
+    position: relative;
+  }
+
+  .password-input-wrap input {
+    padding-inline-end: 3rem;
+  }
+
+  .password-visibility {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0.35rem;
+    width: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--ui-radius-sm);
+    background: transparent;
+    color: var(--ui-text-muted);
+    cursor: pointer;
+  }
+
+  .password-visibility:hover {
+    color: var(--ui-text-primary);
+    background: color-mix(in srgb, var(--ui-text-primary) 7%, transparent);
+  }
+
+  .password-visibility:focus-visible {
+    outline: none;
+    box-shadow: var(--ui-focus-ring-strong);
+  }
+
+  .password-visibility :global(svg) {
+    width: 1rem;
+    height: 1rem;
   }
 
   .password-actions {
@@ -750,6 +865,51 @@
     background: var(--color-danger-surface);
     border: 1px solid var(--color-danger-border);
     color: var(--color-danger-soft);
+  }
+
+  .security-guidance {
+    display: flex;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-4);
+    border: 1px solid var(--ui-border-subtle);
+    border-radius: var(--ui-radius-md);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 68%, transparent);
+  }
+
+  .security-guidance__icon {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--ui-radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-accent-primary);
+    background: color-mix(in srgb, var(--ui-accent-primary) 12%, transparent);
+  }
+
+  .security-guidance__icon :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .security-guidance h3,
+  .security-guidance p {
+    margin: 0;
+  }
+
+  .security-guidance h3 {
+    color: var(--ui-text-primary);
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .security-guidance p {
+    margin-top: var(--ui-space-1);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-label);
+    line-height: 1.6;
   }
 
   /* Sessions */
@@ -898,6 +1058,10 @@
 
     :global(.account-actions .ui-button) {
       width: 100%;
+    }
+
+    .security-layout {
+      grid-template-columns: 1fr;
     }
 
     .session-row {

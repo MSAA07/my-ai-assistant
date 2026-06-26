@@ -25,7 +25,6 @@
 
   let documents = [];
   let loading = true;
-  let refreshing = false;
   let error = '';
   let actionError = '';
   let actionBusyId = '';
@@ -65,9 +64,7 @@
 
   async function loadDocuments({ background = false } = {}) {
     actionError = '';
-    if (background) {
-      refreshing = true;
-    } else {
+    if (!background) {
       loading = true;
       error = '';
     }
@@ -92,9 +89,7 @@
     } catch (err) {
       error = err?.message || t('documentsPage.errors.load');
     } finally {
-      if (background) {
-        refreshing = false;
-      } else {
+      if (!background) {
         loading = false;
       }
     }
@@ -320,17 +315,6 @@
     <svelte:fragment slot="actions">
       {#if !showLibraryEmptyState}
         <div class="header-actions">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="library-refresh"
-            on:click={() => loadDocuments({ background: documents.length > 0 })}
-            disabled={loading || refreshing}
-            aria-label={t('documentsPage.actions.refresh')}
-          >
-            {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
-          </Button>
           <Button type="button" variant="primary" className="library-upload" on:click={goToHome}>
             <span slot="icon" aria-hidden="true">
               <Upload />
@@ -377,16 +361,6 @@
               <Upload />
             </span>
             {t('documentsPage.libraryEmptyUploadCta')}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="library-empty-refresh"
-            on:click={() => loadDocuments({ background: documents.length > 0 })}
-            disabled={refreshing}
-          >
-            {refreshing ? t('common.loading') : t('documentsPage.actions.refresh')}
           </Button>
         </div>
         <span slot="icon" aria-hidden="true">
@@ -489,11 +463,6 @@
     flex-wrap: wrap;
   }
 
-  :global(.library-refresh.ui-button) {
-    --button-shadow: none;
-    font-weight: 500;
-  }
-
   :global(.library-upload.ui-button) {
     --button-shadow: none;
   }
@@ -553,10 +522,6 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--ui-space-2);
-  }
-
-  :global(.library-page .library-empty-refresh.ui-button) {
-    --button-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text-primary) 10%, transparent);
   }
 
   .menu-wrap {
