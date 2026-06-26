@@ -1,4 +1,5 @@
 <script>
+  import { onDestroy } from 'svelte';
   import Button from '../ui/Button.svelte';
   import ProgressBar from '../ui/ProgressBar.svelte';
   import StudyActionCard from '../ui/StudyActionCard.svelte';
@@ -8,8 +9,49 @@
   export let icon;
   export let onPrimaryAction = () => {};
 
+  const MESSAGE_INTERVAL_MS = 2800;
+  const GENERATING_MESSAGE_CONFIG = {
+    summary: {
+      delayMs: 0,
+      messages: [
+        'Reading your document…',
+        'Identifying key concepts…',
+        'Pulling out the main points…',
+        'Writing your summary…',
+        'Almost there…',
+      ],
+    },
+    flashcards: {
+      delayMs: 900,
+      messages: [
+        'Scanning for key terms…',
+        'Matching questions to answers…',
+        'Building your card deck…',
+        'Organising by topic…',
+        'Almost there…',
+      ],
+    },
+    exam: {
+      delayMs: 1800,
+      messages: [
+        'Analysing the content…',
+        'Crafting exam questions…',
+        'Adding true/false questions…',
+        'Mixing up the question types…',
+        'Almost there…',
+      ],
+    },
+  };
+
+  let activeMessageIndex = 0;
+  let messageAnimationKey = 0;
+  let messageDelayTimer = null;
+  let messageIntervalTimer = null;
+  let messageRunKey = '';
+
   $: Icon = icon;
   $: resolvedCard = {
+    key: '',
     title: '',
     status: 'not_generated',
     stateLabel: '',
@@ -25,6 +67,50 @@
     primaryLabel: '',
     ...card,
   };
+  $: generatingConfig = GENERATING_MESSAGE_CONFIG[resolvedCard.key] ?? GENERATING_MESSAGE_CONFIG.summary;
+  $: activeGeneratingMessage = generatingConfig.messages[activeMessageIndex] ?? generatingConfig.messages[0] ?? '';
+  $: nextMessageRunKey = `${resolvedCard.key}:${resolvedCard.status}`;
+  $: if (nextMessageRunKey !== messageRunKey) {
+    messageRunKey = nextMessageRunKey;
+    resetGeneratingMessages();
+  }
+
+  onDestroy(() => {
+    clearMessageTimers();
+  });
+
+  function clearMessageTimers() {
+    if (messageDelayTimer) clearTimeout(messageDelayTimer);
+    if (messageIntervalTimer) clearInterval(messageIntervalTimer);
+    messageDelayTimer = null;
+    messageIntervalTimer = null;
+  }
+
+  function advanceGeneratingMessage() {
+    const messageCount = generatingConfig.messages.length;
+    if (messageCount <= 1) return;
+    activeMessageIndex = (activeMessageIndex + 1) % messageCount;
+    messageAnimationKey += 1;
+  }
+
+  function resetGeneratingMessages() {
+    clearMessageTimers();
+    activeMessageIndex = 0;
+    messageAnimationKey += 1;
+
+    if (resolvedCard.status !== 'generating') return;
+
+    const startInterval = () => {
+      clearMessageTimers();
+      messageIntervalTimer = setInterval(advanceGeneratingMessage, MESSAGE_INTERVAL_MS);
+    };
+
+    if (generatingConfig.delayMs > 0) {
+      messageDelayTimer = setTimeout(startInterval, generatingConfig.delayMs);
+    } else {
+      startInterval();
+    }
+  }
 </script>
 
 <StudyActionCard class="study-hub-feature-card" title={resolvedCard.title} status={resolvedCard.status} statusLabel={resolvedCard.stateLabel}>
@@ -37,10 +123,42 @@
   <svelte:fragment slot="description">
     {#if resolvedCard.status === 'not_generated'}
       <p>{resolvedCard.description}</p>
+    {:else if resolvedCard.status === 'generating'}
+      {#key messageAnimationKey}
+        <p class="study-hub-feature-card__generating-message">{activeGeneratingMessage}</p>
+      {/key}
     {:else if resolvedCard.status !== 'complete'}
       <p>{resolvedCard.statusCopy}</p>
     {/if}
   </svelte:fragment>
+
+  {#if resolvedCard.status === 'generating'}
+    <div class="study-hub-feature-card__skeleton study-hub-feature-card__skeleton--{resolvedCard.key}" aria-hidden="true">
+      {#if resolvedCard.key === 'summary'}
+        <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-line" style="--skeleton-width: 90%; --skeleton-height: 11px;"></span>
+        <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-line" style="--skeleton-width: 75%; --skeleton-height: 11px;"></span>
+        <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-line" style="--skeleton-width: 82%; --skeleton-height: 11px;"></span>
+        <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-line" style="--skeleton-width: 60%; --skeleton-height: 11px;"></span>
+      {:else if resolvedCard.key === 'flashcards'}
+        {#each [0, 1] as rowIndex}
+          <div class="study-hub-feature-card__skeleton-row study-hub-feature-card__skeleton-row--flashcard">
+            <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-square"></span>
+            <span class="study-hub-feature-card__skeleton-copy">
+              <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-line" style={`--skeleton-width: ${rowIndex === 0 ? '78%' : '70%'}; --skeleton-height: 10px;`}></span>
+              <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-line" style={`--skeleton-width: ${rowIndex === 0 ? '52%' : '62%'}; --skeleton-height: 10px;`}></span>
+            </span>
+          </div>
+        {/each}
+      {:else}
+        {#each [0, 1, 2] as rowIndex}
+          <div class="study-hub-feature-card__skeleton-row study-hub-feature-card__skeleton-row--exam">
+            <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-circle"></span>
+            <span class="study-hub-feature-card__skeleton-item study-hub-feature-card__skeleton-line" style={`--skeleton-width: ${rowIndex === 0 ? '82%' : rowIndex === 1 ? '68%' : '76%'}; --skeleton-height: 10px;`}></span>
+          </div>
+        {/each}
+      {/if}
+    </div>
+  {/if}
 
   {#if resolvedCard.status === 'complete'}
     <div class="study-hub-feature-card__metrics">
@@ -96,6 +214,72 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .study-hub-feature-card__generating-message {
+    animation: study-hub-feature-card-message-in 0.4s ease both;
+  }
+
+  .study-hub-feature-card__skeleton {
+    display: grid;
+    gap: 8px;
+    min-height: 5.5rem;
+  }
+
+  .study-hub-feature-card__skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+    min-width: 0;
+  }
+
+  .study-hub-feature-card__skeleton-row--flashcard {
+    min-height: 36px;
+  }
+
+  .study-hub-feature-card__skeleton-row--exam {
+    min-height: 24px;
+  }
+
+  .study-hub-feature-card__skeleton-copy {
+    flex: 1 1 auto;
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .study-hub-feature-card__skeleton-item {
+    --skeleton-color: var(--ui-surface-secondary);
+    display: block;
+    background:
+      linear-gradient(
+        90deg,
+        var(--skeleton-color) 0%,
+        color-mix(in srgb, var(--skeleton-color) 72%, var(--ui-surface-card) 28%) 48%,
+        var(--skeleton-color) 100%
+      );
+    background-size: 220% 100%;
+    animation: study-hub-feature-card-shimmer 1.6s ease-in-out infinite;
+  }
+
+  .study-hub-feature-card__skeleton-line {
+    width: var(--skeleton-width, 100%);
+    height: var(--skeleton-height, 10px);
+    border-radius: 6px;
+  }
+
+  .study-hub-feature-card__skeleton-square {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    flex: 0 0 36px;
+  }
+
+  .study-hub-feature-card__skeleton-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex: 0 0 20px;
+  }
+
   :global(.study-hub-feature-card__progress.ui-progress) {
     --progress-height: 0.25rem;
   }
@@ -111,4 +295,26 @@
     stroke-width: 2;
   }
 
+  @keyframes study-hub-feature-card-message-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes study-hub-feature-card-shimmer {
+    from { background-position: -160% 0; }
+    to { background-position: 160% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .study-hub-feature-card__generating-message,
+    .study-hub-feature-card__skeleton-item {
+      animation: none;
+    }
+  }
 </style>

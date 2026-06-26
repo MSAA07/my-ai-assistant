@@ -509,7 +509,7 @@
       shouldRegenerate: status === 'failed' || hasFeatureContent(featureKey) || generationStatus === 'complete',
       errorMessage: status === 'failed' ? errorMessage : '',
       statusCopy: status === 'generating'
-        ? t('document.hub.generatingEstimate')
+        ? ''
         : status === 'failed'
           ? t('document.hub.failedCopy')
           : '',
