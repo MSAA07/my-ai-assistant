@@ -728,6 +728,10 @@
     flex-direction: column;
   }
 
+  :global(.app-shell:has(.settings-modal-backdrop) .shell-main) {
+    z-index: 120;
+  }
+
   /* Account row */
   .account-row {
     display: flex;
