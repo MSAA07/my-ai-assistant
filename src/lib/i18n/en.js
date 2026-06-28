@@ -797,8 +797,16 @@ export default {
       light: 'Light'
     },
     security: {
-      title: 'Security',
-      description: 'Change your password only when you need to protect the account or replace a weak password.',
+      title: 'Account information',
+      description: 'Review the details connected to your StudyMaxing account.',
+      detailsLabel: 'Account details',
+      nameLabel: 'Name',
+      emailLabel: 'Email address',
+      planLabel: 'Plan',
+      passwordTitle: 'Password',
+      passwordDescription: 'Keep your password private. Change it only when you need to protect the account or replace a weak password.',
+      changePassword: 'Change password',
+      passwordEyebrow: 'Security',
       formDescription: 'Enter your current password first, then choose a new password that is unique to StudyMaxing.',
       guidanceTitle: 'Password guidance',
       guidanceBody: 'Use a password manager and a long, unique password. Your current session stays active after this update; use Active Sessions below to sign out other devices.'
