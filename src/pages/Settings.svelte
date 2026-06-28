@@ -732,6 +732,10 @@
     z-index: 120;
   }
 
+  :global(.app-shell:has(.settings-modal-backdrop) .content-wrapper) {
+    z-index: 140;
+  }
+
   /* Account row */
   .account-row {
     display: flex;
