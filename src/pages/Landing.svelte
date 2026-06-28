@@ -134,7 +134,7 @@
                         <Layers3 size={18} strokeWidth={1.8} />
                       </div>
                       <strong>Flashcards</strong>
-                      <p>Active recall cards for key terms.</p>
+                      <p>Question, answer, then mark correct or incorrect.</p>
                     </div>
                     <div class="tour-choice-card">
                       <div class="tour-mockup-icon">
@@ -149,21 +149,23 @@
               {:else}
                 <div class="tour-mockup tour-study-mockup">
                   <div class="tour-tabs">
-                    <span class="tour-tab tour-tab--active">Summary</span>
-                    <span class="tour-tab">Flashcards</span>
+                    <span class="tour-tab">Summary</span>
+                    <span class="tour-tab tour-tab--active">Flashcards</span>
                     <span class="tour-tab">Exam</span>
                   </div>
-                  <div class="tour-summary-panel">
-                    <h4>Biology Midterm</h4>
-                    <ul>
-                      <li>Cell membranes use phospholipid bilayers to control what enters and leaves the cell.</li>
-                      <li>Mitochondria convert glucose into ATP through cellular respiration.</li>
-                      <li>DNA in the nucleus stores instructions for protein synthesis and cell division.</li>
-                    </ul>
-                  </div>
-                  <div class="tour-stat-row">
-                    <span>24 flashcards ready</span>
-                    <span>10 exam questions ready</span>
+                  <div class="tour-flashcard-panel">
+                    <div class="tour-flashcard-card">
+                      <p class="tour-flashcard-side">Question</p>
+                      <h4>What is the main function of the cell membrane?</h4>
+                    </div>
+                    <div class="tour-flashcard-card tour-flashcard-card--answer">
+                      <p class="tour-flashcard-side">Answer</p>
+                      <p>It controls what enters and leaves the cell through a selectively permeable phospholipid bilayer.</p>
+                    </div>
+                    <div class="tour-flashcard-actions">
+                      <span class="tour-flashcard-action tour-flashcard-action--incorrect">Mark incorrect</span>
+                      <span class="tour-flashcard-action tour-flashcard-action--correct">Mark correct</span>
+                    </div>
                   </div>
                 </div>
               {/if}
@@ -633,52 +635,81 @@
     box-shadow: var(--ui-shadow-1);
   }
 
-  .tour-summary-panel {
+  .tour-flashcard-panel {
     display: grid;
     gap: var(--ui-space-3);
     padding: var(--ui-space-5);
   }
 
-  .tour-summary-panel h4 {
-    margin: 0;
-    color: var(--ui-text-primary);
-    font-size: clamp(1.15rem, 1vw, 1.35rem);
-    font-weight: 800;
-    line-height: 1.2;
+  .tour-flashcard-card {
+    display: grid;
+    gap: var(--ui-space-3);
+    min-height: 9rem;
+    padding: var(--ui-space-5);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-card);
   }
 
-  .tour-summary-panel ul {
-    display: grid;
-    gap: var(--ui-space-2);
+  .tour-flashcard-card--answer {
+    min-height: 7.5rem;
+    border-color: var(--ui-border-strong);
+    background: color-mix(in srgb, var(--ui-surface-secondary) 56%, var(--ui-surface-card) 44%);
+  }
+
+  .tour-flashcard-side {
     margin: 0;
-    padding-inline-start: 1.1rem;
+    color: var(--ui-text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tour-flashcard-card h4 {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.15rem, 1.5vw, 1.6rem);
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .tour-flashcard-card p:not(.tour-flashcard-side) {
+    margin: 0;
     color: var(--ui-text-secondary);
     font-size: var(--font-size-sm);
     line-height: 1.6;
   }
 
-  .tour-summary-panel li::marker {
-    color: var(--ui-text-primary);
-  }
-
-  .tour-stat-row {
-    display: flex;
-    flex-wrap: wrap;
+  .tour-flashcard-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--ui-space-2);
-    padding: 0 var(--ui-space-5) var(--ui-space-5);
   }
 
-  .tour-stat-row span {
+  .tour-flashcard-action {
     display: inline-flex;
     align-items: center;
-    min-height: 2rem;
-    padding-inline: var(--ui-space-3);
+    justify-content: center;
+    min-height: 2.5rem;
     border: 1px solid var(--ui-border-default);
-    border-radius: var(--ui-radius-pill);
+    border-radius: var(--ui-radius-sm);
     background: var(--ui-surface-secondary);
     color: var(--ui-text-primary);
     font-size: var(--font-size-xs);
     font-weight: 700;
+  }
+
+  .tour-flashcard-action--incorrect {
+    border-color: color-mix(in srgb, var(--ui-accent-danger) 40%, var(--ui-border-default) 60%);
+    background: var(--ui-accent-danger);
+    color: var(--destructive-foreground);
+  }
+
+  .tour-flashcard-action--correct {
+    border-color: color-mix(in srgb, var(--ui-accent-success) 40%, var(--ui-border-default) 60%);
+    background: var(--ui-accent-success-strong);
+    color: var(--success-foreground);
   }
 
   .lp-faq {
@@ -831,10 +862,24 @@
 
     .tour-tabs {
       overflow-x: auto;
+      gap: var(--ui-space-1);
+      padding-inline: var(--ui-space-2);
     }
 
-    .tour-summary-panel,
-    .tour-stat-row {
+    .tour-tab {
+      min-height: 2rem;
+      padding-inline: var(--ui-space-2);
+      font-size: 0.68rem;
+    }
+
+    .tour-file-row p {
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      line-height: 1.4;
+    }
+
+    .tour-flashcard-panel {
       padding-inline: var(--ui-space-4);
     }
   }

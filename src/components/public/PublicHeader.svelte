@@ -69,7 +69,6 @@
 <header class="public-header">
   <div class="public-header__inner">
     <button type="button" class="brand" on:click={navigateHome} aria-label={t('publicHeader.brandHome')}>
-      <span class="brand-mark" aria-hidden="true"></span>
       <span class="brand-title">{t('publicHeader.brandName')}</span>
     </button>
 
@@ -162,18 +161,6 @@
     text-align: start;
   }
 
-  .brand-mark {
-    width: 1.125rem;
-    height: 1.125rem;
-    flex: 0 0 auto;
-    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 82%, transparent);
-    border-radius: 0.25rem;
-    background:
-      linear-gradient(135deg, transparent 49%, var(--ui-text-primary) 50% 58%, transparent 59%),
-      var(--ui-bg-page);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-bg-page) 70%, transparent);
-  }
-
   .brand-title {
     min-width: 0;
     color: var(--ui-text-primary);
@@ -254,13 +241,18 @@
 
   @media (max-width: 520px) {
     .public-header__inner {
-      width: min(100% - 24px, var(--size-content));
+      width: min(100% - 16px, var(--size-content));
       min-height: 60px;
       gap: var(--ui-space-2);
     }
 
+    .brand {
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+    }
+
     .brand-title {
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
     }
 
     .public-header__actions {
@@ -268,9 +260,9 @@
     }
 
     :global(.public-header .ui-button) {
-      min-height: 2.25rem;
-      padding-inline: 0.625rem;
-      font-size: 0.8125rem;
+      min-height: 2.5rem;
+      padding-inline: 0.45rem;
+      font-size: 0.78rem;
     }
 
     :global(.public-header .preferences-trigger.ui-button) {
@@ -282,14 +274,30 @@
 
   @media (max-width: 420px) {
     .brand-title {
-      display: none;
+      display: inline;
+      font-size: 0.8125rem;
     }
 
     :global(.preferences-menu) {
       position: fixed;
-      inset-inline: 12px;
+      inset-inline: 8px;
       top: 68px;
       min-width: 0;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .public-header__inner {
+      gap: 0.375rem;
+    }
+
+    .public-header__actions {
+      gap: 0.125rem;
+    }
+
+    :global(.public-header .ui-button) {
+      padding-inline: 0.375rem;
+      font-size: 0.75rem;
     }
   }
 </style>

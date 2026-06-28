@@ -164,5 +164,10 @@
       grid-template-columns: 1fr;
     }
 
+    .public-footer a {
+      display: flex;
+      min-height: 2.75rem;
+      align-items: center;
+    }
   }
 </style>
