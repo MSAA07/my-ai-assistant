@@ -715,6 +715,15 @@
     flex-direction: column;
   }
 
+  :global(.settings-card--account.ui-section) {
+    align-self: start;
+    height: auto;
+  }
+
+  :global(.settings-card--account .ui-section__body) {
+    padding-block-start: var(--ui-space-4);
+  }
+
   :global(.app-shell:has(.settings-modal-backdrop) .shell-main) {
     z-index: 120;
   }
@@ -727,19 +736,19 @@
   .account-row {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--ui-space-3);
     flex-wrap: wrap;
-    flex: 1;
+    padding-block-start: var(--ui-space-1);
   }
 
   .account-avatar {
     flex: 0 0 auto;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: 50%;
     background: color-mix(in srgb, var(--ui-accent-primary) 18%, var(--ui-surface-secondary) 82%);
     color: var(--ui-text-primary);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -758,7 +767,7 @@
   .account-name {
     margin: 0;
     color: var(--ui-text-primary);
-    font-size: 0.9375rem;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     letter-spacing: -0.01em;
     max-width: 200px;
@@ -770,7 +779,7 @@
   .account-email {
     margin: 0;
     color: var(--ui-text-secondary);
-    font-size: var(--ui-type-body-sm);
+    font-size: var(--font-size-xs);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -779,6 +788,11 @@
   .account-actions {
     flex: 0 0 auto;
     margin-inline-start: auto;
+  }
+
+  :global(.account-actions .ui-button) {
+    min-height: 2.25rem;
+    padding-inline: var(--ui-space-3);
   }
 
   .telegram-block,
