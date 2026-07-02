@@ -1,5 +1,5 @@
 <script>
-  import { Check, ClipboardCheck, FileText, Layers3 } from '@lucide/svelte';
+  import { Check, ClipboardCheck, Download, FileText, FolderOpen, Layers3, ScanText, Send } from '@lucide/svelte';
   import { tick } from 'svelte';
   import { t } from '../lib/i18n/t.js';
   import { LANDING_PATH, SIGN_IN_PATH, SIGN_UP_PATH } from '../routes.js';
@@ -9,6 +9,14 @@
     { num: '01', eyebrow: 'landing.tour.step1Eyebrow', title: 'landing.tour.step1Title', body: 'landing.tour.step1Body' },
     { num: '02', eyebrow: 'landing.tour.step2Eyebrow', title: 'landing.tour.step2Title', body: 'landing.tour.step2Body' },
     { num: '03', eyebrow: 'landing.tour.step3Eyebrow', title: 'landing.tour.step3Title', body: 'landing.tour.step3Body' }
+  ];
+
+  const differenceCards = [
+    { icon: 'languages', title: 'landing.difference.cards.language.title', body: 'landing.difference.cards.language.body' },
+    { icon: 'scan', title: 'landing.difference.cards.scanned.title', body: 'landing.difference.cards.scanned.body' },
+    { icon: 'download', title: 'landing.difference.cards.export.title', body: 'landing.difference.cards.export.body' },
+    { icon: 'send', title: 'landing.difference.cards.telegram.title', body: 'landing.difference.cards.telegram.body' },
+    { icon: 'folder', title: 'landing.difference.cards.together.title', body: 'landing.difference.cards.together.body' }
   ];
 
   const faqs = [
@@ -78,6 +86,44 @@
         <span>{t('landing.problemHeadline2')}</span>
       </h2>
       <p class="lp-problem__body">{t('landing.problemBody')}</p>
+    </div>
+  </section>
+
+  <section class="lp-difference" aria-labelledby="difference-heading">
+    <div class="lp-container">
+      <div class="lp-section-head lp-section-head--center">
+        <p class="lp-eyebrow">{t('landing.difference.eyebrow')}</p>
+        <h2 id="difference-heading" class="lp-h2">{t('landing.difference.headline')}</h2>
+        <p class="lp-section-sub">{t('landing.difference.sub')}</p>
+      </div>
+
+      <div class="difference-grid">
+        {#each differenceCards as card}
+          <article class="difference-card">
+            <div class="difference-card__icon" aria-hidden="true">
+              {#if card.icon === 'languages'}
+                <svg class="difference-card__arabic-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 6h9" />
+                  <path d="M8.5 3v3" />
+                  <path d="M10.5 6c-.8 3.2-2.7 5.5-6.5 7" />
+                  <path d="M5.5 9.5c1.1 1.5 2.8 2.7 5.2 3.5" />
+                  <text x="15.1" y="18" fill="currentColor" font-size="10.5" font-weight="800" font-family="Arial, sans-serif">ع</text>
+                </svg>
+              {:else if card.icon === 'scan'}
+                <ScanText size={22} strokeWidth={1.9} />
+              {:else if card.icon === 'download'}
+                <Download size={22} strokeWidth={1.9} />
+              {:else if card.icon === 'send'}
+                <Send size={22} strokeWidth={1.9} />
+              {:else}
+                <FolderOpen size={22} strokeWidth={1.9} />
+              {/if}
+            </div>
+            <h3>{t(card.title)}</h3>
+            <p>{t(card.body)}</p>
+          </article>
+        {/each}
+      </div>
     </div>
   </section>
 
@@ -375,6 +421,80 @@
     color: var(--ui-text-secondary);
     font-size: 1rem;
     line-height: 1.7;
+  }
+
+  .lp-difference {
+    padding-block: clamp(5rem, 9vw, 9rem);
+    border-top: 1px solid var(--ui-border-default);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-surface-card) 26%, transparent) 0%, transparent 44%),
+      var(--ui-bg-page);
+  }
+
+  .difference-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--ui-space-4);
+    max-width: 72rem;
+    margin-inline: auto;
+  }
+
+  .difference-card {
+    display: grid;
+    align-content: start;
+    gap: var(--ui-space-3);
+    min-height: 15rem;
+    padding: var(--ui-space-5);
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-lg);
+    background: color-mix(in srgb, var(--ui-surface-card) 94%, transparent);
+    box-shadow: var(--ui-shadow-1);
+  }
+
+  .difference-card:nth-child(-n + 3) {
+    grid-column: span 2;
+  }
+
+  .difference-card:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+
+  .difference-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--ui-border-default);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-surface-secondary);
+    color: var(--ui-text-primary);
+  }
+
+  .difference-card__icon :global(svg) {
+    display: block;
+  }
+
+  .difference-card__arabic-icon path {
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .difference-card h3 {
+    margin: 0;
+    color: var(--ui-text-primary);
+    font-size: clamp(1.1rem, 1.4vw, 1.35rem);
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .difference-card p {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: 1.65;
   }
 
   .tour-shell {
@@ -812,6 +932,20 @@
 
   /* ── Responsive ────────────────────────────────── */
   @media (max-width: 900px) {
+    .difference-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .difference-card,
+    .difference-card:nth-child(-n + 3),
+    .difference-card:nth-child(n + 4) {
+      grid-column: auto;
+    }
+
+    .difference-card:last-child {
+      grid-column: 1 / -1;
+    }
+
     .tour-shell__rail {
       inset-inline-start: 1.25rem;
     }
@@ -830,6 +964,17 @@
   @media (max-width: 640px) {
     .lp-hero__headline {
       font-size: clamp(2.45rem, 14vw, 3.35rem);
+    }
+
+    .difference-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .difference-card,
+    .difference-card:last-child {
+      grid-column: auto;
+      min-height: auto;
+      padding: var(--ui-space-4);
     }
 
     .tour-shell__rail {

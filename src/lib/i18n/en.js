@@ -103,6 +103,33 @@ export default {
     problemHeadline1: 'Too much to revise?',
     problemHeadline2: 'Start with what matters.',
     problemBody: 'Upload your file. StudyMaxing pulls out the key ideas and turns them into summary, flashcards, and exam practice.',
+    difference: {
+      eyebrow: 'Why StudyMaxing',
+      headline: 'A complete study pack from your own material.',
+      sub: 'Upload one document and build the way you revise: read the key ideas, practice active recall, test yourself, export your materials, or send practice to your phone.',
+      cards: {
+        language: {
+          title: 'Study in Arabic or English',
+          body: 'Upload Arabic or English material and get your summary, flashcards, and practice exam in the language of your document.'
+        },
+        scanned: {
+          title: 'Works with scanned PDFs',
+          body: 'Use typed files or scanned lecture handouts. StudyMaxing reads the content and turns it into structured revision material.'
+        },
+        export: {
+          title: 'Export your revision pack',
+          body: 'Download summaries, flashcards, and practice exams as PDFs for offline review, printing, or sharing.'
+        },
+        telegram: {
+          title: 'Send practice to Telegram',
+          body: 'Deliver flashcards and practice exams to Telegram so you can review from your phone wherever you study.'
+        },
+        together: {
+          title: 'Everything stays together',
+          body: 'Your source file, summary, flashcards, mock exam, and progress live in one Study Hub for that document.'
+        }
+      }
+    },
     featuresEyebrow: 'What you get',
     featuresHeadline: 'Three study tools. One upload.',
     feature1Eyebrow: 'Summary',
