@@ -3,7 +3,6 @@
   import { PanelLeftClose, PanelLeftOpen, SlidersHorizontal } from '@lucide/svelte';
   import Button from '../ui/Button.svelte';
   import LanguageToggle from '../ui/LanguageToggle.svelte';
-  import Badge from '../ui/Badge.svelte';
   import MenuItem from '../ui/MenuItem.svelte';
   import MenuSurface from '../ui/MenuSurface.svelte';
   import ThemeToggle from '../ui/ThemeToggle.svelte';
@@ -14,7 +13,6 @@
   export let pageTitle = '';
   export let userName = '';
   export let userEmail = '';
-  export let planLabel = '';
   export let sidebarCollapsed = false;
 
   const dispatch = createEventDispatcher();
@@ -118,10 +116,6 @@
   </div>
 
   <div class="utility-area">
-    {#if planLabel}
-      <Badge className="plan-pill" tone="neutral" size="sm">{planLabel}</Badge>
-    {/if}
-
     <div class="preferences" bind:this={preferencesWrapper}>
       <Button
         variant="ghost"
@@ -278,17 +272,6 @@
     flex: 0 0 auto;
   }
 
-  :global(.plan-pill) {
-    min-height: 24px;
-    padding-inline: 0.625rem;
-    border-radius: var(--ui-radius-sm);
-    border-color: transparent;
-    background: color-mix(in srgb, var(--ui-surface-secondary) 82%, transparent);
-    color: var(--ui-text-primary);
-    letter-spacing: 0;
-    font-weight: 500;
-  }
-
   .preferences {
     position: relative;
     display: inline-flex;
@@ -442,9 +425,6 @@
       gap: 0.5rem;
     }
 
-    :global(.plan-pill) {
-      display: none;
-    }
   }
 
   @media (max-width: 1024px) {

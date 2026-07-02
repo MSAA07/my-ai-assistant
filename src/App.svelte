@@ -126,10 +126,7 @@
   $: isAuthenticated = !!$session;
   $: bootstrapPending = $isLoading || $authMeta?.bootstrapPending;
   $: isAdmin = $session?.user?.role?.toLowerCase() === 'admin';
-  $: plan = $session?.user?.plan ?? 'free';
-  $: isPaidPlan = plan === 'pro' || plan === 'premium';
   $: locale = $language;
-  $: planLabel = locale && (isPaidPlan ? t('nav.proBadge') : t('nav.freeBadge'));
   $: isPublicRoute = isPublicRoutePath(normalizedPath);
   $: isAuthRoute = isAuthRoutePath(normalizedPath);
   $: isAuthPage = [
@@ -197,19 +194,7 @@
       : undefined
   }));
 
-  $: secondaryItems = locale && [
-    {
-      id: 'plan',
-      labelKey: 'nav.plan',
-      label: t('nav.plan'),
-      href: '#/settings',
-      icon: 'plan',
-      badge: {
-        label: planLabel,
-        variant: isPaidPlan ? 'success' : ''
-      }
-    }
-  ];
+  $: secondaryItems = locale && [];
 </script>
 
 {#key $language}
@@ -308,7 +293,6 @@
         pageTitle={pageTitle}
         userName={$session?.user?.name ?? ''}
         userEmail={$session?.user?.email ?? ''}
-        planLabel={planLabel}
         bottomNavItems={bottomNavItems}
         on:signOut={signOut}
       >

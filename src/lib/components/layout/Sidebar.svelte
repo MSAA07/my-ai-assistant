@@ -2,7 +2,6 @@
   import {
     BookOpen,
     ClipboardCheck,
-    CreditCard,
     House,
     Layers,
     Settings,
@@ -15,7 +14,6 @@
   export let items = [];
   export let secondaryItems = [];
   export let activeId = '';
-  export let planLabel = '';
   export let collapsed = false;
 
   const badgeToneMap = {
@@ -32,12 +30,10 @@
     flashcards: Layers,
     exams: ClipboardCheck,
     settings: Settings,
-    plan: CreditCard,
     admin: ShieldCheck,
   };
 
-  $: planItem = secondaryItems.find((item) => item.icon === 'plan') ?? secondaryItems[0] ?? null;
-  $: footerItems = secondaryItems.filter((item) => item !== planItem);
+  $: footerItems = secondaryItems.filter((item) => item.icon !== 'plan');
 
   function labelFor(item) {
     return item?.labelKey ? t(item.labelKey) : item?.label ?? '';
@@ -90,13 +86,6 @@
           </a>
         {/each}
       </div>
-    {/if}
-
-    {#if planItem}
-      <a class="plan-card" href={planItem.href}>
-        <p class="plan-label">{labelFor(planItem)}</p>
-        <p class="plan-value">{planItem.badge?.label || planLabel || t('nav.freeBadge')}</p>
-      </a>
     {/if}
 
   </div>
@@ -197,8 +186,7 @@
   }
 
   .nav-item:focus-visible,
-  .brand:focus-visible,
-  .plan-card:focus-visible {
+  .brand:focus-visible {
     outline: none;
     box-shadow: var(--ui-focus-ring-strong);
   }
@@ -218,11 +206,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .plan-card {
-    user-select: none;
-    -webkit-user-select: none;
   }
 
   .nav-badge {
@@ -248,8 +231,7 @@
   .sidebar.collapsed .brand-wordmark,
   .sidebar.collapsed .nav-label,
   .sidebar.collapsed :global(.nav-badge),
-  .sidebar.collapsed .footer-links,
-  .sidebar.collapsed .plan-card {
+  .sidebar.collapsed .footer-links {
     display: none;
   }
 
@@ -275,37 +257,6 @@
 
   .footer-link {
     min-height: 32px;
-  }
-
-  .plan-card {
-    display: grid;
-    gap: 0.125rem;
-    padding: 0.75rem 0.875rem;
-    border-radius: var(--ui-radius-md);
-    border: 1px solid color-mix(in srgb, var(--ui-text-primary) 8%, var(--ui-border-default) 92%);
-    background: color-mix(in srgb, var(--ui-text-primary) 4%, transparent);
-    color: var(--ui-text-primary);
-    text-decoration: none;
-    transition: background var(--motion-fast) var(--ease-standard);
-  }
-
-  .plan-card:hover {
-    background: color-mix(in srgb, var(--ui-text-primary) 7%, transparent);
-  }
-
-  .plan-label,
-  .plan-value {
-    margin: 0;
-  }
-
-  .plan-label {
-    font-size: 0.6875rem;
-    color: var(--ui-text-muted);
-  }
-
-  .plan-value {
-    font-size: 0.875rem;
-    font-weight: 500;
   }
 
   @media (max-width: 767px) {

@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { CreditCard, ExternalLink, Eye, EyeOff, KeyRound, Mail, RefreshCw, Send, Unlink, User, X } from '@lucide/svelte';
+  import { ExternalLink, Eye, EyeOff, KeyRound, Mail, RefreshCw, Send, Unlink, User, X } from '@lucide/svelte';
   import PageLayout from '../lib/components/layout/PageLayout.svelte';
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Button from '../lib/components/ui/Button.svelte';
@@ -29,8 +29,6 @@
 
   $: userName = $session?.user?.name ?? t('settings.account.anonymous');
   $: userEmail = $session?.user?.email ?? t('settings.account.noEmail');
-  $: plan = $session?.user?.plan ?? 'free';
-  $: planLabel = plan === 'pro' || plan === 'premium' ? t('nav.proBadge') : t('nav.freeBadge');
   $: userInitial = (userName?.[0] ?? '?').toUpperCase();
 
   async function handleLogout() {
@@ -308,10 +306,6 @@
         title={t('settings.account.title')}
         description={t('settings.account.description')}
       >
-        <div slot="actions">
-          <StatusBadge status={plan === 'free' ? 'info' : 'ready'}>{planLabel}</StatusBadge>
-        </div>
-
         <div class="account-row">
           <div class="account-avatar" aria-hidden="true">{userInitial}</div>
           <div class="account-info">
@@ -449,13 +443,6 @@
               </div>
             </div>
 
-            <div class="account-detail-row">
-              <span class="account-detail-icon" aria-hidden="true"><CreditCard /></span>
-              <div>
-                <p class="account-detail-label">{t('settings.security.planLabel')}</p>
-                <p class="account-detail-value">{planLabel}</p>
-              </div>
-            </div>
           </div>
 
           <aside class="password-summary" aria-label={t('settings.security.passwordTitle')}>

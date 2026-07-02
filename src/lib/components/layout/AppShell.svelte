@@ -14,7 +14,6 @@
   export let pageTitle = '';
   export let userName = '';
   export let userEmail = '';
-  export let planLabel = '';
   export let bottomNavItems = [];
 
   function onSignOut() {
@@ -33,7 +32,6 @@
     items={navItems}
     secondaryItems={secondaryItems}
     activeId={activeNav}
-    planLabel={planLabel}
     collapsed={$sidebarCollapsed}
   />
 
@@ -42,7 +40,6 @@
       pageTitle={pageTitle}
       userName={userName}
       userEmail={userEmail}
-      planLabel={planLabel}
       sidebarCollapsed={$sidebarCollapsed}
       on:signOut={onSignOut}
       on:toggleSidebar={onToggleSidebar}
