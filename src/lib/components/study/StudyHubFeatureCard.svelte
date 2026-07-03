@@ -4,6 +4,7 @@
   import ProgressBar from '../ui/ProgressBar.svelte';
   import StudyActionCard from '../ui/StudyActionCard.svelte';
   import { Sparkles } from '@lucide/svelte';
+  import { t } from '../../i18n/t.js';
 
   export let card = {};
   export let icon;
@@ -13,32 +14,32 @@
   const GENERATING_MESSAGE_CONFIG = {
     summary: {
       delayMs: 0,
-      messages: [
-        'Reading your document…',
-        'Identifying key concepts…',
-        'Pulling out the main points…',
-        'Writing your summary…',
-        'Almost there…',
+      messageKeys: [
+        'document.hub.generatingMessages.summary.reading',
+        'document.hub.generatingMessages.summary.identifying',
+        'document.hub.generatingMessages.summary.extracting',
+        'document.hub.generatingMessages.summary.writing',
+        'document.hub.generatingMessages.common.almostThere',
       ],
     },
     flashcards: {
       delayMs: 900,
-      messages: [
-        'Scanning for key terms…',
-        'Matching questions to answers…',
-        'Building your card deck…',
-        'Organising by topic…',
-        'Almost there…',
+      messageKeys: [
+        'document.hub.generatingMessages.flashcards.scanning',
+        'document.hub.generatingMessages.flashcards.matching',
+        'document.hub.generatingMessages.flashcards.building',
+        'document.hub.generatingMessages.flashcards.organising',
+        'document.hub.generatingMessages.common.almostThere',
       ],
     },
     exam: {
       delayMs: 1800,
-      messages: [
-        'Analysing the content…',
-        'Crafting exam questions…',
-        'Adding true/false questions…',
-        'Mixing up the question types…',
-        'Almost there…',
+      messageKeys: [
+        'document.hub.generatingMessages.exam.analysing',
+        'document.hub.generatingMessages.exam.crafting',
+        'document.hub.generatingMessages.exam.trueFalse',
+        'document.hub.generatingMessages.exam.mixing',
+        'document.hub.generatingMessages.common.almostThere',
       ],
     },
   };
@@ -68,7 +69,8 @@
     ...card,
   };
   $: generatingConfig = GENERATING_MESSAGE_CONFIG[resolvedCard.key] ?? GENERATING_MESSAGE_CONFIG.summary;
-  $: activeGeneratingMessage = generatingConfig.messages[activeMessageIndex] ?? generatingConfig.messages[0] ?? '';
+  $: activeGeneratingMessageKey = generatingConfig.messageKeys[activeMessageIndex] ?? generatingConfig.messageKeys[0] ?? '';
+  $: activeGeneratingMessage = activeGeneratingMessageKey ? t(activeGeneratingMessageKey) : '';
   $: nextMessageRunKey = `${resolvedCard.key}:${resolvedCard.status}`;
   $: if (nextMessageRunKey !== messageRunKey) {
     messageRunKey = nextMessageRunKey;
@@ -87,7 +89,7 @@
   }
 
   function advanceGeneratingMessage() {
-    const messageCount = generatingConfig.messages.length;
+    const messageCount = generatingConfig.messageKeys.length;
     if (messageCount <= 1) return;
     activeMessageIndex = (activeMessageIndex + 1) % messageCount;
     messageAnimationKey += 1;

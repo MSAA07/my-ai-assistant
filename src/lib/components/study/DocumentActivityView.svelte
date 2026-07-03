@@ -1284,7 +1284,7 @@
       <div class="activity-content-head activity-content-head--summary">
         <div class="activity-content-head__copy">
           <Badge tone="success" variant="outline" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
-          <h1 class="activity-content-head__title">{title}</h1>
+          <h1 class="activity-content-head__title bidi-isolate" dir="auto">{title}</h1>
         </div>
         <div class="activity-content-head__actions">
           {#if summaryFeature.hasContent}
@@ -1414,7 +1414,7 @@
       <div class="activity-content-head activity-content-head--flashcards">
         <div class="activity-content-head__copy">
           <Badge tone="accent" variant="outline" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
-          <h1 class="activity-content-head__title">{title}</h1>
+          <h1 class="activity-content-head__title bidi-isolate" dir="auto">{title}</h1>
         </div>
         {#if flashcardsFeature.hasContent}
           <div class="activity-content-head__actions">
@@ -1625,7 +1625,7 @@
       <div class="activity-content-head activity-content-head--exam">
         <div class="activity-content-head__copy">
           <Badge tone="warning" variant="soft" size="sm" uppercase className="summary-mode-badge">{modeLabel}</Badge>
-          <h1 class="activity-content-head__title">{title}</h1>
+          <h1 class="activity-content-head__title bidi-isolate" dir="auto">{title}</h1>
         </div>
         {#if examFeature.hasContent}
           <div class="activity-content-head__actions">

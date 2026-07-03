@@ -460,6 +460,29 @@ export default {
         flashcards: 'Study with AI-generated flashcards that help you memorize important terms and concepts.',
         exam: 'Test your knowledge with a practice exam featuring multiple-choice and true/false questions based on the content.'
       },
+      generatingMessages: {
+        common: {
+          almostThere: 'Almost there…'
+        },
+        summary: {
+          reading: 'Reading your document…',
+          identifying: 'Identifying key concepts…',
+          extracting: 'Pulling out the main points…',
+          writing: 'Writing your summary…'
+        },
+        flashcards: {
+          scanning: 'Scanning for key terms…',
+          matching: 'Matching questions to answers…',
+          building: 'Building your card deck…',
+          organising: 'Organising by topic…'
+        },
+        exam: {
+          analysing: 'Analysing the content…',
+          crafting: 'Crafting exam questions…',
+          trueFalse: 'Adding true/false questions…',
+          mixing: 'Mixing up the question types…'
+        }
+      },
       features: {
         summary: 'Summary',
         flashcards: 'Flashcards',

@@ -914,7 +914,13 @@
       {t('document.hub.backToStudyHub')}
     </Button>
 
-    <PageHeader className="document-header" eyebrow={t('nav.study')} title={documentTitle} subtitle={documentSubtitle}>
+    <PageHeader className="document-header" eyebrow={t('nav.study')}>
+      <svelte:fragment slot="title">
+        <h1 class="document-header-title bidi-isolate" dir="auto">{documentTitle}</h1>
+      </svelte:fragment>
+      <svelte:fragment slot="subtitle">
+        <p class="document-header-subtitle bidi-isolate" dir="auto">{documentSubtitle}</p>
+      </svelte:fragment>
       <div slot="meta" class="document-meta">
         {#if fileTypeBadge}<span class="document-meta-pill">{fileTypeBadge}</span>{/if}
         {#if languageMeta}<span class="document-meta-pill">{languageMeta.value}</span>{/if}
@@ -960,6 +966,8 @@
   :global(.document-hub .back-link svg){width:1.15rem;height:1.15rem;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
   :global(.document-hub .back-link:hover){color:var(--ui-text-primary);transform:none}
   .document-meta{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+  .document-header-title{margin:0;color:var(--ui-text-primary);font-size:var(--study-flow-title-size);line-height:1.08;letter-spacing:0;text-wrap:balance}
+  .document-header-subtitle{margin:0;max-width:54ch;color:var(--ui-text-secondary);font-size:var(--study-flow-subtitle-size);line-height:1.55}
   .document-meta-pill{display:inline-flex;align-items:center;min-height:var(--study-flow-chip-min-height);padding:0 var(--study-flow-chip-padding-inline);border-radius:var(--study-flow-chip-radius);border:1px solid var(--ui-border-default);background:color-mix(in srgb,var(--ui-surface-secondary) 50%,transparent);color:var(--ui-text-secondary);font-size:.75rem;font-weight:500}
   h2{margin:0;color:var(--ui-text-primary);font-size:1rem;font-weight:600;line-height:1.2;letter-spacing:-.02em}
   :global(.document-hub .state-panel){display:grid;gap:var(--space-2)}
