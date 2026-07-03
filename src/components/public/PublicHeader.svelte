@@ -247,8 +247,8 @@
     }
 
     .brand {
-      min-width: 2.5rem;
-      min-height: 2.5rem;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
     }
 
     .brand-title {
@@ -260,14 +260,14 @@
     }
 
     :global(.public-header .ui-button) {
-      min-height: 2.5rem;
+      min-height: 2.75rem;
       padding-inline: 0.45rem;
       font-size: 0.78rem;
     }
 
     :global(.public-header .preferences-trigger.ui-button) {
-      min-width: 2.5rem;
-      min-height: 2.5rem;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
       padding-inline: 0;
     }
   }

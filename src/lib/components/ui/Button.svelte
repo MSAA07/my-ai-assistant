@@ -157,12 +157,13 @@
   }
 
   @media (max-width: 767px) {
-    :global(.ui-button[data-size='sm']) {
+    :global(.ui-button) {
       min-height: 2.75rem;
     }
 
     :global(.ui-button[data-size='icon']),
-    :global(.ui-button[data-size='icon-sm']) {
+    :global(.ui-button[data-size='icon-sm']),
+    :global(.ui-button[data-size='icon-lg']) {
       min-height: 2.75rem;
       min-width: 2.75rem;
       display: inline-flex;

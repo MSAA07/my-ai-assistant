@@ -1043,14 +1043,14 @@
   }
 
   .password-input-wrap input {
-    padding-inline-end: 3rem;
+    padding-inline-end: 3.35rem;
   }
 
   .password-visibility {
     position: absolute;
     inset-block: 0;
     inset-inline-end: 0.35rem;
-    width: 2.35rem;
+    width: 2.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1246,6 +1246,7 @@
     }
 
     :global(.account-actions .ui-button) {
+      min-height: 2.75rem;
       width: 100%;
     }
 

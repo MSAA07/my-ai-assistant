@@ -258,7 +258,7 @@
 
   .password-toggle {
     flex: 0 0 auto;
-    min-height: 2rem;
+    min-height: 2.75rem;
     display: flex;
     align-items: center;
     border: 1px solid transparent;
@@ -296,6 +296,9 @@
   }
 
   .auth-switch-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
     margin-inline-start: 0.25rem;
     color: var(--ui-text-primary);
     font-weight: 600;
@@ -315,7 +318,7 @@
 
   :global(.forgot-btn) {
     justify-self: start;
-    min-height: auto;
+    min-height: 2.75rem;
     padding: 0;
     color: var(--ui-text-secondary);
     text-decoration: underline;
