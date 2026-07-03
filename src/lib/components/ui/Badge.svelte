@@ -48,6 +48,13 @@
     letter-spacing: 0.01em;
   }
 
+  @media (max-width: 767px) {
+    .ui-badge[data-size='sm'] {
+      font-size: var(--font-size-sm);
+      line-height: 1.6;
+    }
+  }
+
   .ui-badge[data-variant='outline'] {
     --badge-bg: transparent;
     --badge-border: var(--ui-border-default);

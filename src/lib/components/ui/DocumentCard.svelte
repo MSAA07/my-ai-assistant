@@ -206,6 +206,13 @@
     min-width: 0;
   }
 
+  @media (max-width: 767px) {
+    :global(.ui-document-card .status-badge) {
+      font-size: var(--font-size-sm);
+      line-height: 1.6;
+    }
+  }
+
   @media (max-width: 640px) {
     .ui-document-card__copy h2 {
       -webkit-line-clamp: 3;
