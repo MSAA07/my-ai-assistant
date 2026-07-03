@@ -99,7 +99,7 @@ Evidence:
 - Selector / computed values:
   - `.upload-panel__details summary`
   - English at `360x800`: text `Accepted formats and limits`, rect `302x20.1`
-  - Arabic at `360x800`: text `الصيغ والحدود المقبولة`, rect `302x20.1`
+  - Arabic at `360x800`: localized Arabic summary label, rect `302x20.1`
 - Screenshot: `upload-flow-harness-panel-compact-360x800-en.png`, `upload-flow-harness-panel-compact-360x800-ar.png`
 - Source line: `UploadPanel.svelte:346`
 
