@@ -222,4 +222,13 @@
     border: 1px solid var(--color-danger-border);
     color: var(--color-danger-soft);
   }
+
+  @media (max-width: 768px) {
+    :global(.auth-card .ui-field__label),
+    :global(.auth-card .ui-field__meta),
+    .auth-eyebrow {
+      font-size: var(--ui-type-body-sm);
+      line-height: 1.35;
+    }
+  }
 </style>

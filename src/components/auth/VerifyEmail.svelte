@@ -235,4 +235,11 @@
     background: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-surface-secondary) 12%);
     color: var(--color-text-secondary);
   }
+
+  @media (max-width: 768px) {
+    .auth-eyebrow {
+      font-size: var(--ui-type-body-sm);
+      line-height: 1.35;
+    }
+  }
 </style>

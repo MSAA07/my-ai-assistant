@@ -252,7 +252,7 @@
     }
 
     .brand-title {
-      font-size: 0.8125rem;
+      font-size: var(--ui-type-body-sm);
     }
 
     .public-header__actions {
@@ -262,7 +262,7 @@
     :global(.public-header .ui-button) {
       min-height: 2.75rem;
       padding-inline: 0.45rem;
-      font-size: 0.78rem;
+      font-size: var(--ui-type-body-sm);
     }
 
     :global(.public-header .preferences-trigger.ui-button) {
@@ -270,12 +270,18 @@
       min-height: 2.75rem;
       padding-inline: 0;
     }
+
+    .preferences-menu__header,
+    .preferences-menu__label {
+      font-size: var(--ui-type-body-sm);
+      line-height: 1.35;
+    }
   }
 
   @media (max-width: 420px) {
     .brand-title {
       display: inline;
-      font-size: 0.8125rem;
+      font-size: var(--ui-type-body-sm);
     }
 
     :global(.preferences-menu) {
@@ -297,7 +303,7 @@
 
     :global(.public-header .ui-button) {
       padding-inline: 0.375rem;
-      font-size: 0.75rem;
+      font-size: var(--ui-type-body-sm);
     }
   }
 </style>

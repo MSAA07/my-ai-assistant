@@ -324,4 +324,14 @@
     text-decoration: underline;
     text-underline-offset: 2px;
   }
+
+  @media (max-width: 768px) {
+    :global(.auth-card .ui-field__label),
+    :global(.auth-card .ui-field__meta),
+    .auth-eyebrow,
+    .password-toggle {
+      font-size: var(--ui-type-body-sm);
+      line-height: 1.35;
+    }
+  }
 </style>

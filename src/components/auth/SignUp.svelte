@@ -435,4 +435,15 @@
     outline: none;
     box-shadow: var(--ui-focus-ring-strong);
   }
+
+  @media (max-width: 768px) {
+    :global(.auth-card .ui-field__label),
+    :global(.auth-card .ui-field__meta),
+    .password-toggle,
+    .password-strength__label,
+    .trust-line {
+      font-size: var(--ui-type-body-sm);
+      line-height: 1.35;
+    }
+  }
 </style>
