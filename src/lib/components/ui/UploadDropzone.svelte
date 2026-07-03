@@ -401,6 +401,8 @@
     .upload-dropzone__drag-chip {
       position: static;
       max-width: 100%;
+      font-size: 0.875rem;
+      line-height: 1.45;
     }
 
     .upload-dropzone__title {
@@ -409,6 +411,13 @@
 
     .upload-dropzone__description {
       font-size: var(--font-size-sm);
+    }
+
+    .upload-dropzone__support,
+    .upload-dropzone__divider strong,
+    .upload-dropzone--compact .upload-dropzone__description {
+      font-size: 0.875rem;
+      line-height: 1.45;
     }
 
     :global(.upload-dropzone__browse.ui-button) {

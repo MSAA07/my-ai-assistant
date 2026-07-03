@@ -254,6 +254,13 @@
   }
 
   @media (max-width: 720px) {
+    .upload-modal__support,
+    .upload-modal__error,
+    .upload-modal__counter {
+      font-size: 0.875rem;
+      line-height: 1.45;
+    }
+
     .upload-modal__footer {
       flex-direction: column;
       align-items: stretch;

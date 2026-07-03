@@ -118,6 +118,13 @@
     font-size: 0.8125rem;
   }
 
+  @media (max-width: 640px) {
+    .upload-file-row__size {
+      font-size: 0.875rem;
+      line-height: 1.45;
+    }
+  }
+
   .upload-file-row__remove {
     border: 0;
     min-width: 44px;

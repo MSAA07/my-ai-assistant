@@ -424,6 +424,20 @@
   }
 
   @media (max-width: 720px) {
+    .upload-panel__support,
+    .upload-panel__counter,
+    .upload-panel__details summary,
+    .upload-panel__details-copy {
+      font-size: 0.875rem;
+      line-height: 1.45;
+    }
+
+    .upload-panel__details summary {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
     .upload-panel__footer {
       flex-direction: row;
       align-items: center;
