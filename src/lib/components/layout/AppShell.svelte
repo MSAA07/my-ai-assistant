@@ -139,7 +139,11 @@
     }
 
     .shell-main {
+      height: 100dvh;
       min-height: 100dvh;
+      box-sizing: border-box;
+      overflow: hidden;
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
     }
 
     .content-wrapper {
@@ -149,6 +153,11 @@
         calc(var(--layout-shell-padding-block) + var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))
         max(var(--ui-space-4), env(safe-area-inset-right));
       gap: var(--layout-shell-page-gap-tight);
+    }
+
+    .shell-content {
+      min-height: 0;
+      overflow-y: auto;
     }
   }
 </style>
