@@ -60,6 +60,7 @@
     --shell-sidebar-width-expanded: var(--size-sidebar, 16rem);
     --shell-sidebar-width-collapsed: var(--size-sidebar-collapsed, 5rem);
     --shell-sidebar-width: var(--shell-sidebar-width-expanded);
+    --bottom-nav-height: var(--size-bottom-nav, 4.5rem);
     display: grid;
     grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr);
     min-height: 100dvh;
@@ -145,7 +146,7 @@
       padding:
         var(--layout-shell-padding-block)
         max(var(--ui-space-4), env(safe-area-inset-left))
-        calc(var(--layout-shell-padding-block) + var(--size-bottom-nav) + env(safe-area-inset-bottom))
+        calc(var(--layout-shell-padding-block) + var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))
         max(var(--ui-space-4), env(safe-area-inset-right));
       gap: var(--layout-shell-page-gap-tight);
     }

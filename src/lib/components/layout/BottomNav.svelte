@@ -69,11 +69,13 @@
     z-index: 95;
     display: none;
     pointer-events: none;
+    box-sizing: border-box;
     background: color-mix(in srgb, var(--ui-surface-card) 90%, transparent);
     backdrop-filter: blur(10px);
     border-top: 1px solid var(--ui-border-default);
-    min-height: var(--size-bottom-nav);
-    padding: var(--space-2) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
+    min-height: calc(var(--bottom-nav-height, var(--size-bottom-nav, 4.5rem)) + env(safe-area-inset-bottom, 0px));
+    padding: var(--space-2) var(--space-2) var(--space-1);
+    padding-bottom: calc(var(--space-1) + env(safe-area-inset-bottom, 0px));
     justify-content: space-around;
   }
 
