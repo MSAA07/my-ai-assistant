@@ -5,6 +5,7 @@
   import PageHeader from '../lib/components/ui/PageHeader.svelte';
   import Button from '../lib/components/ui/Button.svelte';
   import FieldShell from '../lib/components/ui/FieldShell.svelte';
+  import ModalSurface from '../lib/components/ui/ModalSurface.svelte';
   import Section from '../lib/components/ui/Section.svelte';
   import SettingsPanelSkeleton from '../lib/components/ui/SettingsPanelSkeleton.svelte';
   import StatusBadge from '../lib/components/ui/StatusBadge.svelte';
@@ -536,145 +537,141 @@
     </div>
   </PageLayout>
 
-  {#if passwordModalOpen}
-    <div class="settings-modal-backdrop" role="presentation" on:click={closePasswordModal}>
-      <div
-        class="settings-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="change-password-title"
-        tabindex="-1"
-        on:click|stopPropagation
-        on:keydown|stopPropagation
+  <ModalSurface
+    open={passwordModalOpen}
+    width="min(34rem, 100%)"
+    padding="lg"
+    labelledBy="change-password-title"
+    className="settings-password-modal"
+    overlayClassName="settings-password-modal-overlay"
+    on:close={closePasswordModal}
+  >
+    <div class="settings-modal__header">
+      <div>
+        <p class="settings-modal__eyebrow">{t('settings.security.passwordEyebrow')}</p>
+        <h2 id="change-password-title">{t('settings.security.changePassword')}</h2>
+      </div>
+      <button
+        type="button"
+        class="settings-modal__close"
+        aria-label={t('common.close')}
+        disabled={changingPassword}
+        on:click={closePasswordModal}
       >
-        <div class="settings-modal__header">
-          <div>
-            <p class="settings-modal__eyebrow">{t('settings.security.passwordEyebrow')}</p>
-            <h2 id="change-password-title">{t('settings.security.changePassword')}</h2>
-          </div>
+        <X aria-hidden="true" />
+      </button>
+    </div>
+
+    <div class="password-form">
+      <div class="security-form-copy">
+        <p>{t('settings.security.formDescription')}</p>
+      </div>
+
+      <FieldShell
+        label={t('auth.changePassword.fields.currentPassword')}
+        forId="current-password"
+        required
+        error={passwordErrors.currentPassword}
+      >
+        <div class="password-input-wrap">
+          <input
+            id="current-password"
+            type={currentPasswordInputType}
+            bind:value={currentPassword}
+            autocomplete="current-password"
+            placeholder={t('auth.changePassword.placeholders.currentPassword')}
+            aria-invalid={passwordErrors.currentPassword ? 'true' : 'false'}
+            on:blur={() => (passwordTouched = { ...passwordTouched, currentPassword: true })}
+          />
           <button
             type="button"
-            class="settings-modal__close"
-            aria-label={t('common.close')}
-            disabled={changingPassword}
-            on:click={closePasswordModal}
+            class="password-visibility"
+            aria-label={showCurrentPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+            aria-pressed={showCurrentPassword}
+            on:click={() => (showCurrentPassword = !showCurrentPassword)}
           >
-            <X aria-hidden="true" />
+            {#if showCurrentPassword}<EyeOff />{:else}<Eye />{/if}
           </button>
         </div>
+      </FieldShell>
 
-        <div class="password-form">
-          <div class="security-form-copy">
-            <p>{t('settings.security.formDescription')}</p>
-          </div>
-
-          <FieldShell
-            label={t('auth.changePassword.fields.currentPassword')}
-            forId="current-password"
-            required
-            error={passwordErrors.currentPassword}
+      <FieldShell
+        label={t('auth.changePassword.fields.newPassword')}
+        forId="new-password"
+        required
+        error={passwordErrors.newPassword}
+        hint={t('auth.validation.passwordHint')}
+      >
+        <div class="password-input-wrap">
+          <input
+            id="new-password"
+            type={newPasswordInputType}
+            bind:value={newPassword}
+            autocomplete="new-password"
+            placeholder={t('auth.changePassword.placeholders.newPassword')}
+            aria-invalid={passwordErrors.newPassword ? 'true' : 'false'}
+            on:blur={() => (passwordTouched = { ...passwordTouched, newPassword: true })}
+          />
+          <button
+            type="button"
+            class="password-visibility"
+            aria-label={showNewPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+            aria-pressed={showNewPassword}
+            on:click={() => (showNewPassword = !showNewPassword)}
           >
-            <div class="password-input-wrap">
-              <input
-                id="current-password"
-                type={currentPasswordInputType}
-                bind:value={currentPassword}
-                autocomplete="current-password"
-                placeholder={t('auth.changePassword.placeholders.currentPassword')}
-                aria-invalid={passwordErrors.currentPassword ? 'true' : 'false'}
-                on:blur={() => (passwordTouched = { ...passwordTouched, currentPassword: true })}
-              />
-              <button
-                type="button"
-                class="password-visibility"
-                aria-label={showCurrentPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
-                aria-pressed={showCurrentPassword}
-                on:click={() => (showCurrentPassword = !showCurrentPassword)}
-              >
-                {#if showCurrentPassword}<EyeOff />{:else}<Eye />{/if}
-              </button>
-            </div>
-          </FieldShell>
-
-          <FieldShell
-            label={t('auth.changePassword.fields.newPassword')}
-            forId="new-password"
-            required
-            error={passwordErrors.newPassword}
-            hint={t('auth.validation.passwordHint')}
-          >
-            <div class="password-input-wrap">
-              <input
-                id="new-password"
-                type={newPasswordInputType}
-                bind:value={newPassword}
-                autocomplete="new-password"
-                placeholder={t('auth.changePassword.placeholders.newPassword')}
-                aria-invalid={passwordErrors.newPassword ? 'true' : 'false'}
-                on:blur={() => (passwordTouched = { ...passwordTouched, newPassword: true })}
-              />
-              <button
-                type="button"
-                class="password-visibility"
-                aria-label={showNewPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
-                aria-pressed={showNewPassword}
-                on:click={() => (showNewPassword = !showNewPassword)}
-              >
-                {#if showNewPassword}<EyeOff />{:else}<Eye />{/if}
-              </button>
-            </div>
-          </FieldShell>
-
-          <FieldShell
-            label={t('auth.fields.confirmPassword')}
-            forId="confirm-new-password"
-            required
-            error={passwordErrors.confirmPassword}
-          >
-            <div class="password-input-wrap">
-              <input
-                id="confirm-new-password"
-                type={confirmPasswordInputType}
-                bind:value={confirmPassword}
-                autocomplete="new-password"
-                placeholder={t('auth.changePassword.placeholders.confirmPassword')}
-                aria-invalid={passwordErrors.confirmPassword ? 'true' : 'false'}
-                on:blur={() => (passwordTouched = { ...passwordTouched, confirmPassword: true })}
-              />
-              <button
-                type="button"
-                class="password-visibility"
-                aria-label={showConfirmPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
-                aria-pressed={showConfirmPassword}
-                on:click={() => (showConfirmPassword = !showConfirmPassword)}
-              >
-                {#if showConfirmPassword}<EyeOff />{:else}<Eye />{/if}
-              </button>
-            </div>
-          </FieldShell>
-
-          {#if passwordFeedback}
-            <p class="password-feedback password-feedback--{passwordFeedbackTone}" role="status">
-              {passwordFeedback}
-            </p>
-          {/if}
-
-          <div class="password-actions">
-            <Button
-              type="button"
-              variant="primary"
-              loading={changingPassword}
-              disabled={changingPassword || passwordHasErrors}
-              on:click={handleChangePassword}
-            >
-              {changingPassword ? t('auth.changePassword.actions.loading') : t('auth.changePassword.actions.submit')}
-            </Button>
-            <p class="helper">{t('auth.changePassword.sessionNote')}</p>
-          </div>
+            {#if showNewPassword}<EyeOff />{:else}<Eye />{/if}
+          </button>
         </div>
+      </FieldShell>
+
+      <FieldShell
+        label={t('auth.fields.confirmPassword')}
+        forId="confirm-new-password"
+        required
+        error={passwordErrors.confirmPassword}
+      >
+        <div class="password-input-wrap">
+          <input
+            id="confirm-new-password"
+            type={confirmPasswordInputType}
+            bind:value={confirmPassword}
+            autocomplete="new-password"
+            placeholder={t('auth.changePassword.placeholders.confirmPassword')}
+            aria-invalid={passwordErrors.confirmPassword ? 'true' : 'false'}
+            on:blur={() => (passwordTouched = { ...passwordTouched, confirmPassword: true })}
+          />
+          <button
+            type="button"
+            class="password-visibility"
+            aria-label={showConfirmPassword ? t('auth.actions.hidePassword') : t('auth.actions.showPassword')}
+            aria-pressed={showConfirmPassword}
+            on:click={() => (showConfirmPassword = !showConfirmPassword)}
+          >
+            {#if showConfirmPassword}<EyeOff />{:else}<Eye />{/if}
+          </button>
+        </div>
+      </FieldShell>
+
+      {#if passwordFeedback}
+        <p class="password-feedback password-feedback--{passwordFeedbackTone}" role="status">
+          {passwordFeedback}
+        </p>
+      {/if}
+
+      <div class="password-actions">
+        <Button
+          type="button"
+          variant="primary"
+          loading={changingPassword}
+          disabled={changingPassword || passwordHasErrors}
+          on:click={handleChangePassword}
+        >
+          {changingPassword ? t('auth.changePassword.actions.loading') : t('auth.changePassword.actions.submit')}
+        </Button>
+        <p class="helper">{t('auth.changePassword.sessionNote')}</p>
       </div>
     </div>
-  {/if}
+  </ModalSurface>
 {/if}
 
 <style>
@@ -722,14 +719,6 @@
 
   :global(.settings-card--account .ui-section__body) {
     padding-block-start: var(--ui-space-4);
-  }
-
-  :global(.app-shell:has(.settings-modal-backdrop) .shell-main) {
-    z-index: 120;
-  }
-
-  :global(.app-shell:has(.settings-modal-backdrop) .content-wrapper) {
-    z-index: 140;
   }
 
   /* Account row */
@@ -979,28 +968,8 @@
   }
 
   /* Password modal */
-  .settings-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 80;
-    display: grid;
-    place-items: center;
-    padding: var(--ui-space-4);
-    background: color-mix(in srgb, #000 58%, transparent);
-    backdrop-filter: blur(10px);
-  }
-
-  .settings-modal {
-    width: min(100%, 34rem);
-    max-height: min(88vh, 46rem);
-    overflow: auto;
-    display: grid;
+  :global(.settings-password-modal.ui-modal) {
     gap: var(--ui-space-4);
-    padding: var(--ui-space-5);
-    border: 1px solid var(--ui-border-default);
-    border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface-card);
-    box-shadow: var(--ui-shadow-3);
   }
 
   .settings-modal__header {
@@ -1019,7 +988,7 @@
     text-transform: uppercase;
   }
 
-  .settings-modal h2 {
+  :global(.settings-password-modal.ui-modal) h2 {
     margin: 0;
     color: var(--ui-text-primary);
     font-size: var(--ui-type-heading-sm);
@@ -1028,8 +997,8 @@
   }
 
   .settings-modal__close {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
@@ -1287,16 +1256,6 @@
     .password-summary :global(.ui-button) {
       grid-column: 1 / -1;
       width: 100%;
-    }
-
-    .settings-modal-backdrop {
-      align-items: end;
-      padding: var(--ui-space-2);
-    }
-
-    .settings-modal {
-      max-height: 92vh;
-      padding: var(--ui-space-4);
     }
 
     .session-row {
