@@ -103,6 +103,11 @@
   }
 
   @media (max-width: 768px) {
+    .ui-field__control :global(textarea) {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
     .ui-field__control :global(input),
     .ui-field__control :global(select) {
       min-height: 2.75rem;
