@@ -124,5 +124,14 @@
       border-radius: 1rem 1rem 0 0;
       margin: 0;
     }
+
+    .ui-modal--padding-sm {
+      padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .ui-modal--padding-md,
+    .ui-modal--padding-lg {
+      padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    }
   }
 </style>
