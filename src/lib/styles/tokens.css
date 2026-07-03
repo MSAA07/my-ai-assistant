@@ -10,13 +10,13 @@
   --foundation-border-strong: #3f3f3f;
   --foundation-text: #fafafa;
   --foundation-text-secondary: #a1a1a1;
-  --foundation-text-muted: #737373;
+  --foundation-text-muted: #8a8a8a;
   --foundation-text-disabled: #525252;
   --foundation-success: #22c55e;
   --foundation-success-button: #22c55e;
   --foundation-success-hover: #16a34a;
-  --foundation-danger-button: #ef4444;
-  --foundation-danger-hover: #dc2626;
+  --foundation-danger-button: #dc2626;
+  --foundation-danger-hover: #b91c1c;
   --foundation-info: #a3a3a3;
   --foundation-warning: #d4d4d4;
   --foundation-backdrop: rgba(0, 0, 0, 0.8);
@@ -210,7 +210,7 @@
   --info: var(--ui-accent-info);
   --info-foreground: #0a0a0a;
   --destructive: var(--ui-accent-danger);
-  --destructive-foreground: #fef2f2;
+  --destructive-foreground: #ffffff;
   --surface-elevated: var(--ui-surface-secondary);
 
   --radius: var(--ui-radius-sm);
@@ -370,7 +370,7 @@
   --success-foreground: #ecfdf5;
   --warning-foreground: #fafafa;
   --info-foreground: #fafafa;
-  --destructive-foreground: #fef2f2;
+  --destructive-foreground: #ffffff;
   --color-danger-soft: #b91c1c;
   --color-danger-soft-strong: #991b1b;
   --color-shadow: rgba(15, 23, 42, 0.12);
