@@ -294,6 +294,7 @@ export default {
       submitUpload: 'Upload document',
       submitUploading: 'Uploading document...',
       removeFile: 'Remove file',
+      selectedFilesLabel: 'Selected files',
       languageLabel: 'AI Response Language',
       englishOption: 'English',
       arabicOption: 'Arabic',

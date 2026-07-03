@@ -4,6 +4,7 @@
   import ModalSurface from './ModalSurface.svelte';
   import UploadDropzone from './UploadDropzone.svelte';
   import UploadFileRow from './UploadFileRow.svelte';
+  import { t } from '../../i18n/t.js';
 
   const dispatch = createEventDispatcher();
 
@@ -97,7 +98,7 @@
   {/if}
 
   {#if files.length > 0}
-    <div class="upload-modal__files" role="list" aria-label="Selected files">
+    <div class="upload-modal__files" role="list" aria-label={t('home.uploadSection.selectedFilesLabel')}>
       {#each files as file, index (file.name + file.size + index)}
         <div role="listitem">
           <UploadFileRow

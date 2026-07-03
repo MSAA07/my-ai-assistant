@@ -234,6 +234,7 @@ const ar = {
       submitUpload: 'رفع المستند',
       submitUploading: 'جارٍ رفع المستند...',
       removeFile: 'حذف الملف',
+      selectedFilesLabel: 'الملفات المحددة',
       languageLabel: 'لغة استجابة الذكاء الاصطناعي',
       englishOption: 'الإنجليزية',
       arabicOption: 'العربية',
