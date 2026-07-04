@@ -205,12 +205,12 @@
                       <h4>{t('landing.mockup.flashcardQuestion')}</h4>
                     </div>
                     <div class="tour-flashcard-card tour-flashcard-card--answer">
-                      <p class="tour-flashcard-side">Answer</p>
+                      <p class="tour-flashcard-side">{t('landing.mockup.flashcardAnswerLabel')}</p>
                       <p>{t('landing.mockup.flashcardAnswer')}</p>
                     </div>
                     <div class="tour-flashcard-actions">
-                      <span class="tour-flashcard-action tour-flashcard-action--incorrect">Mark incorrect</span>
-                      <span class="tour-flashcard-action tour-flashcard-action--correct">Mark correct</span>
+                      <span class="tour-flashcard-action tour-flashcard-action--incorrect">{t('landing.mockup.flashcardMarkIncorrect')}</span>
+                      <span class="tour-flashcard-action tour-flashcard-action--correct">{t('landing.mockup.flashcardMarkCorrect')}</span>
                     </div>
                   </div>
                 </div>
