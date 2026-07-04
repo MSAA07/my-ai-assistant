@@ -97,7 +97,7 @@
   .ui-badge[data-tone='destructive'] {
     --badge-bg: color-mix(in srgb, var(--ui-accent-danger) 12%, transparent);
     --badge-border: color-mix(in srgb, var(--ui-accent-danger) 28%, var(--ui-border-default) 72%);
-    --badge-fg: color-mix(in srgb, var(--ui-accent-danger) 84%, var(--ui-text-primary) 16%);
+    --badge-fg: color-mix(in srgb, var(--ui-accent-danger) 80%, var(--ui-text-primary) 20%);
   }
 
   .ui-badge[data-variant='solid'][data-tone='neutral'] {

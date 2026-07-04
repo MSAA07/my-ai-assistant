@@ -197,7 +197,7 @@
   :global(.ui-study-action-card__status--failed) {
     border-color: color-mix(in srgb, var(--ui-accent-danger) 30%, var(--ui-border-default) 70%);
     background: color-mix(in srgb, var(--ui-accent-danger) 10%, transparent);
-    color: var(--ui-accent-danger);
+    color: color-mix(in srgb, var(--ui-accent-danger) 80%, var(--ui-text-primary) 20%);
   }
 
   :global(.ui-study-action-card__status--info) {
