@@ -155,13 +155,13 @@
                     <div class="tour-mockup-icon tour-mockup-icon--large">
                       <FileText size={26} strokeWidth={1.8} />
                     </div>
-                    <p>Drop your PDF, DOCX, or PPTX here</p>
+                    <p>{t('landing.mockup.dashboardSubtitle')}</p>
                   </div>
                   <div class="tour-file-row">
                     <div class="tour-file-row__icon">
                       <FileText size={18} strokeWidth={1.8} />
                     </div>
-                    <p>Biology Midterm.pdf &middot; 4.2 MB &middot; Ready</p>
+                    <p>{t('landing.mockup.uploadTitle')} &middot; {t('landing.mockup.uploadMeta')}</p>
                     <Check class="tour-file-row__check" size={18} strokeWidth={2.4} />
                   </div>
                 </div>
@@ -172,41 +172,41 @@
                       <div class="tour-mockup-icon">
                         <FileText size={18} strokeWidth={1.8} />
                       </div>
-                      <strong>Summary</strong>
-                      <p>Condensed notes from the source file.</p>
+                      <strong>{t('landing.mockup.summaryTitle')}</strong>
+                      <p>{t('landing.mockup.summaryText')}</p>
                     </div>
                     <div class="tour-choice-card tour-choice-card--selected">
                       <div class="tour-mockup-icon">
                         <Layers3 size={18} strokeWidth={1.8} />
                       </div>
-                      <strong>Flashcards</strong>
-                      <p>Question, answer, then mark correct or incorrect.</p>
+                      <strong>{t('landing.mockup.flashcardsTitle')}</strong>
+                      <p>{t('landing.mockup.flashcardsText')}</p>
                     </div>
                     <div class="tour-choice-card">
                       <div class="tour-mockup-icon">
                         <ClipboardCheck size={18} strokeWidth={1.8} />
                       </div>
-                      <strong>Mock Exam</strong>
-                      <p>Practice questions with answer checks.</p>
+                      <strong>{t('landing.mockup.examTitle')}</strong>
+                      <p>{t('landing.mockup.examText')}</p>
                     </div>
                   </div>
-                  <button class="tour-generate-button" type="button" tabindex="-1">Generate</button>
+                  <button class="tour-generate-button" type="button" tabindex="-1">{t('landing.mockup.generateSelected')}</button>
                 </div>
               {:else}
                 <div class="tour-mockup tour-study-mockup">
                   <div class="tour-tabs">
-                    <span class="tour-tab">Summary</span>
-                    <span class="tour-tab tour-tab--active">Flashcards</span>
-                    <span class="tour-tab">Exam</span>
+                    <span class="tour-tab">{t('landing.mockup.summaryTitle')}</span>
+                    <span class="tour-tab tour-tab--active">{t('landing.mockup.flashcardsTitle')}</span>
+                    <span class="tour-tab">{t('landing.mockup.examTitle')}</span>
                   </div>
                   <div class="tour-flashcard-panel">
                     <div class="tour-flashcard-card">
-                      <p class="tour-flashcard-side">Question</p>
-                      <h4>What is the main function of the cell membrane?</h4>
+                      <p class="tour-flashcard-side">{t('landing.mockup.featureFlashcardEyebrow')}</p>
+                      <h4>{t('landing.mockup.flashcardQuestion')}</h4>
                     </div>
                     <div class="tour-flashcard-card tour-flashcard-card--answer">
                       <p class="tour-flashcard-side">Answer</p>
-                      <p>It controls what enters and leaves the cell through a selectively permeable phospholipid bilayer.</p>
+                      <p>{t('landing.mockup.flashcardAnswer')}</p>
                     </div>
                     <div class="tour-flashcard-actions">
                       <span class="tour-flashcard-action tour-flashcard-action--incorrect">Mark incorrect</span>
