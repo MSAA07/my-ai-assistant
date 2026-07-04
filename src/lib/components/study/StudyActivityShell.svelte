@@ -278,11 +278,12 @@
   }
 
   :global(.study-activity-shell--flashcards.study-activity-shell--active-session .activity-chrome__rail) {
-    width: calc(100% + (var(--layout-shell-padding-inline) * 2));
-    margin-inline: calc(-1 * var(--layout-shell-padding-inline));
-    padding-inline: var(--layout-shell-padding-inline);
+    width: 100%;
+    margin-inline: 0;
+    padding-inline: 0;
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--ui-bg-page) 97%, transparent), color-mix(in srgb, var(--ui-bg-page) 92%, transparent) 78%, transparent);
+    box-shadow: 0 0 0 var(--layout-shell-padding-inline) color-mix(in srgb, var(--ui-bg-page) 94%, transparent);
   }
 
   :global(.study-activity-shell--active-session .activity-chrome__controls) {

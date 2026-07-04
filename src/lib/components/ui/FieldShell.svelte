@@ -103,6 +103,11 @@
   }
 
   @media (max-width: 768px) {
+    .ui-field__label {
+      font-size: var(--font-size-sm);
+      line-height: 1.3;
+    }
+
     .ui-field__control :global(textarea) {
       font-size: 1rem;
       line-height: 1.4;
