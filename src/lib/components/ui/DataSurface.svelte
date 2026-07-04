@@ -239,6 +239,10 @@
   }
 
   @media (max-width: 640px) {
+    .ui-data-surface__table-wrap :global(.ui-data-table th) {
+      font-size: var(--font-size-sm);
+    }
+
     .ui-data-surface__filters {
       flex-direction: column;
       align-items: stretch;

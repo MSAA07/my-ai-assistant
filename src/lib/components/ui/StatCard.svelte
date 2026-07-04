@@ -137,4 +137,11 @@
   .ui-stat-card__content {
     min-width: 0;
   }
+
+  @media (max-width: 640px) {
+    .ui-stat-card__label,
+    .ui-stat-card__meta {
+      font-size: var(--font-size-sm);
+    }
+  }
 </style>
