@@ -53,7 +53,6 @@ src/
 |   |-- StudyHubDocument.svelte
 |   |-- DocumentView.svelte
 |   |-- Settings.svelte
-|   |-- Documents.svelte
 |   |-- Flashcards.svelte
 |   `-- Exams.svelte
 |-- stores/
@@ -140,7 +139,7 @@ Data and integration:
 
 ## Notes on Legacy Files
 
-- `Documents.svelte`, `Flashcards.svelte`, and `Exams.svelte` are non-canonical legacy compatibility files, not primary UX.
+- `Flashcards.svelte` and `Exams.svelte` are non-canonical legacy compatibility files, not primary UX.
 - `DocumentView.svelte` is the only legacy route surface that remains connected to current canonical study behavior.
 - `AppHeader.svelte` and `Footer.svelte` remain only for the shell fallback path when `VITE_FEATURE_APPSHELL=false`.
 - `Settings.svelte` owns the authenticated Telegram account connection panel.
