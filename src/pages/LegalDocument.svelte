@@ -393,6 +393,13 @@
       gap: 2rem;
     }
 
+    .legal-outline__label,
+    .legal-outline a,
+    .legal-outline button,
+    .legal-doc-page__meta {
+      font-size: var(--font-size-sm);
+    }
+
     .legal-outline {
       position: static;
       max-height: none;
