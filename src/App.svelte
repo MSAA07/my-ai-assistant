@@ -47,12 +47,6 @@
     password_reset: 'auth.notices.passwordReset',
   };
 
-  function logAuthBridge(message) {
-    if (typeof window === 'undefined') return;
-
-    console.log(`[auth] ${message}`);
-  }
-
   function consumeVerificationBridge() {
     if (typeof window === 'undefined') return;
 
@@ -68,8 +62,6 @@
       const callbackUrl = getEmailVerificationCallbackUrl();
       handoffUrl.searchParams.set('callbackURL', callbackUrl);
 
-      logAuthBridge('verification flow triggered');
-
       window.location.replace(handoffUrl.toString());
       return;
     }
@@ -83,7 +75,6 @@
     }
 
     const nextPath = `${VERIFY_EMAIL_PATH}?${nextParams.toString()}`;
-    logAuthBridge('verification flow completed');
     router.replace(nextPath);
   }
 
@@ -101,11 +92,9 @@
 
     if (token) {
       nextParams.set('token', token);
-      logAuthBridge('password reset flow triggered');
     } else {
       nextParams.set('status', 'error');
       nextParams.set('error', (error || 'invalid_token').toLowerCase());
-      logAuthBridge('password reset flow error');
     }
 
     const nextPath = `${RESET_PASSWORD_PATH}?${nextParams.toString()}`;
