@@ -94,6 +94,26 @@
     return Boolean(allowedModelById.get(modelId)?.supportsReasoningEffort);
   }
 
+  function readCurrentCellValues(feature, plan, draft) {
+    let model = draft.model;
+    let reasoningEffort = draft.reasoningEffort ?? null;
+
+    if (typeof document !== 'undefined') {
+      const modelSelect = document.getElementById(`model-${feature}-${plan}`);
+      const reasoningSelect = document.getElementById(`reasoning-${feature}-${plan}`);
+      if (modelSelect?.value) {
+        model = modelSelect.value;
+      }
+      reasoningEffort = reasoningSelect ? (reasoningSelect.value || null) : null;
+    }
+
+    if (!supportsReasoning(model)) {
+      reasoningEffort = null;
+    }
+
+    return { ...draft, model, reasoningEffort };
+  }
+
   function optionLabel(model) {
     const cost = modelCosts[model.id] || '';
     return `${model.label}${cost ? ` - ${cost}` : ''}`;
@@ -151,8 +171,10 @@
 
   async function saveCell(feature, plan) {
     const key = cellKey(feature, plan);
-    const draft = drafts[key];
+    const currentDraft = drafts[key];
+    const draft = currentDraft ? readCurrentCellValues(feature, plan, currentDraft) : null;
     if (!draft || !isDirty(draft)) return;
+    drafts = { ...drafts, [key]: draft };
 
     cellState = {
       ...cellState,
@@ -211,7 +233,7 @@
 
 <div class="model-routing-page">
   <DataSurface title="Model Routing" description="Admin-controlled model selection by feature and plan." tableMinWidth="920px">
-    <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchModelRouting} disabled={loading}>
+    <Button slot="actions" type="button" variant="secondary" size="sm" onclick={fetchModelRouting} disabled={loading}>
       Refresh
     </Button>
 
@@ -222,7 +244,7 @@
         <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">
           <div class="retry-state">
             <span>{error}</span>
-            <Button type="button" variant="secondary" size="sm" on:click={fetchModelRouting}>
+            <Button type="button" variant="secondary" size="sm" onclick={fetchModelRouting}>
               Retry
             </Button>
           </div>
@@ -240,8 +262,9 @@
           <svelte:fragment slot="panels">
             <div class="plan-grid">
               {#each plans as plan}
-                {@const draft = getDraft(feature.id, plan.id)}
-                {@const state = getCellState(feature.id, plan.id)}
+                {@const key = cellKey(feature.id, plan.id)}
+                {@const draft = drafts[key] || null}
+                {@const state = cellState[key] || { saving: false, saved: false, error: '' }}
                 <Card class="routing-cell" variant="base" border={isDirty(draft) ? 'strong' : 'subtle'} padding="md">
                   <header class="cell-header">
                     <div>
@@ -260,10 +283,10 @@
                       <FieldShell label="Model" forId={`model-${feature.id}-${plan.id}`}>
                         <select
                           id={`model-${feature.id}-${plan.id}`}
-                          value={draft.model}
-                          on:input={(event) => updateDraft(feature.id, plan.id, { model: event.currentTarget.value })}
-                          on:change={(event) => updateDraft(feature.id, plan.id, { model: event.currentTarget.value })}
-                          on:blur={(event) => updateDraft(feature.id, plan.id, { model: event.currentTarget.value })}
+                          bind:value={drafts[key].model}
+                          oninput={() => updateDraft(feature.id, plan.id, { model: drafts[key].model })}
+                          onchange={() => updateDraft(feature.id, plan.id, { model: drafts[key].model })}
+                          onblur={() => updateDraft(feature.id, plan.id, { model: drafts[key].model })}
                         >
                           {#each allowedModels as model}
                             <option value={model.id}>{optionLabel(model)}</option>
@@ -275,12 +298,12 @@
                         <FieldShell label="Reasoning Effort" forId={`reasoning-${feature.id}-${plan.id}`}>
                           <select
                             id={`reasoning-${feature.id}-${plan.id}`}
-                            value={draft.reasoningEffort ?? ''}
-                            on:input={(event) => updateDraft(feature.id, plan.id, { reasoningEffort: event.currentTarget.value || null })}
-                            on:change={(event) => updateDraft(feature.id, plan.id, { reasoningEffort: event.currentTarget.value || null })}
-                            on:blur={(event) => updateDraft(feature.id, plan.id, { reasoningEffort: event.currentTarget.value || null })}
+                            bind:value={drafts[key].reasoningEffort}
+                            oninput={() => updateDraft(feature.id, plan.id, { reasoningEffort: drafts[key].reasoningEffort || null })}
+                            onchange={() => updateDraft(feature.id, plan.id, { reasoningEffort: drafts[key].reasoningEffort || null })}
+                            onblur={() => updateDraft(feature.id, plan.id, { reasoningEffort: drafts[key].reasoningEffort || null })}
                           >
-                            <option value="">None</option>
+                            <option value={null}>None</option>
                             {#each reasoningEfforts as effort}
                               <option value={effort}>{effort}</option>
                             {/each}
@@ -303,7 +326,7 @@
                         size="sm"
                         loading={state.saving}
                         disabled={!isDirty(draft) || state.saving}
-                        on:click={() => saveCell(feature.id, plan.id)}
+                        onclick={() => saveCell(feature.id, plan.id)}
                       >
                         {state.saving ? 'Saving...' : 'Save'}
                       </Button>
