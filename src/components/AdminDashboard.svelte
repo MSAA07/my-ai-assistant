@@ -10,6 +10,7 @@
   import AdminJobs from './admin/AdminJobs.svelte';
   import AdminUsageDashboard from './admin/AdminUsageDashboard.svelte';
   import AdminLimits from './admin/AdminLimits.svelte';
+  import AdminModelRouting from './admin/AdminModelRouting.svelte';
   import AdminQA from './admin/AdminQA.svelte';
   import { t } from '../lib/i18n/t.js';
   import { language } from '../lib/stores/language.js';
@@ -20,6 +21,7 @@
     { value: 'users', label: 'Users' },
     { value: 'usage', label: 'Usage' },
     { value: 'limits', label: 'Limits' },
+    { value: 'model-routing', label: 'Model Routing' },
     { value: 'jobs', label: 'Jobs' },
     { value: 'qa', label: t('adminQA.tab') },
     { value: 'sessions', label: 'Sessions' },
@@ -28,9 +30,16 @@
   ];
 
   let activeTab = 'overview';
+  let modelRoutingDirty = false;
 
   function handleTabChange(event) {
-    activeTab = event.detail.value;
+    const nextTab = event.detail.value;
+    if (activeTab === 'model-routing' && modelRoutingDirty) {
+      const shouldLeave = confirm('Discard unsaved model routing changes?');
+      if (!shouldLeave) return;
+      modelRoutingDirty = false;
+    }
+    activeTab = nextTab;
   }
 </script>
 
@@ -61,6 +70,8 @@
       <AdminUsageDashboard />
     {:else if activeTab === 'limits'}
       <AdminLimits />
+    {:else if activeTab === 'model-routing'}
+      <AdminModelRouting onDirtyChange={(dirty) => { modelRoutingDirty = dirty; }} />
     {:else if activeTab === 'jobs'}
       <AdminJobs />
     {:else if activeTab === 'qa'}
