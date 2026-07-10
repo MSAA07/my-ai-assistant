@@ -169,6 +169,14 @@
     };
   }
 
+  function handleModelChange(feature, plan, event) {
+    updateDraft(feature, plan, { model: event.currentTarget.value });
+  }
+
+  function handleReasoningEffortChange(feature, plan, event) {
+    updateDraft(feature, plan, { reasoningEffort: event.currentTarget.value || null });
+  }
+
   async function saveCell(feature, plan) {
     const key = cellKey(feature, plan);
     const currentDraft = drafts[key];
@@ -233,7 +241,7 @@
 
 <div class="model-routing-page">
   <DataSurface title="Model Routing" description="Admin-controlled model selection by feature and plan." tableMinWidth="920px">
-    <Button slot="actions" type="button" variant="secondary" size="sm" onclick={fetchModelRouting} disabled={loading}>
+    <Button slot="actions" type="button" variant="secondary" size="sm" on:click={fetchModelRouting} disabled={loading}>
       Refresh
     </Button>
 
@@ -244,7 +252,7 @@
         <Card class="ui-data-state-error" variant="soft" border="strong" padding="sm">
           <div class="retry-state">
             <span>{error}</span>
-            <Button type="button" variant="secondary" size="sm" onclick={fetchModelRouting}>
+            <Button type="button" variant="secondary" size="sm" on:click={fetchModelRouting}>
               Retry
             </Button>
           </div>
@@ -283,10 +291,8 @@
                       <FieldShell label="Model" forId={`model-${feature.id}-${plan.id}`}>
                         <select
                           id={`model-${feature.id}-${plan.id}`}
-                          bind:value={drafts[key].model}
-                          oninput={() => updateDraft(feature.id, plan.id, { model: drafts[key].model })}
-                          onchange={() => updateDraft(feature.id, plan.id, { model: drafts[key].model })}
-                          onblur={() => updateDraft(feature.id, plan.id, { model: drafts[key].model })}
+                          value={draft.model}
+                          on:change={(event) => handleModelChange(feature.id, plan.id, event)}
                         >
                           {#each allowedModels as model}
                             <option value={model.id}>{optionLabel(model)}</option>
@@ -298,12 +304,10 @@
                         <FieldShell label="Reasoning Effort" forId={`reasoning-${feature.id}-${plan.id}`}>
                           <select
                             id={`reasoning-${feature.id}-${plan.id}`}
-                            bind:value={drafts[key].reasoningEffort}
-                            oninput={() => updateDraft(feature.id, plan.id, { reasoningEffort: drafts[key].reasoningEffort || null })}
-                            onchange={() => updateDraft(feature.id, plan.id, { reasoningEffort: drafts[key].reasoningEffort || null })}
-                            onblur={() => updateDraft(feature.id, plan.id, { reasoningEffort: drafts[key].reasoningEffort || null })}
+                            value={draft.reasoningEffort ?? ''}
+                            on:change={(event) => handleReasoningEffortChange(feature.id, plan.id, event)}
                           >
-                            <option value={null}>None</option>
+                            <option value="">None</option>
                             {#each reasoningEfforts as effort}
                               <option value={effort}>{effort}</option>
                             {/each}
@@ -326,7 +330,7 @@
                         size="sm"
                         loading={state.saving}
                         disabled={!isDirty(draft) || state.saving}
-                        onclick={() => saveCell(feature.id, plan.id)}
+                        on:click={() => saveCell(feature.id, plan.id)}
                       >
                         {state.saving ? 'Saving...' : 'Save'}
                       </Button>

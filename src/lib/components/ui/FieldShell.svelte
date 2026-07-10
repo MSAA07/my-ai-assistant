@@ -97,6 +97,16 @@
     font-size: var(--font-size-sm);
   }
 
+  .ui-field__control :global(select) {
+    background-color: var(--ui-surface-card);
+    color: var(--ui-text-primary);
+  }
+
+  .ui-field__control :global(select option) {
+    background-color: var(--ui-surface-overlay);
+    color: var(--ui-text-primary);
+  }
+
   .ui-field__control :global(textarea) {
     min-height: 100px;
     resize: vertical;
