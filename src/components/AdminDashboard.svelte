@@ -8,6 +8,7 @@
   import StorageOverview from './admin/StorageOverview.svelte';
   import AuditLogViewer from './admin/AuditLogViewer.svelte';
   import AdminJobs from './admin/AdminJobs.svelte';
+  import AdminIssues from './admin/AdminIssues.svelte';
   import AdminUsageDashboard from './admin/AdminUsageDashboard.svelte';
   import AdminLimits from './admin/AdminLimits.svelte';
   import AdminModelRouting from './admin/AdminModelRouting.svelte';
@@ -23,6 +24,7 @@
     { value: 'limits', label: 'Limits' },
     { value: 'model-routing', label: 'Model Routing' },
     { value: 'jobs', label: 'Jobs' },
+    { value: 'issues', label: t('adminIssues.tab') },
     { value: 'qa', label: t('adminQA.tab') },
     { value: 'sessions', label: 'Sessions' },
     { value: 'storage', label: 'Storage' },
@@ -74,6 +76,8 @@
       <AdminModelRouting onDirtyChange={(dirty) => { modelRoutingDirty = dirty; }} />
     {:else if activeTab === 'jobs'}
       <AdminJobs />
+    {:else if activeTab === 'issues'}
+      <AdminIssues />
     {:else if activeTab === 'qa'}
       <AdminQA />
     {:else if activeTab === 'sessions'}

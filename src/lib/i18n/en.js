@@ -1325,6 +1325,55 @@ export default {
       comingSoon: 'Social links coming soon'
     }
   },
+  adminIssues: {
+    tab: 'Issues',
+    title: 'Issues',
+    description: 'Review job failures, admin alerts, and cost anomalies.',
+    refresh: 'Refresh',
+    refreshing: 'Refreshing...',
+    exportCsv: 'Export CSV',
+    exporting: 'Exporting...',
+    loading: 'Loading issues...',
+    empty: 'No issues found',
+    showMore: 'Show more',
+    showLess: 'Show less',
+    filters: {
+      type: 'Type',
+      severity: 'Severity',
+      resolved: 'Resolved',
+      startDate: 'Start date',
+      endDate: 'End date'
+    },
+    columns: {
+      severity: 'Severity',
+      type: 'Type',
+      title: 'Title',
+      message: 'Message',
+      createdAt: 'Created',
+      resolved: 'Resolved'
+    },
+    values: {
+      all: 'All',
+      job_failure: 'Job failure',
+      admin_alert: 'Admin alert',
+      cost_anomaly: 'Cost anomaly',
+      error: 'Error',
+      warning: 'Warning',
+      info: 'Info',
+      resolved: 'Resolved',
+      unresolved: 'Unresolved'
+    },
+    pagination: {
+      label: 'Issues pagination',
+      summary: 'Page {page} of {pageCount} ({total} issues)',
+      previous: 'Previous',
+      next: 'Next'
+    },
+    errors: {
+      fetch: 'Failed to fetch issues.',
+      export: 'Failed to export issues.'
+    }
+  },
   publicLegal: {
     eyebrow: 'StudyMaxing',
     breadcrumbLabel: 'Breadcrumb',

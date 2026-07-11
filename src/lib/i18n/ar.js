@@ -1469,4 +1469,54 @@ ar.adminQA = {
   }
 };
 
+ar.adminIssues = {
+  tab: 'المشكلات',
+  title: 'المشكلات',
+  description: 'راجع حالات فشل المهام وتنبيهات الإدارة وشذوذ التكلفة.',
+  refresh: 'تحديث',
+  refreshing: 'جارٍ التحديث...',
+  exportCsv: 'تصدير CSV',
+  exporting: 'جارٍ التصدير...',
+  loading: 'جارٍ تحميل المشكلات...',
+  empty: 'لم يتم العثور على مشكلات',
+  showMore: 'عرض المزيد',
+  showLess: 'عرض أقل',
+  filters: {
+    type: 'النوع',
+    severity: 'الخطورة',
+    resolved: 'الحالة',
+    startDate: 'تاريخ البدء',
+    endDate: 'تاريخ الانتهاء'
+  },
+  columns: {
+    severity: 'الخطورة',
+    type: 'النوع',
+    title: 'العنوان',
+    message: 'الرسالة',
+    createdAt: 'تاريخ الإنشاء',
+    resolved: 'الحالة'
+  },
+  values: {
+    all: 'الكل',
+    job_failure: 'فشل مهمة',
+    admin_alert: 'تنبيه إداري',
+    cost_anomaly: 'شذوذ في التكلفة',
+    error: 'خطأ',
+    warning: 'تحذير',
+    info: 'معلومات',
+    resolved: 'تم الحل',
+    unresolved: 'غير محلولة'
+  },
+  pagination: {
+    label: 'ترقيم صفحات المشكلات',
+    summary: 'الصفحة {page} من {pageCount} ({total} مشكلة)',
+    previous: 'السابق',
+    next: 'التالي'
+  },
+  errors: {
+    fetch: 'تعذر جلب المشكلات.',
+    export: 'تعذر تصدير المشكلات.'
+  }
+};
+
 export default mergeDictionaries(en, ar);
