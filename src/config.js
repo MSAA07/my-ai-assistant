@@ -46,16 +46,11 @@ export function isAuthChallengeEnabled() {
 }
 
 function getFrontendActionCallbackUrl(envName, action) {
-  const envOverride = normalizeAbsoluteUrl(import.meta.env?.[envName] || "");
-  if (envOverride) {
-    return envOverride;
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/?auth_action=${action}`;
   }
 
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  return `${window.location.origin}/?auth_action=${action}`;
+  return normalizeAbsoluteUrl(import.meta.env?.[envName] || "");
 }
 
 function getBackendAuthBridgeUrl(path, nextUrl) {
