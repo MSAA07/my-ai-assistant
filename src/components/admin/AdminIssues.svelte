@@ -12,7 +12,11 @@
   const PAGE_SIZE = 50;
   const types = ['all', 'job_failure', 'admin_alert', 'cost_anomaly'];
   const severities = ['all', 'error', 'warning', 'info'];
-  const resolvedOptions = ['all', 'false', 'true'];
+  const resolvedOptions = [
+    { value: 'all', label: 'all' },
+    { value: 'false', label: 'unresolved' },
+    { value: 'true', label: 'resolved' }
+  ];
 
   let issues = [];
   let total = 0;
@@ -193,7 +197,7 @@
     <FieldShell className="filter-field" label={t('adminIssues.filters.resolved')}>
       <select bind:value={resolvedFilter} on:change={applyFilters} aria-label={t('adminIssues.filters.resolved')}>
         {#each resolvedOptions as resolved}
-          <option value={resolved}>{issueLabel(resolved === 'false' ? 'unresolved' : resolved)}</option>
+          <option value={resolved.value}>{issueLabel(resolved.label)}</option>
         {/each}
       </select>
     </FieldShell>
