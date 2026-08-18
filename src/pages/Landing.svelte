@@ -32,6 +32,27 @@
     openFaq = openFaq === i ? -1 : i;
   }
 
+  function reveal(node) {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      node.classList.add('is-visible');
+      return {};
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            node.classList.add('is-visible');
+            observer.unobserve(node);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
+    );
+    observer.observe(node);
+    return { destroy() { observer.disconnect(); } };
+  }
+
   let syncedSection = '';
 
   async function scrollToSection(sectionId, behavior = 'smooth') {
@@ -79,7 +100,7 @@
   <!-- ── 2 · CREDIBILITY STRIP ────────────────────── -->
   <!-- ── 3 · PROBLEM STATEMENT ────────────────────── -->
   <section class="lp-problem">
-    <div class="lp-container lp-problem__inner">
+    <div class="lp-container lp-problem__inner reveal-target" use:reveal>
       <p class="lp-eyebrow">{t('landing.problemEyebrow')}</p>
       <h2 class="lp-problem__headline">
         <span>{t('landing.problemHeadline1')}</span>
@@ -99,7 +120,7 @@
 
       <div class="difference-grid">
         {#each differenceCards as card}
-          <article class="difference-card">
+          <article class="difference-card reveal-target" use:reveal>
             <div class="difference-card__icon" aria-hidden="true">
               {#if card.icon === 'languages'}
                 <svg class="difference-card__arabic-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -130,7 +151,7 @@
   <!-- ── 4 · FEATURES ─────────────────────────────── -->
   <section id="features" class="lp-tour">
     <div class="lp-container">
-      <div class="lp-section-head lp-section-head--center">
+      <div class="lp-section-head lp-section-head--center reveal-target" use:reveal>
         <p class="lp-eyebrow">{t('landing.tour.eyebrow')}</p>
         <h2 class="lp-h2">{t('landing.tour.headline')}</h2>
         <p class="lp-section-sub">{t('landing.tour.sub')}</p>
@@ -140,7 +161,7 @@
         <div class="tour-shell__rail" aria-hidden="true"></div>
 
         {#each tourSteps as step, i}
-          <article class="tour-step">
+          <article class="tour-step reveal-target" use:reveal>
             <span class="tour-step__marker" aria-hidden="true">{step.num}</span>
             <div class="tour-step__copy">
               <p class="lp-eyebrow">{t(step.eyebrow)}</p>
@@ -224,7 +245,7 @@
 
   <section class="lp-faq">
     <div class="lp-faq__inner">
-      <div class="lp-section-head">
+      <div class="lp-section-head reveal-target" use:reveal>
         <p class="lp-eyebrow">{t('landing.faqEyebrow')}</p>
         <h2 class="lp-h2">{t('landing.faqHeadline')}</h2>
       </div>
@@ -254,7 +275,7 @@
 
   <!-- ── 7 · FINAL CTA ────────────────────────────── -->
   <section class="lp-cta">
-    <div class="lp-cta__inner">
+    <div class="lp-cta__inner reveal-target" use:reveal>
       <h2 class="lp-cta__headline">{t('landing.ctaHeadline')}</h2>
       <p class="lp-cta__sub">{t('landing.ctaSub')}</p>
       <button class="lp-btn lp-btn--primary" type="button" on:click={() => goTo(SIGN_UP_PATH)}>
@@ -1026,6 +1047,118 @@
 
     .tour-flashcard-panel {
       padding-inline: var(--ui-space-4);
+    }
+  }
+
+  /* Scroll reveal */
+  .reveal-target {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 640ms var(--ease-standard), transform 640ms var(--ease-standard);
+  }
+  .reveal-target:global(.is-visible) {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .difference-grid .difference-card:nth-child(1) { --card-index: 0; }
+  .difference-grid .difference-card:nth-child(2) { --card-index: 1; }
+  .difference-grid .difference-card:nth-child(3) { --card-index: 2; }
+  .difference-grid .difference-card:nth-child(4) { --card-index: 3; }
+  .difference-grid .difference-card:nth-child(5) { --card-index: 4; }
+  .difference-grid .difference-card.reveal-target {
+    transition: opacity 640ms var(--ease-standard), transform 640ms var(--ease-standard), border-color 220ms var(--ease-standard);
+    transition-delay: calc(var(--card-index, 0) * 70ms);
+  }
+
+  /* Hero load-in (page-load, not scroll-triggered — hero is above the fold) */
+  .lp-hero__headline span {
+    display: block;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: heroLine 700ms var(--ease-standard) forwards;
+  }
+  .lp-hero__headline span:nth-child(1) { animation-delay: 60ms; }
+  .lp-hero__headline span:nth-child(2) { animation-delay: 160ms; }
+  .lp-hero__headline span:nth-child(3) { animation-delay: 260ms; }
+  .lp-hero__sub {
+    opacity: 0;
+    animation: heroFade 700ms var(--ease-standard) forwards;
+    animation-delay: 380ms;
+  }
+  .lp-hero__copy .lp-btn {
+    opacity: 0;
+    animation: heroFade 700ms var(--ease-standard) forwards;
+    animation-delay: 460ms;
+  }
+  @keyframes heroLine {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes heroFade {
+    to { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-target, .lp-hero__headline span, .lp-hero__sub, .lp-hero__copy .lp-btn {
+      opacity: 1;
+      transform: none;
+      animation: none;
+      transition: none;
+    }
+  }
+
+  /* Accent color — applied to existing elements only, no new elements */
+  .lp-eyebrow {
+    color: var(--landing-accent);
+  }
+  .lp-hero__headline span:nth-child(3) {
+    display: inline-block;
+    padding: 0.05em 0.2em;
+    background: var(--landing-highlight-bg);
+    color: var(--landing-highlight-ink);
+    border-radius: 0.2em;
+  }
+  .lp-hero {
+    background:
+      radial-gradient(50% 65% at 100% 0%, var(--landing-accent-soft), transparent),
+      radial-gradient(60% 80% at 100% 0%, color-mix(in srgb, var(--ui-text-primary) 4%, transparent), transparent),
+      var(--ui-bg-page);
+  }
+  .tour-step__marker {
+    border-color: var(--landing-accent-border);
+  }
+  .tour-choice-card--selected {
+    border-color: var(--landing-accent);
+  }
+  .difference-card {
+    transition: transform 220ms var(--ease-standard), border-color 220ms var(--ease-standard);
+  }
+  .difference-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--landing-accent-border);
+  }
+  .tour-mockup {
+    transition: border-color 220ms var(--ease-standard);
+  }
+  .tour-step:hover .tour-mockup {
+    border-color: var(--landing-accent-border);
+  }
+
+  /* Break the repeated centered-header rhythm: Why StudyMaxing reads left-aligned instead of centered */
+  .lp-difference .lp-section-head--center {
+    max-width: 40rem;
+    margin-inline: 0;
+    text-align: start;
+  }
+  .lp-difference .lp-section-sub {
+    margin-inline: 0;
+  }
+
+  @media (max-width: 640px) {
+    .lp-difference .lp-section-head--center {
+      text-align: center;
+      margin-inline: auto;
+    }
+    .lp-difference .lp-section-sub {
+      margin-inline: auto;
     }
   }
 </style>

@@ -341,6 +341,18 @@
   --shadow-panel: var(--ui-shadow-1);
   --shadow-menu: var(--ui-shadow-2);
   --shadow-modal-strong: var(--ui-shadow-3);
+
+  /* Landing accent — additive only, does not rename or remove any existing token */
+  --foundation-accent: #8b85f0;
+  --foundation-accent-strong: #a9a3ff;
+  --foundation-highlight: #f5c451;
+  --foundation-highlight-ink: #2b1d02;
+  --landing-accent: var(--foundation-accent);
+  --landing-accent-strong: var(--foundation-accent-strong);
+  --landing-accent-soft: color-mix(in srgb, var(--foundation-accent) 14%, transparent);
+  --landing-accent-border: color-mix(in srgb, var(--foundation-accent) 46%, var(--ui-border-default) 54%);
+  --landing-highlight-bg: color-mix(in srgb, var(--foundation-highlight) 90%, transparent);
+  --landing-highlight-ink: var(--foundation-highlight-ink);
 }
 
 [data-theme="light"] {
@@ -354,6 +366,8 @@
   --foundation-text-secondary: #525252;
   --foundation-text-muted: #737373;
   --foundation-text-disabled: #a3a3a3;
+  --foundation-accent: #4f46e5;
+  --foundation-accent-strong: #4338ca;
   --foundation-success: #16a34a;
   --foundation-success-button: #16a34a;
   --foundation-success-hover: #15803d;
