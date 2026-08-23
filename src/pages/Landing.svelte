@@ -94,29 +94,6 @@
         </button>
       </div>
 
-      <div class="lp-hero__visual" aria-hidden="true">
-        <div class="tour-mockup tour-study-mockup">
-          <div class="tour-tabs">
-            <span class="tour-tab">{t('landing.mockup.summaryTitle')}</span>
-            <span class="tour-tab tour-tab--active">{t('landing.mockup.flashcardsTitle')}</span>
-            <span class="tour-tab">{t('landing.mockup.examTitle')}</span>
-          </div>
-          <div class="tour-flashcard-panel">
-            <div class="tour-flashcard-card">
-              <p class="tour-flashcard-side">{t('landing.mockup.featureFlashcardEyebrow')}</p>
-              <h4>{t('landing.mockup.flashcardQuestion')}</h4>
-            </div>
-            <div class="tour-flashcard-card tour-flashcard-card--answer">
-              <p class="tour-flashcard-side">{t('landing.mockup.flashcardAnswerLabel')}</p>
-              <p>{t('landing.mockup.flashcardAnswer')}</p>
-            </div>
-            <div class="tour-flashcard-actions">
-              <span class="tour-flashcard-action tour-flashcard-action--incorrect">{t('landing.mockup.flashcardMarkIncorrect')}</span>
-              <span class="tour-flashcard-action tour-flashcard-action--correct">{t('landing.mockup.flashcardMarkCorrect')}</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -1182,74 +1159,6 @@
     }
     .lp-difference .lp-section-sub {
       margin-inline: auto;
-    }
-  }
-
-  /* Hero two-column layout with product visual */
-  .lp-hero__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
-    align-items: center;
-    gap: clamp(2rem, 5vw, 4rem);
-    max-width: 100%;
-    text-align: start;
-  }
-  .lp-hero__sub {
-    margin-inline: 0;
-  }
-  .lp-hero__visual {
-    opacity: 0;
-    animation: heroFade 700ms var(--ease-standard) forwards;
-    animation-delay: 540ms;
-  }
-  .lp-hero__visual .tour-mockup {
-    max-width: 26rem;
-    margin-inline: auto;
-  }
-
-  @media (max-width: 900px) {
-    .lp-hero__grid {
-      grid-template-columns: 1fr;
-      text-align: center;
-    }
-    .lp-hero__sub {
-      margin-inline: auto;
-    }
-    .lp-hero__visual {
-      margin-top: var(--ui-space-6);
-    }
-    .lp-hero__visual .tour-mockup {
-      max-width: 24rem;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .lp-hero__visual .tour-mockup {
-      max-width: 100%;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .lp-hero__visual {
-      opacity: 1;
-      animation: none;
-    }
-  }
-
-  /* Product Tour: alternate visual side per step so the section isn't three identical rows */
-  .tour-step:nth-of-type(even) .tour-step__copy {
-    order: 2;
-  }
-  .tour-step:nth-of-type(even) .tour-step__visual {
-    order: 1;
-  }
-
-  @media (max-width: 900px) {
-    .tour-step__copy {
-      order: 1 !important;
-    }
-    .tour-step__visual {
-      order: 2 !important;
     }
   }
 </style>
