@@ -185,10 +185,17 @@ Settings:
 Admin:
 
 - admin user list/detail views display read-only Telegram connection and delivery usage fields returned by the admin user APIs
-- `AdminDashboard.svelte` exposes tabs for Overview, Users, Usage, Limits, Jobs, QA, Sessions, Storage, and Audit Logs
+- the Users tab consumes backend `limit`/`offset`/`total` pagination, distinguishes page selection from all-filtered selection, and previews server-side eligibility before typed bulk confirmation
+- user detail is a right-side drawer whose Profile, Files, Sessions, Limits, and Usage sections load and retry independently
+- shared stacked toasts report every Users mutation, while the shared confirmation modal supports severity and optional exact typed confirmation
+- support login requires a reason, refreshes into a 60-minute impersonated session, and displays a persistent viewing-as banner until the admin session is restored
+- `AdminDashboard.svelte` exposes one Security & Access tab in place of the former separate Sessions and Audit Logs tabs
+- `SecurityAccess.svelte` switches in place between Sessions and Audit Logs; Sessions has live KPIs, user filtering, pagination, typed bulk revoke, and optimistic revoke counts, while Audit Logs has All/Admin Activity, backend-derived actions, date/user filters, pagination, and accessible inline before/after expansion
+- Users and Security & Access deep-link bidirectionally through `#/admin/users?userId=…` and `#/admin/security?view=…&userId=…`; admin names in Admin Activity filter to that actor's activity
 - `AdminQA.svelte` calls `GET /api/admin/qa/history`, `GET /api/admin/qa/progress`, `GET /api/admin/qa/schedule`, and `POST /api/admin/qa/schedule`
 - `AdminQA.svelte` can start `POST /api/admin/qa/health`, `POST /api/admin/qa/pipeline`, and `POST /api/admin/qa/full`
-- the QA tab displays target selection, Auto Health Monitor controls, tier cards, active progress, persisted run history, per-test details, speed verdicts, and copyable failure reports
+- the QA tab is locked to a fixed staging target and displays Auto Health Monitor controls, tier cards, active progress, persisted run history, per-test details, speed verdicts, and copyable failure reports
+- every QA-tab request uses the required, staging-validated `VITE_QA_STAGING_API_BASE_URL`; it never inherits the app-wide backend URL
 - health, pipeline, optimized full, and full labels are frontend-visible tier states; cooldown text is returned from the backend and displayed through the `adminQA` translation namespace
 
 ## I18N Rules
@@ -290,6 +297,7 @@ Environment differences:
 Environment variables used by the frontend:
 
 - `VITE_API_BASE_URL`
+- `VITE_QA_STAGING_API_BASE_URL` (required for the QA tab; must identify an HTTPS staging host)
 - `VITE_AUTH_SUPPORT_EMAIL`
 - `VITE_AUTH_TURNSTILE_SITE_KEY`
 - `VITE_AUTH_VERIFICATION_CALLBACK_URL`

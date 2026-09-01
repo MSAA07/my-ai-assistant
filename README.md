@@ -19,10 +19,12 @@ Current frontend for the Study Maxing public entry, auth experience, and authent
 - canonical Study Hub surfaces: `src/pages/StudyHubIndex.svelte` and `src/pages/StudyHubDocument.svelte`
 - legacy route surface: `src/pages/DocumentView.svelte`, compatibility only
 - admin route: `#/admin`, including the QA tab backed by `/api/admin/qa/*`
+- the admin Users tab provides backend-driven pagination, page/all-filtered selection, independently loaded detail sections, support login, JSON export/erasure controls, and weighted confirmations
 
 ## Environment Notes
 
-- `VITE_API_BASE_URL` overrides all host-derived backend resolution.
+- `VITE_API_BASE_URL` configures the general application backend.
+- `VITE_QA_STAGING_API_BASE_URL` is separately required by the QA tab and must identify an HTTPS staging host; it has no fallback to the general application backend.
 - Without an override, `src/config.js` resolves backend base URL from the deployment host.
 - Vercel preview/stage-style frontend hosts resolve to the staging backend by default.
 - `studymaxing.com`, `www.studymaxing.com`, `my-ai-assistant.vercel.app`, and production-like hosts resolve to the production backend by default.

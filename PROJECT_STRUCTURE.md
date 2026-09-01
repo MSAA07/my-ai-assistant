@@ -118,8 +118,13 @@ Legacy routes:
 
 Admin console:
 
-- `src/components/AdminDashboard.svelte`: tab shell for Overview, Users, Usage, Limits, Jobs, QA, Sessions, Storage, and Audit Logs
-- `src/components/admin/AdminQA.svelte`: admin QA runner UI for target selection, automatic health monitor, health/pipeline/full run cards, active progress polling, persisted history, per-test details, speed verdicts, and copyable failure reports
+- `src/components/AdminDashboard.svelte`: route-aware tab shell for Overview, Users, Usage, Limits, Jobs, QA, Security & Access, and Storage
+- `src/components/admin/SecurityAccess.svelte`: combined security tab with in-place Sessions/Audit Logs switching and deep-link filter state
+- `src/components/admin/SessionManager.svelte`: paginated active-session table, live KPI/freshness state, toast-backed single revoke, and typed per-user bulk revoke
+- `src/components/admin/AuditLogViewer.svelte`: All/Admin Activity views, live scorecard, backend-derived action/date/user filters, pagination, user cross-links, and keyboard-accessible inline audit diffs
+- `src/lib/admin/securityAccess.js`: tested Security & Access URL/query/confirmation/mutation helpers
+- `src/components/admin/AdminQA.svelte`: staging-only admin QA runner UI with automatic health monitor, health/pipeline/full run cards, active progress polling, persisted history, per-test details, speed verdicts, and copyable failure reports
+- `src/config.js`: exposes the app-wide API URL plus a separately required, staging-validated QA API URL with no production or generic fallback
 - `src/components/admin/*`: admin data views that rely on shared primitives and authenticated requests to backend admin APIs
 
 Shared UI system:
@@ -144,6 +149,11 @@ Data and integration:
 - `AppHeader.svelte` and `Footer.svelte` remain only for the shell fallback path when `VITE_FEATURE_APPSHELL=false`.
 - `Settings.svelte` owns the authenticated Telegram account connection panel.
 - `src/components/admin/UserTable.svelte` and `src/components/admin/UserDetail.svelte` display read-only Telegram usage indicators from admin APIs.
+- `src/components/admin/UserTable.svelte`: backend-paginated Users table with explicit page/all-matching selection and safe bulk previews.
+- `src/components/admin/UserDetail.svelte`: independently loaded right-side drawer with support login, data export/erasure, sessions, limits, weighted confirmations, and a deep link to the user's Security & Access activity.
+- `src/lib/components/ui/ToastViewport.svelte` and `src/stores/toasts.js`: reusable stacked success/error notifications.
+- `src/lib/components/ui/ConfirmModal.svelte`: reusable severity-aware confirmation with optional exact typed input.
+- `src/lib/components/layout/ImpersonationBanner.svelte`: persistent support-login identity banner and return-to-admin control.
 - `src/components/admin/AdminQA.svelte` is the only connected frontend surface for `/api/admin/qa/*`.
 
 ## Environment Mapping Notes

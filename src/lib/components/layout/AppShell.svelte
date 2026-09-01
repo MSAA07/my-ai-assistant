@@ -3,6 +3,7 @@
   import Sidebar from './Sidebar.svelte';
   import TopBar from './TopBar.svelte';
   import BottomNav from './BottomNav.svelte';
+  import ImpersonationBanner from './ImpersonationBanner.svelte';
   import { direction } from '../../stores/language.js';
   import { sidebarCollapsed, toggleSidebarCollapsed } from '../../stores/sidebar.js';
 
@@ -15,6 +16,10 @@
   export let userName = '';
   export let userEmail = '';
   export let bottomNavItems = [];
+  export let impersonating = false;
+  export let impersonatedUserName = '';
+  export let impersonatedUserEmail = '';
+  export let stoppingImpersonation = false;
 
   function onSignOut() {
     dispatch('signOut');
@@ -22,6 +27,10 @@
 
   function onToggleSidebar() {
     toggleSidebarCollapsed();
+  }
+
+  function onStopImpersonating() {
+    dispatch('stopImpersonating');
   }
 </script>
 
@@ -44,6 +53,15 @@
       on:signOut={onSignOut}
       on:toggleSidebar={onToggleSidebar}
     />
+
+    {#if impersonating}
+      <ImpersonationBanner
+        userName={impersonatedUserName}
+        userEmail={impersonatedUserEmail}
+        stopping={stoppingImpersonation}
+        on:click={onStopImpersonating}
+      />
+    {/if}
 
     <main class="shell-content">
       <div class="content-wrapper">
@@ -83,7 +101,7 @@
     min-height: 100dvh;
     min-width: 0;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
     background: var(--ui-bg-page);
     align-content: start;
   }

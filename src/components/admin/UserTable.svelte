@@ -4,12 +4,16 @@
   import Badge from '../../lib/components/ui/Badge.svelte';
   import Button from '../../lib/components/ui/Button.svelte';
   import Card from '../../lib/components/ui/Card.svelte';
+  import ConfirmModal from '../../lib/components/ui/ConfirmModal.svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import ModalSurface from '../../lib/components/ui/ModalSurface.svelte';
   import UserDetail from './UserDetail.svelte';
   import { API_BASE } from '../../config.js';
   import { readPageCache, writePageCache } from '../../stores/pageCache.js';
+  import { toast } from '../../stores/toasts.js';
+  import { routeParams, router } from '../../stores/router.js';
+  import { buildUserSelection, getSelectedCount } from '../../lib/admin/userSelection.js';
 
   const CACHE_KEY = 'page:admin:users';
   const createBlankUser = () => ({
@@ -39,6 +43,13 @@
   let roleUpdatingId = null;
   let searchTimeout = null;
   let selectedUserIds = [];
+  let selectionMode = 'page';
+  let total = 0;
+  let limit = 25;
+  let offset = 0;
+  let confirmConfig = null;
+  let pendingConfirmAction = null;
+  let mutationBusy = false;
   let capDefaults = {
     free: { plan: 'free', documentCap: 5, costCapUsd: 1.5, tokenCap: null },
     premium: { plan: 'premium', documentCap: 100, costCapUsd: null, tokenCap: null }
@@ -64,8 +75,27 @@
     if (roleFilter !== 'all') params.set('role', roleFilter);
     if (statusFilter !== 'all') params.set('status', statusFilter);
     if (planFilter !== 'all') params.set('plan', planFilter);
+    params.set('limit', String(limit));
+    params.set('offset', String(offset));
     return params.toString();
   };
+
+  $: currentPage = Math.floor(offset / limit) + 1;
+  $: totalPages = Math.max(1, Math.ceil(total / limit));
+  $: pageStart = total === 0 ? 0 : offset + 1;
+  $: pageEnd = Math.min(offset + users.length, total);
+  $: selectedCount = getSelectedCount({ mode: selectionMode, ids: selectedUserIds, total });
+  $: if ($routeParams.userId && selectedUserId !== $routeParams.userId) selectedUserId = $routeParams.userId;
+
+  function openUser(userId) {
+    selectedUserId = userId;
+    router.navigate(`/admin/users?userId=${encodeURIComponent(userId)}`);
+  }
+
+  function closeUser() {
+    selectedUserId = null;
+    if ($routeParams.userId) router.navigate('/admin/users', { replace: true });
+  }
 
   function formatCapNumber(value) {
     return value === null || value === undefined ? 'unlimited' : Number(value).toLocaleString();
@@ -128,7 +158,8 @@
     }
   }
 
-  async function fetchUsers({ background = false } = {}) {
+  async function fetchUsers({ background = false, resetPage = false } = {}) {
+    if (resetPage) offset = 0;
     if (background) {
       refreshing = true;
     } else {
@@ -148,15 +179,23 @@
       }
 
       users = data.users || [];
+      total = Number(data.total || 0);
+      limit = Number(data.limit || limit);
+      offset = Number(data.offset || 0);
       writePageCache(CACHE_KEY, {
         loaded: true,
         users,
         search,
         roleFilter,
         statusFilter,
-        planFilter
+        planFilter,
+        total,
+        limit,
+        offset
       });
-      selectedUserIds = selectedUserIds.filter((id) => users.some((user) => user.id === id));
+      if (selectionMode === 'page') {
+        selectedUserIds = selectedUserIds.filter((id) => users.some((user) => user.id === id));
+      }
     } catch (err) {
       error = err.message;
     } finally {
@@ -173,14 +212,20 @@
       ? `/api/admin/users/${user.id}/unsuspend`
       : `/api/admin/users/${user.id}/suspend`;
 
-    await fetch(`${API_BASE}${endpoint}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason: 'Admin action' })
-    });
-
-    await fetchUsers({ background: true });
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: user.banned ? 'Admin restored access' : 'Admin suspended access' })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Failed to change user status');
+      toast.success(user.banned ? 'User access restored.' : 'User suspended.');
+      await fetchUsers({ background: true });
+    } catch (err) {
+      toast.error(err.message || 'Failed to change user status');
+    }
   }
 
   async function updateUserRole(user, role) {
@@ -201,8 +246,9 @@
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update role');
       }
+      toast.success('User role updated.');
     } catch (err) {
-      error = err.message;
+      toast.error(err.message || 'Failed to update role');
     } finally {
       roleUpdatingId = null;
       await fetchUsers({ background: true });
@@ -210,51 +256,102 @@
   }
 
   async function deleteUser(user) {
-    if (!confirm(`Delete ${user.email}? This removes all data.`)) return;
-    await fetch(`${API_BASE}/api/admin/users/${user.id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
-    await fetchUsers({ background: true });
-  }
-
-  async function bulkSuspend() {
-    if (!selectedUserIds.length) return;
-    if (!confirm(`Suspend ${selectedUserIds.length} users?`)) return;
-
-    const targets = users.filter((user) => selectedUserIds.includes(user.id));
-    await Promise.all(
-      targets
-        .filter((user) => !user.banned)
-        .map((user) =>
-          fetch(`${API_BASE}/api/admin/users/${user.id}/suspend`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason: 'Bulk admin action' })
-          })
-        )
-    );
-
-    selectedUserIds = [];
-    await fetchUsers({ background: true });
-  }
-
-  async function bulkDelete() {
-    if (!selectedUserIds.length) return;
-    if (!confirm(`Delete ${selectedUserIds.length} users? This is irreversible.`)) return;
-
-    await Promise.all(
-      selectedUserIds.map((id) =>
-        fetch(`${API_BASE}/api/admin/users/${id}`, {
+    openConfirmation({
+      title: 'Delete account',
+      description: `Permanently delete ${user.email} and all associated data.`,
+      confirmLabel: 'Delete account',
+      severity: 'danger',
+      typedConfirmation: { value: 'DELETE', prompt: 'Type', suffix: 'to continue.' }
+    }, async () => {
+      mutationBusy = true;
+      let succeeded = false;
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/users/${user.id}`, {
           method: 'DELETE',
-          credentials: 'include'
-        })
-      )
-    );
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirmation: 'DELETE' })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Failed to delete account');
+        toast.success('Account deleted.');
+        succeeded = true;
+        await fetchUsers({ background: true });
+      } catch (err) {
+        toast.error(err.message || 'Failed to delete account');
+      } finally {
+        mutationBusy = false;
+      }
+      if (succeeded) closeConfirmation();
+    });
+  }
 
-    selectedUserIds = [];
-    await fetchUsers({ background: true });
+  function getSelectionPayload() {
+    return buildUserSelection({
+      mode: selectionMode,
+      ids: selectedUserIds,
+      filters: { search, role: roleFilter, status: statusFilter, plan: planFilter }
+    });
+  }
+
+  async function beginBulkAction(action) {
+    if (!selectedCount) return;
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/users/bulk-action`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, selection: getSelectionPayload(), preview: true })
+      });
+      const preview = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(preview.error || 'Failed to preview bulk action');
+      const excludedCount = preview.excluded?.length || 0;
+      openConfirmation({
+        title: `${action === 'delete' ? 'Delete' : 'Suspend'} ${preview.affected} users`,
+        description: `${preview.affected} eligible of ${preview.matched} matched users will be affected.${excludedCount ? ` ${excludedCount} ineligible users will be excluded automatically.` : ''}`,
+        confirmLabel: action === 'delete' ? 'Delete users' : 'Suspend users',
+        severity: 'danger',
+        typedConfirmation: { value: preview.confirmationText, prompt: 'Type', suffix: 'to commit this bulk action.' }
+      }, () => executeBulkAction(action, preview.confirmationText));
+    } catch (err) {
+      toast.error(err.message || 'Failed to preview bulk action');
+    }
+  }
+
+  async function executeBulkAction(action, confirmation) {
+    mutationBusy = true;
+    let succeeded = false;
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/users/bulk-action`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, selection: getSelectionPayload(), confirmation, reason: 'Bulk admin action' })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Bulk action failed');
+      toast.success(`${data.affected} users ${action === 'delete' ? 'deleted' : 'suspended'}.`);
+      selectedUserIds = [];
+      selectionMode = 'page';
+      succeeded = true;
+      await fetchUsers({ background: true });
+    } catch (err) {
+      toast.error(err.message || 'Bulk action failed');
+    } finally {
+      mutationBusy = false;
+    }
+    if (succeeded) closeConfirmation();
+  }
+
+  function openConfirmation(config, action) {
+    confirmConfig = config;
+    pendingConfirmAction = action;
+  }
+
+  function closeConfirmation() {
+    if (mutationBusy) return;
+    confirmConfig = null;
+    pendingConfirmAction = null;
   }
 
   function openCreateModal() {
@@ -343,15 +440,18 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         createError = data.error || 'Failed to create user';
+        toast.error(createError);
         return;
       }
 
       newUser = createBlankUser();
       createModalOpen = false;
       error = '';
+      toast.success('User created.');
       await fetchUsers({ background: users.length > 0 });
     } catch (err) {
       createError = err.message || 'Failed to create user';
+      toast.error(createError);
     } finally {
       creatingUser = false;
     }
@@ -359,11 +459,42 @@
 
   function handleSearchInput() {
     if (searchTimeout) clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => void fetchUsers({ background: users.length > 0 }), 400);
+    clearSelection();
+    searchTimeout = setTimeout(() => void fetchUsers({ background: users.length > 0, resetPage: true }), 400);
+  }
+
+  function handleFilterChange() {
+    clearSelection();
+    void fetchUsers({ background: users.length > 0, resetPage: true });
   }
 
   function toggleSelectAll() {
+    selectionMode = 'page';
     selectedUserIds = selectedUserIds.length === users.length ? [] : users.map((user) => user.id);
+  }
+
+  function toggleUserSelection(userId, checked) {
+    selectionMode = 'page';
+    selectedUserIds = checked
+      ? [...new Set([...selectedUserIds, userId])]
+      : selectedUserIds.filter((id) => id !== userId);
+  }
+
+  function selectAllMatching() {
+    selectionMode = 'matching';
+    selectedUserIds = [];
+  }
+
+  function clearSelection() {
+    selectionMode = 'page';
+    selectedUserIds = [];
+  }
+
+  function changePage(nextPage) {
+    const bounded = Math.min(Math.max(nextPage, 1), totalPages);
+    offset = (bounded - 1) * limit;
+    if (selectionMode === 'page') selectedUserIds = [];
+    void fetchUsers({ background: true });
   }
 
   $: allSelected = selectedUserIds.length === users.length && users.length > 0;
@@ -376,6 +507,9 @@
       roleFilter = cached.roleFilter || 'all';
       statusFilter = cached.statusFilter || 'all';
       planFilter = cached.planFilter || 'all';
+      total = Number(cached.total || users.length);
+      limit = Number(cached.limit || 25);
+      offset = Number(cached.offset || 0);
       loading = false;
     }
     void fetchUsers({ background: Boolean(cached?.loaded) });
@@ -414,7 +548,7 @@
     </FieldShell>
 
     <FieldShell className="filter-field" label="Role">
-      <select bind:value={roleFilter} on:change={() => fetchUsers({ background: users.length > 0 })}>
+      <select bind:value={roleFilter} on:change={handleFilterChange}>
         <option value="all">All roles</option>
         <option value="admin">Admin</option>
         <option value="user">User</option>
@@ -422,7 +556,7 @@
     </FieldShell>
 
     <FieldShell className="filter-field" label="Status">
-      <select bind:value={statusFilter} on:change={() => fetchUsers({ background: users.length > 0 })}>
+      <select bind:value={statusFilter} on:change={handleFilterChange}>
         <option value="all">All status</option>
         <option value="active">Active</option>
         <option value="banned">Banned</option>
@@ -430,7 +564,7 @@
     </FieldShell>
 
     <FieldShell className="filter-field" label="Plan">
-      <select bind:value={planFilter} on:change={() => fetchUsers({ background: users.length > 0 })}>
+      <select bind:value={planFilter} on:change={handleFilterChange}>
         <option value="all">All plans</option>
         <option value="free">Free</option>
         <option value="premium">Premium</option>
@@ -441,13 +575,19 @@
   <svelte:fragment slot="bulk">
     {#if !loading}
       <div class="bulk-actions">
-        <Badge tone="neutral" size="sm">{selectedUserIds.length} selected</Badge>
+        <Badge tone={selectionMode === 'matching' ? 'accent' : 'neutral'} size="sm">{selectedCount} selected</Badge>
+        {#if selectionMode === 'page' && selectedUserIds.length === users.length && total > users.length}
+          <Button type="button" variant="ghost" size="sm" on:click={selectAllMatching}>Select all {total} matching</Button>
+        {:else if selectionMode === 'matching'}
+          <span class="selection-copy">All {total} matching users selected.</span>
+          <Button type="button" variant="ghost" size="sm" on:click={clearSelection}>Clear</Button>
+        {/if}
         <Button
           type="button"
           variant="secondary"
           size="sm"
-          disabled={!selectedUserIds.length}
-          on:click={bulkSuspend}
+          disabled={!selectedCount}
+          on:click={() => beginBulkAction('suspend')}
         >
           Suspend Selected
         </Button>
@@ -455,8 +595,8 @@
           type="button"
           variant="danger"
           size="sm"
-          disabled={!selectedUserIds.length}
-          on:click={bulkDelete}
+          disabled={!selectedCount}
+          on:click={() => beginBulkAction('delete')}
         >
           Delete Selected
         </Button>
@@ -482,7 +622,8 @@
             <th>
               <input
                 type="checkbox"
-                checked={allSelected}
+                checked={selectionMode === 'matching' || allSelected}
+                disabled={selectionMode === 'matching'}
                 on:change={toggleSelectAll}
               />
             </th>
@@ -501,7 +642,13 @@
           {#each users as user}
             <tr>
               <td>
-                <input type="checkbox" value={user.id} bind:group={selectedUserIds} />
+                <input
+                  type="checkbox"
+                  value={user.id}
+                  disabled={selectionMode === 'matching'}
+                  checked={selectionMode === 'matching' || selectedUserIds.includes(user.id)}
+                  on:change={(event) => toggleUserSelection(user.id, event.currentTarget.checked)}
+                />
               </td>
               <td>
                 <strong>{user.name || 'Unnamed user'}</strong>
@@ -539,11 +686,11 @@
               <td>{formatBytes(user.storageUsed)}</td>
               <td>{user.lastActive ? new Date(user.lastActive).toLocaleString() : '-'}</td>
               <td class="actions-cell">
-                <Button type="button" variant="ghost" size="sm" on:click={() => (selectedUserId = user.id)}>
+                <Button type="button" variant="ghost" size="sm" on:click={() => openUser(user.id)}>
                   View
                 </Button>
-                <Button type="button" variant={user.banned ? 'success' : 'secondary'} size="sm" on:click={() => toggleBan(user)}>
-                  {user.banned ? 'Unban' : 'Ban'}
+                <Button type="button" variant={user.banned ? 'success' : 'warning'} size="sm" on:click={() => toggleBan(user)}>
+                  {user.banned ? 'Restore' : 'Suspend'}
                 </Button>
                 <Button type="button" variant="danger" size="sm" on:click={() => deleteUser(user)}>
                   Delete
@@ -553,6 +700,14 @@
           {/each}
         </tbody>
       </table>
+      <div class="pagination-bar">
+        <p>Showing {pageStart}-{pageEnd} of {total} users</p>
+        <div class="pagination-actions">
+          <Button type="button" variant="secondary" size="sm" disabled={currentPage <= 1 || loading} on:click={() => changePage(currentPage - 1)}>Previous</Button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <Button type="button" variant="secondary" size="sm" disabled={currentPage >= totalPages || loading} on:click={() => changePage(currentPage + 1)}>Next</Button>
+        </div>
+      </div>
     {/if}
   </svelte:fragment>
 </DataSurface>
@@ -644,8 +799,22 @@
 {#if selectedUserId}
   <UserDetail
     userId={selectedUserId}
-    on:close={() => (selectedUserId = null)}
+    on:close={closeUser}
     on:updated={fetchUsers}
+  />
+{/if}
+
+{#if confirmConfig}
+  <ConfirmModal
+    open
+    title={confirmConfig.title}
+    description={confirmConfig.description}
+    confirmLabel={confirmConfig.confirmLabel}
+    severity={confirmConfig.severity}
+    typedConfirmation={confirmConfig.typedConfirmation}
+    busy={mutationBusy}
+    on:cancel={closeConfirmation}
+    on:confirm={() => pendingConfirmAction?.()}
   />
 {/if}
 
@@ -828,6 +997,32 @@
     border: 1px solid var(--ui-border-subtle);
     border-radius: var(--ui-radius-sm);
     background: color-mix(in srgb, var(--ui-surface-base) 94%, transparent);
+  }
+
+  .selection-copy {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-label);
+  }
+
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    padding-top: var(--ui-space-3);
+  }
+
+  .pagination-bar p,
+  .pagination-actions span {
+    margin: 0;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-label);
+  }
+
+  .pagination-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
   }
 
   td input[type='checkbox'],

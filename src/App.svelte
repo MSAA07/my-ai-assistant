@@ -12,9 +12,11 @@
   import AppHeader from './components/AppHeader.svelte';
   import AppShell from './lib/components/layout/AppShell.svelte';
   import PageLayout from './lib/components/layout/PageLayout.svelte';
+  import ToastViewport from './lib/components/ui/ToastViewport.svelte';
   import { API_BASE, getEmailVerificationCallbackUrl } from './config.js';
   import { currentPath, routeParams as queryParams, router } from './stores/router.js';
-  import { session, isLoading, signOut, authMeta } from './stores/auth.js';
+  import { session, isLoading, signOut, stopImpersonating, authMeta } from './stores/auth.js';
+  import { toast } from './stores/toasts.js';
   import { t } from './lib/i18n/t.js';
   import { language } from './lib/stores/language.js';
   import {
@@ -39,6 +41,15 @@
   import './styles/global.css';
 
   const useAppShell = import.meta.env.VITE_FEATURE_APPSHELL !== 'false';
+  let stoppingImpersonation = false;
+
+  async function handleStopImpersonating() {
+    stoppingImpersonation = true;
+    const result = await stopImpersonating();
+    stoppingImpersonation = false;
+    if (result?.error) toast.error(result.error.message || 'Failed to return to the admin session.');
+    else toast.success('Returned to your admin session.');
+  }
 
   const AUTH_NOTICE_KEYS = {
     signed_out: 'auth.notices.signedOut',
@@ -115,6 +126,7 @@
   $: isAuthenticated = !!$session;
   $: bootstrapPending = $isLoading || $authMeta?.bootstrapPending;
   $: isAdmin = $session?.user?.role?.toLowerCase() === 'admin';
+  $: impersonating = Boolean($session?.session?.impersonatedBy);
   $: locale = $language;
   $: isPublicRoute = isPublicRoutePath(normalizedPath);
   $: isAuthRoute = isAuthRoutePath(normalizedPath);
@@ -283,7 +295,12 @@
         userName={$session?.user?.name ?? ''}
         userEmail={$session?.user?.email ?? ''}
         bottomNavItems={bottomNavItems}
+        {impersonating}
+        impersonatedUserName={$session?.user?.name ?? ''}
+        impersonatedUserEmail={$session?.user?.email ?? ''}
+        {stoppingImpersonation}
         on:signOut={signOut}
+        on:stopImpersonating={handleStopImpersonating}
       >
         {#if routeAccessDenied}
           <PageLayout class="access-denied" width="narrow">
@@ -326,6 +343,8 @@
     {/if}
   {/if}
 {/key}
+
+<ToastViewport />
 
 <style>
   .loading-screen {

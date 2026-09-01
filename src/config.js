@@ -37,6 +37,29 @@ export const getApiBaseUrl = () => {
   return apiBaseUrl;
 };
 
+export const getQaStagingApiBaseUrl = () => {
+  const configuredUrl = normalizeEnvValue(import.meta.env?.VITE_QA_STAGING_API_BASE_URL || "");
+  if (!configuredUrl) {
+    throw new Error("VITE_QA_STAGING_API_BASE_URL is required for the QA tab; no fallback target is allowed");
+  }
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(configuredUrl);
+  } catch {
+    throw new Error("VITE_QA_STAGING_API_BASE_URL must be a valid staging URL");
+  }
+
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const hasStagingMarker = /(^|[.-])stag(e|ing)([.-]|$)/.test(hostname);
+  const hasProductionMarker = /(^|[.-])prod(uction)?([.-]|$)/.test(hostname);
+  if (parsedUrl.protocol !== "https:" || !hasStagingMarker || hasProductionMarker) {
+    throw new Error("VITE_QA_STAGING_API_BASE_URL must be an HTTPS staging host and must not identify production");
+  }
+
+  return normalizeAbsoluteUrl(parsedUrl.toString());
+};
+
 export const API_BASE = getApiBaseUrl();
 export const AUTH_SUPPORT_EMAIL = normalizeEnvValue(import.meta.env?.VITE_AUTH_SUPPORT_EMAIL || "contact@studymaxing.com");
 export const AUTH_TURNSTILE_SITE_KEY = normalizeEnvValue(import.meta.env?.VITE_AUTH_TURNSTILE_SITE_KEY || "");

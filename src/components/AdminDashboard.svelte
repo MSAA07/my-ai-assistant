@@ -4,9 +4,8 @@
   import Tabs from '../lib/components/ui/Tabs.svelte';
   import AdminStats from './admin/AdminStats.svelte';
   import UserTable from './admin/UserTable.svelte';
-  import SessionManager from './admin/SessionManager.svelte';
   import StorageOverview from './admin/StorageOverview.svelte';
-  import AuditLogViewer from './admin/AuditLogViewer.svelte';
+  import SecurityAccess from './admin/SecurityAccess.svelte';
   import AdminJobs from './admin/AdminJobs.svelte';
   import AdminIssues from './admin/AdminIssues.svelte';
   import AdminUsageDashboard from './admin/AdminUsageDashboard.svelte';
@@ -15,6 +14,15 @@
   import AdminQA from './admin/AdminQA.svelte';
   import { t } from '../lib/i18n/t.js';
   import { language } from '../lib/stores/language.js';
+  import { routeParams as queryParams, router } from '../stores/router.js';
+
+  export let adminPath = '';
+
+  function normalizeAdminTab(path) {
+    const segment = String(path || '').split('/')[0];
+    if (segment === 'sessions' || segment === 'audit' || segment === 'security') return 'security';
+    return segment || 'overview';
+  }
 
   $: $language;
   $: tabs = [
@@ -26,13 +34,18 @@
     { value: 'jobs', label: 'Jobs' },
     { value: 'issues', label: t('adminIssues.tab') },
     { value: 'qa', label: t('adminQA.tab') },
-    { value: 'sessions', label: 'Sessions' },
+    { value: 'security', label: 'Security & Access' },
     { value: 'storage', label: 'Storage' },
-    { value: 'audit', label: 'Audit Logs' }
   ];
 
-  let activeTab = 'overview';
+  let activeTab = normalizeAdminTab(adminPath);
   let modelRoutingDirty = false;
+
+  $: requestedTab = normalizeAdminTab(adminPath);
+  $: if (requestedTab !== activeTab) activeTab = requestedTab;
+  $: securityView = $queryParams.view === 'audit' || adminPath === 'audit' ? 'audit' : 'sessions';
+  $: securityActivity = $queryParams.activity === 'admin' ? 'admin' : 'all';
+  $: securityUserId = $queryParams.userId || '';
 
   function handleTabChange(event) {
     const nextTab = event.detail.value;
@@ -42,6 +55,7 @@
       modelRoutingDirty = false;
     }
     activeTab = nextTab;
+    router.navigate(nextTab === 'overview' ? '/admin' : `/admin/${nextTab}`);
   }
 </script>
 
@@ -80,12 +94,10 @@
       <AdminIssues />
     {:else if activeTab === 'qa'}
       <AdminQA />
-    {:else if activeTab === 'sessions'}
-      <SessionManager />
+    {:else if activeTab === 'security'}
+      <SecurityAccess initialView={securityView} userId={securityUserId} activity={securityActivity} />
     {:else if activeTab === 'storage'}
       <StorageOverview />
-    {:else if activeTab === 'audit'}
-      <AuditLogViewer />
     {/if}
   </div>
 </PageLayout>

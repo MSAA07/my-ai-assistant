@@ -360,6 +360,19 @@ export async function getSession() {
   return request("/get-session");
 }
 
+export async function refreshSession(reason = "refresh") {
+  return restoreSession(reason, { broadcast: true });
+}
+
+export async function stopImpersonating() {
+  const result = await request("/admin/stop-impersonating", { method: "POST" });
+  if (result.error) return result;
+
+  const restored = await restoreSession("impersonation_stopped", { broadcast: true });
+  if (!restored.error) router.replace('/admin');
+  return restored.error ? restored : result;
+}
+
 async function restoreSession(reason = "authenticated", { broadcast = false } = {}) {
   const sessionResult = await getSession();
 
@@ -769,5 +782,7 @@ export const authClient = {
   requestPasswordReset,
   resetPassword,
   changePassword,
+  refreshSession,
+  stopImpersonating,
   handleSessionInvalidation,
 };

@@ -7,7 +7,7 @@
   import FieldShell from '../../lib/components/ui/FieldShell.svelte';
   import ModalSurface from '../../lib/components/ui/ModalSurface.svelte';
   import Toggle from '../../lib/components/ui/Toggle.svelte';
-  import { API_BASE } from '../../config.js';
+  import { getQaStagingApiBaseUrl } from '../../config.js';
   import { formatDate, formatNumber, t } from '../../lib/i18n/t.js';
   import { language } from '../../lib/stores/language.js';
 
@@ -33,7 +33,7 @@
     { value: 1440, labelKey: 'adminQA.monitor.frequencies.1440' }
   ];
 
-  let target = 'staging';
+  const target = 'staging';
   let running = false;
   let activeRunLabel = '';
   let progress = null;
@@ -143,12 +143,16 @@
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  function getQaEndpoint(path) {
+    return `${getQaStagingApiBaseUrl()}/api/admin/qa${path}`;
+  }
+
   async function fetchSchedule() {
     scheduleError = '';
     scheduleLoading = true;
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/qa/schedule`, {
+      const response = await fetch(getQaEndpoint('/schedule'), {
         credentials: 'include'
       });
       const data = await response.json().catch(() => null);
@@ -170,7 +174,7 @@
     scheduleError = '';
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/qa/schedule`, {
+      const response = await fetch(getQaEndpoint('/schedule'), {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -211,7 +215,7 @@
     historyLoading = history.length === 0;
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/qa/history`, {
+      const response = await fetch(getQaEndpoint('/history'), {
         credentials: 'include'
       });
       const data = await response.json().catch(() => null);
@@ -230,7 +234,7 @@
 
   async function fetchProgress() {
     try {
-      const response = await fetch(`${API_BASE}/api/admin/qa/progress`, {
+      const response = await fetch(getQaEndpoint('/progress'), {
         credentials: 'include'
       });
       const data = await response.json().catch(() => null);
@@ -334,7 +338,7 @@
     startProgressPolling();
 
     try {
-      const response = await fetch(`${API_BASE}/api/admin/qa${endpoint.path}`, {
+      const response = await fetch(getQaEndpoint(endpoint.path), {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -469,15 +473,8 @@
       </div>
 
       <div class="qa-target-control">
-        <FieldShell label={t('adminQA.targetLabel')} forId="admin-qa-target">
-          <select id="admin-qa-target" bind:value={target} disabled={running}>
-            <option value="staging">{t('adminQA.targets.staging')}</option>
-            <option value="production">{t('adminQA.targets.production')}</option>
-          </select>
-        </FieldShell>
-        {#if target === 'production'}
-          <Badge tone="warning" size="sm">{t('adminQA.liveEnvironment')}</Badge>
-        {/if}
+        <span class="qa-target-control__label">{t('adminQA.targetLabel')}</span>
+        <Badge tone="success" size="sm">{t('adminQA.targets.staging')}</Badge>
       </div>
     </div>
 
@@ -760,10 +757,15 @@
 
   .qa-target-control {
     display: flex;
-    align-items: end;
+    align-items: center;
     gap: var(--ui-space-2);
     flex-wrap: wrap;
-    min-width: min(100%, 18rem);
+  }
+
+  .qa-target-control__label {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-type-body-sm);
+    font-weight: 600;
   }
 
   .qa-card-grid {

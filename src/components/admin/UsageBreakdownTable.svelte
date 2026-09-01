@@ -1,6 +1,7 @@
 <script>
   import { ArrowUpDown, ChevronDown, ChevronUp } from '@lucide/svelte';
   import DataSurface from '../../lib/components/ui/DataSurface.svelte';
+  import { resolveUsageLabel } from '../../lib/admin/usageLabels.js';
 
   export let title = '';
   export let rows = [];
@@ -12,6 +13,9 @@
   export let compact = false;
   export let errorMessage = '';
   export let retry = null;
+  export let nameKey = '';
+  export let idKey = '';
+  export let labelKey = '';
 
   const numberColumns = ['events', 'inputTokens', 'outputTokens', 'totalTokens', 'costUsd', 'costSar'];
   let sortKey = 'costUsd';
@@ -139,10 +143,7 @@
   }
 
   function getLabel(row) {
-    if (type === 'documents') return getDocumentPrimary(row);
-    if (type === 'features') return row.featureKey || '-';
-    if (type === 'models') return row.model || '-';
-    return getUserPrimary(row);
+    return resolveUsageLabel(row, { type, nameKey, idKey, labelKey });
   }
 
   function getSecondaryLabel(row) {
