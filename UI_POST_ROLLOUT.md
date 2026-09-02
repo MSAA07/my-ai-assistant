@@ -74,5 +74,6 @@ Environment differences:
 - The refreshed public shell copy is implemented directly in the public surface components rather than through the authenticated i18n contract.
 - The April 2026 admin visual audit is archival and does not include the later QA tab.
 - Security & Access now combines the former Sessions and Audit Logs tabs while keeping their data surfaces structurally separate; its live KPI, pagination, cross-link, diff-expansion, typed-confirmation, and toast behavior is covered by the September 2026 rebuild.
+- Operations now combines the former Issues and Jobs tabs into a source-isolated incident feed plus an independently loading Jobs & Queue inspector. It includes live open counts, explicit severity/status text, stale-source timestamps, Sentry/Job/Cost·Alert filtering, Copy for Codex acknowledgement, reopenable resolution, bulk actions, queue search/pagination, and requeue toasts.
 
 Last Updated: June 7, 2026

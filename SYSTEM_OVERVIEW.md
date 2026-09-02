@@ -190,6 +190,9 @@ Admin:
 - shared stacked toasts report every Users mutation, while the shared confirmation modal supports severity and optional exact typed confirmation
 - support login requires a reason, refreshes into a 60-minute impersonated session, and displays a persistent viewing-as banner until the admin session is restored
 - `AdminDashboard.svelte` exposes one Security & Access tab in place of the former separate Sessions and Audit Logs tabs
+- `AdminDashboard.svelte` exposes one Operations tab in place of the former separate Jobs and Issues tabs; legacy routes normalize into Operations
+- `Operations.svelte` provides live open-incident KPIs, source/severity filters, partial-source freshness notices, lifecycle actions, multi-select bulk resolve, and a selection-derived Copy for Codex preview that acknowledges copied incidents
+- `JobsQueueInspector.svelte` loads independently below the feed with search, status/type filters, queue summary, pagination, job timelines, and toast-backed requeue for failed or stuck jobs
 - `SecurityAccess.svelte` switches in place between Sessions and Audit Logs; Sessions has live KPIs, user filtering, pagination, typed bulk revoke, and optimistic revoke counts, while Audit Logs has All/Admin Activity, backend-derived actions, date/user filters, pagination, and accessible inline before/after expansion
 - Users and Security & Access deep-link bidirectionally through `#/admin/users?userId=…` and `#/admin/security?view=…&userId=…`; admin names in Admin Activity filter to that actor's activity
 - `AdminQA.svelte` calls `GET /api/admin/qa/history`, `GET /api/admin/qa/progress`, `GET /api/admin/qa/schedule`, and `POST /api/admin/qa/schedule`

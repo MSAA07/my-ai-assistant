@@ -6,8 +6,7 @@
   import UserTable from './admin/UserTable.svelte';
   import StorageOverview from './admin/StorageOverview.svelte';
   import SecurityAccess from './admin/SecurityAccess.svelte';
-  import AdminJobs from './admin/AdminJobs.svelte';
-  import AdminIssues from './admin/AdminIssues.svelte';
+  import Operations from './admin/Operations.svelte';
   import AdminUsageDashboard from './admin/AdminUsageDashboard.svelte';
   import AdminLimits from './admin/AdminLimits.svelte';
   import AdminModelRouting from './admin/AdminModelRouting.svelte';
@@ -21,6 +20,7 @@
   function normalizeAdminTab(path) {
     const segment = String(path || '').split('/')[0];
     if (segment === 'sessions' || segment === 'audit' || segment === 'security') return 'security';
+    if (segment === 'jobs' || segment === 'issues' || segment === 'operations') return 'operations';
     return segment || 'overview';
   }
 
@@ -31,8 +31,7 @@
     { value: 'usage', label: 'Usage' },
     { value: 'limits', label: 'Limits' },
     { value: 'model-routing', label: 'Model Routing' },
-    { value: 'jobs', label: 'Jobs' },
-    { value: 'issues', label: t('adminIssues.tab') },
+    { value: 'operations', label: 'Operations' },
     { value: 'qa', label: t('adminQA.tab') },
     { value: 'security', label: 'Security & Access' },
     { value: 'storage', label: 'Storage' },
@@ -88,10 +87,8 @@
       <AdminLimits />
     {:else if activeTab === 'model-routing'}
       <AdminModelRouting onDirtyChange={(dirty) => { modelRoutingDirty = dirty; }} />
-    {:else if activeTab === 'jobs'}
-      <AdminJobs />
-    {:else if activeTab === 'issues'}
-      <AdminIssues />
+    {:else if activeTab === 'operations'}
+      <Operations />
     {:else if activeTab === 'qa'}
       <AdminQA />
     {:else if activeTab === 'security'}

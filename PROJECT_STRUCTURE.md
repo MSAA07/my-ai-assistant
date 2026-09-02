@@ -118,7 +118,10 @@ Legacy routes:
 
 Admin console:
 
-- `src/components/AdminDashboard.svelte`: route-aware tab shell for Overview, Users, Usage, Limits, Jobs, QA, Security & Access, and Storage
+- `src/components/AdminDashboard.svelte`: route-aware tab shell for Overview, Users, Usage, Limits, Operations, QA, Security & Access, and Storage
+- `src/components/admin/Operations.svelte`: unified incident feed, live source KPIs, lifecycle/bulk actions, partial-source freshness state, and Copy for Codex workflow
+- `src/components/admin/JobsQueueInspector.svelte`: independently loading paginated/searchable queue inspector with job detail timelines and requeue actions
+- `src/lib/admin/operations.js`: tested Operations query, selection, brief-formatting, and optimistic KPI helpers
 - `src/components/admin/SecurityAccess.svelte`: combined security tab with in-place Sessions/Audit Logs switching and deep-link filter state
 - `src/components/admin/SessionManager.svelte`: paginated active-session table, live KPI/freshness state, toast-backed single revoke, and typed per-user bulk revoke
 - `src/components/admin/AuditLogViewer.svelte`: All/Admin Activity views, live scorecard, backend-derived action/date/user filters, pagination, user cross-links, and keyboard-accessible inline audit diffs
